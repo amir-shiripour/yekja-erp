@@ -11,12 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('tenants', function (Blueprint $table) {
-            $table->foreignId('sub_account_id')->nullable()->after('owner_id')->constrained('reseller_sub_accounts')->nullOnDelete();
-        });
+        if (Schema::hasTable('tenants') && !Schema::hasColumn('tenants', 'sub_account_id')) {
+            Schema::table('tenants', function (Blueprint $table) {
+                if (Schema::hasTable('reseller_sub_accounts')) {
+                    $table->foreignId('sub_account_id')->nullable()->constrained('reseller_sub_accounts')->nullOnDelete();
+                } else {
+                    $table->unsignedBigInteger('sub_account_id')->nullable()->index();
+                }
+            });
+        }
 
         // Backfill existing data
-        if (Schema::hasTable('reseller_sub_accounts')) {
+        if (Schema::hasTable('reseller_sub_accounts') && Schema::hasTable('tenants') && Schema::hasColumn('tenants', 'sub_account_id')) {
             $subAccounts = \Illuminate\Support\Facades\DB::table('reseller_sub_accounts')
                 ->whereNotNull('tenant_id')
                 ->get(['id', 'tenant_id']);

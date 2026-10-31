@@ -11,24 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('activity_logs', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->string('activity_type', 100);
-            $table->text('description');
-            $table->string('subject_type')->nullable();
-            $table->unsignedBigInteger('subject_id')->nullable();
-            $table->json('properties')->nullable();
-            $table->string('ip_address', 45)->nullable();
-            $table->string('user_agent')->nullable();
-            $table->timestamp('created_at')->nullable();
+        if (!Schema::hasTable('activity_logs')) {
+            Schema::create('activity_logs', function (Blueprint $table) {
+                $table->bigIncrements('id');
+                $table->unsignedBigInteger('user_id')->nullable();
+                $table->string('activity_type', 100);
+                $table->text('description');
+                $table->string('subject_type')->nullable();
+                $table->unsignedBigInteger('subject_id')->nullable();
+                $table->json('properties')->nullable();
+                $table->string('ip_address', 45)->nullable();
+                $table->string('user_agent')->nullable();
+                $table->timestamp('created_at')->nullable();
 
-            $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
-            
-            $table->index(['subject_type', 'subject_id']);
-            $table->index('activity_type');
-            $table->index('created_at');
-        });
+                $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
+                
+                $table->index(['subject_type', 'subject_id']);
+                $table->index('activity_type');
+                $table->index('created_at');
+            });
+        }
     }
 
     /**

@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('market_shipping_slots', function (Blueprint $table) {
-            //
-        });
+        if (Schema::hasTable('market_shipping_slots')) {
+            Schema::table('market_shipping_slots', function (Blueprint $table) {
+                //
+            });
+        }
     }
 
     /**

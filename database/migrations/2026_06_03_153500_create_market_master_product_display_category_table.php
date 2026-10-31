@@ -11,12 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('market_product_display_category', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('master_product_id')->constrained('market_master_products')->cascadeOnDelete();
-            $table->foreignId('display_category_id')->constrained('market_display_categories')->cascadeOnDelete();
-            $table->timestamps();
-        });
+        if (Schema::hasTable('market_master_products') && Schema::hasTable('market_display_categories')) {
+            if (!Schema::hasTable('market_product_display_category')) {
+                Schema::create('market_product_display_category', function (Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('master_product_id')->constrained('market_master_products')->cascadeOnDelete();
+                    $table->foreignId('display_category_id')->constrained('market_display_categories')->cascadeOnDelete();
+                    $table->timestamps();
+                });
+            }
+        }
     }
 
     /**

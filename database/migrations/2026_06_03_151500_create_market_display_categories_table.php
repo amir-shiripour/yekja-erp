@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('market_display_categories', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('parent_id')->nullable()->constrained('market_display_categories')->nullOnDelete();
-            $table->string('name');
-            $table->string('slug');
-            $table->text('description')->nullable();
-            $table->string('icon')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('market_display_categories')) {
+            Schema::create('market_display_categories', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('parent_id')->nullable()->constrained('market_display_categories')->nullOnDelete();
+                $table->string('name');
+                $table->string('slug');
+                $table->text('description')->nullable();
+                $table->string('icon')->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->timestamps();
+            });
+        }
     }
 
     /**

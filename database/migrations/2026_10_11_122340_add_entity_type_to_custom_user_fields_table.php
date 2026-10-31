@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('custom_user_fields', function (Blueprint $table) {
-            $table->string('entity_type', 50)->default('user')->after('id')->index();
-        });
+        if (Schema::hasTable('custom_user_fields') && !Schema::hasColumn('custom_user_fields', 'entity_type')) {
+            Schema::table('custom_user_fields', function (Blueprint $table) {
+                $table->string('entity_type', 50)->default('user')->after('id')->index();
+            });
+        }
     }
 
     /**
