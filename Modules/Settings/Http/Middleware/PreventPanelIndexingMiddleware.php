@@ -18,20 +18,29 @@ class PreventPanelIndexingMiddleware
     {
         $response = $next($request);
 
-        // Check if panel indexing is blocked
-        if (function_exists('is_panel_indexing_blocked') && is_panel_indexing_blocked()) {
-            if ($this->isPanelRequest($request)) {
-                $response->headers->set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
-                return $response;
-            }
+        // اگر در حال نصب سامانه هستیم یا برنامه هنوز نصب نشده است، بررسی ایندکسینگ انجام نشود
+        if ($request->is('install', 'install/*') || !file_exists(storage_path('app/installed.flag'))) {
+            return $response;
         }
 
-        // Check if public site indexing is blocked
-        if (function_exists('is_public_indexing_blocked') && is_public_indexing_blocked()) {
-            if (!$this->isPanelRequest($request)) {
-                $response->headers->set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
-                return $response;
+        try {
+            // Check if panel indexing is blocked
+            if (function_exists('is_panel_indexing_blocked') && is_panel_indexing_blocked()) {
+                if ($this->isPanelRequest($request)) {
+                    $response->headers->set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+                    return $response;
+                }
             }
+
+            // Check if public site indexing is blocked
+            if (function_exists('is_public_indexing_blocked') && is_public_indexing_blocked()) {
+                if (!$this->isPanelRequest($request)) {
+                    $response->headers->set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+                    return $response;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignore any settings/database errors
         }
 
         return $response;
