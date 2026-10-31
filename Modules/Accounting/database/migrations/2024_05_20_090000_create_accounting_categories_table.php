@@ -13,15 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('accounting_categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('title');
-            $table->enum('type', ['asset', 'liability', 'equity', 'income', 'expense'])->comment('ماهیت: دارایی، بدهی، سرمایه، درآمد، هزینه');
-            $table->boolean('status')->default(true)->comment('فعال/غیر فعال');
-            $table->boolean('is_system')->default(false)->comment('سرفصل سیستمی (غیرقابل حذف)');
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        if (!Schema::hasTable('accounting_categories')) {
+            Schema::create('accounting_categories', function (Blueprint $table) {
+                $table->id();
+                $table->string('title');
+                $table->enum('type', ['asset', 'liability', 'equity', 'income', 'expense'])->comment('ماهیت: دارایی، بدهی، سرمایه، درآمد، هزینه');
+                $table->boolean('status')->default(true)->comment('فعال/غیر فعال');
+                $table->boolean('is_system')->default(false)->comment('سرفصل سیستمی (غیرقابل حذف)');
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
     }
 
     /**

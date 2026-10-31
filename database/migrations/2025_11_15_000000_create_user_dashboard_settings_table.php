@@ -8,12 +8,14 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('user_dashboard_settings', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->json('layout')->nullable(); // Stores the order and visibility of widgets
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('user_dashboard_settings')) {
+            Schema::create('user_dashboard_settings', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->json('layout')->nullable(); // Stores the order and visibility of widgets
+                $table->timestamps();
+            });
+        }
     }
 
     public function down()

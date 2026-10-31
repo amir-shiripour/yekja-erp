@@ -13,26 +13,23 @@ return new class extends Migration
      */
     public function up()
     {
-        // This is the pivot table (جدول واسط)
-        // It answers: "Which modules are required for which theme?"
-        Schema::create('theme_module_requirements', function (Blueprint $table) {
-            $table->id();
+        if (!Schema::hasTable('theme_module_requirements')) {
+            Schema::create('theme_module_requirements', function (Blueprint $table) {
+                $table->id();
 
-            // Foreign key for the theme
-            $table->foreignId('theme_id')
-                ->constrained('themes')
-                ->onDelete('cascade'); // If theme is deleted, delete this record
+                $table->foreignId('theme_id')
+                    ->constrained('themes')
+                    ->onDelete('cascade');
 
-            // Foreign key for the module
-            $table->foreignId('module_id')
-                ->constrained('modules')
-                ->onDelete('cascade'); // If module is deleted, delete this record
+                $table->foreignId('module_id')
+                    ->constrained('modules')
+                    ->onDelete('cascade');
 
-            // Ensure a theme cannot require the same module twice
-            $table->unique(['theme_id', 'module_id']);
+                $table->unique(['theme_id', 'module_id']);
 
-            $table->timestamps();
-        });
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -6,26 +6,30 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('custom_user_fields', function (Blueprint $table) {
-            $table->id();
-            $table->string('role_name');                         // نام نقش (Spatie)
-            $table->string('field_name');                        // مثل: national_code, address
-            $table->string('label');                             // برچسب نمایشی
-            $table->enum('field_type', ['text','number','date','email']);
-            $table->boolean('is_required')->default(false);
-            $table->json('rules')->nullable();                   // چرا: امکان ولیدیشن‌های اضافه (unique, regex,…)
-            $table->timestamps();
-            $table->unique(['role_name','field_name']);
-        });
+        if (!Schema::hasTable('custom_user_fields')) {
+            Schema::create('custom_user_fields', function (Blueprint $table) {
+                $table->id();
+                $table->string('role_name');                         // نام نقش (Spatie)
+                $table->string('field_name');                        // مثل: national_code, address
+                $table->string('label');                             // برچسب نمایشی
+                $table->enum('field_type', ['text','number','date','email']);
+                $table->boolean('is_required')->default(false);
+                $table->json('rules')->nullable();                   // چرا: امکان ولیدیشن‌های اضافه (unique, regex,…)
+                $table->timestamps();
+                $table->unique(['role_name','field_name']);
+            });
+        }
 
-        Schema::create('user_custom_values', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('field_name');                        // مطابق با custom_user_fields.field_name
-            $table->text('value')->nullable();
-            $table->timestamps();
-            $table->unique(['user_id','field_name']);
-        });
+        if (!Schema::hasTable('user_custom_values')) {
+            Schema::create('user_custom_values', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->string('field_name');                        // مطابق با custom_user_fields.field_name
+                $table->text('value')->nullable();
+                $table->timestamps();
+                $table->unique(['user_id','field_name']);
+            });
+        }
     }
 
     public function down(): void {
