@@ -30,6 +30,14 @@ class GitHubService
     }
 
     /**
+     * دستور Git را همراه با فلگ دور زدن خطای dubious ownership اجرا می‌کند
+     */
+    protected function gitCmd(string $command): string
+    {
+        return "git -c safe.directory=* {$command}";
+    }
+
+    /**
      * بررسی اینکه آیا مسیر پروژه یک مخزن گیت معتبر است یا خیر
      */
     public function isGitRepository(): bool
@@ -53,8 +61,8 @@ class GitHubService
         }
 
         try {
-            $branchRes = Process::path($base)->run('git rev-parse --abbrev-ref HEAD');
-            $commitRes = Process::path($base)->run('git log -1 --format="%h - %s (%ci)"');
+            $branchRes = Process::path($base)->run($this->gitCmd('rev-parse --abbrev-ref HEAD'));
+            $commitRes = Process::path($base)->run($this->gitCmd('log -1 --format="%h - %s (%ci)"'));
 
             return [
                 'initialized' => true,
@@ -116,12 +124,9 @@ class GitHubService
         try {
             Log::info("Auto-initializing Git repository at {$base} for {$this->repo} on branch {$this->branch}...");
 
-            // ۱. تنظیم safe.directory برای جلوگیری از خطای مالکیت کاربر وب‌سرور
-            Process::path($base)->run("git config --global --add safe.directory \"{$base}\"");
-
-            // ۲. مقداردهی اولیه Git
+            // ۱. مقداردهی اولیه Git
             if (!$this->isGitRepository()) {
-                $init = Process::path($base)->run('git init');
+                $init = Process::path($base)->run($this->gitCmd('init'));
                 if (!$init->successful()) {
                     return [
                         'success' => false,
@@ -130,13 +135,13 @@ class GitHubService
                 }
             }
 
-            // ۳. تنظیم نام شاخه اصلی
-            Process::path($base)->run("git branch -M {$this->branch}");
+            // ۲. تنظیم نام شاخه اصلی
+            Process::path($base)->run($this->gitCmd("branch -M {$this->branch}"));
 
-            // ۴. افزودن آدرس ریموت
+            // ۳. افزودن آدرس ریموت
             $remoteUrl = "https://github.com/{$this->repo}.git";
-            Process::path($base)->run('git remote remove origin');
-            $remote = Process::path($base)->run("git remote add origin {$remoteUrl}");
+            Process::path($base)->run($this->gitCmd('remote remove origin'));
+            $remote = Process::path($base)->run($this->gitCmd("remote add origin {$remoteUrl}"));
             if (!$remote->successful()) {
                 return [
                     'success' => false,
@@ -144,8 +149,8 @@ class GitHubService
                 ];
             }
 
-            // ۵. دریافت اطلاعات شاخه از گیت‌هاب
-            $fetch = Process::path($base)->timeout(120)->run("git fetch origin {$this->branch}");
+            // ۴. دریافت اطلاعات شاخه از گیت‌هاب
+            $fetch = Process::path($base)->timeout(120)->run($this->gitCmd("fetch origin {$this->branch}"));
             if (!$fetch->successful()) {
                 return [
                     'success' => false,
@@ -153,9 +158,9 @@ class GitHubService
                 ];
             }
 
-            // ۶. اتصال شاخه محلی به شاخه ریموت و ریست ملایم جهت حفظ فایل‌ها
-            Process::path($base)->run("git branch --set-upstream-to=origin/{$this->branch} {$this->branch}");
-            Process::path($base)->run("git reset --mixed origin/{$this->branch}");
+            // ۵. اتصال شاخه محلی به شاخه ریموت و ریست ملایم جهت حفظ فایل‌ها
+            Process::path($base)->run($this->gitCmd("branch --set-upstream-to=origin/{$this->branch} {$this->branch}"));
+            Process::path($base)->run($this->gitCmd("reset --mixed origin/{$this->branch}"));
 
             Log::info("Git repository successfully initialized and connected to origin/{$this->branch}");
 
@@ -190,14 +195,11 @@ class GitHubService
                 }
             }
 
-            // اطمینان از تنظیم safe.directory
-            Process::path($base)->run("git config --global --add safe.directory \"{$base}\"");
-
             // ۱. بردن سایت به حالت تعمیرات
             Process::path($base)->run('php artisan down');
 
-            // ۲. واکشی آخرین کدها از گیت‌هاب
-            $fetch = Process::path($base)->timeout(90)->run("git fetch origin {$this->branch}");
+            // ۲. واکشی آخرین کدها از گیت‌هاب با دور زدن محدودیت مالکیت لینوکس
+            $fetch = Process::path($base)->timeout(90)->run($this->gitCmd("fetch origin {$this->branch}"));
             if (!$fetch->successful()) {
                 Log::error("Git Fetch Failed: " . $fetch->errorOutput());
                 Process::path($base)->run('php artisan up');
@@ -208,11 +210,11 @@ class GitHubService
             }
 
             // تلاش برای ادغام آخرین تغییرات شاخه
-            $pull = Process::path($base)->timeout(90)->run("git pull origin {$this->branch}");
+            $pull = Process::path($base)->timeout(90)->run($this->gitCmd("pull origin {$this->branch}"));
             if (!$pull->successful()) {
                 Log::warning("Git Pull standard failed, attempting safe merge/checkout: " . $pull->errorOutput());
-                // اگر پول عادی به دلیل تفاوت‌های محلی با ارور مواجه شد، ریست ملایم انجام می‌دهیم
-                $reset = Process::path($base)->run("git reset --hard origin/{$this->branch}");
+                // در صورت وجود تغییرات لوکال Unstaged، ریست هارد با شاخه اصلی انجام می‌دهیم
+                $reset = Process::path($base)->run($this->gitCmd("reset --hard origin/{$this->branch}"));
                 if (!$reset->successful()) {
                     Log::error("Git Reset Failed: " . $reset->errorOutput());
                     Process::path($base)->run('php artisan up');
@@ -225,7 +227,7 @@ class GitHubService
 
             Log::info("Git update applied successfully.");
 
-            // ۳. آپدیت دیتابیس، کش‌ها و وابستگی‌ها
+            // ۳. آپدیت دیتابیس، کش‌ها و برگرداندن سایت به حالت آنلاین
             Process::path($base)->timeout(180)->run('php artisan migrate --force');
             Process::path($base)->run('php artisan optimize:clear');
             Process::path($base)->run('php artisan up');
