@@ -46,21 +46,38 @@ class ResolveTenantPath
         if (empty($firstSegment) || $tenantManager->isReservedSubdomain($firstSegment)) {
             if ($firstSegment === 'livewire') {
                 $referer = $request->header('referer');
+                $refererSlug = null;
                 if ($referer) {
                     $refererPath = parse_url($referer, PHP_URL_PATH);
                     $refererSlug = $tenantManager->extractTenantFromPath($refererPath ?? '');
-                    if ($refererSlug) {
-                        try {
-                            $refererTenant = Tenant::where('subdomain', $refererSlug)->first();
-                            if ($refererTenant) {
-                                $tenantManager->setTenant($refererTenant);
-                                app()->instance('currentTenant', $refererTenant);
-                                view()->share('currentTenant', $refererTenant);
-                                $this->configureTenantSession($refererTenant);
+                }
+
+                // Fallback: In Livewire 3, inspect snapshot memo path if Referer was stripped by browser policy
+                if (!$refererSlug && $request->isMethod('POST')) {
+                    try {
+                        $payload = $request->json('components.0.snapshot');
+                        if ($payload && is_string($payload)) {
+                            $decoded = json_decode($payload, true);
+                            $originPath = $decoded['memo']['path'] ?? null;
+                            if ($originPath) {
+                                $refererSlug = $tenantManager->extractTenantFromPath($originPath);
                             }
-                        } catch (\Throwable $e) {
-                            // ignore DB error
                         }
+                    } catch (\Throwable $e) {
+                    }
+                }
+
+                if ($refererSlug) {
+                    try {
+                        $refererTenant = Tenant::where('subdomain', $refererSlug)->first();
+                        if ($refererTenant) {
+                            $tenantManager->setTenant($refererTenant);
+                            app()->instance('currentTenant', $refererTenant);
+                            view()->share('currentTenant', $refererTenant);
+                            $this->configureTenantSession($refererTenant);
+                        }
+                    } catch (\Throwable $e) {
+                        // ignore DB error
                     }
                 }
             }

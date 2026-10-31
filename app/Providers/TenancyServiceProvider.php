@@ -29,6 +29,9 @@ class TenancyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Reset bound cache for clean lifecycle in tests and long-running workers
+        TenancyModelRegistry::flushBound();
+
         // Zero-Touch Tenancy: Dynamic scoping of all module models
         TenancyModelRegistry::bootAll();
     }

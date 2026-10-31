@@ -166,21 +166,21 @@ class TenantManager
             }
         }
 
-        try {
-            if (app()->bound('request') && request()) {
-                $currentHost = request()->getHost();
-                if (!empty($currentHost) && !filter_var($currentHost, FILTER_VALIDATE_IP) && $currentHost !== 'localhost') {
-                    $domains[] = strtolower(trim($currentHost));
+        $configCentral = config('tenancy.central_domains', []);
+        if (is_array($configCentral)) {
+            foreach ($configCentral as $cd) {
+                $trimmed = strtolower(trim($cd));
+                if (!empty($trimmed) && !filter_var($trimmed, FILTER_VALIDATE_IP) && $trimmed !== 'localhost') {
+                    $domains[] = $trimmed;
                 }
             }
-        } catch (Throwable $e) {
         }
+
+        // دامنه‌های پیش‌فرض پلتفرم
+        $domains[] = 'crm-laravel.test';
+        $domains[] = 'vardicrm.ir';
 
         $filtered = array_values(array_unique(array_filter($domains)));
-        if (empty($filtered)) {
-            return ['crm-laravel.test'];
-        }
-
         return $filtered;
     }
 
