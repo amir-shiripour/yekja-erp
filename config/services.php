@@ -31,4 +31,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'github' => [
+        'repo' => env('GITHUB_REPO', 'amir-shiripour/yekja-erp'),
+        'branch' => env('GITHUB_BRANCH', 'main'),
+        'token' => env('GITHUB_TOKEN'),
+    ],
+
 ];

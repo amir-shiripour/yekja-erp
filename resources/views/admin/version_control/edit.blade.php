@@ -36,7 +36,7 @@
                             <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                                 ویرایش <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">اطلاعات نسخه</span>
                             </h1>
-                            <div class="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-mono font-bold tracking-wider">
+                            <div class="px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-sans font-bold tracking-wider">
                                 v{{ $version->version_number }}
                             </div>
                         </div>
@@ -68,7 +68,7 @@
                                             <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                                         </div>
                                         <input type="text" name="version_number" id="version_number" value="{{ old('version_number', $version->version_number) }}" required
-                                               class="block w-full pr-11 pl-4 py-3 bg-slate-100/50 dark:bg-slate-800/50 border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl text-slate-900 dark:text-white font-mono placeholder-slate-400 transition-all">
+                                               class="block w-full pr-11 pl-4 py-3 bg-slate-100/50 dark:bg-slate-800/50 border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-indigo-500/10 rounded-2xl text-slate-900 dark:text-white font-sans placeholder-slate-400 transition-all">
                                     </div>
                                     <x-input-error for="version_number" />
                                 </div>
@@ -122,7 +122,7 @@
                             <div class="space-y-4">
                                 <template x-for="(item, index) in items" :key="index">
                                     <div class="flex items-center gap-4 group animate-in slide-in-from-right duration-300">
-                                        <span class="flex-shrink-0 w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-mono font-bold border border-amber-100 dark:border-amber-500/20 shadow-sm" x-text="index + 1"></span>
+                                        <span class="flex-shrink-0 w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-sans font-bold border border-amber-100 dark:border-amber-500/20 shadow-sm" x-text="index + 1"></span>
                                         <div class="flex-1">
                                             <input type="text" x-model="items[index]" name="changelog[]"
                                                    class="block w-full px-5 py-3 bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 rounded-2xl text-sm text-slate-900 dark:text-white transition-all">
@@ -170,11 +170,11 @@
                                 <div class="space-y-4">
                                     <div class="flex justify-between items-center text-xs font-medium">
                                         <span class="text-slate-500 dark:text-slate-400">تاریخ ثبت اولیه:</span>
-                                        <span class="text-slate-900 dark:text-white font-mono">{{ $version->created_at->format('Y/m/d') }}</span>
+                                        <span class="text-slate-900 dark:text-white font-sans">{{ $version->created_at->format('Y/m/d') }}</span>
                                     </div>
                                     <div class="flex justify-between items-center text-xs font-medium">
                                         <span class="text-slate-500 dark:text-slate-400">آخرین بروزرسانی:</span>
-                                        <span class="text-slate-900 dark:text-white font-mono">{{ $version->updated_at->format('Y/m/d H:i') }}</span>
+                                        <span class="text-slate-900 dark:text-white font-sans">{{ $version->updated_at->format('Y/m/d H:i') }}</span>
                                     </div>
                                 </div>
                             </div>
