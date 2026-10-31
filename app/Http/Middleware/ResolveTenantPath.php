@@ -6,6 +6,8 @@ use App\Models\Tenant;
 use App\Tenancy\TenantManager;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use ReflectionClass;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -17,6 +19,19 @@ class ResolveTenantPath
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // ۱. اگر برنامه هنوز نصب نشده یا مسیر مربوط به فرآیند نصب است
+        if ($request->is('install') || $request->is('install/*') || !File::exists(storage_path('app/installed.flag'))) {
+            return $next($request);
+        }
+
+        try {
+            if (!Schema::hasTable('tenants')) {
+                return $next($request);
+            }
+        } catch (\Throwable $e) {
+            return $next($request);
+        }
+
         /** @var TenantManager $tenantManager */
         $tenantManager = app(TenantManager::class);
 
@@ -35,12 +50,16 @@ class ResolveTenantPath
                     $refererPath = parse_url($referer, PHP_URL_PATH);
                     $refererSlug = $tenantManager->extractTenantFromPath($refererPath ?? '');
                     if ($refererSlug) {
-                        $refererTenant = Tenant::where('subdomain', $refererSlug)->first();
-                        if ($refererTenant) {
-                            $tenantManager->setTenant($refererTenant);
-                            app()->instance('currentTenant', $refererTenant);
-                            view()->share('currentTenant', $refererTenant);
-                            $this->configureTenantSession($refererTenant);
+                        try {
+                            $refererTenant = Tenant::where('subdomain', $refererSlug)->first();
+                            if ($refererTenant) {
+                                $tenantManager->setTenant($refererTenant);
+                                app()->instance('currentTenant', $refererTenant);
+                                view()->share('currentTenant', $refererTenant);
+                                $this->configureTenantSession($refererTenant);
+                            }
+                        } catch (\Throwable $e) {
+                            // ignore DB error
                         }
                     }
                 }
@@ -48,7 +67,12 @@ class ResolveTenantPath
             return $next($request);
         }
 
-        $tenant = Tenant::where('subdomain', $firstSegment)->first();
+        try {
+            $tenant = Tenant::where('subdomain', $firstSegment)->first();
+        } catch (\Throwable $e) {
+            $tenant = null;
+        }
+
         if (!$tenant) {
             return $next($request);
         }
