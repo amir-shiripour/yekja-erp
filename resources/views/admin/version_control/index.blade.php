@@ -5,12 +5,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {{-- هدر و دکمه‌ها --}}
-            <div class="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div class="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                 <div>
                     <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                         مدیریت <span class="text-indigo-600 dark:text-indigo-400">نسخه‌ها و استقرار</span>
                     </h1>
-                    <p class="mt-2 text-slate-600 dark:text-slate-300 font-medium text-sm">وضعیت پایداری هسته CRM و همگام‌سازی با مخزن گیت‌هاب</p>
+                    <p class="mt-2 text-slate-600 dark:text-slate-300 font-medium text-sm">وضعیت پایداری هسته ERP و همگام‌سازی با مخزن گیت‌هاب</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <a href="{{ route('admin.version-control.check-remote') }}" class="px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-all flex items-center gap-2">
@@ -23,6 +23,33 @@
                     </a>
                 </div>
             </div>
+
+            {{-- پیام هشدار در صورت عدم وجود مخزن گیت روی سرور --}}
+            @if(isset($isGitRepo) && !$isGitRepo)
+                <div class="mb-8 p-6 bg-amber-50/80 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-800/40 rounded-3xl shadow-sm text-right">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="flex items-start gap-4">
+                            <div class="p-3 bg-amber-100 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 rounded-2xl flex-shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-black text-amber-900 dark:text-amber-200">پوشه Git روی این سرور راه‌اندازی نشده است</h3>
+                                <p class="mt-1 text-xs text-amber-700 dark:text-amber-300 font-medium leading-relaxed">
+                                    پروژه روی این سرور بدون پوشه <code>.git</code> قرار گرفته است (مثلاً از طریق Zip یا FTP). برای اینکه آپدیت‌ها خودکار دریافت شوند، روی دکمه روبرو کلیک کنید تا مخزن به صورت خودکار متصل شود.
+                                </p>
+                            </div>
+                        </div>
+                        <form action="{{ route('admin.version-control.init-repo') }}" method="POST" class="flex-shrink-0">
+                            @csrf
+                            <button type="submit" onclick="return confirm('آیا از راه‌اندازی و اتصال خودکار مخزن Git روی سرور اطمینان دارید؟')"
+                                    class="px-5 py-3 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black rounded-2xl shadow-lg shadow-amber-600/20 transition-all flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                راه‌اندازی و اتصال خودکار به گیت‌هاب
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endif
 
             {{-- بخش وضعیت آنلاین (Advanced Update Panel) --}}
             @php
@@ -47,6 +74,19 @@
 
                     <div class="mt-6 space-y-2">
                         <div class="flex items-center justify-between text-[11px] font-bold">
+                            <span class="text-slate-600 dark:text-slate-300">وضعیت Git سرور:</span>
+                            @if(isset($isGitRepo) && $isGitRepo)
+                                <span class="text-emerald-600 dark:text-emerald-400 font-sans flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                                    متصل ({{ $localGitStatus['branch'] ?? 'main' }})
+                                </span>
+                            @else
+                                <span class="text-amber-600 dark:text-amber-400 font-sans">
+                                    عدم وجود .git
+                                </span>
+                            @endif
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] font-bold border-t border-slate-100 dark:border-slate-800 pt-2">
                             <span class="text-slate-600 dark:text-slate-300">آخرین ثبت دیتابیس:</span>
                             <span dir="ltr" class="text-indigo-600 dark:text-indigo-400 font-sans uppercase">
                                 {{ $currentLocal ? (function_exists('verta') ? verta($currentLocal->release_date)->format('Y/m/d') : $currentLocal->release_date->format('Y/m/d')) : 'نامشخص' }}
@@ -112,8 +152,8 @@
                             @endif
                         </div>
 
-                        @if($remote)
-                            <div class="flex items-center justify-center">
+                        <div class="flex flex-col items-center justify-center gap-3">
+                            @if($remote)
                                 <form action="{{ route('admin.version-control.deploy') }}" method="POST">
                                     @csrf
                                     <button type="submit" onclick="return confirm('هشدار: سیستم برای دقایقی در حالت تعمیرات قرار می‌گیرد و کدهای جدید جایگزین می‌شوند. ادامه می‌دهید؟')"
@@ -122,8 +162,8 @@
                                         نصب و استقرار هوشمند
                                     </button>
                                 </form>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

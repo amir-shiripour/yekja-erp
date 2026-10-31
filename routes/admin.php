@@ -133,6 +133,7 @@ Route::prefix('version-control')->name('version-control.')->middleware(['role:su
     // مسیرهای قدیمی برای گیت‌هاب
     Route::get('/check-remote', [VersionControlController::class, 'checkRemote'])->name('check-remote');
     Route::post('/deploy-update', [VersionControlController::class, 'deployUpdate'])->name('deploy');
+    Route::post('/init-repo', [VersionControlController::class, 'initRepo'])->name('init-repo');
 
     // امکانات جدید مربوط به آپدیت سیستم
     // نکته: نام متد update در کدهای جدید با متد PUT (برای ویرایش فرم) تداخل داشت!

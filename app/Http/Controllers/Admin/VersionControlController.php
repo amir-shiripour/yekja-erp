@@ -23,8 +23,18 @@ class VersionControlController extends Controller
         $remoteInfo = session('remote_version_info');
         $repoName = $this->gitService->getRepo();
         $branchName = $this->gitService->getBranch();
+        $isGitRepo = $this->gitService->isGitRepository();
+        $localGitStatus = $this->gitService->getLocalGitStatus();
 
-        return view('admin.version_control.index', compact('versions', 'currentLocal', 'remoteInfo', 'repoName', 'branchName'));
+        return view('admin.version_control.index', compact(
+            'versions',
+            'currentLocal',
+            'remoteInfo',
+            'repoName',
+            'branchName',
+            'isGitRepo',
+            'localGitStatus'
+        ));
     }
 
     /**
@@ -38,6 +48,18 @@ class VersionControlController extends Controller
             return redirect()->back()->with('success', 'اطلاعات مخزن با موفقیت دریافت و همگام شد.');
         }
         return redirect()->back()->with('error', 'امکان برقراری ارتباط با مخزن گیت‌هاب (' . $this->gitService->getRepo() . ') وجود ندارد.');
+    }
+
+    /**
+     * مقداردهی اولیه مخزن گیت روی سرور (برای سرورهایی که با Zip یا FTP آپلود شده‌اند)
+     */
+    public function initRepo()
+    {
+        $result = $this->gitService->initializeGitRepository();
+        if ($result['success']) {
+            return redirect()->route('admin.version-control.index')->with('success', $result['message']);
+        }
+        return redirect()->back()->with('error', $result['message']);
     }
 
     /**
