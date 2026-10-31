@@ -8,37 +8,69 @@ use Illuminate\Support\Facades\Log;
 
 class GitHubService
 {
-    protected $repo = 'amir-shiripour/sito-crm-laravel';
-    protected $branch = 'main';
+    protected string $repo;
+    protected string $branch;
+    protected ?string $token;
+
+    public function __construct()
+    {
+        $this->repo = config('services.github.repo', env('GITHUB_REPO', 'amir-shiripour/yekja-erp'));
+        $this->branch = config('services.github.branch', env('GITHUB_BRANCH', 'main'));
+        $this->token = config('services.github.token', env('GITHUB_TOKEN'));
+    }
+
+    public function getRepo(): string
+    {
+        return $this->repo;
+    }
+
+    public function getBranch(): string
+    {
+        return $this->branch;
+    }
 
     /**
-     * دریافت اطلاعات آخرین کامیت از برنچ اصلی
+     * دریافت اطلاعات آخرین کامیت از برنچ مشخص شده مخزن گیت‌هاب
      */
-    public function getLatestRemoteInfo()
+    public function getLatestRemoteInfo(): ?array
     {
         try {
-            $response = Http::withHeaders([
+            $headers = [
                 'Accept' => 'application/vnd.github.v3+json',
-                'User-Agent' => 'Sito-CRM-Agent'
-            ])->get("https://api.github.com/repos/{$this->repo}/branches/{$this->branch}");
+                'User-Agent' => 'Yekja-ERP-Agent',
+            ];
+
+            if (!empty($this->token)) {
+                $headers['Authorization'] = 'Bearer ' . $this->token;
+            }
+
+            $response = Http::withHeaders($headers)
+                ->timeout(12)
+                ->get("https://api.github.com/repos/{$this->repo}/branches/{$this->branch}");
 
             if ($response->successful()) {
-                return $response->json();
+                $data = $response->json();
+                $data['active_repo'] = $this->repo;
+                $data['active_branch'] = $this->branch;
+                return $data;
             }
+
+            Log::warning("GitHub API returned status {$response->status()}: " . $response->body());
         } catch (\Exception $e) {
             Log::error("GitHub API Error: " . $e->getMessage());
             return null;
         }
+
         return null;
     }
 
     /**
      * اجرای عملیات به‌روزرسانی خودکار با ثبت لاگ دقیق
      */
-    public function performUpdate()
+    public function performUpdate(): array
     {
         try {
-            Log::info("Starting Smart Deployment from GitHub...");
+            Log::info("Starting Smart Deployment from GitHub ({$this->repo} / {$this->branch})...");
 
             // 1. حالت تعمیرات
             Process::run('php artisan down');
@@ -51,13 +83,13 @@ class GitHubService
                 Process::run('php artisan up');
                 return [
                     'success' => false,
-                    'message' => 'خطا در واکشی کدها از گیت‌هاب. خروجی: ' . $pull->errorOutput()
+                    'message' => 'خطا در واکشی کدها از گیت‌هاب. خروجی: ' . $pull->errorOutput(),
                 ];
             }
 
             Log::info("Git Pull Successful. Output: " . $pull->output());
 
-            // 3. آپدیت وابستگی‌ها و دیتابیس
+            // 3. آپدیت وابستگی‌ها، دیتابیس و پاک‌سازی کش‌ها
             Process::run('composer install --no-dev --optimize-autoloader');
             Process::run('php artisan migrate --force');
             Process::run('php artisan optimize:clear');
@@ -67,7 +99,7 @@ class GitHubService
 
             return [
                 'success' => true,
-                'message' => 'سیستم با موفقیت به آخرین نسخه گیت‌هاب به‌روزرسانی شد.'
+                'message' => 'سیستم با موفقیت به آخرین نسخه گیت‌هاب به‌روزرسانی شد.',
             ];
 
         } catch (\Exception $e) {
@@ -75,7 +107,7 @@ class GitHubService
             Process::run('php artisan up');
             return [
                 'success' => false,
-                'message' => 'خطای سیستمی در فرآیند استقرار: ' . $e->getMessage()
+                'message' => 'خطای سیستمی در فرآیند استقرار: ' . $e->getMessage(),
             ];
         }
     }

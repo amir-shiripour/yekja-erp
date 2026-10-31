@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-    <div class="py-10 bg-[#f8fafc] dark:bg-[#070a13] min-h-screen transition-colors duration-500 font-iranYekan text-right">
+    <div class="py-10 bg-[#f8fafc] dark:bg-[#070a13] min-h-screen transition-colors duration-500 font-sans text-right">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {{-- هدر و دکمه‌ها --}}
@@ -10,10 +10,10 @@
                     <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                         مدیریت <span class="text-indigo-600 dark:text-indigo-400">نسخه‌ها و استقرار</span>
                     </h1>
-                    <p class="mt-2 text-slate-500 dark:text-slate-400 font-medium text-sm">وضعیت پایداری هسته CRM و همگام‌سازی با مخزن گیت‌هاب</p>
+                    <p class="mt-2 text-slate-600 dark:text-slate-300 font-medium text-sm">وضعیت پایداری هسته CRM و همگام‌سازی با مخزن گیت‌هاب</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('admin.version-control.check-remote') }}" class="px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2">
+                    <a href="{{ route('admin.version-control.check-remote') }}" class="px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-all flex items-center gap-2">
                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         بررسی مخزن آنلاین
                     </a>
@@ -25,34 +25,38 @@
             </div>
 
             {{-- بخش وضعیت آنلاین (Advanced Update Panel) --}}
-            @php $remote = session('remote_version_info'); @endphp
+            @php
+                $remote = session('remote_version_info');
+                $currentRepo = $repoName ?? ($remote['active_repo'] ?? config('services.github.repo', 'amir-shiripour/yekja-erp'));
+                $currentBranch = $branchName ?? ($remote['active_branch'] ?? config('services.github.branch', 'main'));
+            @endphp
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                {{-- کارت نسخه محلی (آپدیت شده برای نمایش ورژن فایل کانفیگ) --}}
+                {{-- کارت نسخه محلی --}}
                 <div class="bg-white/70 dark:bg-slate-900/50 backdrop-blur-xl border border-white dark:border-slate-800 p-6 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col justify-between">
                     <div>
                         <div class="flex items-center gap-4 mb-4">
-                            <div class="p-3 bg-indigo-100 dark:bg-indigo-500/10 rounded-2xl text-indigo-600 dark:text-indigo-400">
+                            <div class="p-3 bg-indigo-100 dark:bg-indigo-500/15 rounded-2xl text-indigo-600 dark:text-indigo-300">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l4-4m-4 4l4 4"/></svg>
                             </div>
                             <h3 class="font-bold text-slate-800 dark:text-slate-200 text-sm">نسخه نصب شده</h3>
                         </div>
-                        <div class="text-3xl font-black text-slate-900 dark:text-white font-mono leading-none tracking-tighter">
+                        <div class="text-3xl font-black text-slate-900 dark:text-white font-sans leading-none tracking-tighter">
                             v{{ $currentLocal ? $currentLocal->version_number : '1.0.0' }}
                         </div>
                     </div>
 
                     <div class="mt-6 space-y-2">
-                        <div class="flex items-center justify-between text-[10px] font-bold">
-                            <span class="text-slate-500 dark:text-slate-400">آخرین ثبت دیتابیس:</span>
-                            <span dir="ltr" class="text-indigo-600 dark:text-indigo-400 uppercase">
-                            {{ $currentLocal ? (function_exists('verta') ? verta($currentLocal->release_date)->format('Y/m/d') : $currentLocal->release_date->format('Y/m/d')) : 'نامشخص' }}
-                        </span>
+                        <div class="flex items-center justify-between text-[11px] font-bold">
+                            <span class="text-slate-600 dark:text-slate-300">آخرین ثبت دیتابیس:</span>
+                            <span dir="ltr" class="text-indigo-600 dark:text-indigo-400 font-sans uppercase">
+                                {{ $currentLocal ? (function_exists('verta') ? verta($currentLocal->release_date)->format('Y/m/d') : $currentLocal->release_date->format('Y/m/d')) : 'نامشخص' }}
+                            </span>
                         </div>
-                        <div class="flex items-center justify-between text-[10px] font-bold border-t border-slate-100 dark:border-slate-800 pt-2">
-                            <span class="text-slate-500 dark:text-slate-400">نسخه فایل (app.php):</span>
-                            <span dir="ltr" class="text-amber-600 dark:text-amber-400 font-mono">
-                            v{{ config('app.version', '1.0.0') }}
-                        </span>
+                        <div class="flex items-center justify-between text-[11px] font-bold border-t border-slate-100 dark:border-slate-800 pt-2">
+                            <span class="text-slate-600 dark:text-slate-300">نسخه فایل (app.php):</span>
+                            <span dir="ltr" class="text-amber-600 dark:text-amber-400 font-sans">
+                                v{{ config('app.version', '1.0.0') }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -69,15 +73,42 @@
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                 <span class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">GitHub Remote Status</span>
                             </div>
+
+                            <div class="space-y-1">
+                                <h2 class="text-xl font-black text-right flex items-center gap-2 flex-wrap">
+                                    <span>مخزن متصل:</span>
+                                    <a href="https://github.com/{{ $currentRepo }}" target="_blank" rel="noopener noreferrer" dir="ltr" class="text-indigo-400 hover:text-indigo-300 underline font-sans text-lg">
+                                        {{ $currentRepo }}
+                                    </a>
+                                </h2>
+                                <p class="text-sm font-bold text-slate-300 text-right">
+                                    برنچ سینک عملیاتی: <span class="text-emerald-400 font-sans" dir="ltr">{{ $currentBranch }}</span>
+                                </p>
+                            </div>
+
                             @if($remote)
-                                <h2 class="text-2xl font-black">برنچ عملیاتی: <span class="text-emerald-400">main</span></h2>
                                 <div class="mt-4 p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-                                    <p class="text-xs text-slate-300 font-bold mb-1 italic text-right">آخرین کامیت آنلاین:</p>
-                                    <p class="text-sm text-white font-medium leading-relaxed text-right" dir="ltr">{{ Str::limit($remote['commit']['commit']['message'], 80) }}</p>
+                                    <div class="flex items-center justify-between text-xs text-slate-300 font-bold mb-1">
+                                        <span>آخرین کامیت آنلاین:</span>
+                                        @if(isset($remote['commit']['sha']))
+                                            <span class="font-sans text-indigo-300 bg-white/10 px-2 py-0.5 rounded-lg text-[11px]" dir="ltr">{{ substr($remote['commit']['sha'], 0, 7) }}</span>
+                                        @endif
+                                    </div>
+                                    <p class="text-sm text-white font-medium leading-relaxed text-right" dir="auto">
+                                        {{ Str::limit($remote['commit']['commit']['message'] ?? 'بدون پیام کامیت', 120) }}
+                                    </p>
+                                    @if(isset($remote['commit']['commit']['author']['date']))
+                                        <div class="mt-2 text-[11px] text-slate-400 font-sans text-left" dir="ltr">
+                                            {{ \Carbon\Carbon::parse($remote['commit']['commit']['author']['date'])->diffForHumans() }}
+                                        </div>
+                                    @endif
                                 </div>
                             @else
-                                <h2 class="text-2xl font-black text-right">وضعیت مخزن آنلاین نامشخص</h2>
-                                <p class="mt-2 text-sm text-slate-300 leading-relaxed font-medium text-right">برای بررسی هماهنگی با گیت‌هاب، از دکمه بررسی مخزن در منوی بالا استفاده کنید.</p>
+                                <div class="mt-4 p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                    <p class="text-sm text-slate-300 leading-relaxed font-medium text-right">
+                                        جهت دریافت آخرین وضعیت مخزن گیت‌هاب و بررسی آپدیت‌های جدید، روی دکمه «بررسی مخزن آنلاین» در بالای صفحه کلیک کنید.
+                                    </p>
+                                </div>
                             @endif
                         </div>
 
@@ -114,7 +145,7 @@
                             <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-all group">
                                 <td class="px-8 py-6">
                                     <div class="flex items-center gap-4">
-                                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-mono font-black text-sm border border-indigo-100 dark:border-indigo-500/20 shadow-sm">
+                                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-sans font-black text-sm border border-indigo-100 dark:border-indigo-500/20 shadow-sm">
                                             v{{ $version->version_number }}
                                         </div>
                                         <div>
@@ -124,7 +155,7 @@
                                     </div>
                                 </td>
                                 <td class="px-8 py-6 text-sm text-slate-600 dark:text-slate-300 font-bold">
-                                    <span dir="ltr">{{ function_exists('verta') ? verta($version->release_date)->format('Y/m/d') : $version->release_date->format('Y/m/d') }}</span>
+                                    <span dir="ltr" class="font-sans">{{ function_exists('verta') ? verta($version->release_date)->format('Y/m/d') : $version->release_date->format('Y/m/d') }}</span>
                                 </td>
                                 <td class="px-8 py-6">
                                     @if($version->is_current)
