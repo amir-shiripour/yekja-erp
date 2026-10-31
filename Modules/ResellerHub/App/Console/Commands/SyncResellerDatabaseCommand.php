@@ -18,128 +18,96 @@ class SyncResellerDatabaseCommand extends Command
 
         // 1. resellers table
         if (Schema::hasTable('resellers')) {
-            Schema::table('resellers', function (Blueprint $table) {
-                if (!Schema::hasColumn('resellers', 'deleted_at')) {
-                    $table->softDeletes();
-                    $this->line(' Added deleted_at to resellers');
-                }
+            $this->safeAddColumn('resellers', 'deleted_at', function (Blueprint $table) {
+                $table->softDeletes();
             });
         }
 
         // 2. reseller_invoices table
         if (Schema::hasTable('reseller_invoices')) {
-            Schema::table('reseller_invoices', function (Blueprint $table) {
-                if (!Schema::hasColumn('reseller_invoices', 'source_order_id')) {
-                    $table->unsignedBigInteger('source_order_id')->nullable()->after('tenant_id')->index();
-                    $this->line(' Added source_order_id to reseller_invoices');
-                }
-                if (!Schema::hasColumn('reseller_invoices', 'source')) {
-                    $table->string('source', 64)->nullable()->after('type')->index();
-                    $this->line(' Added source to reseller_invoices');
-                }
-                if (!Schema::hasColumn('reseller_invoices', 'currency')) {
-                    $table->string('currency', 10)->default('IRT')->after('amount');
-                    $this->line(' Added currency to reseller_invoices');
-                }
-                if (!Schema::hasColumn('reseller_invoices', 'renewal_applied_at')) {
-                    $table->timestamp('renewal_applied_at')->nullable()->after('due_date');
-                    $this->line(' Added renewal_applied_at to reseller_invoices');
-                }
-                if (!Schema::hasColumn('reseller_invoices', 'renewal_of_order_id')) {
-                    $table->unsignedBigInteger('renewal_of_order_id')->nullable()->index();
-                    $this->line(' Added renewal_of_order_id to reseller_invoices');
-                }
-                if (!Schema::hasColumn('reseller_invoices', 'deleted_at')) {
-                    $table->softDeletes();
-                    $this->line(' Added deleted_at to reseller_invoices');
-                }
+            $this->safeAddColumn('reseller_invoices', 'source_order_id', function (Blueprint $table) {
+                $table->unsignedBigInteger('source_order_id')->nullable()->index();
+            });
+            $this->safeAddColumn('reseller_invoices', 'source', function (Blueprint $table) {
+                $table->string('source', 64)->nullable()->index();
+            });
+            $this->safeAddColumn('reseller_invoices', 'currency', function (Blueprint $table) {
+                $table->string('currency', 10)->default('IRT');
+            });
+            $this->safeAddColumn('reseller_invoices', 'renewal_applied_at', function (Blueprint $table) {
+                $table->timestamp('renewal_applied_at')->nullable();
+            });
+            $this->safeAddColumn('reseller_invoices', 'renewal_of_order_id', function (Blueprint $table) {
+                $table->unsignedBigInteger('renewal_of_order_id')->nullable()->index();
+            });
+            $this->safeAddColumn('reseller_invoices', 'deleted_at', function (Blueprint $table) {
+                $table->softDeletes();
             });
         }
 
         // 3. reseller_orders table
         if (Schema::hasTable('reseller_orders')) {
-            Schema::table('reseller_orders', function (Blueprint $table) {
-                if (!Schema::hasColumn('reseller_orders', 'is_custom_package')) {
-                    $table->boolean('is_custom_package')->default(false)->after('tenant_id')->index();
-                    $this->line(' Added is_custom_package to reseller_orders');
-                }
-                if (!Schema::hasColumn('reseller_orders', 'source')) {
-                    $table->string('source', 64)->nullable()->after('provisioning_status')->index();
-                    $this->line(' Added source to reseller_orders');
-                }
-                if (!Schema::hasColumn('reseller_orders', 'contract_value')) {
-                    $table->decimal('contract_value', 15, 2)->nullable()->after('total_amount');
-                    $this->line(' Added contract_value to reseller_orders');
-                }
-                if (!Schema::hasColumn('reseller_orders', 'currency')) {
-                    $table->string('currency', 10)->default('IRT')->after('total_amount');
-                    $this->line(' Added currency to reseller_orders');
-                }
-                if (!Schema::hasColumn('reseller_orders', 'renewal_of_order_id')) {
-                    $table->unsignedBigInteger('renewal_of_order_id')->nullable()->index();
-                    $this->line(' Added renewal_of_order_id to reseller_orders');
-                }
-                if (!Schema::hasColumn('reseller_orders', 'deleted_at')) {
-                    $table->softDeletes();
-                    $this->line(' Added deleted_at to reseller_orders');
-                }
+            $this->safeAddColumn('reseller_orders', 'is_custom_package', function (Blueprint $table) {
+                $table->boolean('is_custom_package')->default(false)->index();
+            });
+            $this->safeAddColumn('reseller_orders', 'source', function (Blueprint $table) {
+                $table->string('source', 64)->nullable()->index();
+            });
+            $this->safeAddColumn('reseller_orders', 'contract_value', function (Blueprint $table) {
+                $table->decimal('contract_value', 15, 2)->nullable();
+            });
+            $this->safeAddColumn('reseller_orders', 'currency', function (Blueprint $table) {
+                $table->string('currency', 10)->default('IRT');
+            });
+            $this->safeAddColumn('reseller_orders', 'renewal_of_order_id', function (Blueprint $table) {
+                $table->unsignedBigInteger('renewal_of_order_id')->nullable()->index();
+            });
+            $this->safeAddColumn('reseller_orders', 'deleted_at', function (Blueprint $table) {
+                $table->softDeletes();
             });
         }
 
         // 4. reseller_invoice_payments table
         if (Schema::hasTable('reseller_invoice_payments')) {
-            Schema::table('reseller_invoice_payments', function (Blueprint $table) {
-                if (!Schema::hasColumn('reseller_invoice_payments', 'currency')) {
-                    $table->string('currency', 10)->default('IRT')->after('amount');
-                    $this->line(' Added currency to reseller_invoice_payments');
-                }
-                if (!Schema::hasColumn('reseller_invoice_payments', 'idempotency_key')) {
-                    $table->string('idempotency_key', 64)->nullable()->unique()->after('status');
-                    $this->line(' Added idempotency_key to reseller_invoice_payments');
-                }
-                if (!Schema::hasColumn('reseller_invoice_payments', 'expires_at')) {
-                    $table->timestamp('expires_at')->nullable()->index()->after('paid_at');
-                    $this->line(' Added expires_at to reseller_invoice_payments');
-                }
+            $this->safeAddColumn('reseller_invoice_payments', 'currency', function (Blueprint $table) {
+                $table->string('currency', 10)->default('IRT');
+            });
+            $this->safeAddColumn('reseller_invoice_payments', 'idempotency_key', function (Blueprint $table) {
+                $table->string('idempotency_key', 64)->nullable()->unique();
+            });
+            $this->safeAddColumn('reseller_invoice_payments', 'expires_at', function (Blueprint $table) {
+                $table->timestamp('expires_at')->nullable()->index();
             });
         }
 
         // 5. tenants table
         if (Schema::hasTable('tenants')) {
-            Schema::table('tenants', function (Blueprint $table) {
-                if (!Schema::hasColumn('tenants', 'checkout_expires_at')) {
-                    $table->timestamp('checkout_expires_at')->nullable()->after('plan_expires_at')->index();
-                    $this->line(' Added checkout_expires_at to tenants');
-                }
-                try {
-                    $table->index(['reseller_id', 'status', 'plan_expires_at'], 'idx_tenants_reseller_status_expiry');
-                } catch (\Throwable $e) {}
+            $this->safeAddColumn('tenants', 'checkout_expires_at', function (Blueprint $table) {
+                $table->timestamp('checkout_expires_at')->nullable()->index();
             });
+            try {
+                Schema::table('tenants', function (Blueprint $table) {
+                    $table->index(['reseller_id', 'status', 'plan_expires_at'], 'idx_tenants_reseller_status_expiry');
+                });
+            } catch (\Throwable $e) {}
         }
 
         // 6. reseller_settings table
         if (Schema::hasTable('reseller_settings')) {
-            Schema::table('reseller_settings', function (Blueprint $table) {
-                if (!Schema::hasColumn('reseller_settings', 'rounding_mode')) {
-                    $table->string('rounding_mode', 20)->default('none');
-                    $this->line(' Added rounding_mode to reseller_settings');
-                }
-                if (!Schema::hasColumn('reseller_settings', 'rounding_unit')) {
-                    $table->unsignedInteger('rounding_unit')->default(1000);
-                    $this->line(' Added rounding_unit to reseller_settings');
-                }
-                if (!Schema::hasColumn('reseller_settings', 'rounding_apply_to')) {
-                    $table->string('rounding_apply_to', 20)->default('total');
-                    $this->line(' Added rounding_apply_to to reseller_settings');
-                }
-                if (!Schema::hasColumn('reseller_settings', 'enable_tour')) {
-                    $table->boolean('enable_tour')->default(true);
-                    $this->line(' Added enable_tour to reseller_settings');
-                }
-                if (!Schema::hasColumn('reseller_settings', 'tour_steps')) {
-                    $table->json('tour_steps')->nullable();
-                    $this->line(' Added tour_steps to reseller_settings');
-                }
+            $this->safeAddColumn('reseller_settings', 'rounding_mode', function (Blueprint $table) {
+                $table->string('rounding_mode', 20)->default('none');
+            });
+            $this->safeAddColumn('reseller_settings', 'rounding_unit', function (Blueprint $table) {
+                $table->unsignedInteger('rounding_unit')->default(1000);
+            });
+            $this->safeAddColumn('reseller_settings', 'rounding_apply_to', function (Blueprint $table) {
+                $table->string('rounding_apply_to', 20)->default('total');
+            });
+            $this->safeAddColumn('reseller_settings', 'enable_tour', function (Blueprint $table) {
+                $table->boolean('enable_tour')->default(true);
+            });
+            $this->safeAddColumn('reseller_settings', 'tour_steps', function (Blueprint $table) {
+                $table->json('tour_steps')->nullable();
             });
         }
 
@@ -161,17 +129,31 @@ class SyncResellerDatabaseCommand extends Command
         if (Schema::hasTable('migrations')) {
             $batch = (int) DB::table('migrations')->max('batch') + 1;
             foreach ($migrations as $mig) {
-                if (!DB::table('migrations')->where('migration', $mig)->exists()) {
-                    DB::table('migrations')->insert([
-                        'migration' => $mig,
-                        'batch' => $batch,
-                    ]);
-                    $this->line(" Registered {$mig} in migrations table");
-                }
+                try {
+                    if (!DB::table('migrations')->where('migration', $mig)->exists()) {
+                        DB::table('migrations')->insert([
+                            'migration' => $mig,
+                            'batch' => $batch,
+                        ]);
+                        $this->line(" Registered {$mig} in migrations table");
+                    }
+                } catch (\Throwable $e) {}
             }
         }
 
         $this->info('ResellerHub database schema synced successfully!');
         return 0;
+    }
+
+    protected function safeAddColumn(string $tableName, string $columnName, \Closure $callback): void
+    {
+        try {
+            if (!Schema::hasColumn($tableName, $columnName)) {
+                Schema::table($tableName, $callback);
+                $this->line(" Added {$columnName} to {$tableName}");
+            }
+        } catch (\Throwable $e) {
+            $this->warn(" Warning on {$tableName}.{$columnName}: " . $e->getMessage());
+        }
     }
 }
