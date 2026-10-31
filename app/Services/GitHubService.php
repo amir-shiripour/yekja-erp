@@ -229,6 +229,7 @@ class GitHubService
 
             // ۳. آپدیت دیتابیس، کش‌ها و برگرداندن سایت به حالت آنلاین
             Process::path($base)->timeout(180)->run('php artisan migrate --force');
+            Process::path($base)->timeout(120)->run('php artisan reseller:sync-database');
             Process::path($base)->run('php artisan optimize:clear');
             Process::path($base)->run('php artisan up');
 

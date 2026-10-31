@@ -168,6 +168,7 @@ class ResellerHubServiceProvider extends ServiceProvider
             AuditDuplicateInvoicesCommand::class,
             ExpirePendingCheckoutsCommand::class,
             \Modules\ResellerHub\App\Console\Commands\ReconcileInvoicesCommand::class,
+            \Modules\ResellerHub\App\Console\Commands\SyncResellerDatabaseCommand::class,
         ]);
     }
 
