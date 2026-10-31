@@ -1,0 +1,10 @@
+{
+    "name": "modules/directadmin",
+    "description": "DirectAdmin connection module for Sito CRM",
+    "type": "laravel-module",
+    "autoload": {
+        "psr-4": {
+            "Modules\\DirectAdmin\\": ""
+        }
+    }
+}

@@ -1,0 +1,960 @@
+<?php
+
+namespace Modules\Booking\Http\Controllers\User;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Modules\Booking\Entities\BookingCategory;
+use Modules\Booking\Entities\BookingForm;
+use Modules\Booking\Entities\BookingService;
+use Modules\Booking\Entities\BookingSetting;
+use Spatie\Permission\Models\Role;
+use Modules\Booking\Entities\BookingServiceProvider;
+
+
+class ServiceController extends Controller
+{
+    public function index(Request $request)
+    {
+        $authUser  = Auth::user();
+        $settings  = BookingSetting::current();
+
+        $isAdmin   = $this->isAdminUser($authUser);
+        $isProvider = $this->userIsProvider($authUser, $settings);
+        $adminOwnerIds = $this->getAdminOwnerIds();
+
+        $query = BookingService::query()
+            ->leftJoin('booking_categories', 'booking_services.category_id', '=', 'booking_categories.id')
+            ->select('booking_services.*')
+            ->with(['category', 'categories', 'appointmentForm']);
+
+        if ($authUser) {
+            $query->with(['serviceProviders' => function ($q) use ($authUser) {
+                $q->where('provider_user_id', $authUser->id);
+            }]);
+        }
+
+        if (! $isAdmin) {
+            $query->where(function ($q) use ($authUser, $isProvider, $settings, $adminOwnerIds) {
+                $q->whereNull('booking_services.owner_user_id')
+                    ->orWhereIn('booking_services.owner_user_id', $adminOwnerIds);
+
+                if ($isProvider && $settings->allow_role_service_creation && $authUser) {
+                    $q->orWhere('booking_services.owner_user_id', $authUser->id);
+                }
+            });
+        }
+
+        // Apply Filters
+        if ($search = $request->input('search')) {
+            $query->where('booking_services.name', 'like', "%{$search}%");
+        }
+
+        if ($categoryId = $request->input('category_id')) {
+            $query->where(function ($q) use ($categoryId) {
+                $q->whereHas('categories', function ($subQ) use ($categoryId) {
+                    $subQ->where('booking_categories.id', $categoryId);
+                })->orWhere('booking_services.category_id', $categoryId);
+            });
+        }
+
+        if ($status = $request->input('status')) {
+            $query->where('booking_services.status', $status);
+        }
+
+        $perPage = (int) $request->input('per_page', 20);
+        if (!in_array($perPage, [10, 20, 50, 100], true)) {
+            $perPage = 20;
+        }
+
+        $services = $query->orderByRaw('CASE WHEN booking_categories.id IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('booking_categories.sort_order', 'asc')
+            ->orderBy('booking_categories.name', 'asc')
+            ->orderBy('booking_services.sort_order', 'asc')
+            ->orderBy('booking_services.name', 'asc')
+            ->orderByDesc('booking_services.id')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        $editableServiceIds = [];
+        foreach ($services as $srv) {
+            if ($this->canEditServiceForUser($authUser, $srv, $adminOwnerIds, $settings)) {
+                $editableServiceIds[] = $srv->id;
+            }
+        }
+
+        $categories = BookingCategory::orderBy('sort_order', 'asc')->orderBy('name', 'asc')->get(); // We fetch all categories for the filter dropdown
+
+        session(['services_index_url' => $request->fullUrl()]);
+
+        return view('booking::user.services.index', [
+            'services'           => $services,
+            'categories'         => $categories,
+            'settings'           => $settings,
+            'isAdminUser'        => $isAdmin,
+            'isProvider'         => $isProvider,
+            'adminOwnerIds'      => $adminOwnerIds,
+            'editableServiceIds' => $editableServiceIds,
+        ]);
+    }
+
+    public function create()
+    {
+        $authUser = Auth::user();
+        $settings = BookingSetting::current();
+
+        if (! $this->canCreateService($authUser, $settings)) {
+            abort(403);
+        }
+
+        $categories = $this->categoriesForUser($authUser, $settings);
+        $forms      = BookingForm::query()->orderBy('name')->get();
+
+        $isAdminUser = $this->isAdminUser($authUser);
+        $isProvider  = $this->userIsProvider($authUser, $settings);
+
+        $providers   = $isAdminUser ? $this->getEligibleProviders($settings) : collect();
+
+        return view('booking::user.services.create', compact('categories', 'forms', 'settings', 'isAdminUser', 'isProvider', 'providers'));
+    }
+
+    public function store(Request $request)
+    {
+        $authUser = Auth::user();
+        $settings = BookingSetting::current();
+
+        if (! $this->canCreateService($authUser, $settings)) {
+            abort(403);
+        }
+
+        $isAdminUser = $this->isAdminUser($authUser);
+
+        // Sanitize price fields before validation
+        $this->sanitizePriceInputs($request);
+
+        $data = $request->validate([
+            'name'        => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'status'      => ['required', Rule::in([BookingService::STATUS_ACTIVE, BookingService::STATUS_INACTIVE])],
+            'color'       => ['nullable', 'string', 'max:20', 'regex:/^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/'],
+            'sort_order'  => ['nullable', 'integer', 'min:0'],
+
+            'base_price'     => ['required', 'numeric', 'min:0'],
+            'discount_price' => ['nullable', 'numeric', 'min:0'],
+            'discount_from'  => ['nullable', 'string'],
+            'discount_to'    => ['nullable', 'string'],
+
+            'category_ids'        => ['nullable', 'array'],
+            'category_ids.*'      => ['integer', 'exists:booking_categories,id'],
+            'online_booking_mode' => ['required', Rule::in([
+                BookingService::ONLINE_MODE_INHERIT,
+                BookingService::ONLINE_MODE_FORCE_ON,
+                BookingService::ONLINE_MODE_FORCE_OFF,
+            ])],
+            'auto_confirm_online_booking' => ['nullable', 'boolean'],
+            'credit_client_wallet'        => ['nullable', 'boolean'],
+
+            'payment_mode'       => ['required', Rule::in([
+                BookingService::PAYMENT_MODE_NONE,
+                BookingService::PAYMENT_MODE_OPTIONAL,
+                BookingService::PAYMENT_MODE_REQUIRED,
+            ])],
+            'payment_amount_type'  => ['nullable', Rule::in([
+                BookingService::PAYMENT_AMOUNT_FULL,
+                BookingService::PAYMENT_AMOUNT_DEPOSIT,
+                BookingService::PAYMENT_AMOUNT_FIXED,
+            ])],
+            'payment_amount_value' => ['nullable', 'numeric', 'min:0'],
+
+            'appointment_form_id'   => ['nullable', 'integer', 'exists:booking_forms,id'],
+            'provider_can_customize'=> ['nullable', 'boolean'],
+            'custom_schedule_enabled' => ['nullable', 'boolean'],
+            'buffer_before_minutes' => ['nullable', 'integer', 'min:0', 'max:240'],
+            'buffer_after_minutes'  => ['nullable', 'integer', 'min:0', 'max:240'],
+            'provider_ids'          => ['nullable', 'array'],
+            'provider_ids.*'        => ['integer', 'exists:users,id'],
+        ]);
+
+        $categoryIds = $request->input('category_ids', []);
+        foreach ($categoryIds as $catId) {
+            $this->ensureCategorySelectionAllowed($authUser, $settings, $catId);
+        }
+        $data['category_id'] = !empty($categoryIds) ? $categoryIds[0] : null;
+        $data['sort_order'] = isset($data['sort_order']) ? (int) $data['sort_order'] : 0;
+
+        // Provider اجازه تغییر این گزینه را ندارد
+        if (! $isAdminUser) {
+            $data['provider_can_customize'] = false;
+        } else {
+            $data['provider_can_customize'] = (bool)($data['provider_can_customize'] ?? false);
+        }
+        $data['custom_schedule_enabled'] = (bool)($data['custom_schedule_enabled'] ?? false);
+        $data['auto_confirm_online_booking'] = (bool)($data['auto_confirm_online_booking'] ?? false);
+        $data['credit_client_wallet'] = (bool)($data['credit_client_wallet'] ?? false);
+
+        $data['discount_from'] = $data['discount_from'] ?: null;
+        $data['discount_to']   = $data['discount_to']   ?: null;
+        $data['color']         = $data['color']         ?: '#4f46e5';
+
+        $data['owner_user_id'] = $authUser?->id;
+
+        $service = BookingService::query()->create($data);
+
+        if (!empty($categoryIds)) {
+            $service->categories()->sync($categoryIds);
+        }
+
+        if ($isAdminUser) {
+            $providerIds = array_map('intval', $request->input('provider_ids', []));
+            foreach ($providerIds as $pId) {
+                BookingServiceProvider::query()->updateOrCreate(
+                    ['service_id' => $service->id, 'provider_user_id' => $pId],
+                    [
+                        'is_active' => true,
+                        'customization_enabled' => true,
+                        'override_status_mode' => BookingServiceProvider::OVERRIDE_MODE_INHERIT,
+                    ]
+                );
+            }
+        } elseif ($authUser && $this->userIsProvider($authUser, $settings)) {
+            BookingServiceProvider::query()->updateOrCreate(
+                ['service_id' => $service->id, 'provider_user_id' => $authUser->id],
+                [
+                    'is_active' => true,
+                    'customization_enabled' => true,
+                    'override_status_mode' => BookingServiceProvider::OVERRIDE_MODE_INHERIT,
+                ]
+            );
+        }
+
+        return redirect()
+            ->route('user.booking.services.index')
+            ->with('success', 'سرویس با موفقیت ثبت شد.');
+    }
+
+    public function edit(BookingService $service)
+    {
+        $authUser = Auth::user();
+        $settings = BookingSetting::current();
+        $adminOwnerIds = $this->getAdminOwnerIds();
+
+        if (! $this->canEditServiceForUser($authUser, $service, $adminOwnerIds, $settings)) {
+            abort(403);
+        }
+
+        $categories = $this->categoriesForUser($authUser, $settings);
+        $forms      = BookingForm::query()->orderBy('name')->get();
+
+        $isAdminUser = $this->isAdminUser($authUser);
+        $isProvider  = $this->userIsProvider($authUser, $settings);
+
+        $isPublicService = $this->serviceIsPublic($service, $adminOwnerIds);
+        $isOwnerService  = $authUser ? ((int)$service->owner_user_id === (int)$authUser->id) : false;
+
+        $editingPublicAsProvider = (!$isAdminUser && $isProvider && $isPublicService && !$isOwnerService);
+        $serviceProvider = null;
+
+        if ($editingPublicAsProvider && $authUser) {
+            $serviceProvider = BookingServiceProvider::query()
+                ->where('service_id', $service->id)
+                ->where('provider_user_id', $authUser->id)
+                ->first();
+        }
+
+        $providers = $isAdminUser ? $this->getEligibleProviders($settings) : collect();
+        $effectiveProviderIds = [];
+        if ($isAdminUser && $service->exists) {
+            $effectiveProviderIds = BookingServiceProvider::query()
+                ->where('service_id', $service->id)
+                ->where('is_active', true)
+                ->pluck('provider_user_id')
+                ->map(fn($v) => (int)$v)
+                ->toArray();
+        }
+
+        return view('booking::user.services.edit', compact(
+            'service',
+            'categories',
+            'forms',
+            'settings',
+            'isAdminUser',
+            'isProvider',
+            'isPublicService',
+            'isOwnerService',
+            'editingPublicAsProvider',
+            'serviceProvider',
+            'providers',
+            'effectiveProviderIds'
+        ));
+    }
+
+    public function update(Request $request, BookingService $service)
+    {
+        $authUser = Auth::user();
+        $settings = BookingSetting::current();
+        $adminOwnerIds = $this->getAdminOwnerIds();
+
+        if (! $this->canEditServiceForUser($authUser, $service, $adminOwnerIds, $settings)) {
+            abort(403);
+        }
+
+        $isAdminUser = $this->isAdminUser($authUser);
+        $isProvider  = $this->userIsProvider($authUser, $settings);
+
+        $isPublicService = $this->serviceIsPublic($service, $adminOwnerIds);
+        $isOwnerService  = $authUser ? ((int)$service->owner_user_id === (int)$authUser->id) : false;
+
+        // Sanitize price fields before validation
+        $this->sanitizePriceInputs($request);
+
+        // -------------------------------------------------
+        // حالت 1: Provider روی سرویس عمومی (override در pivot)
+        // -------------------------------------------------
+        if (! $isAdminUser && $isProvider && $isPublicService && ! $isOwnerService) {
+
+            $data = $request->validate([
+                // فقط فیلدهای مجاز برای Provider روی سرویس عمومی
+                'base_price'     => ['required', 'numeric', 'min:0'],
+                'discount_price' => ['nullable', 'numeric', 'min:0'],
+                'discount_from'  => ['nullable', 'string'],
+                'discount_to'    => ['nullable', 'string'],
+
+                'category_id'         => ['nullable', 'integer', 'exists:booking_categories,id'],
+                'appointment_form_id' => ['nullable', 'integer', 'exists:booking_forms,id'],
+
+                'online_booking_mode' => ['required', Rule::in([
+                    BookingService::ONLINE_MODE_INHERIT,
+                    BookingService::ONLINE_MODE_FORCE_ON,
+                    BookingService::ONLINE_MODE_FORCE_OFF,
+                ])],
+                'auto_confirm_online_booking' => ['nullable', 'boolean'],
+
+                'payment_mode'       => ['required', Rule::in([
+                    BookingService::PAYMENT_MODE_NONE,
+                    BookingService::PAYMENT_MODE_OPTIONAL,
+                    BookingService::PAYMENT_MODE_REQUIRED,
+                ])],
+                'payment_amount_type'  => ['nullable', Rule::in([
+                    BookingService::PAYMENT_AMOUNT_FULL,
+                    BookingService::PAYMENT_AMOUNT_DEPOSIT,
+                    BookingService::PAYMENT_AMOUNT_FIXED,
+                ])],
+                'payment_amount_value' => ['nullable', 'numeric', 'min:0'],
+            ]);
+
+            $data['discount_from'] = $data['discount_from'] ?: null;
+            $data['discount_to']   = $data['discount_to']   ?: null;
+
+            $sp = BookingServiceProvider::query()->firstOrNew([
+                'service_id'       => $service->id,
+                'provider_user_id' => $authUser->id,
+            ]);
+
+            if (! $sp->exists) {
+                $sp->is_active = true; // اینجا منطقیه فعال باشه چون اجازه ورود به edit داشته
+                $sp->customization_enabled = (bool) $service->provider_can_customize;
+                $sp->override_status_mode = BookingServiceProvider::OVERRIDE_MODE_INHERIT;
+            }
+
+            // Override ها
+            $sp->override_price_mode       = BookingServiceProvider::OVERRIDE_MODE_OVERRIDE;
+            $sp->override_base_price       = $data['base_price'];
+            $sp->override_discount_price   = $data['discount_price'] ?? null;
+            $sp->override_discount_from    = $data['discount_from'] ?? null;
+            $sp->override_discount_to      = $data['discount_to'] ?? null;
+
+            $sp->override_category_id          = $data['category_id'] ?? null;
+            $sp->override_appointment_form_id  = $data['appointment_form_id'] ?? null;
+
+            $sp->override_online_booking_mode  = $data['online_booking_mode'];
+            $sp->override_auto_confirm         = (bool)($data['auto_confirm_online_booking'] ?? false);
+
+            $sp->override_payment_mode         = $data['payment_mode'];
+            $sp->override_payment_amount_type  = $data['payment_amount_type'] ?? null;
+            $sp->override_payment_amount_value = $data['payment_amount_value'] ?? null;
+
+            $this->ensureCategorySelectionAllowed($authUser, $settings, $sp->override_category_id);
+
+            $sp->save();
+
+            return redirect()
+                ->route('user.booking.services.edit', $service)
+                ->with('success', 'تنظیمات این سرویس برای شما ذخیره شد.');
+        }
+
+        // -------------------------------------------------
+        // حالت 2: Admin یا Provider روی سرویس خودش (edit روی BookingService)
+        // -------------------------------------------------
+
+        $rules = [
+            'name'        => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'status'      => ['required', Rule::in([BookingService::STATUS_ACTIVE, BookingService::STATUS_INACTIVE])],
+            'color'       => ['nullable', 'string', 'max:20', 'regex:/^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/'],
+            'sort_order'  => ['nullable', 'integer', 'min:0'],
+
+            'base_price'     => ['required', 'numeric', 'min:0'],
+            'discount_price' => ['nullable', 'numeric', 'min:0'],
+            'discount_from'  => ['nullable', 'string'],
+            'discount_to'    => ['nullable', 'string'],
+
+            'category_ids'        => ['nullable', 'array'],
+            'category_ids.*'      => ['integer', 'exists:booking_categories,id'],
+            'online_booking_mode' => ['required', Rule::in([
+                BookingService::ONLINE_MODE_INHERIT,
+                BookingService::ONLINE_MODE_FORCE_ON,
+                BookingService::ONLINE_MODE_FORCE_OFF,
+            ])],
+            'auto_confirm_online_booking' => ['nullable', 'boolean'],
+            'credit_client_wallet'        => ['nullable', 'boolean'],
+
+            'payment_mode'       => ['required', Rule::in([
+                BookingService::PAYMENT_MODE_NONE,
+                BookingService::PAYMENT_MODE_OPTIONAL,
+                BookingService::PAYMENT_MODE_REQUIRED,
+            ])],
+            'payment_amount_type'  => ['nullable', Rule::in([
+                BookingService::PAYMENT_AMOUNT_FULL,
+                BookingService::PAYMENT_AMOUNT_DEPOSIT,
+                BookingService::PAYMENT_AMOUNT_FIXED,
+            ])],
+            'payment_amount_value' => ['nullable', 'numeric', 'min:0'],
+
+            'appointment_form_id'   => ['nullable', 'integer', 'exists:booking_forms,id'],
+            'custom_schedule_enabled' => ['nullable', 'boolean'],
+            'buffer_before_minutes' => ['nullable', 'integer', 'min:0', 'max:240'],
+            'buffer_after_minutes'  => ['nullable', 'integer', 'min:0', 'max:240'],
+        ];
+
+        // فقط admin می‌تواند provider_can_customize و provider_ids را تغییر دهد
+        if ($isAdminUser) {
+            $rules['provider_can_customize'] = ['nullable', 'boolean'];
+            $rules['provider_ids']          = ['nullable', 'array'];
+            $rules['provider_ids.*']        = ['integer', 'exists:users,id'];
+        }
+
+        $data = $request->validate($rules);
+
+        $categoryIds = $request->input('category_ids', []);
+        foreach ($categoryIds as $catId) {
+            $this->ensureCategorySelectionAllowed($authUser, $settings, $catId);
+        }
+        $data['category_id'] = !empty($categoryIds) ? $categoryIds[0] : null;
+        if (array_key_exists('sort_order', $data)) {
+            $data['sort_order'] = isset($data['sort_order']) ? (int) $data['sort_order'] : 0;
+        }
+
+        $data['discount_from'] = $data['discount_from'] ?: null;
+        $data['discount_to']   = $data['discount_to']   ?: null;
+
+        if ($isAdminUser) {
+            $data['provider_can_customize'] = (bool)($data['provider_can_customize'] ?? false);
+        }
+        $data['custom_schedule_enabled'] = (bool) $request->input('custom_schedule_enabled', false);
+        $data['auto_confirm_online_booking'] = (bool)($data['auto_confirm_online_booking'] ?? false);
+        $data['credit_client_wallet'] = (bool)($data['credit_client_wallet'] ?? false);
+
+        $service->fill($data)->save();
+
+        if (!empty($categoryIds)) {
+            $service->categories()->sync($categoryIds);
+        } else {
+            $service->categories()->detach();
+        }
+
+        if ($isAdminUser) {
+            $selectedProviderIds = array_map('intval', $request->input('provider_ids', []));
+
+            foreach ($selectedProviderIds as $pId) {
+                BookingServiceProvider::query()->updateOrCreate(
+                    ['service_id' => $service->id, 'provider_user_id' => $pId],
+                    [
+                        'is_active' => true,
+                        'customization_enabled' => true,
+                        'override_status_mode' => BookingServiceProvider::OVERRIDE_MODE_INHERIT,
+                    ]
+                );
+            }
+
+            BookingServiceProvider::query()
+                ->where('service_id', $service->id)
+                ->whereNotIn('provider_user_id', $selectedProviderIds)
+                ->update(['is_active' => false]);
+        }
+
+        return redirect()
+            ->route('user.booking.services.edit', $service)
+            ->with('success', 'سرویس با موفقیت بروزرسانی شد.');
+    }
+
+    public function customPrices(BookingService $service)
+    {
+        $authUser = Auth::user();
+        $settings = BookingSetting::current();
+        $adminOwnerIds = $this->getAdminOwnerIds();
+
+        if (! $this->canEditServiceForUser($authUser, $service, $adminOwnerIds, $settings)) {
+            abort(403);
+        }
+
+        $customPrices = $service->custom_prices ?? [];
+
+        if (!isset($customPrices['tabs']) || !is_array($customPrices['tabs'])) {
+            $customPrices = [
+                'tabs' => []
+            ];
+        }
+
+        return view('booking::user.services.custom-prices', [
+            'service' => $service,
+            'customPrices' => $customPrices
+        ]);
+    }
+
+    public function updateCustomPrices(Request $request, BookingService $service)
+    {
+        $authUser = Auth::user();
+        $settings = BookingSetting::current();
+        $adminOwnerIds = $this->getAdminOwnerIds();
+
+        if (! $this->canEditServiceForUser($authUser, $service, $adminOwnerIds, $settings)) {
+            abort(403);
+        }
+
+        if ($request->filled('custom_prices')) {
+            $decoded = json_decode($request->input('custom_prices'), true);
+            if (is_array($decoded)) {
+                $request->merge($decoded);
+            }
+        }
+        $validated = $request->validate([
+            'tabs' => ['nullable', 'array'],
+            'tabs.*.title' => ['nullable', 'string', 'max:255'],
+            'tabs.*.sections' => ['nullable', 'array'],
+            'tabs.*.sections.*.title' => ['nullable', 'string', 'max:255'],
+            'tabs.*.sections.*.type' => ['nullable', 'string', 'max:255'],
+            'tabs.*.sections.*.brands' => ['nullable', 'array'],
+            'tabs.*.sections.*.brands.*.name' => ['nullable', 'string', 'max:255'],
+            'tabs.*.sections.*.brands.*.price' => ['nullable', 'numeric', 'min:0'],
+            'tabs.*.sections.*.brands.*.is_installment' => ['nullable', 'in:0,1,true,false'],
+        ]);
+
+        $sanitizedTabs = [];
+
+        foreach ($validated['tabs'] ?? [] as $tab) {
+            $sections = [];
+
+            foreach ($tab['sections'] ?? [] as $section) {
+                $brands = [];
+
+                foreach ($section['brands'] ?? [] as $brand) {
+                    if (!empty($brand['name']) || isset($brand['price'])) {
+                        $brands[] = [
+                            'name'  => $brand['name'] ?? '',
+                            'price' => $brand['price'] !== null ? (float)$brand['price'] : 0,
+                            'is_installment' => isset($brand['is_installment']) ? (bool)$brand['is_installment'] : false,                        ];
+                    }
+                }
+
+                if (!empty($section['title']) || !empty($brands)) {
+                    $sections[] = [
+                        'title'  => $section['title'] ?? 'بدون عنوان',
+                        'type'   => $section['type'] ?? '',
+                        'brands' => $brands,
+                    ];
+                }
+            }
+            if (!empty($tab['title']) || !empty($sections)) {
+                $sanitizedTabs[] = [
+                    'title'    => $tab['title'] ?? 'تب بدون عنوان',
+                    'sections' => $sections,
+                ];
+            }
+        }
+        $service->update([
+            'custom_prices' => [
+                'tabs' => $sanitizedTabs
+            ]
+        ]);
+
+        return redirect()
+            ->route('user.booking.services.custom-prices', $service->id)
+            ->with('success', 'تنظیمات قیمت و عنوان‌ها با موفقیت ذخیره شد.');
+    }
+
+    public function toggleForMe(Request $request, BookingService $service)
+    {
+        $authUser = Auth::user();
+        $settings = BookingSetting::current();
+        $adminOwnerIds = $this->getAdminOwnerIds();
+
+        if (! $authUser) {
+            abort(403);
+        }
+
+        // فقط Providerها
+        if (! $this->userIsProvider($authUser, $settings)) {
+            abort(403);
+        }
+
+        // فقط سرویس‌های عمومی قابل فعال‌سازی برای Provider هستند
+        if (! $this->serviceIsPublic($service, $adminOwnerIds)) {
+            abort(403);
+        }
+
+        $sp = BookingServiceProvider::query()->firstOrNew([
+            'service_id'        => $service->id,
+            'provider_user_id'  => $authUser->id,
+        ]);
+
+        // پیشفرض‌ها اگر رکورد تازه ساخته می‌شود
+        if (! $sp->exists) {
+            $sp->customization_enabled = (bool) $service->provider_can_customize;
+            $sp->override_status_mode = BookingServiceProvider::OVERRIDE_MODE_INHERIT;
+        }
+
+        $sp->is_active = ! (bool) $sp->is_active;
+        $sp->save();
+
+        return redirect()
+            ->to(session('services_index_url', route('user.booking.services.index')))
+            ->with('success', $sp->is_active ? 'سرویس برای شما فعال شد.' : 'سرویس برای شما غیرفعال شد.');
+    }
+
+    // --------------------------------------------------
+    // Helperهای دسترسی
+    // --------------------------------------------------
+
+    protected function sanitizePriceInputs(Request $request): void
+    {
+        $inputs = [];
+        $priceFields = ['base_price', 'discount_price', 'payment_amount_value'];
+
+        foreach ($priceFields as $field) {
+            $value = $request->input($field);
+            if ($value !== null) {
+                $sanitized = str_replace(',', '', $value);
+                // Convert empty string to null to avoid SQL errors
+                $inputs[$field] = $sanitized === '' ? null : $sanitized;
+            }
+        }
+
+        if (!empty($inputs)) {
+            $request->merge($inputs);
+        }
+    }
+
+    /**
+     * آیا کاربر ادمین/سوپرادمین/مدیر نوبت‌دهی است؟
+     */
+    protected function isAdminUser(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->hasAnyRole(['super-admin', 'admin'])) {
+            return true;
+        }
+
+        // اگر در جای دیگری برای مدیریت کلی نوبت‌دهی از این پرمیشن‌ها استفاده می‌کنی
+        if ($user->can('booking.manage') || $user->can('booking.services.manage')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * نقش‌های Provider از روی BookingSetting
+     */
+    protected function getProviderRoleIds(BookingSetting $settings): array
+    {
+        return array_map('intval', (array)($settings->allowed_roles ?? []));
+    }
+
+    /**
+     * لیست تمام کاربرانی که نقش ارائه‌دهنده (Provider) براساس تنظیمات نوبت‌دهی دارند
+     */
+    protected function getEligibleProviders(BookingSetting $settings)
+    {
+        $rolesInput = $settings->allowed_roles;
+        if (is_string($rolesInput)) {
+            $decoded = json_decode($rolesInput, true);
+            $rolesInput = is_array($decoded) ? $decoded : preg_split('/\s*,\s*/', trim($rolesInput), -1, PREG_SPLIT_NO_EMPTY);
+        }
+        if (!is_array($rolesInput) || empty($rolesInput)) {
+            return collect();
+        }
+
+        $roleIds = [];
+        $roleNames = [];
+        foreach ($rolesInput as $v) {
+            if (is_numeric($v) && (int)$v > 0) {
+                $roleIds[] = (int)$v;
+            } elseif (is_string($v) && trim($v) !== '') {
+                $roleNames[] = trim($v);
+            }
+        }
+
+        if (empty($roleIds) && empty($roleNames)) {
+            return collect();
+        }
+
+        return User::whereHas('roles', function ($q) use ($roleIds, $roleNames) {
+            $q->where(function ($subQ) use ($roleIds, $roleNames) {
+                if (!empty($roleIds)) {
+                    $subQ->whereIn('id', $roleIds);
+                }
+                if (!empty($roleNames)) {
+                    $subQ->orWhereIn('name', $roleNames);
+                }
+            });
+        })->orderBy('name')->get();
+    }
+
+    /**
+     * آیا این کاربر براساس تنظیمات، Provider است؟
+     */
+    protected function userIsProvider(?User $user, BookingSetting $settings): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        $providerRoleIds = $this->getProviderRoleIds($settings);
+        if (empty($providerRoleIds)) {
+            return false;
+        }
+
+        $userRoleIds = $user->roles()->pluck('id')->map(fn ($v) => (int)$v)->all();
+
+        return count(array_intersect($providerRoleIds, $userRoleIds)) > 0;
+    }
+
+    /**
+     * لیست user_id هایی که نقش admin / super-admin دارند
+     * (همین‌ها مالک سرویس‌های عمومی محسوب می‌شوند)
+     */
+    protected function getAdminOwnerIds(): array
+    {
+        $roleIds = Role::query()
+            ->whereIn('name', ['super-admin', 'admin'])
+            ->pluck('id')
+            ->all();
+
+        if (empty($roleIds)) {
+            return [];
+        }
+
+        return DB::table('model_has_roles')
+            ->whereIn('role_id', $roleIds)
+            ->where('model_type', User::class)
+            ->pluck('model_id')
+            ->map(fn ($v) => (int)$v)
+            ->all();
+    }
+
+    /**
+     * سرویس عمومی است؟ (owner_user_id خالی یا متعلق به admin/super-admin)
+     */
+    protected function serviceIsPublic(BookingService $service, array $adminOwnerIds): bool
+    {
+        if ($service->owner_user_id === null) {
+            return true;
+        }
+
+        return in_array((int)$service->owner_user_id, $adminOwnerIds, true);
+    }
+
+    /**
+     * آیا این کاربر حق ایجاد سرویس جدید دارد؟
+     */
+    protected function canCreateService(?User $user, BookingSetting $settings): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        if ($this->isAdminUser($user)) {
+            return true;
+        }
+
+        // باید Provider باشد
+        if (! $this->userIsProvider($user, $settings)) {
+            return false;
+        }
+
+        // تنظیمات اجازه ساخت سرویس را بدهند
+        if (! $settings->allow_role_service_creation) {
+            return false;
+        }
+
+        // و پرمیشن سطحی داشته باشد (برای هم‌خوانی با Spatie)
+        if (! $user->can('booking.services.create')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * آیا این کاربر می‌تواند این سرویس خاص را ویرایش کند؟
+     *
+     * قواعد:
+     *  - ادمین / سوپرادمین → همیشه می‌تواند.
+     *  - Provider:
+     *      - اگر allow_role_service_creation = 1 و owner_user_id == user_id → می‌تواند.
+     *      - اگر سرویس عمومی است و provider_can_customize = 1 → می‌تواند (حتی اگر اجازه ساخت فعال نباشد).
+     */
+    protected function canEditServiceForUser(?User $user, BookingService $service, array $adminOwnerIds, BookingSetting $settings): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        if ($this->isAdminUser($user)) {
+            return true;
+        }
+
+        $isProvider = $this->userIsProvider($user, $settings);
+        if (! $isProvider) {
+            return false;
+        }
+
+        // مالک سرویس (در صورت فعال بودن امکان ساخت)
+        if ($settings->allow_role_service_creation && (int)$service->owner_user_id === (int)$user->id) {
+            return true;
+        }
+
+        // سرویس عمومی و قابل شخصی‌سازی توسط Provider (به شرط فعال بودن برای همین Provider)
+        if ($this->serviceIsPublic($service, $adminOwnerIds) && $service->provider_can_customize) {
+            $sp = BookingServiceProvider::query()
+                ->where('service_id', $service->id)
+                ->where('provider_user_id', $user->id)
+                ->first();
+
+            if ($sp && $sp->is_active) {
+                return true;
+            }
+        }
+
+
+        return false;
+    }
+
+    protected function categoriesForUser(?User $user, BookingSetting $settings)
+    {
+        $query = BookingCategory::query()->orderBy('sort_order', 'asc')->orderBy('name', 'asc');
+
+        if ($settings->service_category_selection_scope === 'OWN'
+            && $user
+            && ! $user->can('booking.categories.manage')
+            && ! $user->hasRole('super-admin')) {
+            $query->where('creator_id', $user->id);
+        }
+
+        return $query->get();
+    }
+
+    protected function ensureCategorySelectionAllowed(?User $user, BookingSetting $settings, ?int $categoryId): void
+    {
+        if (! $categoryId) {
+            return;
+        }
+
+        if (! $user) {
+            abort(403);
+        }
+
+        if ($settings->service_category_selection_scope !== 'OWN') {
+            return;
+        }
+
+        if ($user->can('booking.categories.manage') || $user->hasRole('super-admin')) {
+            return;
+        }
+
+        $ownsCategory = BookingCategory::query()
+            ->where('id', $categoryId)
+            ->where('creator_id', $user->id)
+            ->exists();
+
+        if (! $ownsCategory) {
+            abort(403);
+        }
+    }
+
+    public function editInstallments(BookingService $service)
+    {
+        abort_unless(auth()->user()->can('booking.services.edit'),403);
+        $customPricesRaw = $service->custom_prices ?? [];
+        $customPrices = $customPricesRaw['tabs'] ?? (is_array($customPricesRaw) ? $customPricesRaw : []);
+        $savedSettings = $service->installment_settings ?? [];
+
+        return view('booking::user.services.installments', compact('service', 'savedSettings', 'customPrices'));
+
+    }
+
+    public function updateInstallments(Request $request, BookingService $service)
+    {
+        abort_unless(auth()->user()->can('booking.services.edit'), 403);
+
+        $validated = $request->validate([
+            'installments' => 'nullable|array',
+            'installments.*.sections' => 'nullable|array',
+            'installments.*.sections.*.is_active' => 'nullable|in:0,1',
+            'installments.*.sections.*.max_months' => 'nullable|integer|min:1|max:60',
+            'installments.*.sections.*.down_payment_percent' => 'nullable|numeric|min:0|max:100',
+            'installments.*.sections.*.fee_percent' => 'nullable|numeric|min:0|max:100',
+            'installments.*.sections.*.payment_cycle' => 'nullable|in:monthly,weekly',
+            'installments.*.sections.*.grace_period_days' => 'nullable|integer|min:0',
+            'installments.*.sections.*.late_fee_percent' => 'nullable|numeric|min:0|max:100',
+
+            'installments.*.sections.*.brands' => 'nullable|array',
+            'installments.*.sections.*.brands.*.max_months' => 'nullable|integer|min:1|max:60',
+            'installments.*.sections.*.brands.*.down_payment_percent' => 'nullable|numeric|min:0|max:100',
+            'installments.*.sections.*.brands.*.fee_percent' => 'nullable|numeric|min:0|max:100',
+            'installments.*.sections.*.brands.*.excluded' => 'nullable|in:0,1',
+        ]);
+
+        $installmentsData = $validated['installments'] ?? [];
+
+        foreach ($installmentsData as $tIdx => &$tab) {
+            if (!isset($tab['sections'])) continue;
+
+            foreach ($tab['sections'] as $sIdx => &$section) {
+                $section['is_active'] = !empty($section['is_active']) ? 1 : 0;
+
+                $section['max_months'] = $section['max_months'] ?? 3;
+                $section['down_payment_percent'] = $section['down_payment_percent'] ?? 30;
+                $section['fee_percent'] = $section['fee_percent'] ?? 0;
+                $section['payment_cycle'] = $section['payment_cycle'] ?? 'monthly';
+                $section['grace_period_days'] = $section['grace_period_days'] ?? 3;
+                $section['late_fee_percent'] = $section['late_fee_percent'] ?? 0;
+
+                if (!isset($section['brands'])) continue;
+
+                foreach ($section['brands'] as $bIdx => &$brand) {
+                    $brand['excluded'] = !empty($brand['excluded']) ? 1 : 0;
+
+                    foreach (['max_months', 'down_payment_percent', 'fee_percent'] as $field) {
+                        $brand[$field] = isset($brand[$field]) && $brand[$field] !== '' ? $brand[$field] : null;
+                    }
+                }
+            }
+        }
+
+        $service->update([
+            'installment_settings' => $installmentsData,
+        ]);
+
+        return redirect()
+            ->route('user.booking.services.installments', $service->id)
+            ->with('success', 'تنظیمات پرداخت قسطی با موفقیت ذخیره شد.');
+    }
+}

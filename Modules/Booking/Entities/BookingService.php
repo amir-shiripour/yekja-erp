@@ -1,0 +1,142 @@
+<?php
+
+namespace Modules\Booking\Entities;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
+
+class BookingService extends Model
+{
+    public const STATUS_ACTIVE = 'ACTIVE';
+    public const STATUS_INACTIVE = 'INACTIVE';
+
+    public const ONLINE_MODE_INHERIT = 'INHERIT';
+    public const ONLINE_MODE_FORCE_ON = 'FORCE_ON';
+    public const ONLINE_MODE_FORCE_OFF = 'FORCE_OFF';
+
+    public const PAYMENT_MODE_NONE = 'NONE';
+    public const PAYMENT_MODE_OPTIONAL = 'OPTIONAL';
+    public const PAYMENT_MODE_REQUIRED = 'REQUIRED';
+
+    public const PAYMENT_AMOUNT_FULL = 'FULL';
+    public const PAYMENT_AMOUNT_DEPOSIT = 'DEPOSIT';
+    public const PAYMENT_AMOUNT_FIXED = 'FIXED_AMOUNT';
+
+    protected $table = 'booking_services';
+
+    protected $fillable = [
+        'tenant_id',
+        'owner_user_id',
+        'name',
+        'description',
+        'slug',
+        'status',
+        'color',
+        'sort_order',
+        'base_price',
+        'discount_price',
+        'discount_from',
+        'discount_to',
+        'category_id',
+        'online_booking_mode',
+        'auto_confirm_online_booking',
+        'credit_client_wallet',
+        'payment_mode',
+        'payment_amount_type',
+        'payment_amount_value',
+        'appointment_form_id',
+        'client_profile_required_fields',
+        'provider_can_customize',
+        'custom_schedule_enabled',
+        'buffer_before_minutes',
+        'buffer_after_minutes',
+        'custom_prices',
+        'installments',
+        'installment_settings',
+    ];
+
+    protected $casts = [
+        'sort_order' => 'integer',
+        'base_price' => 'decimal:0',
+        'discount_price' => 'decimal:0',
+        'payment_amount_value' => 'decimal:0',
+        'discount_from' => 'datetime',
+        'discount_to' => 'datetime',
+        'client_profile_required_fields' => 'array',
+        'provider_can_customize' => 'boolean',
+        'custom_schedule_enabled' => 'boolean',
+        'auto_confirm_online_booking' => 'boolean',
+        'credit_client_wallet' => 'boolean',
+        'custom_prices' => 'array',
+        'installments' => 'array',
+        'installment_settings' => 'array',
+    ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $m) {
+            if (!$m->slug) {
+                $m->slug = static::makeUniqueSlug($m->name);
+            }
+        });
+    }
+
+    protected static function makeUniqueSlug(string $name): string
+    {
+        $base = Str::slug($name);
+        if (!$base) {
+            $base = 'srv-' . Str::lower(Str::random(6));
+        }
+
+        $slug = $base;
+        $i = 1;
+        while (static::query()->where('slug', $slug)->exists()) {
+            $slug = $base . '-' . $i;
+            $i++;
+        }
+
+        return $slug;
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(BookingCategory::class, 'category_id');
+    }
+
+    public function appointmentForm(): BelongsTo
+    {
+        return $this->belongsTo(BookingForm::class, 'appointment_form_id');
+    }
+
+    public function serviceProviders(): HasMany
+    {
+        return $this->hasMany(BookingServiceProvider::class, 'service_id');
+    }
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class, 'service_id');
+    }
+
+    public function providers(): BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'booking_service_providers', 'service_id', 'provider_user_id')
+            ->withPivot(['id', 'is_active', 'customization_enabled'])
+            ->withTimestamps();
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(BookingCategory::class, 'booking_category_service', 'service_id', 'category_id')
+            ->orderBy('booking_categories.sort_order', 'asc')
+            ->orderBy('booking_categories.name', 'asc')
+            ->withTimestamps();
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
+    }
+}

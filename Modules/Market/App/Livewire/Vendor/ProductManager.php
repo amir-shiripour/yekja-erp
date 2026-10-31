@@ -1,0 +1,137 @@
+<?php
+
+namespace Modules\Market\App\Livewire\Vendor;
+
+use Livewire\Component;
+use Livewire\WithPagination;
+use Modules\Market\Entities\MasterProduct;
+use Modules\Market\Entities\VendorProduct;
+use Modules\Market\Entities\MarketSetting;
+use Morilog\Jalali\Jalalian;
+
+class ProductManager extends Component
+{
+    use WithPagination;
+
+    public $editingId = null;
+    public $editForm = [];
+
+    public function edit($vendorProductId)
+    {
+        $vendorId = auth()->user()->marketVendor->id;
+        $vp = VendorProduct::where('id', $vendorProductId)->where('vendor_id', $vendorId)->firstOrFail();
+
+        $this->editingId = $vp->id;
+        $this->editForm = [
+            'price' => $vp->price,
+            'discount_price' => $vp->discount_price,
+            'discount_start_date' => $vp->discount_start_date ? Jalalian::fromCarbon($vp->discount_start_date)->format('Y/m/d H:i') : '',
+            'discount_end_date' => $vp->discount_end_date ? Jalalian::fromCarbon($vp->discount_end_date)->format('Y/m/d H:i') : '',
+            'discount_stock' => $vp->discount_stock,
+            'max_discount_purchase_qty' => $vp->max_discount_purchase_qty,
+            'stock' => $vp->stock,
+            'reorder_point' => $vp->reorder_point,
+            'min_purchase_qty' => $vp->min_purchase_qty,
+            'max_purchase_qty' => $vp->max_purchase_qty,
+            'cart_amount_step' => $vp->cart_amount_step ? number_format($vp->cart_amount_step) : '',
+            'purchase_step' => $vp->purchase_step,
+            'is_active' => in_array($vp->status, ['published', 'pending_review']),
+        ];
+    }
+
+    public function cancelEdit()
+    {
+        $this->editingId = null;
+        $this->editForm = [];
+    }
+
+    public function saveEdit()
+    {
+        if (!empty($this->editForm['cart_amount_step'])) {
+            $this->editForm['cart_amount_step'] = str_replace(',', '', $this->editForm['cart_amount_step']);
+        }
+
+        $this->validate([
+            'editForm.price' => 'required|numeric',
+            'editForm.stock' => 'required|numeric|min:0',
+            'editForm.min_purchase_qty' => 'nullable|integer|min:1',
+            'editForm.max_purchase_qty' => 'nullable|integer|min:1',
+            'editForm.cart_amount_step' => 'nullable|numeric|min:0',
+            'editForm.purchase_step' => 'nullable|integer|min:1',
+        ]);
+
+        if (!empty($this->editForm['cart_amount_step']) || !empty($this->editForm['purchase_step'])) {
+            $this->validate([
+                'editForm.cart_amount_step' => 'required|numeric|min:0.01',
+                'editForm.purchase_step' => 'required|integer|min:1',
+            ], [
+                'editForm.cart_amount_step.required' => 'در صورت تعیین محدودیت، مبنای مبلغ سبد خرید الزامی است.',
+                'editForm.purchase_step.required' => 'در صورت تعیین محدودیت، تعداد مجاز خرید الزامی است.',
+            ]);
+        }
+
+        $vendorId = auth()->user()->marketVendor->id;
+        $vp = VendorProduct::where('id', $this->editingId)->where('vendor_id', $vendorId)->firstOrFail();
+
+        // 💡 FIX: تبدیل تاریخ شمسی به میلادی
+        $startDate = null;
+        if (!empty($this->editForm['discount_start_date']) && preg_match('/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/', $this->editForm['discount_start_date'])) {
+            $startDate = Jalalian::fromFormat('Y/m/d H:i', $this->editForm['discount_start_date'])->toCarbon();
+        }
+
+        $endDate = null;
+        if (!empty($this->editForm['discount_end_date']) && preg_match('/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/', $this->editForm['discount_end_date'])) {
+            $endDate = Jalalian::fromFormat('Y/m/d H:i', $this->editForm['discount_end_date'])->toCarbon();
+        }
+
+        // 💡 FIX: تعیین وضعیت بر اساس نوع فروشگاه
+        $storeType = MarketSetting::getValue('system.store_type', 'multi');
+        $defaultStatus = ($storeType === 'single') ? 'published' : 'pending_review';
+
+        $vp->update([
+            'price' => $this->editForm['price'],
+            'discount_price' => !empty($this->editForm['discount_price']) ? $this->editForm['discount_price'] : null,
+            'discount_start_date' => $startDate,
+            'discount_end_date' => $endDate,
+            'discount_stock' => !empty($this->editForm['discount_stock']) ? $this->editForm['discount_stock'] : null,
+            'max_discount_purchase_qty' => !empty($this->editForm['max_discount_purchase_qty']) ? $this->editForm['max_discount_purchase_qty'] : null,
+            'stock' => $this->editForm['stock'],
+            'reorder_point' => $this->editForm['reorder_point'] ?: 5,
+            'min_purchase_qty' => !empty($this->editForm['min_purchase_qty']) ? $this->editForm['min_purchase_qty'] : 1,
+            'max_purchase_qty' => !empty($this->editForm['max_purchase_qty']) ? $this->editForm['max_purchase_qty'] : null,
+            'cart_amount_step' => !empty($this->editForm['cart_amount_step']) ? $this->editForm['cart_amount_step'] : null,
+            'purchase_step' => !empty($this->editForm['purchase_step']) ? $this->editForm['purchase_step'] : null,
+            'status' => $this->editForm['is_active'] ? $defaultStatus : 'draft',
+        ]);
+
+        $this->editingId = null;
+        $this->dispatch('notify', type: 'success', text: 'ویرایش تنوع با موفقیت انجام شد.');
+    }
+
+    public function delete($id)
+    {
+        $vendorId = auth()->user()->marketVendor->id;
+        VendorProduct::where('id', $id)->where('vendor_id', $vendorId)->delete();
+        $this->dispatch('notify', type: 'success', text: 'تنوع با موفقیت از انبار شما حذف شد.');
+    }
+
+    public function render()
+    {
+        $vendorId = auth()->user()->marketVendor->id;
+
+        $masters = MasterProduct::whereHas('variants.vendorProducts', function($q) use ($vendorId) {
+            $q->where('vendor_id', $vendorId);
+        })
+            ->with(['variants' => function($q) use ($vendorId) {
+                $q->whereHas('vendorProducts', function($q2) use ($vendorId) {
+                    $q2->where('vendor_id', $vendorId);
+                })->with(['vendorProducts' => function($q3) use ($vendorId) {
+                    $q3->where('vendor_id', $vendorId);
+                }]);
+            }])
+            ->latest()
+            ->paginate(10);
+
+        return view('market::livewire.vendor.product-manager', compact('masters'));
+    }
+}

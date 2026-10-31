@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    @if(function_exists('csrf_token'))
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+    @endif
+
+    <title>{{ config('app.name', 'Laravel') }} - نصب</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+    {{-- فونت فارسی وزیرمتن --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Tailwind CSS CDN برای استفاده در صفحات نصب -->
+    {{-- در صفحه نصب از @vite استفاده نمی‌کنیم چون ممکن است build نشده باشد --}}
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'IRANYekanX', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="text-gray-900 antialiased bg-gray-100 rtl">
+<div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
+    <div>
+        <a href="/">
+            {{-- لوگوی ساده --}}
+            <svg class="w-20 h-20 fill-current text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                 fill="currentColor">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clip-rule="evenodd" />
+            </svg>
+        </a>
+    </div>
+
+    <div class="w-full sm:max-w-xl mt-6 px-6 py-6 bg-white shadow-md overflow-hidden sm:rounded-lg">
+        @if (View::hasSection('content'))
+            @yield('content')
+        @else
+            {{ $slot ?? '' }}
+        @endif
+    </div>
+</div>
+</body>
+
+</html>

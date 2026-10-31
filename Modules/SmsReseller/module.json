@@ -1,0 +1,11 @@
+{
+    "name": "SmsReseller",
+    "alias": "smsreseller",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\SmsReseller\\App\\Providers\\SmsResellerServiceProvider"
+    ],
+    "files": []
+}

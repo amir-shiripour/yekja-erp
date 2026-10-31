@@ -1,0 +1,74 @@
+<?php
+namespace Modules\Market\Entities;
+use Illuminate\Database\Eloquent\Model;
+
+class ProductVariant extends Model {
+    protected $table = 'market_product_variants';
+    // 💡 اضافه کردن فیلدهای جدید
+    protected $fillable = [
+        'master_product_id', 'variant_code', 'variant_attributes', 'price', 'stock', 'is_active',
+        'discount_price', 'discount_start_date', 'discount_end_date', 'discount_stock', 'max_discount_purchase_qty',
+        'reorder_point', 'min_purchase_qty', 'max_purchase_qty', 'cart_amount_step', 'purchase_step'
+    ];
+    protected $casts = [
+        'variant_attributes' => 'array',
+        'discount_start_date' => 'datetime',
+        'discount_end_date' => 'datetime',
+    ];
+
+    public function masterProduct() { return $this->belongsTo(MasterProduct::class, 'master_product_id'); }
+    public function vendorProducts() { return $this->hasMany(VendorProduct::class, 'product_variant_id'); }
+    public function warehouseStocks() { return $this->hasMany(WarehouseStock::class, 'product_variant_id'); } // 💡 اضافه شد
+
+    /**
+     * 💡 FINAL: Accessor برای تولید نام واریانت از روی ساختار صحیح variant_attributes
+     * مثال: رنگ: مشکی, حافظه داخلی: 256
+     */
+    public function getNameAttribute(): string
+    {
+        if (empty($this->variant_attributes) || !is_array($this->variant_attributes)) {
+            return '';
+        }
+
+        $attributes = [];
+        foreach ($this->variant_attributes as $key => $value) {
+            if ($key === 'name' && $value === 'استاندارد') continue;
+            $attributes[] = "{$key}: {$value}";
+        }
+
+        return implode(', ', $attributes);
+    }
+
+    /**
+     * 💡 Accessor for unified effective selling price calculation (discount price if valid and > 0, else base price)
+     */
+    public function getSellingPriceAttribute(): float
+    {
+        $now = now();
+
+        $hasVariantDiscount = $this->discount_price > 0
+            && (empty($this->discount_start_date) || $now->gte($this->discount_start_date))
+            && (empty($this->discount_end_date) || $now->lte($this->discount_end_date));
+
+        if ($hasVariantDiscount) {
+            return (float) $this->discount_price;
+        }
+
+        if ($this->relationLoaded('vendorProducts') || $this->vendorProducts()->exists()) {
+            $firstVp = $this->vendorProducts
+                ->where('status', 'published')
+                ->first() ?? $this->vendorProducts->first();
+
+            if ($firstVp) {
+                return $firstVp->selling_price;
+            }
+        }
+
+        return (float) ($this->price ?: 0);
+    }
+
+    public function getEffectivePrice(): float
+    {
+        return $this->selling_price;
+    }
+}

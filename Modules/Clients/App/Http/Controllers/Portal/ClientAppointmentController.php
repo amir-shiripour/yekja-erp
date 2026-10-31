@@ -1,0 +1,271 @@
+<?php
+
+namespace Modules\Clients\App\Http\Controllers\Portal;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Modules\Booking\Entities\Appointment;
+use Modules\Booking\Entities\BookingSetting;
+
+class ClientAppointmentController extends Controller
+{
+    public function index(Request $request)
+    {
+        $client = auth('client')->user();
+
+        $query = Appointment::where('client_id', $client->id)
+            ->with(['service', 'provider', 'payments'])
+            ->orderBy('start_at_utc', 'desc');
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $appointments = $query->paginate(15)->withQueryString();
+
+        $bookingCurrencyUnit = 'IRR';
+        $bookingCurrencyLabel = 'ریال';
+        if (class_exists(BookingSetting::class)) {
+            try {
+                $bookingSettings = BookingSetting::current();
+                $bookingCurrencyUnit = $bookingSettings->currency_unit ?? 'IRR';
+                $bookingCurrencyLabel = $bookingCurrencyUnit === 'IRT' ? 'تومان' : 'ریال';
+            } catch (\Exception $e) {}
+        }
+
+        return view('clients::portal.appointments.index', compact(
+            'appointments',
+            'bookingCurrencyUnit',
+            'bookingCurrencyLabel'
+        ));
+    }
+    public function show(Appointment $appointment)
+    {
+        // Ensure the client can only view their own appointments
+        if ($appointment->client_id !== auth('client')->id()) {
+            abort(403);
+        }
+
+        // Load necessary relations
+        $appointment->load(['service.appointmentForm', 'provider', 'payments']);
+
+        $rawFormResponses = $appointment->appointment_form_response_json ?? [];
+        $formResponses = [];
+
+        if (!empty($rawFormResponses)) {
+            $fieldMeta = [];
+
+            if ($appointment->service && $appointment->service->appointmentForm) {
+                $form = $appointment->service->appointmentForm;
+                $formSchema = $form->schema_json;
+
+                if (isset($formSchema['fields']) && is_array($formSchema['fields'])) {
+                    foreach ($formSchema['fields'] as $field) {
+                        $label = $field['label'] ?? $field['name'] ?? $field['id'] ?? '';
+                        $type  = $field['type'] ?? 'text';
+
+                        if (isset($field['name'])) {
+                            $fieldMeta[$field['name']] = ['label' => $label, 'type' => $type];
+                        }
+                        if (isset($field['id'])) {
+                            $fieldMeta[$field['id']] = ['label' => $label, 'type' => $type];
+                        }
+                    }
+                }
+            }
+
+            // Collect user IDs for select-user-by-role or user select fields
+            $roleUserIds = [];
+            foreach ($rawFormResponses as $key => $value) {
+                $type = $fieldMeta[$key]['type'] ?? '';
+                $isUserField = $type === 'select-user-by-role' || $type === 'select-user' || str_contains(strtolower((string)$key), 'user') || str_contains(strtolower((string)$key), 'doctor') || str_contains(strtolower((string)$key), 'provider');
+                if ($isUserField) {
+                    if (is_array($value)) {
+                        foreach ($value as $v) {
+                            if (is_numeric($v)) $roleUserIds[] = (int) $v;
+                        }
+                    } elseif (is_numeric($value)) {
+                        $roleUserIds[] = (int) $value;
+                    }
+                }
+            }
+
+            $userNamesMap = [];
+            if (!empty($roleUserIds)) {
+                $userNamesMap = User::whereIn('id', array_unique($roleUserIds))->pluck('name', 'id')->toArray();
+            }
+
+            foreach ($rawFormResponses as $key => $value) {
+                $meta = $fieldMeta[$key] ?? ['label' => $key, 'type' => 'text'];
+                $type = $meta['type'] ?? 'text';
+                $displayValue = $value;
+
+                $isUserField = $type === 'select-user-by-role' || $type === 'select-user' || str_contains(strtolower((string)$key), 'user') || str_contains(strtolower((string)$key), 'doctor') || str_contains(strtolower((string)$key), 'provider');
+
+                if ($isUserField) {
+                    if (is_array($value)) {
+                        $names = array_map(fn($id) => $userNamesMap[$id] ?? (is_numeric($id) ? "کاربر #{$id}" : $id), $value);
+                        $displayValue = implode('، ', $names);
+                    } elseif (is_numeric($value) && isset($userNamesMap[$value])) {
+                        $displayValue = $userNamesMap[$value];
+                    }
+                }
+
+                $formResponses[] = [
+                    'label' => $meta['label'],
+                    'value' => $displayValue,
+                ];
+            }
+        }
+
+        // Load booking settings for currency display
+        $bookingSettings = null;
+        $bookingCurrencyUnit = 'IRR';
+        $bookingCurrencyLabel = 'ریال';
+        if (class_exists(\Modules\Booking\Entities\BookingSetting::class)) {
+            try {
+                $bookingSettings = \Modules\Booking\Entities\BookingSetting::current();
+                $bookingCurrencyUnit = $bookingSettings->currency_unit ?? 'IRR';
+                $bookingCurrencyLabel = $bookingCurrencyUnit === 'IRT' ? 'تومان' : 'ریال';
+            } catch (\Exception $e) {
+                // fallback to defaults
+            }
+        }
+
+        $settingsMap = \Illuminate\Support\Facades\Schema::hasTable('settings')
+            ? \Modules\Settings\Entities\Setting::query()->pluck('value', 'key')->toArray()
+            : [];
+
+        $activeRaw = $settingsMap['active_payment_methods'] ?? '[]';
+        $activeMethods = is_string($activeRaw) ? json_decode($activeRaw, true) : (array) $activeRaw;
+        if (empty($activeMethods) || !is_array($activeMethods)) {
+            $activeMethods = ['online', 'pos', 'transfer', 'cod', 'installment'];
+        }
+
+        $allMethodLabels = [
+            'online' => 'درگاه پرداخت آنلاین',
+            'pos' => 'دستگاه کارتخوان (POS)',
+            'transfer' => 'انتقال بانکی / کارت به کارت (شبا)',
+            'cod' => 'پرداخت در محل (نقد)',
+            'installment' => 'پرداخت قسطی / چک',
+        ];
+
+        $posDevices = is_string($settingsMap['pos_devices'] ?? null) ? (json_decode($settingsMap['pos_devices'], true) ?: []) : [];
+        $rawAccounts = is_string($settingsMap['bank_transfer_accounts'] ?? null) 
+            ? (json_decode($settingsMap['bank_transfer_accounts'], true) ?: []) 
+            : (is_array($settingsMap['bank_transfer_accounts'] ?? null) ? $settingsMap['bank_transfer_accounts'] : []);
+
+        // Filter active bank accounts for clients
+        $activeBankAccounts = array_filter($rawAccounts, function($acc) {
+            if (!isset($acc['is_active'])) {
+                return true;
+            }
+            return filter_var($acc['is_active'], FILTER_VALIDATE_BOOLEAN);
+        });
+
+        $bankAccounts = array_values(array_map(function($acc, $index) {
+            return [
+                'id' => $acc['id'] ?? ($acc['bank_name'] ?? ('acc_' . $index)),
+                'bank_name' => $acc['bank_name'] ?? 'بانک',
+                'owner_name' => $acc['owner_name'] ?? ($acc['owner'] ?? ($acc['name'] ?? '')),
+                'card_number' => !empty($acc['card_number']) ? preg_replace('/[^0-9]/', '', $acc['card_number']) : '',
+                'account_number' => $acc['account_number'] ?? '',
+                'iban' => $acc['iban'] ?? '',
+            ];
+        }, $activeBankAccounts, array_keys($activeBankAccounts)));
+
+        $installmentTypes = is_string($settingsMap['installment_types'] ?? null) ? (json_decode($settingsMap['installment_types'], true) ?: []) : [];
+
+        $onlineGateways = [];
+        if (($settingsMap['zarinpal_status'] ?? '') === 'active') {
+            $onlineGateways[] = ['id' => 'zarinpal', 'label' => 'درگاه زرین‌پال'];
+        }
+        if (($settingsMap['zibal_status'] ?? '') === 'active') {
+            $onlineGateways[] = ['id' => 'zibal', 'label' => 'درگاه زیبال'];
+        }
+        if (($settingsMap['behpardakht_status'] ?? '') === 'active') {
+            $onlineGateways[] = ['id' => 'behpardakht', 'label' => 'درگاه بهپرداخت ملت'];
+        }
+        if (($settingsMap['sep_status'] ?? '') === 'active') {
+            $onlineGateways[] = ['id' => 'sep', 'label' => 'درگاه سامان کیش (سپ)'];
+        }
+
+        // بررسی دوطرفه: ۱. فعال بودن در چک‌باکس‌های "روش‌های پرداخت فعال سیستم" ۲. فعال بودن وضعیت اختصاصی آن روش
+        $availablePaymentMethods = [];
+
+        // ۱. درگاه پرداخت آنلاین
+        if (in_array('online', $activeMethods) && !empty($onlineGateways)) {
+            $availablePaymentMethods['online'] = $allMethodLabels['online'];
+        }
+
+        // ۲. دستگاه کارتخوان (POS)
+        if (in_array('pos', $activeMethods) && ($settingsMap['pos_status'] ?? '') === 'active') {
+            $availablePaymentMethods['pos'] = $allMethodLabels['pos'];
+        }
+
+        // ۳. انتقال بانکی (کارت به کارت / شبا)
+        if (in_array('transfer', $activeMethods) && ($settingsMap['bank_transfer_status'] ?? '') === 'active' && !empty($bankAccounts)) {
+            $availablePaymentMethods['transfer'] = $allMethodLabels['transfer'];
+        }
+
+        // ۴. پرداخت در محل (نقد)
+        if (in_array('cod', $activeMethods) && ($settingsMap['cod_status'] ?? '') === 'active') {
+            $availablePaymentMethods['cod'] = $allMethodLabels['cod'];
+        }
+
+        // ۵. پرداخت اقساطی / چک
+        if (in_array('installment', $activeMethods) && ($settingsMap['installment_status'] ?? '') === 'active') {
+            $availablePaymentMethods['installment'] = $allMethodLabels['installment'];
+        }
+
+        $paymentSubItems = [
+            'pos' => array_values(array_map(fn($d) => [
+                'id' => $d['id'] ?? ($d['name'] ?? ''),
+                'label' => ($d['name'] ?? 'کارتخوان') . (!empty($d['account_number']) ? ' (حساب: ' . $d['account_number'] . ')' : '')
+            ], $posDevices)),
+            'transfer' => array_values(array_map(fn($a) => [
+                'id' => $a['id'] ?? ($a['bank_name'] ?? ''),
+                'label' => ($a['bank_name'] ?? 'بانک') . (!empty($a['owner_name']) ? ' - ' . $a['owner_name'] : '') . (!empty($a['card_number']) ? ' (' . $a['card_number'] . ')' : (!empty($a['iban']) ? ' (' . $a['iban'] . ')' : ''))
+            ], $bankAccounts)),
+            'installment' => array_values(array_map(fn($i) => [
+                'id' => $i['id'] ?? ($i['title'] ?? ''),
+                'label' => ($i['title'] ?? 'طرح اقساطی') . (!empty($i['default_tier_config']['max_months']) ? ' (' . $i['default_tier_config']['max_months'] . ' ماهه)' : '')
+            ], $installmentTypes)),
+            'online' => $onlineGateways,
+        ];
+
+        $showServiceDescription = $bookingSettings->show_service_description ?? true;
+        $showSupplementaryInfo  = $bookingSettings->show_supplementary_info ?? true;
+        $showProviderInfo       = $bookingSettings->show_provider_info ?? true;
+
+        return view('clients::portal.appointments.show', compact(
+            'appointment',
+            'formResponses',
+            'bookingCurrencyUnit',
+            'bookingCurrencyLabel',
+            'availablePaymentMethods',
+            'paymentSubItems',
+            'bankAccounts',
+            'showServiceDescription',
+            'showSupplementaryInfo',
+            'showProviderInfo'
+        ));
+    }
+
+    public function cancel(Appointment $appointment)
+    {
+        if ($appointment->client_id !== auth('client')->id()) {
+            abort(403);
+        }
+
+        if (in_array($appointment->status, [Appointment::STATUS_CONFIRMED, Appointment::STATUS_PENDING, Appointment::STATUS_PENDING_PAYMENT, Appointment::STATUS_RESCHEDULED])) {
+            $appointment->status = Appointment::STATUS_CANCELED_BY_CLIENT;
+            $appointment->save();
+
+            return back()->with('success', 'نوبت شما با موفقیت لغو شد.');
+        }
+
+        return back()->with('error', 'امکان لغو این نوبت وجود ندارد.');
+    }
+}

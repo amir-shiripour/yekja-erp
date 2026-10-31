@@ -1,0 +1,1608 @@
+@php use Illuminate\Support\Facades\Route as RouteAlias; @endphp
+@extends('layouts.user')
+@section('title', 'تنظیمات سرویس‌ها')
+
+@php
+    $isSuperAdmin = auth()->user()?->hasAnyRole(['super-admin', 'superadmin']);
+    $inputClass = "w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:bg-gray-800 dark:focus:border-indigo-500 dark:focus:ring-indigo-500/20";
+    $labelClass = "block text-xs font-bold text-gray-600 dark:text-gray-300 mb-2";
+    $cardClass  = "bg-white dark:bg-gray-800/40 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-sm overflow-hidden";
+    $v = fn(string $key, $default='') => $raw[$key] ?? $default;
+
+    $identityTabRoute = null;
+    foreach (['settings.identity.index', 'settings.identity', 'settings.company.index'] as $candidateRoute) {
+        if (RouteAlias::has($candidateRoute)) {
+            $identityTabRoute = route($candidateRoute);
+            break;
+        }
+    }
+
+    $tabs = [
+        'numbering'   => ['label' => 'شماره‌گذاری', 'icon' => 'hash'],
+        'finance'     => ['label' => 'مالی', 'icon' => 'coin'],
+        'print'       => ['label' => 'چاپ و فاکتور', 'icon' => 'printer'],
+        'automation'  => ['label' => 'مدیریت گردش کارها', 'icon' => 'bolt'],
+    ];
+@endphp
+
+@section('content')
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        {{-- Hero Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <span
+                    class="flex items-center justify-center w-14 h-14 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 shrink-0">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </span>
+                <div>
+                    <h1 class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">تنظیمات ماژول
+                        سرویس‌ها و خدمات</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">پیکربندی قوانین صدور فاکتور و نصب گردش
+                        کارهای پیش‌فرض خدمات.</p>
+                </div>
+            </div>
+        </div>
+
+        @if(session('success'))
+            <div
+                class="rounded-2xl bg-emerald-50 p-4 border border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 text-sm font-medium flex items-center gap-3">
+                <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('services.settings.update') }}"
+              x-data="settingsForm('{{ $v('services_invoice_prefix','SRV-') }}','{{ $v('services_invoice_middle_prefix',date('Y')) }}','{{ $v('services_invoice_suffix','') }}','{{ $v('services_invoice_padding',4) }}', '{{ $v('services_proforma_invoice_prefix','PI-') }}','{{ $v('services_proforma_invoice_middle_prefix',date('Y')) }}','{{ $v('services_proforma_invoice_suffix','') }}','{{ $v('services_proforma_invoice_padding',4) }}')">
+            @csrf @method('PUT')
+
+            {{-- Tab Navigation --}}
+            <input type="hidden" name="active_tab" x-model="activeTab">
+            <div class="sticky top-4 z-30 mb-6">
+                <div
+                    class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl p-2 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-wrap items-center gap-1.5">
+                    @foreach($tabs as $tabKey => $tab)
+                        <button type="button" @click="activeTab = '{{ $tabKey }}'"
+                                :class="activeTab === '{{ $tabKey }}' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-700 dark:hover:text-gray-200'"
+                                class="flex-1 min-w-36 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200">
+                            @switch($tab['icon'])
+                                @case('hash')
+                                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                         stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                    </svg>
+                                    @break
+                                @case('coin')
+                                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                         stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    @break
+                                @case('printer')
+                                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                         stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm-3-9.5a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z"/>
+                                    </svg>
+                                    @break
+                                @case('bolt')
+                                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                         stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    </svg>
+                                    @break
+                            @endswitch
+                            <span>{{ $tab['label'] }}</span>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            <div x-show="activeTab === 'numbering'" x-cloak class="space-y-6">
+
+                {{-- Invoice Number Builder --}}
+                <div class="{{ $cardClass }}">
+                    <div class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60">
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                            <span
+                                class="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            </span>
+                            شماره‌گذاری فاکتور
+                        </h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-13">الگوی تولید شماره برای فاکتورهای
+                            جدید
+                            را تعیین کنید.</p>
+                    </div>
+                    <div class="p-6 md:p-8 space-y-8">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div>
+                                <label class="{{ $labelClass }}">پیشوند (Prefix)</label>
+                                <input type="text" name="services_invoice_prefix" x-model="prefix"
+                                       @input="updatePreview()"
+                                       value="{{ $v('services_invoice_prefix','SRV-') }}" class="{{ $inputClass }}"
+                                       placeholder="SRV-">
+                            </div>
+                            <div>
+                                <label class="{{ $labelClass }}">میانی (مثلاً سال)</label>
+                                <input type="text" name="services_invoice_middle_prefix" x-model="middle"
+                                       @input="updatePreview()"
+                                       value="{{ $v('services_invoice_middle_prefix',date('Y')) }}"
+                                       class="{{ $inputClass }}" placeholder="{{ date('Y') }}">
+                            </div>
+                            <div>
+                                <label class="{{ $labelClass }}">پسوند (Suffix)</label>
+                                <input type="text" name="services_invoice_suffix" x-model="suffix"
+                                       @input="updatePreview()"
+                                       value="{{ $v('services_invoice_suffix','') }}" class="{{ $inputClass }}"
+                                       placeholder="-CRM">
+                            </div>
+                            <div>
+                                <label class="{{ $labelClass }}">طول شماره</label>
+                                <input type="number" name="services_invoice_padding" x-model.number="padding"
+                                       @input="updatePreview()" min="1" max="10"
+                                       value="{{ $v('services_invoice_padding',4) }}"
+                                       class="{{ $inputClass }} dir-ltr text-left">
+                            </div>
+                        </div>
+                        <div
+                            class="relative overflow-hidden p-6 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/10 border border-indigo-100 dark:border-indigo-500/20 flex flex-col items-center justify-center text-center">
+                            <span
+                                class="text-xs font-bold uppercase tracking-widest text-indigo-400 dark:text-indigo-500 mb-2">پیش‌نمایش شماره فاکتور</span>
+                            <span
+                                class="font-mono text-3xl font-black text-indigo-600 dark:text-indigo-300 tracking-wider"
+                                x-text="preview"></span>
+                        </div>
+                        <div class="mt-6 border-t border-gray-100 dark:border-gray-700/60 pt-6">
+                            <label for="services_invoice_auto"
+                                   class="flex items-center justify-between gap-4 cursor-pointer group p-5 rounded-2xl border-2 border-transparent bg-gray-50 dark:bg-gray-800/50 hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all">
+                                <div class="flex-1">
+                                    <span class="text-base font-black text-gray-800 dark:text-gray-200 block">شماره‌گذاری اتوماتیک فاکتور</span>
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400 block mt-1">در صورت فعال بودن، در صفحه ایجاد فاکتور، سیستم به صورت خودکار فرمت را تکمیل و قفل می‌کند.</span>
+                                </div>
+                                <div class="relative shrink-0">
+                                    <input type="hidden" name="services_invoice_auto" value="0">
+                                    <input type="checkbox" id="services_invoice_auto" name="services_invoice_auto"
+                                           value="1"
+                                           @checked($v('services_invoice_auto') === '1') class="sr-only peer">
+                                    <div
+                                        class="w-14 h-8 bg-gray-300 dark:bg-gray-600 rounded-full peer peer-checked:bg-indigo-600 transition-colors duration-300 shadow-inner"></div>
+                                    <div
+                                        class="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center">
+                                        <svg
+                                            class="w-3 h-3 text-indigo-600 opacity-0 peer-checked:opacity-100 transition-opacity"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="{{ $cardClass }}">
+                    <div class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60">
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                            <span
+                                class="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            </span>
+                            شماره‌گذاری پیش فاکتور
+                        </h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-13">الگوی تولید شماره برای پیش
+                            فاکتورهای
+                            جدید را تعیین کنید.</p>
+                    </div>
+                    <div class="p-6 md:p-8 space-y-8">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div>
+                                <label class="{{ $labelClass }}">پیشوند (Prefix)</label>
+                                <input type="text" name="services_proforma_invoice_prefix" x-model="proforma_prefix"
+                                       @input="updateProformaPreview()"
+                                       value="{{ $v('services_proforma_invoice_prefix','PI-') }}"
+                                       class="{{ $inputClass }}"
+                                       placeholder="PI-">
+                            </div>
+                            <div>
+                                <label class="{{ $labelClass }}">میانی (مثلاً سال)</label>
+                                <input type="text" name="services_proforma_invoice_middle_prefix"
+                                       x-model="proforma_middle"
+                                       @input="updateProformaPreview()"
+                                       value="{{ $v('services_proforma_invoice_middle_prefix',date('Y')) }}"
+                                       class="{{ $inputClass }}" placeholder="{{ date('Y') }}">
+                            </div>
+                            <div>
+                                <label class="{{ $labelClass }}">پسوند (Suffix)</label>
+                                <input type="text" name="services_proforma_invoice_suffix" x-model="proforma_suffix"
+                                       @input="updateProformaPreview()"
+                                       value="{{ $v('services_proforma_invoice_suffix','') }}" class="{{ $inputClass }}"
+                                       placeholder="-CRM">
+                            </div>
+                            <div>
+                                <label class="{{ $labelClass }}">طول شماره</label>
+                                <input type="number" name="services_proforma_invoice_padding"
+                                       x-model.number="proforma_padding"
+                                       @input="updateProformaPreview()" min="1" max="10"
+                                       value="{{ $v('services_proforma_invoice_padding',4) }}"
+                                       class="{{ $inputClass }} dir-ltr text-left">
+                            </div>
+                        </div>
+                        <div
+                            class="relative overflow-hidden p-6 rounded-2xl bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/10 border border-blue-100 dark:border-blue-500/20 flex flex-col items-center justify-center text-center">
+                            <span
+                                class="text-xs font-bold uppercase tracking-widest text-blue-400 dark:text-blue-500 mb-2">پیش‌نمایش شماره پیش فاکتور</span>
+                            <span class="font-mono text-3xl font-black text-blue-600 dark:text-blue-300 tracking-wider"
+                                  x-text="proforma_preview"></span>
+                        </div>
+                        <div class="mt-6 border-t border-gray-100 dark:border-gray-700/60 pt-6">
+                            <label for="services_proforma_invoice_auto"
+                                   class="flex items-center justify-between gap-4 cursor-pointer group p-5 rounded-2xl border-2 border-transparent bg-gray-50 dark:bg-gray-800/50 hover:border-blue-200 dark:hover:border-blue-500/30 transition-all">
+                                <div class="flex-1">
+                                    <span class="text-base font-black text-gray-800 dark:text-gray-200 block">شماره‌گذاری اتوماتیک پیش فاکتور</span>
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400 block mt-1">تولید خودکار شماره پیش فاکتور در زمان ایجاد، به فرمت تنظیم شده</span>
+                                </div>
+                                <div class="relative shrink-0">
+                                    <input type="hidden" name="services_proforma_invoice_auto" value="0">
+                                    <input type="checkbox" id="services_proforma_invoice_auto"
+                                           name="services_proforma_invoice_auto" value="1"
+                                           @checked($v('services_proforma_invoice_auto') === '1') class="sr-only peer">
+                                    <div
+                                        class="w-14 h-8 bg-gray-300 dark:bg-gray-600 rounded-full peer peer-checked:bg-blue-600 transition-colors duration-300 shadow-inner"></div>
+                                    <div
+                                        class="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center">
+                                        <svg
+                                            class="w-3 h-3 text-blue-600 opacity-0 peer-checked:opacity-100 transition-opacity"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="activeTab === 'finance'" x-cloak class="space-y-6">
+
+                {{-- Default Tax --}}
+                <div class="{{ $cardClass }}">
+                    <div
+                        class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-emerald-50/50 to-transparent dark:from-emerald-900/10">
+                        <h2 class="text-lg font-black text-gray-900 dark:text-white flex items-center gap-3">
+                            <span
+                                class="flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shadow-inner">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="2"><path
+                                        stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/></svg>
+                            </span>
+                            تنظیمات مالیات پیش‌فرض
+                        </h2>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2 mr-15">این درصد مالیات به
+                            صورت
+                            اتوماتیک در فاکتورهای جدید لحاظ می‌گردد.</p>
+                    </div>
+                    <div class="p-6 md:p-8">
+                        <div class="max-w-md">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">درصد مالیات
+                                (٪)</label>
+                            <div class="relative flex items-center">
+                                <input type="number" name="services_default_tax_rate" min="0" max="100" step="0.01"
+                                       value="{{ $v('services_default_tax_rate', 9) }}"
+                                       class="w-full rounded-2xl border-2 border-gray-200 bg-gray-50 px-5 py-4 text-lg font-black text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-100 dark:focus:bg-gray-800 dark:focus:border-emerald-500 text-center dir-ltr shadow-sm">
+                                <span
+                                    class="absolute right-5 text-gray-400 font-black text-lg pointer-events-none">%</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-3 flex items-start gap-1.5 leading-relaxed">
+                                <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                در صفحه ایجاد فاکتور، این مقدار را به‌صورت خودکار دریافت می‌کنید. همچنین امکان ویرایش
+                                (تایپ
+                                کردن) یا قفل‌کردن مقدار مالیات برای هر فاکتور را توسط دکمه‌ی تاگلِ ادیت خواهید داشت.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Tax Mode: invoice-level vs per-item --}}
+                <div class="{{ $cardClass }}" x-data="{ taxMode: '{{ $v('services_tax_mode','invoice') }}' }">
+                    <div
+                        class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-emerald-50/50 to-transparent dark:from-emerald-900/10">
+                        <h2 class="text-lg font-black text-gray-900 dark:text-white flex items-center gap-3">
+                            <span
+                                class="flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shadow-inner">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                                </svg>
+                            </span>
+                            نحوه محاسبه مالیات
+                        </h2>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2 mr-15">مشخص کنید مالیات
+                            روی کل فاکتور اعمال شود یا هر ردیف بتواند مالیات مستقل خودش را داشته باشد.</p>
+                    </div>
+                    <div class="p-6 md:p-8 space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <label
+                                class="relative flex items-start gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all"
+                                :class="taxMode === 'invoice' ? 'border-emerald-500 bg-emerald-50/60 dark:bg-emerald-500/10' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                                <input type="radio" name="services_tax_mode" value="invoice" x-model="taxMode"
+                                       class="mt-1 accent-emerald-600">
+                                <span>
+                                    <span
+                                        class="block font-bold text-gray-800 dark:text-gray-100">مالیات کل فاکتور</span>
+                                    <span class="block text-xs text-gray-400 mt-1">مثل قبل؛ یک درصد مالیات برای کل فاکتور تعیین می‌شود.</span>
+                                </span>
+                            </label>
+                            <label
+                                class="relative flex items-start gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all"
+                                :class="taxMode === 'item' ? 'border-emerald-500 bg-emerald-50/60 dark:bg-emerald-500/10' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'">
+                                <input type="radio" name="services_tax_mode" value="item" x-model="taxMode"
+                                       class="mt-1 accent-emerald-600">
+                                <span>
+                                    <span
+                                        class="block font-bold text-gray-800 dark:text-gray-100">مالیات تفکیکی هر ردیف</span>
+                                    <span class="block text-xs text-gray-400 mt-1">هر ردیف فاکتور (سرویس یا دستی) مالیات مستقل خودش را دارد.</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div x-show="taxMode === 'item'" x-transition x-cloak
+                             class="flex items-center justify-between gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700/60">
+                            <div>
+                                <label for="services_tax_apply_custom_fields"
+                                       class="font-bold text-sm text-gray-800 dark:text-gray-100 cursor-pointer">اعمال
+                                    مالیات روی فیلدهای سفارشی قیمت‌دار</label>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input type="checkbox" id="services_tax_apply_custom_fields"
+                                       name="services_tax_apply_custom_fields" value="1"
+                                       @checked($v('services_tax_apply_custom_fields', false))
+                                       class="sr-only peer">
+                                <div
+                                    class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:bg-emerald-600 transition-colors"></div>
+                                <div
+                                    class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:-translate-x-5"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Payment Synchronization --}}
+                <div class="{{ $cardClass }} md:col-span-2">
+                    <div
+                        class="p-6 border-b border-gray-100 dark:border-gray-700/60 bg-linear-to-r from-emerald-50/50 to-transparent dark:from-emerald-900/10">
+                        <h2 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor"
+                                 stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                            </svg>
+                            همگام‌سازی روش‌های پرداخت
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <label
+                            class="flex items-center justify-between gap-6 cursor-pointer group p-5 rounded-2xl border-2 border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/30 hover:border-emerald-200 dark:hover:border-emerald-500/30 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-all">
+                            <div class="flex-1">
+                                <span class="text-base font-black text-gray-800 dark:text-gray-200 block">فراخوانی روش‌های پرداخت از تنظیمات سیستم</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 block mt-1.5 leading-relaxed">
+                                        با فعال‌سازی این گزینه، درگاه‌های آنلاین، حساب‌های بانکی و دستگاه‌های کارتخوان (POS) که در ماژول تنظیمات اصلی سیستم تعریف شده‌اند، به صورت خودکار در صفحه «ثبت پرداختی» نمایش داده خواهند شد.
+                                    </span>
+                            </div>
+                            <div class="relative shrink-0">
+                                <input type="hidden" name="services_use_global_payment_settings" value="0">
+                                <input type="checkbox" id="services_use_global_payment_settings"
+                                       name="services_use_global_payment_settings" value="1"
+                                       @checked($v('services_use_global_payment_settings') === '1') class="sr-only peer">
+                                <div
+                                    class="w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-300 shadow-inner"></div>
+                                <div
+                                    class="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center">
+                                    <svg
+                                        class="w-3.5 h-3.5 text-emerald-600 opacity-0 peer-checked:opacity-100 transition-opacity"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Partial Payments Setting --}}
+                <div class="{{ $cardClass }} md:col-span-2">
+                    <div
+                        class="p-6 border-b border-gray-100 dark:border-gray-700/60 bg-linear-to-r from-emerald-50/50 to-transparent dark:from-emerald-900/10">
+                        <h2 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor"
+                                 stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            پرداخت جزئی و مرحله‌ای فاکتورها
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <label
+                            class="flex items-center justify-between gap-6 cursor-pointer group p-5 rounded-2xl border-2 border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/30 hover:border-emerald-200 dark:hover:border-emerald-500/30 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-all">
+                            <div class="flex-1">
+                                <span class="text-base font-black text-gray-800 dark:text-gray-200 block">اجازه پرداخت جزئی فاکتورها</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 block mt-1.5 leading-relaxed">
+                                    با فعال‌سازی این گزینه، کاربران و مشتریان در پورتال هنگام پرداخت صورت‌حساب‌های خدمات می‌توانند علاوه بر تسویه کامل مانده، مبلغ دلخواهی (کمتر از مانده فاکتور) را وارد کرده و فاکتور را در چند مرحله تسویه نمایند. در صورت غیرفعال بودن، فاکتورها صرفاً به صورت یکجا و کامل قابل پرداخت خواهند بود.
+                                </span>
+                            </div>
+                            <div class="relative shrink-0">
+                                <input type="hidden" name="services_allow_partial_payment" value="0">
+                                <input type="checkbox" id="services_allow_partial_payment"
+                                       name="services_allow_partial_payment" value="1"
+                                       @checked($v('services_allow_partial_payment') === '1') class="sr-only peer">
+                                <div
+                                    class="w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-300 shadow-inner"></div>
+                                <div
+                                    class="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center">
+                                    <svg
+                                        class="w-3.5 h-3.5 text-emerald-600 opacity-0 peer-checked:opacity-100 transition-opacity"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Free Display for Zero-Amount Invoices --}}
+                <div class="{{ $cardClass }} md:col-span-2">
+                    <div
+                        class="p-6 border-b border-gray-100 dark:border-gray-700/60 bg-linear-to-r from-emerald-50/50 to-transparent dark:from-emerald-900/10">
+                        <h2 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor"
+                                 stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            نمایش فاکتورهای با مبلغ صفر به عنوان «رایگان»
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <label
+                            class="flex items-center justify-between gap-6 cursor-pointer group p-5 rounded-2xl border-2 border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/30 hover:border-emerald-200 dark:hover:border-emerald-500/30 hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-all">
+                            <div class="flex-1">
+                                <span class="text-base font-black text-gray-800 dark:text-gray-200 block">نمایش برچسب «رایگان» در لیست فاکتورها</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 block mt-1.5 leading-relaxed">
+                                    با فعال‌سازی این گزینه، فاکتورهایی که مبلغ کل آنها ۰ می‌باشد در صفحه مدیریت فاکتورها در ستون‌های «مبلغ کل» و «وضعیت پرداخت» با عنوان «رایگان» نمایش داده خواهند شد.
+                                </span>
+                            </div>
+                            <div class="relative shrink-0">
+                                <input type="hidden" name="services_show_free_for_zero_invoices" value="0">
+                                <input type="checkbox" id="services_show_free_for_zero_invoices"
+                                       name="services_show_free_for_zero_invoices" value="1"
+                                       @checked($v('services_show_free_for_zero_invoices') === '1') class="sr-only peer">
+                                <div
+                                    class="w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-300 shadow-inner"></div>
+                                <div
+                                    class="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center">
+                                    <svg
+                                        class="w-3.5 h-3.5 text-emerald-600 opacity-0 peer-checked:opacity-100 transition-opacity"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Currency Settings (Super Admin Only) --}}
+                @if($isSuperAdmin)
+                <div class="{{ $cardClass }}"
+                     x-data="{ currency: '{{ $v('currency','toman') }}' }">
+                    <div class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60">
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                            <span
+                                class="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </span>
+                            واحد پول سیستم
+                        </h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-13">واحد پولی پایه برای محاسبات و
+                            نمایش
+                            در تمام بخش‌های سیستم.</p>
+                    </div>
+
+                    <div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                        <div class="flex flex-col">
+                            <label class="{{ $labelClass }}">انتخاب واحد</label>
+                            <div
+                                class="flex items-center gap-2 p-1.5 rounded-xl bg-gray-100 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700">
+                                <button type="button"
+                                        @click="currency = 'toman'; $dispatch('currency-changed', { currency: 'toman' })"
+                                        :class="currency === 'toman' ? 'bg-white dark:bg-gray-800 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                                        class="flex-1 py-2.5 px-4 rounded-lg text-sm font-bold transition-all duration-200">
+                                    تومان (Toman)
+                                </button>
+                                <button type="button"
+                                        @click="currency = 'rial'; $dispatch('currency-changed', { currency: 'rial' })"
+                                        :class="currency === 'rial' ? 'bg-white dark:bg-gray-800 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                                        class="flex-1 py-2.5 px-4 rounded-lg text-sm font-bold transition-all duration-200">
+                                    ریال (Rial)
+                                </button>
+                            </div>
+                            <input type="hidden" name="currency" x-model="currency">
+                        </div>
+
+                        <div class="flex flex-col">
+                            <div class="{{ $labelClass }} invisible">&nbsp;</div>
+                            <div
+                                class="flex-1 rounded-xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700/60 p-4 text-sm text-gray-600 dark:text-gray-400 flex items-center gap-3">
+                                <svg class="w-5 h-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span
+                                    x-text="currency === 'rial' ? 'تمامی مبالغ در سیستم بر اساس ریال محاسبه خواهند شد.' : 'تمامی مبالغ در سیستم بر اساس تومان محاسبه خواهند شد.'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Rounding Settings --}}
+                <div class="{{ $cardClass }}"
+                     x-data="roundingPreview('{{ $v('services_rounding_mode', 'none') }}', {{ $v('services_rounding_factor', 1000) }}, '{{ $v('currency', 'toman') }}')"
+                     @currency-changed.window="onCurrencyChanged($event.detail.currency)">
+                    <div
+                        class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                <span
+                                    class="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                         stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M7 16l-4-4m0 0l4-4m-4 4h18M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                    </svg>
+                                </span>
+                                تنظیمات رند کردن مبالغ
+                            </h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-13">
+                                نحوه رند شدن مبالغ کل فاکتورها در ماژول سرویس‌ها را مشخص کنید.
+                            </p>
+                        </div>
+                        {{-- Active Currency Badge --}}
+                        <div
+                            class="flex items-center gap-2 self-start sm:self-auto px-3.5 py-1.5 rounded-xl bg-purple-50/70 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-800/40 text-xs font-bold text-purple-700 dark:text-purple-300">
+                            <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                            <span>مبنای مالی جاری: </span>
+                            <span class="font-extrabold" x-text="currencyLabel"></span>
+                        </div>
+                    </div>
+
+                    <div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                        {{-- Controls Column --}}
+                        <div class="space-y-6 flex flex-col justify-between">
+                            <div>
+                                <label class="{{ $labelClass }}">نوع رندسازی</label>
+                                <div
+                                    class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 rounded-xl bg-gray-100 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700">
+                                    <button type="button" @click="mode = 'none'; updatePreview()"
+                                            :class="mode === 'none' ? 'bg-white dark:bg-gray-800 shadow-sm text-indigo-600 dark:text-indigo-400 font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                                            class="py-2.5 px-2 rounded-lg text-xs font-semibold transition-all duration-200 text-center">
+                                        بدون رندسازی
+                                    </button>
+                                    <button type="button" @click="mode = 'nearest'; updatePreview()"
+                                            :class="mode === 'nearest' ? 'bg-white dark:bg-gray-800 shadow-sm text-blue-600 dark:text-blue-400 font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                                            class="py-2.5 px-2 rounded-lg text-xs font-semibold transition-all duration-200 text-center">
+                                        به نزدیک‌ترین
+                                    </button>
+                                    <button type="button" @click="mode = 'up'; updatePreview()"
+                                            :class="mode === 'up' ? 'bg-white dark:bg-gray-800 shadow-sm text-emerald-600 dark:text-emerald-400 font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                                            class="py-2.5 px-2 rounded-lg text-xs font-semibold transition-all duration-200 text-center">
+                                        رو به بالا
+                                    </button>
+                                    <button type="button" @click="mode = 'down'; updatePreview()"
+                                            :class="mode === 'down' ? 'bg-white dark:bg-gray-800 shadow-sm text-rose-600 dark:text-rose-400 font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                                            class="py-2.5 px-2 rounded-lg text-xs font-semibold transition-all duration-200 text-center">
+                                        رو به پایین
+                                    </button>
+                                </div>
+                                <input type="hidden" name="services_rounding_mode" x-model="mode">
+                            </div>
+
+                            <div
+                                :class="mode === 'none' ? 'opacity-40 pointer-events-none transition-opacity' : 'transition-opacity'">
+                                <div class="mb-2">
+                                    <label for="services_rounding_factor_input" class="{{ $labelClass }} !mb-0">
+                                        ضریب گرد کردن (<span x-text="currencyLabel"></span>)
+                                    </label>
+                                </div>
+                                <div class="flex items-stretch rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 dark:focus-within:border-indigo-500 dark:focus-within:ring-indigo-500/20 transition-all overflow-hidden shadow-2xs">
+                                    <input type="text" inputmode="numeric" id="services_rounding_factor_input"
+                                           x-model="factorFormatted" @input="onFactorInput($event)"
+                                           :placeholder="placeholderFactor"
+                                           class="flex-1 min-w-0 bg-transparent focus:bg-transparent dark:bg-transparent dark:focus:bg-transparent border-0 px-4 py-3 text-sm font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-0 focus:outline-hidden text-left dir-ltr"
+                                           dir="ltr">
+                                    <input type="hidden" name="services_rounding_factor" :value="factor">
+                                    <span class="inline-flex items-center px-4 bg-gray-100 dark:bg-gray-800/80 border-s border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300 select-none shrink-0"
+                                          x-text="currencyLabel"></span>
+                                </div>
+
+                                {{-- Quick Presets --}}
+                                <div class="mt-3">
+                                    <div
+                                        class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1.5 flex items-center justify-between">
+                                        <span>ضرایب پیشنهادی سریع:</span>
+                                        <span class="text-[10px] text-gray-400">کلیک برای انتخاب</span>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <template x-for="p in currentPresets" :key="p">
+                                            <button type="button" @click="setFactor(p)"
+                                                    :class="factor === p ? 'bg-purple-600 text-white border-purple-600 shadow-sm' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                                                    class="px-2.5 py-1 rounded-lg border text-xs font-bold transition-colors">
+                                                <span x-text="formatNumber(p)"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Preview Column --}}
+                        <div class="flex flex-col">
+                            <label class="{{ $labelClass }}">پیش‌نمایش زنده اثر رندسازی</label>
+                            <div
+                                class="flex-1 rounded-2xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700/60 p-5 flex flex-col justify-between space-y-4 text-sm">
+
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">مبلغ نمونه فاکتور:</span>
+                                        <span class="font-bold text-gray-800 dark:text-gray-200 dir-ltr text-sm"
+                                              x-text="formatMoney(sampleAmount)"></span>
+                                    </div>
+
+                                    <div
+                                        class="flex items-center justify-between pt-3 border-t border-gray-200/60 dark:border-gray-700/60">
+                                        <div class="flex flex-col">
+                                            <span
+                                                class="text-xs text-gray-500 dark:text-gray-400">مبلغ نهایی رند شده:</span>
+                                            <span class="text-[10px] text-gray-400" x-text="modeDescription"></span>
+                                        </div>
+                                        <span class="font-extrabold text-base dir-ltr" :class="colorClass"
+                                              x-text="formatMoney(result)"></span>
+                                    </div>
+
+                                    <div
+                                        class="flex items-center justify-between text-xs pt-3 border-t border-gray-200/40 dark:border-gray-700/40">
+                                        <span class="text-gray-500 dark:text-gray-400">تفاوت اثر مالی:</span>
+                                        <span class="font-bold dir-ltr text-xs"
+                                              :class="diff > 0 ? 'text-emerald-600 dark:text-emerald-400' : (diff < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-gray-400')"
+                                              x-text="formattedDiff"></span>
+                                    </div>
+                                </div>
+
+                                {{-- Explanatory Footer note in preview --}}
+                                <div
+                                    class="p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 border border-gray-200/70 dark:border-gray-700/50 text-[11px] leading-relaxed">
+                                    <template x-if="mode === 'none'">
+                                        <span class="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                                            <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24"
+                                                 stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                            </svg>
+                                            <span>رندسازی غیرفعال است؛ مبالغ دقیقاً مطابق محاسبات اقلام و مالیات صادر می‌شوند.</span>
+                                        </span>
+                                    </template>
+                                    <template x-if="mode !== 'none' && diff === 0">
+                                        <span class="text-gray-500 dark:text-gray-400">مبلغ نمونه فاکتور دقیقاً مضربی از ضریب انتخابی است و نیازی به کسر یا افزایش ندارد.</span>
+                                    </template>
+                                    <template x-if="mode !== 'none' && diff > 0">
+                                        <span class="text-emerald-700 dark:text-emerald-400 font-medium">
+                                            مبلغ فاکتور <strong
+                                                x-text="formatNumber(Math.abs(diff)) + ' ' + currencyLabel"></strong> به نفع فروشنده افزایش می‌یابد.
+                                        </span>
+                                    </template>
+                                    <template x-if="mode !== 'none' && diff < 0">
+                                        <span class="text-rose-700 dark:text-rose-400 font-medium">
+                                            مبلغ فاکتور <strong
+                                                x-text="formatNumber(Math.abs(diff)) + ' ' + currencyLabel"></strong> به عنوان تخفیف رندسازی به نفع مشتری کسر می‌گردد.
+                                        </span>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="activeTab === 'print'" x-cloak class="space-y-6">
+
+                {{-- Print Mode --}}
+                <div class="{{ $cardClass }}">
+                    <div class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60">
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                            <span
+                                class="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm-3-9.5a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z"/></svg>
+                            </span>
+                            تنظیمات چاپ
+                        </h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-13">قالب پیش‌فرض چاپ فاکتور و پیش
+                            فاکتور را انتخاب کنید.</p>
+                    </div>
+                    <div class="p-6 md:p-8 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
+                            <div>
+                                <label for="services_print_mode" class="{{ $labelClass }}">حالت چاپ پیش‌فرض</label>
+                                <select id="services_print_mode" name="services_print_mode" class="{{ $inputClass }}">
+                                    <option value="standard" @selected($v('services_print_mode') == 'standard')>
+                                        استاندارد
+                                    </option>
+                                    <option value="official" @selected($v('services_print_mode') == 'official')>رسمی
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="services_official_invoice_orientation" class="{{ $labelClass }}">جهت چاپ
+                                    فاکتور رسمی</label>
+                                <select id="services_official_invoice_orientation"
+                                        name="services_official_invoice_orientation" class="{{ $inputClass }}">
+                                    <option
+                                        value="portrait" @selected($v('services_official_invoice_orientation', 'portrait') == 'portrait')>
+                                        عمودی (Portrait)
+                                    </option>
+                                    <option
+                                        value="landscape" @selected($v('services_official_invoice_orientation') == 'landscape')>
+                                        افقی (Landscape)
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="services_invoice_footer_note" class="{{ $labelClass }}">یادداشت پایین فاکتور
+                                (اختیاری)</label>
+                            <textarea id="services_invoice_footer_note" name="services_invoice_footer_note" rows="3"
+                                      maxlength="1000" class="{{ $inputClass }} resize-none"
+                                      placeholder="مثال: کالای فروخته شده پس گرفته نمی‌شود.">{{ $v('services_invoice_footer_note') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Identity Info note for Official Invoice --}}
+                <div class="{{ $cardClass }}">
+                    <div
+                        class="p-6 md:p-8 flex items-start justify-between gap-4 flex-wrap bg-linear-to-r from-purple-50/50 to-transparent dark:from-purple-900/10">
+                        <div class="flex items-start gap-3">
+                            <span
+                                class="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </span>
+                            <div>
+                                <h2 class="text-lg font-bold text-gray-900 dark:text-white">
+                                    اطلاعات هویتی فروشنده در فاکتور رسمی
+                                </h2>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                    اطلاعات هویتی (نام، شماره اقتصادی، شناسه ملی، شماره ثبت، تلفن/نمابر، نشانی و مهر و
+                                    امضا) به‌صورت خودکار از ماژول تنظیمات خوانده و در سربرگ فاکتور رسمی چاپ می‌شوند.
+                                    هر فیلدی که در ماژول تنظیمات برایش مقداری ثبت نشده باشد، به‌طور خودکار از فاکتور
+                                    حذف می‌شود و نیازی به فعال/غیرفعال کردن دستی آن در این صفحه نیست.
+                                </p>
+                            </div>
+                        </div>
+                        @if($identityTabRoute)
+                            <a href="{{ $identityTabRoute }}" target="_blank"
+                               class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                ویرایش در تنظیمات
+                            </a>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Stamp & Signature Display Size Settings --}}
+                <div class="{{ $cardClass }}">
+                    <div
+                        class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60 bg-linear-to-r from-amber-50/50 via-transparent to-transparent dark:from-amber-900/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 shadow-inner shrink-0">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </span>
+                            <div>
+                                <h2 class="text-lg font-black text-gray-900 dark:text-white">
+                                    تنظیمات اندازه تصویر مهر و امضای مجاز در چاپ فاکتور
+                                </h2>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">
+                                    ابعاد نمایش (عرض و ارتفاع بر حسب پیکسل) تصویر مهر و امضا را به‌صورت مجزا برای پرینت
+                                    استاندارد و رسمی تعیین کنید.
+                                </p>
+                            </div>
+                        </div>
+
+                        @if(!empty($raw['identity_seal_signature']))
+                            <div
+                                class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold shrink-0">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>تصویر مهر و امضا بارگذاری شده است</span>
+                            </div>
+                        @else
+                            <div
+                                class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400 text-xs font-bold shrink-0">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                                <span>تصویر مهر هنوز در تنظیمات بارگذاری نشده</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="p-6 md:p-8"
+                         x-data="stampSizePreview('{{ $v('services_stamp_standard_width', '') }}', '{{ $v('services_stamp_standard_height', '') }}', '{{ $v('services_stamp_official_width', '') }}', '{{ $v('services_stamp_official_height', '') }}')">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                            {{-- Standard Print Box --}}
+                            <div
+                                class="rounded-2xl border border-gray-200 dark:border-gray-700/80 bg-gray-50/50 dark:bg-gray-900/20 p-5 md:p-6 flex flex-col justify-between space-y-6">
+                                <div>
+                                    <div
+                                        class="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-200/80 dark:border-gray-700/60">
+                                        <div class="flex items-center gap-2.5">
+                                            <span
+                                                class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                                     stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                            </span>
+                                            <div>
+                                                <h3 class="font-black text-sm text-gray-900 dark:text-white">پرینت
+                                                    استاندارد فاکتور</h3>
+                                                <p class="text-[11px] text-gray-500 dark:text-gray-400">قالب فاکتور عادی
+                                                    و پیش‌فاکتور</p>
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                            استاندارد
+                                        </span>
+                                    </div>
+
+                                    {{-- Width & Height Inputs --}}
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="services_stamp_standard_width" class="{{ $labelClass }}">
+                                                عرض تصویر (پیکسل)
+                                            </label>
+                                            <div class="relative">
+                                                <input type="number" min="20" max="800" step="1"
+                                                       id="services_stamp_standard_width"
+                                                       name="services_stamp_standard_width"
+                                                       x-model="stdWidth"
+                                                       placeholder="خودکار (۱۳۰)"
+                                                       class="{{ $inputClass }} dir-ltr text-center font-bold">
+                                                <span
+                                                    class="absolute right-3 top-3.5 text-xs font-bold text-gray-400 pointer-events-none">px</span>
+                                            </div>
+                                            <span class="text-[10px] text-gray-400 mt-1 block">پیش‌فرض: ۱۳۰ پیکسل</span>
+                                        </div>
+
+                                        <div>
+                                            <label for="services_stamp_standard_height" class="{{ $labelClass }}">
+                                                ارتفاع تصویر (پیکسل)
+                                            </label>
+                                            <div class="relative">
+                                                <input type="number" min="20" max="600" step="1"
+                                                       id="services_stamp_standard_height"
+                                                       name="services_stamp_standard_height"
+                                                       x-model="stdHeight"
+                                                       placeholder="خودکار (۴۵)"
+                                                       class="{{ $inputClass }} dir-ltr text-center font-bold">
+                                                <span
+                                                    class="absolute right-3 top-3.5 text-xs font-bold text-gray-400 pointer-events-none">px</span>
+                                            </div>
+                                            <span class="text-[10px] text-gray-400 mt-1 block">پیش‌فرض: ۴۵ پیکسل</span>
+                                        </div>
+                                    </div>
+
+                                    {{-- Quick Preset Buttons --}}
+                                    <div class="mt-4">
+                                        <label
+                                            class="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1.5">اندازه‌های
+                                            پیشنهادی:</label>
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            <button type="button" @click="setStandard(100, 40)"
+                                                    class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-2xs">
+                                                کوچک (100×40)
+                                            </button>
+                                            <button type="button" @click="setStandard(130, 45)"
+                                                    class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-2xs">
+                                                استاندارد (130×45)
+                                            </button>
+                                            <button type="button" @click="setStandard(170, 65)"
+                                                    class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-2xs">
+                                                بزرگ (170×65)
+                                            </button>
+                                            <button type="button" @click="resetStandard()"
+                                                    class="px-2.5 py-1 rounded-lg text-xs font-bold text-gray-500 hover:text-rose-600 dark:text-gray-400 dark:hover:text-rose-400 transition-colors">
+                                                بازنشانی
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Live Preview Box Standard --}}
+                                <div>
+                                    <div
+                                        class="flex items-center justify-between text-xs font-bold text-gray-600 dark:text-gray-300 mb-2">
+                                        <span class="flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5 text-blue-500" fill="none" viewBox="0 0 24 24"
+                                                 stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                            پیش‌نمایش زنده در قالب استاندارد
+                                        </span>
+                                        <span class="text-[10px] text-gray-400 font-mono dir-ltr"
+                                              x-text="(stdWidth || 'خودکار') + ' × ' + (stdHeight || 'خودکار') + ' px'"></span>
+                                    </div>
+                                    <div
+                                        class="bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 p-4 flex flex-col items-center justify-center min-h-[140px] shadow-inner">
+                                        <div class="text-center w-full max-w-[220px] mx-auto">
+                                            <p class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1">مهر و
+                                                امضا:</p>
+                                            <div class="flex items-center justify-center py-1 transition-all"
+                                                 :style="'min-height: ' + (stdHeight ? stdHeight + 'px' : '45px')">
+                                                @if(!empty($raw['identity_seal_signature']))
+                                                    <img src="{{ asset($raw['identity_seal_signature']) }}"
+                                                         alt="پیش‌نمایش مهر و امضا"
+                                                         :style="stdImgStyle">
+                                                @else
+                                                    <div
+                                                        class="flex flex-col items-center justify-center py-2 text-gray-300 dark:text-gray-600">
+                                                        <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24"
+                                                             stroke="currentColor" stroke-width="1.2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                        </svg>
+                                                        <span
+                                                            class="text-[10px] text-gray-400 mt-1">بدون تصویر مهر</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <p class="text-[10px] font-bold text-gray-700 dark:text-gray-300 pt-1.5 border-t border-dashed border-gray-300 dark:border-gray-600 mt-1">
+                                                {{ $raw['identity_name'] ?? $raw['seller_name'] ?? $raw['company_name'] ?? 'فروشنده / شرکت' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Official Print Box --}}
+                            <div
+                                class="rounded-2xl border border-gray-200 dark:border-gray-700/80 bg-gray-50/50 dark:bg-gray-900/20 p-5 md:p-6 flex flex-col justify-between space-y-6">
+                                <div>
+                                    <div
+                                        class="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-200/80 dark:border-gray-700/60">
+                                        <div class="flex items-center gap-2.5">
+                                            <span
+                                                class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-xs">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                                     stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                                </svg>
+                                            </span>
+                                            <div>
+                                                <h3 class="font-black text-sm text-gray-900 dark:text-white">پرینت رسمی
+                                                    فاکتور</h3>
+                                                <p class="text-[11px] text-gray-500 dark:text-gray-400">قالب رسمی امور
+                                                    مالیاتی</p>
+                                            </div>
+                                        </div>
+                                        <span
+                                            class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                                            رسمی
+                                        </span>
+                                    </div>
+
+                                    {{-- Width & Height Inputs --}}
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="services_stamp_official_width" class="{{ $labelClass }}">
+                                                عرض تصویر (پیکسل)
+                                            </label>
+                                            <div class="relative">
+                                                <input type="number" min="20" max="800" step="1"
+                                                       id="services_stamp_official_width"
+                                                       name="services_stamp_official_width"
+                                                       x-model="offWidth"
+                                                       placeholder="خودکار (۱۴۰)"
+                                                       class="{{ $inputClass }} dir-ltr text-center font-bold">
+                                                <span
+                                                    class="absolute right-3 top-3.5 text-xs font-bold text-gray-400 pointer-events-none">px</span>
+                                            </div>
+                                            <span class="text-[10px] text-gray-400 mt-1 block">پیش‌فرض: ۱۴۰ پیکسل</span>
+                                        </div>
+
+                                        <div>
+                                            <label for="services_stamp_official_height" class="{{ $labelClass }}">
+                                                ارتفاع تصویر (پیکسل)
+                                            </label>
+                                            <div class="relative">
+                                                <input type="number" min="20" max="600" step="1"
+                                                       id="services_stamp_official_height"
+                                                       name="services_stamp_official_height"
+                                                       x-model="offHeight"
+                                                       placeholder="خودکار (۵۵)"
+                                                       class="{{ $inputClass }} dir-ltr text-center font-bold">
+                                                <span
+                                                    class="absolute right-3 top-3.5 text-xs font-bold text-gray-400 pointer-events-none">px</span>
+                                            </div>
+                                            <span class="text-[10px] text-gray-400 mt-1 block">پیش‌فرض: ۵۵ پیکسل</span>
+                                        </div>
+                                    </div>
+
+                                    {{-- Quick Preset Buttons --}}
+                                    <div class="mt-4">
+                                        <label
+                                            class="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-1.5">اندازه‌های
+                                            پیشنهادی:</label>
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            <button type="button" @click="setOfficial(110, 45)"
+                                                    class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-purple-400 hover:text-purple-600 transition-colors shadow-2xs">
+                                                کوچک (110×45)
+                                            </button>
+                                            <button type="button" @click="setOfficial(140, 55)"
+                                                    class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-purple-400 hover:text-purple-600 transition-colors shadow-2xs">
+                                                رسمی (140×55)
+                                            </button>
+                                            <button type="button" @click="setOfficial(180, 75)"
+                                                    class="px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-purple-400 hover:text-purple-600 transition-colors shadow-2xs">
+                                                بزرگ (180×75)
+                                            </button>
+                                            <button type="button" @click="resetOfficial()"
+                                                    class="px-2.5 py-1 rounded-lg text-xs font-bold text-gray-500 hover:text-rose-600 dark:text-gray-400 dark:hover:text-rose-400 transition-colors">
+                                                بازنشانی
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Live Preview Box Official --}}
+                                <div>
+                                    <div
+                                        class="flex items-center justify-between text-xs font-bold text-gray-600 dark:text-gray-300 mb-2">
+                                        <span class="flex items-center gap-1.5">
+                                            <svg class="w-3.5 h-3.5 text-purple-500" fill="none" viewBox="0 0 24 24"
+                                                 stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                            پیش‌نمایش زنده در قالب رسمی
+                                        </span>
+                                        <span class="text-[10px] text-gray-400 font-mono dir-ltr"
+                                              x-text="(offWidth || 'خودکار') + ' × ' + (offHeight || 'خودکار') + ' px'"></span>
+                                    </div>
+                                    <div
+                                        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 p-3 min-h-[140px] shadow-inner">
+                                        <div class="grid grid-cols-2 gap-2 text-center text-[10px]">
+                                            <div
+                                                class="flex flex-col justify-between items-center border border-gray-200 dark:border-gray-700 rounded-lg p-2 bg-gray-50/60 dark:bg-gray-900/30">
+                                                <p class="font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-1 w-full">
+                                                    مهر و امضای فروشنده</p>
+                                                <div
+                                                    class="flex-1 flex items-center justify-center py-1 w-full transition-all"
+                                                    :style="'min-height: ' + (offHeight ? offHeight + 'px' : '55px')">
+                                                    @if(!empty($raw['identity_seal_signature']))
+                                                        <img src="{{ asset($raw['identity_seal_signature']) }}"
+                                                             alt="پیش‌نمایش مهر و امضا"
+                                                             :style="offImgStyle">
+                                                    @else
+                                                        <div
+                                                            class="flex flex-col items-center justify-center py-2 text-gray-300 dark:text-gray-600">
+                                                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24"
+                                                                 stroke="currentColor" stroke-width="1.2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                            </svg>
+                                                            <span
+                                                                class="text-[9px] text-gray-400 mt-1">بدون تصویر مهر</span>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <p class="text-[9px] font-bold text-gray-500 dark:text-gray-400 pt-1 border-t border-dashed border-gray-300 dark:border-gray-700 w-full truncate">
+                                                    {{ $raw['identity_name'] ?? $raw['seller_name'] ?? $raw['company_name'] ?? 'فروشنده' }}
+                                                </p>
+                                            </div>
+                                            <div
+                                                class="flex flex-col justify-between items-center border border-gray-200 dark:border-gray-700 rounded-lg p-2 bg-gray-50/60 dark:bg-gray-900/30">
+                                                <p class="font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-1 w-full">
+                                                    مهر و امضای خریدار</p>
+                                                <div
+                                                    class="flex-1 flex items-center justify-center py-1 w-full transition-all"
+                                                    :style="'min-height: ' + (offHeight ? offHeight + 'px' : '55px')">
+                                                    <span class="text-[9px] text-gray-300 dark:text-gray-600 italic">محل امضای مشتری</span>
+                                                </div>
+                                                <p class="text-[9px] font-bold text-gray-500 dark:text-gray-400 pt-1 border-t border-dashed border-gray-300 dark:border-gray-700 w-full">
+                                                    تأیید و امضاء
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="{{ $cardClass }}">
+                    <div class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60">
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                            <span
+                                class="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </span>
+                            فیلدهای مشتری در فاکتور
+                        </h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-13">
+                            مشخص کنید کدام فیلدهای فرم مشتری (سیستمی یا سفارشی) در بخش «اطلاعات خریدار» چاپ فاکتور
+                            (رسمی و غیررسمی) و همچنین در صفحه‌ی جزئیات فاکتور نمایش داده شوند.
+                        </p>
+                    </div>
+
+                    <div class="p-6 md:p-8">
+                        @if(empty($clientFormFields))
+                            <div
+                                class="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/30 rounded-2xl p-5 border border-dashed border-gray-200 dark:border-gray-700">
+                                هیچ فرم فعالی برای مشتریان پیدا نشد. ابتدا یک فرم در «فرم‌ساز مشتریان» فعال کنید.
+                            </div>
+                        @else
+                            @php
+                                $groupedClientFields = collect($clientFormFields)->groupBy('group');
+                            @endphp
+
+                            <div class="space-y-7">
+                                @foreach($groupedClientFields as $groupName => $fields)
+                                    <div>
+                                        <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">{{ $groupName }}</h4>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                            @foreach($fields as $field)
+                                                @php
+                                                    $selectedClientFields = $selectedClientFields ?? [];
+                                                    $checked = in_array($field['id'], $selectedClientFields, true);
+                                                @endphp
+                                                <label
+                                                    class="group relative flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all
+                                                           {{ $checked
+                                                              ? 'border-indigo-300 bg-indigo-50/70 dark:border-indigo-500/40 dark:bg-indigo-500/10'
+                                                              : 'border-gray-100 bg-gray-50/60 hover:border-indigo-200 hover:bg-white dark:border-gray-700/50 dark:bg-gray-900/30 dark:hover:border-gray-600' }}">
+                                                    <input type="checkbox"
+                                                           name="services_invoice_client_fields[]"
+                                                           value="{{ $field['id'] }}"
+                                                           {{ $checked ? 'checked' : '' }}
+                                                           class="peer sr-only">
+
+                                                    <span
+                                                        class="flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 peer-checked:bg-indigo-600 peer-checked:border-indigo-600">
+                                                        <svg
+                                                            class="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                            stroke-width="3">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                  d="M5 13l4 4L19 7"/>
+                                                        </svg>
+                                                    </span>
+
+                                                    <span class="flex flex-col min-w-0">
+                                                        <span
+                                                            class="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">{{ $field['label'] }}</span>
+                                                        <span
+                                                            class="text-[10px] text-gray-400 dir-ltr font-mono truncate">{{ $field['id'] }}</span>
+                                                    </span>
+
+                                                    @if($field['is_system'])
+                                                        <span
+                                                            class="ms-auto shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                                                            سیستمی
+                                                        </span>
+                                                    @endif
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <div x-show="activeTab === 'automation'" x-cloak class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{-- Auto Merge Concurrent Invoices Card --}}
+                    <div class="{{ $cardClass }} md:col-span-2">
+                        <div class="p-6 border-b border-gray-100 dark:border-gray-700/60">
+                            <h2 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                </svg>
+                                ادغام خودکار فاکتورهای همزمان
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <label for="services_auto_merge_concurrent_invoices"
+                                   class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border-2 border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/30 hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-all cursor-pointer group">
+                                <div class="space-y-1 flex-1">
+                                    <span class="text-base font-black text-gray-800 dark:text-gray-200 block">
+                                        فعال‌سازی ادغام هوشمند فاکتورهای هم‌دوره
+                                    </span>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed max-w-2xl">
+                                        چنانچه این گزینه فعال باشد، هنگامی که از طریق گردش‌کارها یا تمدید خودکار، ۲ یا چند فاکتور برای یک مشتری با تاریخ صدور و سررسید یکسان ایجاد شود، سیستم به طور خودکار آن‌ها را در یک فاکتور تجمیعی ادغام کرده و سفارش‌ها را به آن متصل می‌کند.
+                                    </p>
+                                </div>
+                                <div class="relative shrink-0">
+                                    <input type="hidden" name="services_auto_merge_concurrent_invoices" value="0">
+                                    <input type="checkbox" id="services_auto_merge_concurrent_invoices"
+                                           name="services_auto_merge_concurrent_invoices" value="1"
+                                           @checked($v('services_auto_merge_concurrent_invoices') === '1') class="sr-only peer">
+                                    <div class="w-14 h-8 bg-gray-300 dark:bg-gray-600 rounded-full peer peer-checked:bg-indigo-600 transition-colors duration-300 shadow-inner"></div>
+                                    <div class="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center">
+                                        <svg class="w-3 h-3 text-indigo-600 opacity-0 peer-checked:opacity-100 transition-opacity"
+                                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="{{ $cardClass }} md:col-span-2">
+                        <div class="p-6 border-b border-gray-100 dark:border-gray-700/60">
+                            <h2 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor"
+                                     stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                                نصب گردش کارهای پیش‌فرض
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                با کلیک روی دکمه زیر، تمام گردش کارهای استاندارد و پیش‌فرض خدمات (مانند فعال‌سازی سفارش
+                                پس از پرداخت، معلق شدن سفارشات در صورت لغو فاکتور، و تعلیق خودکار ۷ روزه) مجدداً در
+                                سیستم نصب و تنظیم می‌شوند.
+                            </p>
+                            <button type="button" onclick="document.getElementById('seedWorkflowsForm').submit();"
+                                    class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500/20 transition-all text-sm font-bold shadow-sm group">
+                                <svg class="w-4 h-4 group-hover:rotate-180 transition-transform duration-500"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                اجرا و نصب گردش کارها
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="sticky bottom-4 z-40 mt-8">
+                <div
+                    class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl p-4 rounded-2xl border border-gray-200 dark:border-gray-700/50 shadow-[0_10px_40px_rgba(0,0,0,0.05)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex flex-row-reverse items-center justify-between gap-4">
+                    <button type="submit"
+                            class="flex-1 md:flex-none px-8 py-3.5 rounded-xl bg-linear-to-r from-indigo-600 to-indigo-700 text-white font-black shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:from-indigo-500 hover:to-indigo-600 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        ذخیره تنظیمات
+                    </button>
+                    <a href="{{ route('services.invoices.index') }}"
+                       class="px-6 py-3.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                        انصراف
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <form id="seedWorkflowsForm" action="{{ route('services.settings.seed-workflows') }}" method="POST"
+              class="hidden">
+            @csrf
+        </form>
+    </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('alpine:init', () => {
+                function toPersianNumber(str) {
+                    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                    return str.toString().replace(/\d/g, digit => persianDigits[digit]);
+                }
+
+                function toEnglishNumber(str) {
+                    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                    return str.toString().replace(/[۰-۹]/g, digit => persianDigits.indexOf(digit)).replace(/[٠-٩]/g, digit => arabicDigits.indexOf(digit));
+                }
+
+                function addThousandSeparator(number) {
+                    if (!number) return '';
+                    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                }
+
+                Alpine.data('priceInput', (initialValue = 0) => ({
+                    value: initialValue,
+                    displayValue: '',
+                    init() {
+                        this.value = Number(this.value) || 0;
+                        this.formatDisplayValue();
+                    },
+                    onInput(input) {
+                        const numeric = toEnglishNumber(input).replace(/[^\d]/g, '');
+                        this.value = numeric ? Number(numeric) : 0;
+                        this.displayValue = toPersianNumber(addThousandSeparator(numeric));
+                    },
+                    formatDisplayValue() {
+                        this.displayValue = this.value > 0 ? toPersianNumber(addThousandSeparator(this.value)) : '';
+                    }
+                }));
+
+                Alpine.data('settingsForm', (prefix, middle, suffix, padding, proforma_prefix, proforma_middle, proforma_suffix, proforma_padding) => ({
+                    activeTab: '{{ session('active_tab', old('active_tab')) }}' || localStorage.getItem('servicesSettingsTab') || 'numbering',
+                    prefix, middle, suffix,
+                    padding: parseInt(padding) || 4,
+                    preview: '',
+                    proforma_prefix, proforma_middle, proforma_suffix,
+                    proforma_padding: parseInt(proforma_padding) || 4,
+                    proforma_preview: '',
+                    init() {
+                        this.updatePreview();
+                        this.updateProformaPreview();
+                        this.$watch('activeTab', value => localStorage.setItem('servicesSettingsTab', value));
+                    },
+                    updatePreview() {
+                        const num = String(1).padStart(this.padding, '0');
+                        this.preview = this.prefix + this.middle + '-' + num + this.suffix;
+                    },
+                    updateProformaPreview() {
+                        const num = String(1).padStart(this.proforma_padding, '0');
+                        this.proforma_preview = this.proforma_prefix + this.proforma_middle + '-' + num + this.proforma_suffix;
+                    }
+                }));
+
+                Alpine.data('roundingPreview', (initialMode, initialFactor, initialCurrency) => ({
+                    mode: initialMode || 'none',
+                    factor: parseInt(initialFactor) || (initialCurrency === 'rial' ? 10000 : 1000),
+                    factorFormatted: '',
+                    currency: initialCurrency || 'toman',
+                    sampleAmount: (initialCurrency === 'rial') ? 3452000 : 345200,
+                    result: 0,
+
+                    init() {
+                        this.factorFormatted = this.factor ? addThousandSeparator(this.factor) : '';
+                        this.updatePreview();
+                    },
+
+                    onFactorInput(e) {
+                        const raw = toEnglishNumber(e.target.value || '').replace(/[^\d]/g, '');
+                        const num = raw ? parseInt(raw, 10) : 0;
+                        this.factor = num;
+                        this.factorFormatted = num > 0 ? addThousandSeparator(num) : '';
+                        this.updatePreview();
+                    },
+
+                    onCurrencyChanged(newCurrency) {
+                        if (!newCurrency || this.currency === newCurrency) return;
+                        const oldCurrency = this.currency;
+                        this.currency = newCurrency;
+
+                        // Proportional factor & sample adjustments between Toman and Rial
+                        if (oldCurrency === 'toman' && newCurrency === 'rial') {
+                            this.factor = Math.max(1, (this.factor || 1000) * 10);
+                            this.sampleAmount = this.sampleAmount * 10;
+                        } else if (oldCurrency === 'rial' && newCurrency === 'toman') {
+                            this.factor = Math.max(1, Math.round((this.factor || 10000) / 10));
+                            this.sampleAmount = Math.max(1, Math.round(this.sampleAmount / 10));
+                        }
+                        this.factorFormatted = this.factor > 0 ? addThousandSeparator(this.factor) : '';
+                        this.updatePreview();
+                    },
+
+                    get currencyLabel() {
+                        return this.currency === 'rial' ? 'ریال' : 'تومان';
+                    },
+
+                    get placeholderFactor() {
+                        return this.currency === 'rial' ? '10,000' : '1,000';
+                    },
+
+                    get exampleFactorText() {
+                        return this.currency === 'rial' ? '۱۰,۰۰۰ ریال' : '۱,۰۰۰ تومان';
+                    },
+
+                    get currentPresets() {
+                        if (this.currency === 'rial') {
+                            return [5000, 10000, 50000, 100000, 500000];
+                        }
+                        return [500, 1000, 5000, 10000, 50000];
+                    },
+
+                    get modeDescription() {
+                        if (this.mode === 'none') return 'بدون اعمال ضریب';
+                        if (this.mode === 'nearest') return 'گرد شده به نزدیک‌ترین ضریب';
+                        if (this.mode === 'up') return 'گرد شده به سقف بالاتر';
+                        if (this.mode === 'down') return 'گرد شده به کف پایین‌تر';
+                        return '';
+                    },
+
+                    setFactor(val) {
+                        this.factor = parseInt(val) || 0;
+                        this.factorFormatted = this.factor > 0 ? addThousandSeparator(this.factor) : '';
+                        this.updatePreview();
+                    },
+
+                    setSample(val) {
+                        this.sampleAmount = parseInt(val) || 0;
+                        this.updatePreview();
+                    },
+
+                    updatePreview() {
+                        const factor = parseInt(this.factor) || 0;
+                        const sample = Number(this.sampleAmount) || 0;
+                        if (!this.mode || this.mode === 'none' || factor <= 0) {
+                            this.result = Math.round(sample);
+                        } else if (this.mode === 'up') {
+                            this.result = Math.ceil(sample / factor) * factor;
+                        } else if (this.mode === 'down') {
+                            this.result = Math.floor(sample / factor) * factor;
+                        } else if (this.mode === 'nearest') {
+                            this.result = Math.round(sample / factor) * factor;
+                        } else {
+                            this.result = Math.round(sample);
+                        }
+                    },
+
+                    get diff() {
+                        if (this.mode === 'none' || !this.factor) return 0;
+                        return this.result - (Number(this.sampleAmount) || 0);
+                    },
+
+                    formatNumber(n) {
+                        if (n === null || n === undefined || isNaN(n)) return '۰';
+                        const str = addThousandSeparator(Math.round(Number(n)));
+                        return toPersianNumber(str);
+                    },
+
+                    formatMoney(n) {
+                        return this.formatNumber(n) + ' ' + this.currencyLabel;
+                    },
+
+                    get formattedDiff() {
+                        const d = this.diff;
+                        if (d > 0) return '+' + this.formatNumber(d) + ' ' + this.currencyLabel;
+                        if (d < 0) return '-' + this.formatNumber(Math.abs(d)) + ' ' + this.currencyLabel;
+                        return 'بدون تفاوت (۰ ' + this.currencyLabel + ')';
+                    },
+
+                    get colorClass() {
+                        if (this.mode === 'none') return 'text-gray-800 dark:text-gray-200';
+                        if (this.diff > 0) return 'text-emerald-600 dark:text-emerald-400';
+                        if (this.diff < 0) return 'text-rose-600 dark:text-rose-400';
+                        return 'text-indigo-600 dark:text-indigo-400';
+                    }
+                }));
+
+                Alpine.data('stampSizePreview', (stdW, stdH, offW, offH) => ({
+                    stdWidth: stdW || '',
+                    stdHeight: stdH || '',
+                    offWidth: offW || '',
+                    offHeight: offH || '',
+
+                    setStandard(w, h) {
+                        this.stdWidth = w;
+                        this.stdHeight = h;
+                    },
+                    setOfficial(w, h) {
+                        this.offWidth = w;
+                        this.offHeight = h;
+                    },
+                    resetStandard() {
+                        this.stdWidth = '';
+                        this.stdHeight = '';
+                    },
+                    resetOfficial() {
+                        this.offWidth = '';
+                        this.offHeight = '';
+                    },
+
+                    get stdImgStyle() {
+                        let style = 'object-fit: contain; mix-blend-mode: multiply; max-width: 100%; transition: all 0.2s ease-in-out;';
+                        if (this.stdWidth) {
+                            style += ` width: ${this.stdWidth}px;`;
+                        } else {
+                            style += ' width: auto;';
+                        }
+                        if (this.stdHeight) {
+                            style += ` height: ${this.stdHeight}px; max-height: ${this.stdHeight}px;`;
+                        } else {
+                            style += ' height: 45px; max-height: 45px;';
+                        }
+                        return style;
+                    },
+
+                    get offImgStyle() {
+                        let style = 'object-fit: contain; mix-blend-mode: multiply; max-width: 100%; transition: all 0.2s ease-in-out;';
+                        if (this.offWidth) {
+                            style += ` width: ${this.offWidth}px;`;
+                        } else {
+                            style += ' width: auto;';
+                        }
+                        if (this.offHeight) {
+                            style += ` height: ${this.offHeight}px; max-height: ${this.offHeight}px;`;
+                        } else {
+                            style += ' height: 55px; max-height: 55px;';
+                        }
+                        return style;
+                    }
+                }));
+            });
+        </script>
+    @endpush
+@endsection

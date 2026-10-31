@@ -1,0 +1,16 @@
+{
+    "name": "DomainManager",
+    "alias": "domainmanager",
+    "description": "Domain Management module integrating with reseller.world API.",
+    "keywords": [
+        "domain",
+        "reseller.world",
+        "registrar"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\DomainManager\\Providers\\DomainManagerServiceProvider"
+    ],
+    "files": [],
+    "requires": []
+}

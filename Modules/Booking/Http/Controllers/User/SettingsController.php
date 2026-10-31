@@ -1,0 +1,560 @@
+<?php
+
+namespace Modules\Booking\Http\Controllers\User;
+
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Validation\Rule;
+use Modules\Booking\Entities\BookingSetting;
+use Modules\Booking\Entities\BookingAvailabilityRule;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
+
+class SettingsController extends Controller
+{
+    public function edit()
+    {
+        $settings = BookingSetting::current();
+
+        $rules = [];
+        for ($weekday = 0; $weekday <= 6; $weekday++) {
+            $rule = BookingAvailabilityRule::query()
+                ->where('scope_type', BookingAvailabilityRule::SCOPE_GLOBAL)
+                ->where('weekday', $weekday)
+                ->first();
+
+            if (!$rule) {
+                $rule = new BookingAvailabilityRule([
+                    'scope_type' => BookingAvailabilityRule::SCOPE_GLOBAL,
+                    'scope_id'   => null,
+                    'weekday'    => $weekday,
+                    'is_closed'  => false,
+                    'work_start_local' => null,
+                    'work_end_local'   => null,
+                    'breaks_json'      => [],
+                    'slot_duration_minutes' => null,
+                    'capacity_per_slot' => null,
+                    'capacity_per_day'  => null,
+                ]);
+            }
+            $rules[$weekday] = $rule;
+        }
+
+        $rolesQuery = Role::orderBy('name');
+        if (!auth()->user() || !auth()->user()->hasRole('super-admin')) {
+            $rolesQuery->where('name', '!=', 'super-admin');
+        }
+        $roles = $rolesQuery->get();
+        $categories = \Modules\Booking\Entities\BookingCategory::orderBy('name')->get();
+
+        $globalExceptions = \Modules\Booking\Entities\BookingAvailabilityException::query()
+            ->where('scope_type', \Modules\Booking\Entities\BookingAvailabilityException::SCOPE_GLOBAL)
+            ->whereNull('scope_id')
+            ->get();
+
+        $services = \Modules\Booking\Entities\BookingService::query()
+            ->where('status', \Modules\Booking\Entities\BookingService::STATUS_ACTIVE)
+            ->orderBy('name')
+            ->get(['id', 'name', 'status', 'owner_user_id']);
+
+        // ── Providers filtered by allowed_roles & super-admin visibility ──
+        $rolesInput = $settings->allowed_roles ?? [];
+        if (is_string($rolesInput)) {
+            $decoded = json_decode($rolesInput, true);
+            $rolesInput = is_array($decoded) ? $decoded : preg_split('/\s*,\s*/', trim($rolesInput), -1, PREG_SPLIT_NO_EMPTY);
+        }
+        $roleIds = [];
+        $roleNames = [];
+        if (is_array($rolesInput)) {
+            foreach ($rolesInput as $v) {
+                if (is_numeric($v) && (int)$v > 0) {
+                    $roleIds[] = (int)$v;
+                } elseif (is_string($v) && trim($v) !== '') {
+                    $roleNames[] = trim($v);
+                }
+            }
+        }
+
+        $providersQuery = \App\Models\User::query();
+
+        if (!empty($roleIds) || !empty($roleNames)) {
+            $providersQuery->whereHas('roles', function ($q) use ($roleIds, $roleNames) {
+                $q->where(function ($subQ) use ($roleIds, $roleNames) {
+                    if (!empty($roleIds)) {
+                        $subQ->whereIn('id', $roleIds);
+                    }
+                    if (!empty($roleNames)) {
+                        $subQ->orWhereIn('name', $roleNames);
+                    }
+                });
+            });
+        } else {
+            // Fallback: if no provider roles defined, show users attached to services
+            $providersQuery->whereIn('id', function ($q) {
+                $q->select('provider_user_id')->from('booking_service_providers');
+            });
+        }
+
+        $isSuperAdmin = auth()->user() && auth()->user()->hasRole('super-admin');
+        if (!$isSuperAdmin) {
+            $providersQuery->whereDoesntHave('roles', function ($r) {
+                $r->where('name', 'super-admin');
+            });
+        }
+
+        $providers = $providersQuery
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
+
+        $syncService = app(\Modules\Booking\Services\ServiceSyncService::class);
+        $syncGroups = $syncService->getGroups();
+
+        if (!$isSuperAdmin) {
+            $superAdminUserIds = \App\Models\User::whereHas('roles', function ($r) {
+                $r->where('name', 'super-admin');
+            })->pluck('id')->toArray();
+
+            $syncGroups = array_values(array_filter($syncGroups, function ($g) use ($superAdminUserIds) {
+                return empty($g['provider_user_id']) || !in_array((int)$g['provider_user_id'], $superAdminUserIds, true);
+            }));
+        }
+
+        $allUsers = \App\Models\User::orderBy('name')->get(['id', 'name', 'email']);
+
+        return view('booking::user.settings.edit', compact(
+            'settings', 'rules', 'roles', 'categories', 'globalExceptions', 'services', 'providers', 'syncGroups', 'allUsers'
+        ));
+    }
+
+    public function update(Request $request)
+    {
+        $settings = BookingSetting::current();
+        $shouldLog = (bool) config('app.debug') || (bool) config('booking.debug_logs', false);
+
+        // ── Helper: normalize roles to IDs ──
+        $normalizeRolesToIds = function ($rolesInput): array {
+            if (is_string($rolesInput)) {
+                $decoded = json_decode($rolesInput, true);
+                $rolesInput = is_array($decoded) ? $decoded : preg_split('/\s*,\s*/', trim($rolesInput), -1, PREG_SPLIT_NO_EMPTY);
+            }
+            if (!is_array($rolesInput)) $rolesInput = [];
+            $rolesInput = array_values(array_filter($rolesInput, fn($v) => $v !== null && $v !== ''));
+
+            $ids = [];
+            foreach ($rolesInput as $v) {
+                if (is_int($v) || (is_string($v) && ctype_digit($v))) {
+                    if ((int)$v > 0) $ids[] = (int)$v;
+                    continue;
+                }
+                if (is_string($v) && trim($v) !== '') {
+                    $id = \Spatie\Permission\Models\Role::query()->where('name', trim($v))->value('id');
+                    if ($id) $ids[] = (int)$id;
+                }
+            }
+            return array_values(array_unique($ids));
+        };
+
+        $isSuperAdmin = auth()->user() && auth()->user()->hasRole('super-admin');
+        $superAdminRole = \Spatie\Permission\Models\Role::where('name', 'super-admin')->first();
+        $superAdminRoleId = $superAdminRole?->id;
+
+        $syncRoleInput = function ($inputRoles, $oldRoles) use ($isSuperAdmin, $superAdminRoleId) {
+            if ($isSuperAdmin || !$superAdminRoleId) {
+                return $inputRoles;
+            }
+            $containsOldSuper = in_array($superAdminRoleId, $oldRoles);
+            
+            // Filter out super-admin from input
+            $filteredInput = array_diff($inputRoles, [$superAdminRoleId]);
+            
+            if ($containsOldSuper) {
+                $filteredInput[] = $superAdminRoleId;
+            }
+            return array_values($filteredInput);
+        };
+
+        $oldAllowedRoles = $normalizeRolesToIds($settings->allowed_roles ?? []);
+
+        // ═══════════════════════════════════════
+        //  PART 1: Validate & Save General Settings
+        // ═══════════════════════════════════════
+        $generalData = $request->validate([
+            'currency_unit' => ['required', 'in:IRR,IRT'],
+            'global_online_booking_enabled' => ['required'],
+            'default_slot_duration_minutes' => ['required', 'integer', 'min:5', 'max:720'],
+            'default_capacity_per_slot' => ['required', 'integer', 'min:1', 'max:1000'],
+            'default_capacity_per_day' => ['nullable', 'integer', 'min:1', 'max:10000'],
+            'default_buffer_before_minutes' => ['nullable', 'integer', 'min:0', 'max:240'],
+            'default_buffer_after_minutes'  => ['nullable', 'integer', 'min:0', 'max:240'],
+            'allow_role_service_creation' => ['required'],
+            'allowed_roles' => ['nullable'],
+            'statement_roles' => ['nullable'],
+            'category_management_scope' => ['required', 'in:ALL,OWN'],
+            'form_management_scope' => ['required', 'in:ALL,OWN'],
+            'service_category_selection_scope' => ['required', 'in:ALL,OWN'],
+            'service_form_selection_scope' => ['required', 'in:ALL,OWN'],
+            'operator_appointment_flow' => ['required', 'in:PROVIDER_FIRST,SERVICE_FIRST'],
+            'user_appointment_flow' => ['required', 'in:PROVIDER_FIRST,SERVICE_FIRST'],
+            'allow_appointment_entry_exit_times' => ['required'],
+            'allow_manual_time_override' => ['required'],
+            'tax_enabled' => ['required'],
+            'tax_type' => ['nullable', 'in:PERCENT,FIXED'],
+            'tax_amount' => ['nullable', 'numeric', 'min:0'],
+            'show_service_description' => ['nullable'],
+            'show_supplementary_info' => ['nullable'],
+            'show_provider_info' => ['nullable'],
+            'queue_enabled' => ['nullable'],
+            'queue_max_size' => ['nullable', 'integer', 'min:1', 'max:100000'],
+            'monitoring_quick_status_enabled' => ['nullable'],
+            'monitoring_refresh_interval_seconds' => ['nullable', 'integer', 'min:5', 'max:3600'],
+            'laboratory_enabled' => ['nullable'],
+            'laboratory_default_partner' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $generalData['global_online_booking_enabled'] = (bool) $generalData['global_online_booking_enabled'];
+        $generalData['queue_enabled'] = $request->boolean('queue_enabled');
+        $generalData['queue_max_size'] = $request->filled('queue_max_size') ? (int) $request->input('queue_max_size') : null;
+        $generalData['allow_role_service_creation'] = (bool) $generalData['allow_role_service_creation'];
+        $generalData['allow_appointment_entry_exit_times'] = (bool) $generalData['allow_appointment_entry_exit_times'];
+        $generalData['allow_manual_time_override'] = (bool) $generalData['allow_manual_time_override'];
+        $generalData['tax_enabled'] = $request->boolean('tax_enabled');
+        $generalData['show_service_description'] = $request->boolean('show_service_description');
+        $generalData['show_supplementary_info'] = $request->boolean('show_supplementary_info');
+        $generalData['show_provider_info'] = $request->boolean('show_provider_info');
+        $generalData['monitoring_quick_status_enabled'] = $request->boolean('monitoring_quick_status_enabled');
+        $generalData['monitoring_refresh_interval_seconds'] = $request->filled('monitoring_refresh_interval_seconds')
+            ? (int) $request->input('monitoring_refresh_interval_seconds')
+            : 15;
+        $generalData['laboratory_enabled'] = $request->boolean('laboratory_enabled');
+        if ($request->filled('laboratory_default_partner')) {
+            $generalData['laboratory_default_partner'] = trim((string)$request->input('laboratory_default_partner'));
+        }
+
+        $settings->fill($generalData);
+
+        if ($request->has('laboratory_settings') || $request->has('laboratory_settings_json')) {
+            $labSettingsInput = $request->input('laboratory_settings_json') ?? $request->input('laboratory_settings');
+            if (is_string($labSettingsInput)) {
+                $decoded = json_decode($labSettingsInput, true);
+                if (is_array($decoded)) {
+                    $settings->laboratory_settings = $decoded;
+                }
+            } elseif (is_array($labSettingsInput)) {
+                $settings->laboratory_settings = $labSettingsInput;
+            }
+        }
+
+        $settings->allowed_roles = $syncRoleInput($normalizeRolesToIds($request->input('allowed_roles', [])), $oldAllowedRoles);
+        $settings->statement_roles = $syncRoleInput($normalizeRolesToIds($request->input('statement_roles', [])), $normalizeRolesToIds($settings->statement_roles ?? []));
+
+        // ── Appointment Statuses ──
+        $appointmentStatusesInput = $request->input('appointment_statuses', []);
+        if (is_array($appointmentStatusesInput) && !empty($appointmentStatusesInput)) {
+            usort($appointmentStatusesInput, fn($a, $b) => ($a['order'] ?? 99) <=> ($b['order'] ?? 99));
+            $formattedAppointmentStatuses = [];
+            foreach ($appointmentStatusesInput as $st) {
+                if (empty($st['id'])) continue;
+                $formattedAppointmentStatuses[] = [
+                    'id' => trim($st['id']),
+                    'name' => trim($st['name'] ?? $st['id']),
+                    'color' => trim($st['color'] ?? '#6b7280'),
+                    'order' => (int) ($st['order'] ?? 1),
+                    'step_booking_enabled' => !empty($st['step_booking_enabled']),
+                    'schedule_booking_enabled' => !empty($st['schedule_booking_enabled']),
+                ];
+            }
+            if (!empty($formattedAppointmentStatuses)) {
+                $settings->appointment_statuses = $formattedAppointmentStatuses;
+            }
+        }
+
+        // ═══════════════════════════════════════
+        //  PART 2: Save Cure Settings DIRECTLY
+        // ═══════════════════════════════════════
+        // Bypass fill() — assign each cure field manually
+
+        $settings->cure_default_status = $request->input('cure_default_status', 'draft');
+        $settings->cure_allow_edit_confirmed = $request->boolean('cure_allow_edit_confirmed');
+        $settings->cure_allow_discount = $request->boolean('cure_allow_discount');
+        $settings->cure_max_discount_percent = (int) $request->input('cure_max_discount_percent', 100);
+        $settings->cure_discount_type = $request->input('cure_discount_type', 'amount');
+        $settings->cure_auto_tax = $request->boolean('cure_auto_tax');
+        $settings->cure_warranty_enabled = $request->boolean('cure_warranty_enabled');
+        $settings->cure_default_warranty_months = (int) $request->input('cure_default_warranty_months', 6);
+        $settings->cure_default_warranty_text = $request->input('cure_default_warranty_text') ?: null;
+        $settings->cure_default_notes = $request->input('cure_default_notes') ?: null;
+        $settings->cure_require_notes = $request->boolean('cure_require_notes');
+        $settings->cure_tooth_numbering_system = $request->input('cure_tooth_numbering_system', 'universal');
+        $settings->cure_auto_highlight_teeth = $request->boolean('cure_auto_highlight_teeth');
+        $settings->cure_show_tooth_filter = $request->boolean('cure_show_tooth_filter');
+
+        $cureAllowedCategories = $request->input('cure_allowed_categories', []);
+        if (is_array($cureAllowedCategories)) {
+            $settings->cure_allowed_categories = array_values(array_map('intval', array_filter($cureAllowedCategories)));
+        } else {
+            $settings->cure_allowed_categories = [];
+        }
+
+        $cureStatusesInput = $request->input('cure_statuses', []);
+        if (is_array($cureStatusesInput)) {
+            usort($cureStatusesInput, fn($a, $b) => ($a['order'] ?? 99) <=> ($b['order'] ?? 99));
+            $formattedStatuses = [];
+            
+            $oldStatuses = $settings->cure_statuses ?? [];
+            $oldStatusRolesMap = [];
+            foreach ($oldStatuses as $os) {
+                if (!empty($os['id'])) {
+                    $oldStatusRolesMap[$os['id']] = $os['allowed_roles'] ?? [];
+                }
+            }
+
+            foreach ($cureStatusesInput as $st) {
+                if (empty($st['id']) || empty($st['name'])) continue;
+                $allowedRoles = [];
+                if (isset($st['allowed_roles'])) {
+                    $allowedRoles = $normalizeRolesToIds($st['allowed_roles']);
+                }
+                
+                $oldRoles = $oldStatusRolesMap[trim($st['id'])] ?? [];
+                $allowedRoles = $syncRoleInput($allowedRoles, $oldRoles);
+
+                $allowedFrom = [];
+                if (isset($st['allowed_from'])) {
+                    $allowedFrom = is_array($st['allowed_from']) ? $st['allowed_from'] : array_filter(explode(',', $st['allowed_from']));
+                }
+                $formattedStatuses[] = [
+                    'id' => trim($st['id']),
+                    'name' => trim($st['name']),
+                    'color' => trim($st['color'] ?? '#6b7280'),
+                    'order' => (int) ($st['order'] ?? 1),
+                    'allowed_roles' => $allowedRoles,
+                    'allowed_from' => array_values(array_unique(array_filter($allowedFrom))),
+                ];
+            }
+            $settings->cure_statuses = $formattedStatuses;
+        } else {
+            $settings->cure_statuses = [];
+        }
+
+        $settings->cure_assignable_roles = $syncRoleInput($normalizeRolesToIds($request->input('cure_assignable_roles', [])), $normalizeRolesToIds($settings->cure_assignable_roles ?? []));
+
+        if ($shouldLog) {
+            \Log::info('[Booking][Settings] Saving cure fields', [
+                'cure_default_status' => $settings->cure_default_status,
+                'cure_allow_discount' => $settings->cure_allow_discount,
+                'cure_warranty_enabled' => $settings->cure_warranty_enabled,
+                'cure_auto_tax' => $settings->cure_auto_tax,
+            ]);
+        }
+
+        $settings->save();
+
+        if ($shouldLog) {
+            $fresh = $settings->fresh();
+            \Log::info('[Booking][Settings] After save verification', [
+                'cure_default_status' => $fresh->cure_default_status,
+                'cure_allow_discount' => $fresh->cure_allow_discount,
+            ]);
+        }
+
+        // ═══════════════════════════════════════
+        //  PART 3: Manage Provider Role Permissions
+        // ═══════════════════════════════════════
+        $newAllowedRoles = (array) ($settings->allowed_roles ?? []);
+        $old = array_map('strval', $oldAllowedRoles);
+        $new = array_map('strval', $newAllowedRoles);
+        $added = array_values(array_diff($new, $old));
+        $removed = array_values(array_diff($old, $new));
+        $allowCreation = (bool) $settings->allow_role_service_creation;
+        $protectedRoleNames = ['super-admin', 'admin'];
+
+        $providerAlwaysPerms = [
+            'booking.view', 'booking.services.view', 'booking.categories.view',
+            'booking.forms.view', 'booking.appointments.view',
+            'booking.appointments.create', 'booking.appointments.edit',
+        ];
+        $providerCreationPerms = [
+            'booking.services.create', 'booking.services.edit', 'booking.services.delete',
+            'booking.categories.create', 'booking.categories.edit', 'booking.categories.delete',
+            'booking.forms.create', 'booking.forms.edit', 'booking.forms.delete',
+        ];
+
+        if (!empty($new)) {
+            foreach (\Spatie\Permission\Models\Role::query()->whereIn('id', $new)->get() as $role) {
+                foreach ($providerAlwaysPerms as $perm) {
+                    if (!$role->hasPermissionTo($perm)) $role->givePermissionTo($perm);
+                }
+                if (!in_array($role->name, $protectedRoleNames, true)) {
+                    if ($allowCreation) {
+                        foreach ($providerCreationPerms as $perm) {
+                            if (!$role->hasPermissionTo($perm)) $role->givePermissionTo($perm);
+                        }
+                    } else {
+                        foreach ($providerCreationPerms as $perm) {
+                            if ($role->hasPermissionTo($perm)) $role->revokePermissionTo($perm);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!empty($removed)) {
+            foreach (\Spatie\Permission\Models\Role::query()->whereIn('id', $removed)->get() as $role) {
+                if (in_array($role->name, $protectedRoleNames, true)) continue;
+                foreach (array_merge($providerAlwaysPerms, $providerCreationPerms) as $perm) {
+                    if ($role->hasPermissionTo($perm)) $role->revokePermissionTo($perm);
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════
+        //  PART 4: Update Weekly Schedule
+        // ═══════════════════════════════════════
+        $rulesInput = $request->input('rules', []);
+        for ($weekday = 0; $weekday <= 6; $weekday++) {
+            $input = $rulesInput[$weekday] ?? null;
+            if ($input === null) continue;
+
+            $isClosed = (bool)($input['is_closed'] ?? false);
+            $start = $input['work_start_local'] ?? null;
+            $end = $input['work_end_local'] ?? null;
+
+            $breaks = [];
+            if (isset($input['breaks']) && is_array($input['breaks'])) {
+                foreach ($input['breaks'] as $row) {
+                    $bStart = trim($row['start_local'] ?? '');
+                    $bEnd = trim($row['end_local'] ?? '');
+                    if ($bStart !== '' && $bEnd !== '') {
+                        $breaks[] = ['start_local' => $bStart, 'end_local' => $bEnd];
+                    }
+                }
+            } elseif (isset($input['breaks_json'])) {
+                $bVal = $input['breaks_json'];
+                $breaks = is_string($bVal) ? (json_decode($bVal, true) ?: []) : (is_array($bVal) ? $bVal : []);
+            }
+
+            $slotDuration = isset($input['slot_duration_minutes']) && $input['slot_duration_minutes'] !== '' ? (int)$input['slot_duration_minutes'] : null;
+            $capSlot = isset($input['capacity_per_slot']) && $input['capacity_per_slot'] !== '' ? (int)$input['capacity_per_slot'] : null;
+            $capDay = isset($input['capacity_per_day']) && $input['capacity_per_day'] !== '' ? (int)$input['capacity_per_day'] : null;
+            $bufBefore = isset($input['buffer_before_minutes']) && $input['buffer_before_minutes'] !== '' ? (int)$input['buffer_before_minutes'] : null;
+            $bufAfter  = isset($input['buffer_after_minutes']) && $input['buffer_after_minutes'] !== '' ? (int)$input['buffer_after_minutes'] : null;
+
+            BookingAvailabilityRule::updateOrCreate(
+                ['scope_type' => BookingAvailabilityRule::SCOPE_GLOBAL, 'scope_id' => null, 'weekday' => $weekday],
+                [
+                    'is_closed' => $isClosed,
+                    'work_start_local' => $isClosed ? null : ($start ?: null),
+                    'work_end_local' => $isClosed ? null : ($end ?: null),
+                    'breaks_json' => $isClosed ? [] : $breaks,
+                    'slot_duration_minutes' => $isClosed ? null : $slotDuration,
+                    'capacity_per_slot' => $isClosed ? null : $capSlot,
+                    'capacity_per_day' => $isClosed ? null : $capDay,
+                    'buffer_before_minutes' => $isClosed ? null : $bufBefore,
+                    'buffer_after_minutes'  => $isClosed ? null : $bufAfter,
+                ]
+            );
+        }
+
+        // ═══════════════════════════════════════
+        //  PART 5: Save Service Sync Groups
+        // ═══════════════════════════════════════
+        $syncInput = $request->input('sync_groups', null);
+        if ($syncInput !== null) {
+            $syncService = app(\Modules\Booking\Services\ServiceSyncService::class);
+            $rawGroups = is_string($syncInput) ? json_decode($syncInput, true) : (is_array($syncInput) ? $syncInput : []);
+            if (!is_array($rawGroups)) {
+                $rawGroups = [];
+            }
+
+            if (!$isSuperAdmin) {
+                $existingGroups = $syncService->getGroups();
+                $superAdminUserIds = \App\Models\User::whereHas('roles', function ($r) {
+                    $r->where('name', 'super-admin');
+                })->pluck('id')->toArray();
+
+                $superAdminGroups = array_filter($existingGroups, function ($g) use ($superAdminUserIds) {
+                    return !empty($g['provider_user_id']) && in_array((int)$g['provider_user_id'], $superAdminUserIds, true);
+                });
+
+                if (!empty($superAdminGroups)) {
+                    $submittedIds = array_column($rawGroups, 'id');
+                    foreach ($superAdminGroups as $sag) {
+                        if (!in_array($sag['id'], $submittedIds, true)) {
+                            $rawGroups[] = $sag;
+                        }
+                    }
+                }
+            }
+
+            $syncService->saveGroups($rawGroups);
+        }
+
+        // ═══════════════════════════════════════
+        //  PART 6: Save Ads & Promotion Settings
+        // ═══════════════════════════════════════
+        $optimizer = app(\App\Services\ImageOptimizerService::class);
+        $currentAds = $settings->ads ?? [];
+        $doctorAds = $currentAds['doctor_page'] ?? [
+            'enabled'         => false,
+            'desktop_image'   => null,
+            'mobile_image'    => null,
+            'link'            => null,
+            'open_in_new_tab' => true,
+            'alt_text'        => null,
+        ];
+
+        $doctorAds['enabled'] = $request->boolean('ads_doctor_enabled');
+        $doctorAds['link'] = $request->filled('ads_doctor_link') ? trim((string)$request->input('ads_doctor_link')) : null;
+        $doctorAds['open_in_new_tab'] = $request->boolean('ads_doctor_open_new_tab', true);
+        $doctorAds['alt_text'] = $request->filled('ads_doctor_alt_text') ? trim((string)$request->input('ads_doctor_alt_text')) : null;
+
+        // Desktop Image Deletion
+        if ($request->boolean('delete_ads_doctor_desktop_image')) {
+            if (!empty($doctorAds['desktop_image'])) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($doctorAds['desktop_image']);
+            }
+            $doctorAds['desktop_image'] = null;
+        }
+
+        // Desktop Image Upload & Optimization
+        if ($request->hasFile('ads_doctor_desktop_image')) {
+            $desktopFile = $request->file('ads_doctor_desktop_image');
+            if ($desktopFile->isValid()) {
+                if (!empty($doctorAds['desktop_image'])) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($doctorAds['desktop_image']);
+                }
+                $doctorAds['desktop_image'] = $optimizer->uploadAndOptimize($desktopFile, 'booking/banners', 'public', 1920, 85);
+            }
+        }
+
+        // Mobile Image Deletion
+        if ($request->boolean('delete_ads_doctor_mobile_image')) {
+            if (!empty($doctorAds['mobile_image'])) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($doctorAds['mobile_image']);
+            }
+            $doctorAds['mobile_image'] = null;
+        }
+
+        // Mobile Image Upload & Optimization
+        if ($request->hasFile('ads_doctor_mobile_image')) {
+            $mobileFile = $request->file('ads_doctor_mobile_image');
+            if ($mobileFile->isValid()) {
+                if (!empty($doctorAds['mobile_image'])) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($doctorAds['mobile_image']);
+                }
+                $doctorAds['mobile_image'] = $optimizer->uploadAndOptimize($mobileFile, 'booking/banners', 'public', 1080, 85);
+            }
+        }
+
+        $currentAds['doctor_page'] = $doctorAds;
+        $settings->ads = $currentAds;
+        $settings->save();
+
+        // ═══════════════════════════════════════
+        //  PART 7: Redirect back to the same tab
+        // ═══════════════════════════════════════
+        $activeTab = $request->input('_active_tab', 'general');
+        return redirect()->route('user.booking.settings.edit', ['tab' => $activeTab])
+            ->with('success', 'تنظیمات با موفقیت ذخیره شد.');
+    }
+}

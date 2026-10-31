@@ -1,0 +1,308 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Modules\Booking\Http\Controllers\Web\OnlineBookingController;
+use Modules\Booking\Http\Controllers\User\BookingDashboardController;
+use Modules\Booking\Http\Controllers\User\ServiceController as UserServiceController;
+use Modules\Booking\Http\Controllers\User\AppointmentController as UserAppointmentController;
+use Modules\Booking\Http\Controllers\User\SettingsController as UserSettingsController;
+use Modules\Booking\Http\Controllers\User\ServiceAvailabilityController as UserServiceAvailabilityController;
+use Modules\Booking\Http\Controllers\User\ProviderAvailabilityController;
+use Modules\Booking\Http\Controllers\User\ServiceExceptionController;
+use Modules\Booking\Http\Controllers\User\ProviderExceptionController;
+use Modules\Booking\Http\Controllers\User\GlobalExceptionController;
+use Modules\Booking\Http\Controllers\User\CategoryController as UserCategoryController;
+use Modules\Booking\Http\Controllers\User\FormController as UserFormController;
+use Modules\Booking\Http\Controllers\User\StatementController;
+use Modules\Settings\Http\Controllers\PaymentController;
+use Modules\Booking\App\Http\Controllers\User\DoctorController;
+use Modules\Booking\App\Http\Controllers\User\CureController;
+use Modules\Booking\App\Http\Controllers\User\TreatmentPlanWorkflowController;
+
+
+
+// Public minimal pages (optional)
+Route::prefix('booking')->name('booking.')->middleware('web')->group(function () {
+    Route::get('/', [OnlineBookingController::class, 'index'])->name('public.index');
+    Route::post('/send-otp', [OnlineBookingController::class, 'sendBookingOtp'])->name('public.send_otp');
+
+    // 👈 روت جدید برای صفحه اختصاصی ارائه‌دهنده/پزشک اضافه شد
+    Route::get('/provider/{provider}', [OnlineBookingController::class, 'provider'])->name('public.provider');
+
+    Route::get('/service/{service}', [OnlineBookingController::class, 'service'])->name('public.service');
+    Route::get('/service/{service}/calendar', [OnlineBookingController::class, 'calendar'])->name('public.calendar');
+    Route::get('/service/{service}/slots', [OnlineBookingController::class, 'slots'])->name('public.slots');
+    Route::post('/service/{service}/book', [OnlineBookingController::class, 'book'])->name('public.book');
+
+    Route::get('/result/{appointment}', [OnlineBookingController::class, 'result'])->name('public.result');
+
+    // Payment callback for booking
+    Route::get('/payment/verify/{gateway}/{payment}', [OnlineBookingController::class, 'verifyPayment'])->name('payment.verify');
+});
+
+// User area
+Route::prefix('user')->name('user.')->middleware(['web', 'auth'])->group(function () {
+
+    Route::prefix('booking')->name('booking.')->group(function () {
+        Route::get('/', [BookingDashboardController::class, 'index'])->name('dashboard')->middleware('can:booking.view');
+
+        Route::get('services', [UserServiceController::class, 'index'])->name('services.index')->middleware('can:booking.services.view');
+        Route::get('services/create', [UserServiceController::class, 'create'])->name('services.create')->middleware('can:booking.services.create');
+        Route::post('services', [UserServiceController::class, 'store'])->name('services.store')->middleware('can:booking.services.create');
+        Route::get('services/{service}/edit', [UserServiceController::class, 'edit'])->name('services.edit')->middleware('can:booking.services.edit');
+        Route::match(['put', 'post'], 'services/{service}', [UserServiceController::class, 'update'])->name('services.update')->middleware('can:booking.services.edit');
+        Route::post('services/{service}/toggle-for-me', [UserServiceController::class, 'toggleForMe'])
+            ->name('services.toggleForMe')
+            ->middleware('can:booking.services.view');
+
+//custom-prices routes
+        Route::get('services/{service}/custom-prices', [UserServiceController::class, 'customPrices'])
+            ->name('services.custom-prices');
+        Route::post('services/{service}/custom-prices', [UserServiceController::class, 'updateCustomPrices'])
+            ->name('services.custom-prices.update');
+
+//installments routes
+        Route::get('services/{service}/installments', [UserServiceController::class, 'editInstallments'])
+            ->name('services.installments');
+        Route::post('services/{service}/installments', [UserServiceController::class, 'updateInstallments'])
+            ->name('services.installments.update');
+        //cure routes
+        Route::get('/cure',[CureController::class, 'index'])->name('cure.index');
+        Route::get('/cure/client-plans/{clientId}', [CureController::class, 'clientPlans'])->name('cure.client-plans');
+        Route::post('/cure',[CureController::class, 'store'])->name('cure.store');
+        Route::get('/cure/list',[CureController::class, 'list'])->name('cure.list');
+        Route::get('/cure/{cure}',[CureController::class, 'show'])->name('cure.show');
+        Route::get('/cure/{cure}/workflows',[CureController::class, 'workflows'])->name('cure.workflows');
+        Route::get('/cure/{cure}/edit',[CureController::class, 'edit'])->name('cure.edit');
+        Route::put('/cure/{cure}',[CureController::class, 'update'])->name('cure.update');
+        Route::post('/cure/{cure}/status',[CureController::class, 'changeStatus'])->name('cure.status');
+        Route::get('/cure/{cure}/snapshot/{snapshot}',[CureController::class, 'showSnapshot'])->name('cure.snapshot');
+        Route::delete('/cure/{cure}', [CureController::class, 'destroy'])->name('cure.destroy');
+
+        // workflow bindings routes
+        Route::get('/cure/{plan}/workflow-bindings', [TreatmentPlanWorkflowController::class, 'index'])->name('cure.workflow-bindings.index');
+        Route::post('/cure/{plan}/workflow-bindings', [TreatmentPlanWorkflowController::class, 'store'])->name('cure.workflow-bindings.store');
+        Route::put('/cure/{plan}/workflow-bindings/{binding}', [TreatmentPlanWorkflowController::class, 'update'])->name('cure.workflow-bindings.update');
+        Route::delete('/cure/{plan}/workflow-bindings/{binding}', [TreatmentPlanWorkflowController::class, 'destroy'])->name('cure.workflow-bindings.destroy');
+        Route::post('/cure/{plan}/workflow-bindings/{binding}/trigger', [TreatmentPlanWorkflowController::class, 'trigger'])->name('cure.workflow-bindings.trigger');
+
+        // ⚠️ این دو تا از روی middleware سلب میشن تا کنترل دست ServiceAvailabilityController باشه
+        Route::get('services/{service}/availability', [UserServiceAvailabilityController::class, 'edit'])
+            ->name('services.availability.edit');
+
+        Route::post('services/{service}/availability', [UserServiceAvailabilityController::class, 'update'])
+            ->name('services.availability.update');
+
+        Route::get('categories', [UserCategoryController::class, 'index'])
+            ->name('categories.index')
+            ->middleware('can:booking.categories.view');
+
+        Route::get('categories/create', [UserCategoryController::class, 'create'])
+            ->name('categories.create')
+            ->middleware('can:booking.categories.create');
+
+        Route::post('categories', [UserCategoryController::class, 'store'])
+            ->name('categories.store')
+            ->middleware('can:booking.categories.create');
+
+        Route::get('categories/{category}/edit', [UserCategoryController::class, 'edit'])
+            ->name('categories.edit')
+            ->middleware('can:booking.categories.edit');
+
+        Route::put('categories/{category}', [UserCategoryController::class, 'update'])
+            ->name('categories.update')
+            ->middleware('can:booking.categories.edit');
+
+        Route::delete('categories/{category}', [UserCategoryController::class, 'destroy'])
+            ->name('categories.destroy')
+            ->middleware('can:booking.categories.delete');
+
+        Route::get('forms', [UserFormController::class, 'index'])
+            ->name('forms.index')
+            ->middleware('can:booking.forms.view');
+
+        Route::get('forms/create', [UserFormController::class, 'create'])
+            ->name('forms.create')
+            ->middleware('can:booking.forms.create');
+
+        Route::post('forms', [UserFormController::class, 'store'])
+            ->name('forms.store')
+            ->middleware('can:booking.forms.create');
+
+        Route::get('forms/{form}/edit', [UserFormController::class, 'edit'])
+            ->name('forms.edit')
+            ->middleware('can:booking.forms.edit');
+
+        Route::put('forms/{form}', [UserFormController::class, 'update'])
+            ->name('forms.update')
+            ->middleware('can:booking.forms.edit');
+
+        Route::delete('forms/{form}', [UserFormController::class, 'destroy'])
+            ->name('forms.destroy')
+            ->middleware('can:booking.forms.delete');
+
+
+        // برنامه زمانی «ارائه‌دهندگان» فقط برای ادمین‌ها و کسانی که permission دارند
+        Route::get('providers', [ProviderAvailabilityController::class, 'index'])
+            ->name('providers.index')
+            ->middleware('can:booking.availability.manage');
+
+        Route::get('providers/{provider}/availability', [ProviderAvailabilityController::class, 'edit'])
+            ->name('providers.availability.edit')
+            ->middleware('can:booking.availability.manage');
+
+        Route::post('providers/{provider}/availability', [ProviderAvailabilityController::class, 'update'])
+            ->name('providers.availability.update')
+            ->middleware('can:booking.availability.manage');
+
+        Route::get('appointments', [UserAppointmentController::class, 'index'])->name('appointments.index')->middleware('can:booking.appointments.view');
+        Route::get('schedule', [UserAppointmentController::class, 'schedule'])->name('schedule.index')->middleware('can:booking.appointments.view');
+        Route::get('waitlist', \Modules\Booking\App\Livewire\User\BookingWaitlistManager::class)->name('waitlist.index')->middleware('can:booking.appointments.view');
+        Route::get('monitoring', \Modules\Booking\App\Livewire\User\ClinicLiveMonitoring::class)->name('monitoring.index')->middleware('can:booking.appointments.view');
+        Route::get('laboratory', \Modules\Booking\App\Livewire\User\LaboratoryManager::class)->name('laboratory.index')->middleware('can:booking.appointments.view');
+        Route::get('laboratory/daily-board', \Modules\Booking\App\Livewire\User\LaboratoryDailyBoard::class)->name('laboratory.daily-board')->middleware('can:booking.appointments.view');
+        Route::get('csrf-token', function () {
+            return response()->json([
+                'token' => csrf_token(),
+                'status' => 'active',
+            ]);
+        })->name('csrf-token');
+        Route::get('appointments/create', [UserAppointmentController::class, 'create'])->name('appointments.create');
+        Route::post('appointments', [UserAppointmentController::class, 'store'])->name('appointments.store');
+
+        Route::get('appointments/wizard/providers', [UserAppointmentController::class, 'wizardProviders'])
+            ->name('appointments.wizard.providers');
+
+        Route::get('appointments/wizard/services', [UserAppointmentController::class, 'wizardServices'])
+            ->name('appointments.wizard.services');
+
+        Route::get('appointments/wizard/all-services', [UserAppointmentController::class, 'wizardAllServices'])
+            ->name('appointments.wizard.all-services');
+
+        Route::get('appointments/wizard/categories', [UserAppointmentController::class, 'wizardCategories'])
+            ->name('appointments.wizard.categories');
+
+        Route::get('appointments/wizard/calendar', [UserAppointmentController::class, 'wizardCalendar'])
+            ->name('appointments.wizard.calendar');
+
+        Route::get('appointments/wizard/clients', [UserAppointmentController::class, 'wizardClients'])
+            ->name('appointments.wizard.clients');
+
+        Route::get('appointments/wizard/waitlist', [UserAppointmentController::class, 'wizardWaitlist'])
+            ->name('appointments.wizard.waitlist');
+
+        Route::get('appointments/wizard/form', [UserAppointmentController::class, 'wizardForm'])
+            ->name('appointments.wizard.form');
+
+        Route::get('appointments/wizard/history', [UserAppointmentController::class, 'wizardHistory'])
+            ->name('appointments.wizard.history');
+
+        Route::get('appointments/{appointment}', [UserAppointmentController::class, 'show'])
+            ->name('appointments.show')
+            ->middleware('can:booking.appointments.view');
+
+        Route::get('appointments/{appointment}/edit', [UserAppointmentController::class, 'edit'])
+            ->name('appointments.edit')
+            ->middleware('can:booking.appointments.edit');
+
+        Route::post('appointments/{appointment}', [UserAppointmentController::class, 'update'])
+            ->name('appointments.update')
+            ->middleware('can:booking.appointments.edit');
+
+        Route::delete('appointments/{appointment}', [UserAppointmentController::class, 'destroy'])
+            ->name('appointments.destroy')
+            ->middleware('can:booking.appointments.edit');
+
+        // مدیریت پرداخت‌های نوبت
+        Route::post('appointments/{appointment}/payments', [UserAppointmentController::class, 'storePayment'])
+            ->name('appointments.payments.store')
+            ->middleware('can:booking.payments.manage');
+
+        Route::patch('appointments/{appointment}/payments/{payment}', [UserAppointmentController::class, 'updatePayment'])
+            ->name('appointments.payments.update')
+            ->middleware('can:booking.payments.manage');
+
+        Route::delete('appointments/{appointment}/payments/{payment}', [UserAppointmentController::class, 'destroyPayment'])
+            ->name('appointments.payments.destroy')
+            ->middleware('can:booking.payments.manage');
+
+        Route::get('settings', [UserSettingsController::class, 'edit'])->name('settings.edit')->middleware('can:booking.settings.manage');
+        Route::post('settings', [UserSettingsController::class, 'update'])->name('settings.update')->middleware('can:booking.settings.manage');
+
+        // تعطیلات عمومی و سراسری سیستم
+        Route::get('settings/holidays', [GlobalExceptionController::class, 'index'])->name('settings.holidays.index')->middleware('can:booking.settings.manage');
+        Route::post('settings/holidays', [GlobalExceptionController::class, 'store'])->name('settings.holidays.store')->middleware('can:booking.settings.manage');
+        Route::post('settings/holidays/batch', [GlobalExceptionController::class, 'batch'])->name('settings.holidays.batch')->middleware('can:booking.settings.manage');
+        Route::delete('settings/holidays/{exception}', [GlobalExceptionController::class, 'destroy'])->name('settings.holidays.destroy')->middleware('can:booking.settings.manage');
+
+        // استثناهای سرویس - فقط مدیریت (ادمین‌ها)
+        Route::get('services/{service}/exceptions', [ServiceExceptionController::class, 'index'])
+            ->name('services.exceptions.index')
+            ->middleware('can:booking.availability.manage');
+
+        Route::post('services/{service}/exceptions', [ServiceExceptionController::class, 'store'])
+            ->name('services.exceptions.store')
+            ->middleware('can:booking.availability.manage');
+
+        Route::post('services/{service}/exceptions/batch', [ServiceExceptionController::class, 'batch'])
+            ->name('services.exceptions.batch')
+            ->middleware('can:booking.availability.manage');
+
+        Route::delete('services/{service}/exceptions/{exception}', [ServiceExceptionController::class, 'destroy'])
+            ->name('services.exceptions.destroy')
+            ->middleware('can:booking.availability.manage');
+
+        // استثناهای ارائه‌دهنده - فقط مدیریت (ادمین‌ها)
+        Route::get('providers/{provider}/exceptions', [ProviderExceptionController::class, 'index'])
+            ->name('providers.exceptions.index')
+            ->middleware('can:booking.availability.manage');
+
+        Route::post('providers/{provider}/exceptions', [ProviderExceptionController::class, 'store'])
+            ->name('providers.exceptions.store')
+            ->middleware('can:booking.availability.manage');
+
+        Route::post('providers/{provider}/exceptions/batch', [ProviderExceptionController::class, 'batch'])
+            ->name('providers.exceptions.batch')
+            ->middleware('can:booking.availability.manage');
+
+        Route::delete('providers/{provider}/exceptions/{exception}', [ProviderExceptionController::class, 'destroy'])
+            ->name('providers.exceptions.destroy')
+            ->middleware('can:booking.availability.manage');
+
+        Route::get('statement', [StatementController::class, 'index'])
+            ->name('statement.index');
+
+        Route::post('statement', [StatementController::class, 'store'])
+            ->name('statement.store');
+
+        Route::put('statement/{statement}/status', [StatementController::class, 'updateStatus'])
+            ->name('statement.update-status');
+
+        Route::delete('statement/{statement}', [StatementController::class, 'destroy'])
+            ->name('statement.destroy');
+
+        Route::get('statement/search-providers', [StatementController::class, 'searchProviders'])
+            ->name('statement.search-providers');
+
+        Route::get('statement/search-users', [StatementController::class, 'searchUsers'])
+            ->name('statement.search-users');
+
+        Route::get('statement/print', [StatementController::class, 'print'])
+            ->name('statement.print');
+    });
+
+    Route::prefix('doctor-profile')
+        ->name('doctor-profile.')->middleware(['auth'])
+        ->group(function () {
+            Route::get('/', [DoctorController::class, 'show'])->name('show');
+            Route::post('/about', [DoctorController::class, 'updateAbout'])->name('about.update');
+            Route::post('/photos', [DoctorController::class, 'uploadPhoto'])->name('photo-upload');
+            Route::post('/videos', [DoctorController::class, 'uploadVideo'])->name('video-upload');
+            Route::delete('/media/{id}', [DoctorController::class, 'deleteMedia'])->name('media.delete');
+            Route::post('/insurance/update', [DoctorController::class, 'updateInsurance'])->name('update.insurance');
+            Route::post('/stats/update', [DoctorController::class, 'updateStats'])->name('update.stats');
+            Route::post('/visibility/toggle', [DoctorController::class, 'toggleVisibility'])
+                ->name('visibility.toggle');
+
+        });
+});

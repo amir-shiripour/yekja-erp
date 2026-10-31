@@ -1,0 +1,1058 @@
+@extends('clients::layouts.client')
+
+@php
+    use Illuminate\Support\Facades\Route;
+    use Modules\Clients\Entities\ClientSetting;
+
+    $title = 'ورود به پنل مشتریان';
+
+    $registerEnabled = (bool) ClientSetting::getValue('auth.register_enabled', false);
+
+    $mode         = ClientSetting::getValue('auth.mode', 'password'); // password | otp | both
+    $defaultLogin = ClientSetting::getValue('auth.default', 'password'); // password | otp
+
+    if (!in_array($mode, ['password','otp','both'], true)) $mode = 'password';
+    if (!in_array($defaultLogin, ['password','otp'], true)) $defaultLogin = 'password';
+
+    // اگر mode=otp باشد، پیش‌فرض هم otp
+    if ($mode === 'otp') $defaultLogin = 'otp';
+    if ($mode === 'password') $defaultLogin = 'password';
+
+    // اگر OTP ارسال شده باشد (از Controller)
+    $otpSent      = (bool) session('otp_sent', false);
+    $otpUsername  = (string) session('otp_username', old('username', ''));
+    $otpResendIn  = (int) session('otp_resend_in', 60);
+
+    // تب فعال: اگر کد ارسال شده → otp، وگرنه طبق default
+    $initialTab = $otpSent ? 'otp' : $defaultLogin;
+
+    // مسیرهای OTP اگر وجود داشته باشند
+    $otpSendUrl   = Route::has('client.otp.send') ? route('client.otp.send') : null;
+    $otpVerifyUrl = Route::has('client.otp.verify') ? route('client.otp.verify') : null;
+
+    // متغیرهای ثبت‌نام
+    $activeForm = \Modules\Clients\Entities\ClientForm::active();
+    $regFields = $activeForm ? collect($activeForm->schema['fields'] ?? [])->where('show_in_registration', true) : collect();
+
+    $hasProvinceCityField = $regFields->contains(fn($f) => ($f['type'] ?? '') === 'select-province-city');
+    $provincesData = [];
+    $provinces = [];
+    if ($hasProvinceCityField) {
+        $jsonPath = base_path('Modules/Clients/resources/data/iran-provinces-cities.json');
+        if (file_exists($jsonPath)) {
+            $provincesData = json_decode(file_get_contents($jsonPath), true) ?? [];
+            $provinces = array_keys($provincesData);
+        }
+    }
+    $hasDateField = $regFields->contains(fn($f) => ($f['type'] ?? '') === 'date');
+
+    $isRegisterMode = session('register_mode') || request()->query('register') == '1' || old('via_otp') !== null || $errors->has('full_name') || $errors->has('email') || $errors->has('phone') || $errors->has('national_code');
+    $registerUsername = session('register_username') ?: request()->query('username') ?: old('username');
+    $registerPassword = session('register_password') ?: old('password');
+    $registerAlert = session('register_alert');
+    $viaOtp = session('via_otp') || old('via_otp') || request()->query('via_otp') == '1';
+
+    // بومی‌سازی عنوان نام کاربری بر اساس تنظیمات
+    $usernameStrategy = ClientSetting::getValue('username_strategy')
+        ?? ClientSetting::getValue('username.strategy', 'email_local');
+
+    // تنظیمات تب ورود با رمز عبور
+    $usernameLabelPassword = 'نام کاربری';
+    $usernamePlaceholderPassword = 'Username';
+    $usernameInputTypePassword = 'text';
+
+    if ($usernameStrategy === 'mobile') {
+        $usernameLabelPassword = 'شماره موبایل';
+        $usernamePlaceholderPassword = 'مثلاً: 09123456789';
+        $usernameInputTypePassword = 'tel';
+    } elseif ($usernameStrategy === 'email_local' || $usernameStrategy === 'email') {
+        $usernameLabelPassword = 'ایمیل';
+        $usernamePlaceholderPassword = 'مثلاً: info@domain.com';
+        $usernameInputTypePassword = 'email';
+    } elseif ($usernameStrategy === 'national_code') {
+        $usernameLabelPassword = 'کد ملی';
+        $usernamePlaceholderPassword = 'مثلاً: 0012345678';
+        $usernameInputTypePassword = 'text';
+    }
+
+    // تنظیمات تب ورود با کد تایید (OTP)
+    $usernameLabelOtp = 'شماره موبایل (یا نام کاربری)';
+    $usernamePlaceholderOtp = 'مثلاً: 09123456789 یا نام کاربری';
+    $usernameInputTypeOtp = 'text';
+
+    if ($usernameStrategy === 'mobile') {
+        $usernameLabelOtp = 'شماره موبایل';
+        $usernamePlaceholderOtp = 'مثلاً: 09123456789';
+        $usernameInputTypeOtp = 'tel';
+    }
+@endphp
+
+@section('content')
+    <div class="flex min-h-[calc(100vh-140px)] flex-col items-center justify-center py-10 px-4">
+
+        <div class="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
+
+                {{-- Header --}}
+                <div class="bg-gray-50/50 dark:bg-gray-900/30 px-6 py-6 border-b border-gray-100 dark:border-gray-700/60 text-center">
+                    <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                        {{ $isRegisterMode ? 'تکمیل ثبت‌نام' : ($registerEnabled ? 'ورود و ثبت‌نام' : 'ورود به پرتال') }}
+                    </h1>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto leading-relaxed">
+                        {{ $isRegisterMode ? 'لطفاً اطلاعات زیر را برای عضویت وارد کنید.' : 'جهت دسترسی به داشبورد و پیگیری درخواست‌ها وارد شوید.' }}
+                    </p>
+                </div>
+
+                @if($isRegisterMode)
+                    {{-- فرم ثبت‌نام --}}
+                    @if($hasDateField)
+                        @includeIf('partials.jalali-date-picker')
+                    @endif
+
+                    <div class="px-6 py-8 space-y-5">
+                        @if ($registerAlert)
+                            <div class="rounded-xl bg-indigo-50 p-3 text-xs font-medium text-indigo-700 dark:bg-indigo-900/10 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/20">
+                                {{ $registerAlert }}
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('client.register.submit') }}" class="space-y-4" enctype="multipart/form-data">
+                            @csrf
+                            
+                            <input type="hidden" name="username" value="{{ $registerUsername }}">
+                            <input type="hidden" name="via_otp" value="{{ $viaOtp ? '1' : '0' }}">
+                            
+                            @if($viaOtp)
+                                <div class="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3.5 dark:border-emerald-800/40 dark:bg-emerald-950/20">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <span class="block text-xs font-semibold text-emerald-800 dark:text-emerald-300">شماره موبایل تایید شده</span>
+                                                <span class="block text-xs font-bold text-gray-700 dark:text-gray-200 dir-ltr text-right">{{ $registerUsername }}</span>
+                                            </div>
+                                        </div>
+                                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                                            احراز شده
+                                        </span>
+                                    </div>
+                                    <input type="hidden" name="phone" value="{{ $registerUsername }}">
+                                </div>
+                            @endif
+
+                            @if(!$viaOtp)
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                                        رمز عبور
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative" x-data="{ show: false }">
+                                        <input :type="show ? 'text' : 'password'"
+                                               name="password"
+                                               required
+                                               class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100 dir-ltr"
+                                               placeholder="رمز عبور خود را انتخاب کنید (حداقل ۶ کاراکتر)">
+                                        <button type="button" @click="show = !show"
+                                                class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 hover:text-gray-600 focus:outline-none">
+                                            <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <svg x-show="show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" x-cloak>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    @error('password')
+                                        <div class="text-xs text-red-500 mt-1">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @endif
+
+                            {{-- رندر پویا فیلدها --}}
+                            @foreach($regFields as $field)
+                                @php
+                                    $fid = $field['id'];
+                                    if ($fid === 'username' || $fid === 'password') {
+                                        continue;
+                                    }
+                                    if ($viaOtp && $fid === 'phone') {
+                                        continue;
+                                    }
+                                    $isRequired = !empty($field['required']);
+                                    $fieldType = $field['type'] ?? 'text';
+
+                                    // تعیین مقدار پیش‌فرض بر اساس استراتژی نام کاربری
+                                    $defaultValue = old($fid);
+                                    if (empty($defaultValue)) {
+                                        if ($fid === 'phone' && $usernameStrategy === 'mobile') {
+                                            $defaultValue = $registerUsername;
+                                        } elseif ($fid === 'email' && ($usernameStrategy === 'email_local' || $usernameStrategy === 'email')) {
+                                            $defaultValue = str_contains($registerUsername, '@') ? $registerUsername : '';
+                                        } elseif ($fid === 'national_code' && $usernameStrategy === 'national_code') {
+                                            $defaultValue = $registerUsername;
+                                        }
+                                    }
+
+                                    // پارس گزینه‌ها برای select / radio / checkbox
+                                    $opts = [];
+                                    if (!empty($field['options_json'])) {
+                                        $parsed = json_decode($field['options_json'], true);
+                                        if (is_array($parsed)) {
+                                            $opts = $parsed;
+                                        } else {
+                                            $lines = array_filter(array_map('trim', explode("\n", $field['options_json'])));
+                                            foreach ($lines as $line) {
+                                                if (str_contains($line, ':')) {
+                                                    [$okey, $oval] = array_map('trim', explode(':', $line, 2));
+                                                    $opts[$okey] = $oval;
+                                                } else {
+                                                    $opts[$line] = $line;
+                                                }
+                                            }
+                                        }
+                                    } elseif (!empty($field['options']) && is_array($field['options'])) {
+                                        $opts = $field['options'];
+                                    }
+                                @endphp
+                                
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                                        {{ $field['label'] }}
+                                        @if($isRequired)
+                                            <span class="text-red-500">*</span>
+                                        @endif
+                                    </label>
+                                    
+                                    @if($fieldType === 'textarea')
+                                        <textarea name="{{ $fid }}" rows="3" {{ $isRequired ? 'required' : '' }}
+                                                  placeholder="{{ $field['placeholder'] ?? '' }}"
+                                                  class="block w-full rounded-xl border-gray-200 bg-gray-50 py-2.5 px-4 text-sm text-gray-900 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100 resize-y min-h-[80px]">{{ $defaultValue }}</textarea>
+
+                                    @elseif($fieldType === 'date')
+                                        <div class="relative">
+                                            <input type="text" name="{{ $fid }}" value="{{ $defaultValue }}" {{ $isRequired ? 'required' : '' }}
+                                                   placeholder="{{ $field['placeholder'] ?? 'مثلاً: 1403/01/01' }}"
+                                                   data-jdp-only-date
+                                                   class="block w-full rounded-xl border-gray-200 bg-gray-50 py-2.5 px-4 text-sm text-gray-900 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100">
+                                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+
+                                    @elseif($fieldType === 'select')
+                                        @if(!empty($field['multiple']))
+                                            @php
+                                                $selectedVals = is_array($defaultValue) ? $defaultValue : (is_string($defaultValue) && str_starts_with(trim($defaultValue), '[') ? (json_decode($defaultValue, true) ?: []) : ($defaultValue ? [$defaultValue] : []));
+                                            @endphp
+                                            <select name="{{ $fid }}[]" multiple {{ $isRequired ? 'required' : '' }}
+                                                    class="block w-full rounded-xl border-gray-200 bg-gray-50 py-2.5 px-4 text-sm text-gray-900 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100 min-h-[90px]">
+                                                @foreach($opts as $okey => $oval)
+                                                    @php $v = is_string($okey) ? $okey : $oval; $l = is_string($oval) ? $oval : $okey; @endphp
+                                                    <option value="{{ $v }}" {{ in_array($v, $selectedVals) ? 'selected' : '' }}>{{ $l }}</option>
+                                                @endforeach
+                                            </select>
+                                            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">برای انتخاب چند مورد کلید Ctrl یا Cmd را نگه دارید.</p>
+                                        @else
+                                            <div class="relative">
+                                                <select name="{{ $fid }}" {{ $isRequired ? 'required' : '' }}
+                                                        class="block w-full appearance-none rounded-xl border-gray-200 bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-900 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100">
+                                                    <option value="">{{ $field['placeholder'] ?? 'انتخاب کنید...' }}</option>
+                                                    @foreach($opts as $okey => $oval)
+                                                        @php $v = is_string($okey) ? $okey : $oval; $l = is_string($oval) ? $oval : $okey; @endphp
+                                                        <option value="{{ $v }}" {{ (string)$defaultValue === (string)$v ? 'selected' : '' }}>{{ $l }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                    @elseif($fieldType === 'radio')
+                                        <div class="flex flex-wrap gap-4 pt-1">
+                                            @foreach($opts as $okey => $oval)
+                                                @php $v = is_string($okey) ? $okey : $oval; $l = is_string($oval) ? $oval : $okey; @endphp
+                                                <label class="inline-flex items-center gap-2 cursor-pointer group">
+                                                    <input type="radio" name="{{ $fid }}" value="{{ $v }}" {{ (string)$defaultValue === (string)$v ? 'checked' : '' }}
+                                                           {{ $isRequired ? 'required' : '' }}
+                                                           class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 transition-colors cursor-pointer">
+                                                    <span class="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ $l }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+
+                                    @elseif($fieldType === 'checkbox')
+                                        @if(!empty($opts))
+                                            @php
+                                                $selectedVals = is_array($defaultValue) ? $defaultValue : (is_string($defaultValue) && str_starts_with(trim($defaultValue), '[') ? (json_decode($defaultValue, true) ?: []) : ($defaultValue ? [$defaultValue] : []));
+                                            @endphp
+                                            <div class="flex flex-wrap gap-4 pt-1">
+                                                @foreach($opts as $okey => $oval)
+                                                    @php $v = is_string($okey) ? $okey : $oval; $l = is_string($oval) ? $oval : $okey; @endphp
+                                                    <label class="inline-flex items-center gap-2 cursor-pointer group">
+                                                        <input type="checkbox" name="{{ $fid }}[]" value="{{ $v }}" {{ in_array($v, $selectedVals) ? 'checked' : '' }}
+                                                               class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 transition-colors cursor-pointer">
+                                                        <span class="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ $l }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="flex items-center gap-2 pt-1">
+                                                <input type="hidden" name="{{ $fid }}" value="0">
+                                                <input type="checkbox" id="field_{{ $fid }}" name="{{ $fid }}" value="1" {{ !empty($defaultValue) ? 'checked' : '' }}
+                                                       class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 transition-colors cursor-pointer">
+                                                <label for="field_{{ $fid }}" class="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+                                                    {{ $field['placeholder'] ?: 'تأیید و موافقت' }}
+                                                </label>
+                                            </div>
+                                        @endif
+
+                                    @elseif($fieldType === 'select-province-city')
+                                        @php
+                                            $currentVal = $defaultValue;
+                                            if (is_string($currentVal)) {
+                                                $currentVal = json_decode($currentVal, true) ?? [];
+                                            }
+                                            if (!is_array($currentVal)) {
+                                                $currentVal = [];
+                                            }
+                                            $selectedProvince = $currentVal['province'] ?? '';
+                                            $selectedCity = $currentVal['city'] ?? '';
+                                            $cities = ($selectedProvince && isset($provincesData[$selectedProvince])) ? $provincesData[$selectedProvince] : [];
+                                        @endphp
+                                        <div class="grid grid-cols-2 gap-2" x-data="{
+                                            province: @js($selectedProvince),
+                                            city: @js($selectedCity),
+                                            provinces: @js($provinces),
+                                            cities: @js($cities),
+                                            provincesData: @js($provincesData),
+                                            searchProvince: '',
+                                            searchCity: '',
+                                            openProvince: false,
+                                            openCity: false,
+                                            init() {
+                                                if (this.province && this.provincesData[this.province]) {
+                                                    this.cities = this.provincesData[this.province];
+                                                }
+                                            },
+                                            updateCities() {
+                                                if (this.province && this.provincesData[this.province]) {
+                                                    this.cities = this.provincesData[this.province];
+                                                    this.city = '';
+                                                    this.searchCity = '';
+                                                    this.updateValue();
+                                                } else {
+                                                    this.cities = [];
+                                                    this.city = '';
+                                                    this.searchCity = '';
+                                                    this.updateValue();
+                                                }
+                                            },
+                                            updateValue() {
+                                                $refs.hiddenInput.value = JSON.stringify({province: this.province || '', city: this.city || ''});
+                                            },
+                                            get filteredProvinces() {
+                                                if (!this.searchProvince) return this.provinces;
+                                                return this.provinces.filter(p => p.includes(this.searchProvince));
+                                            },
+                                            get filteredCities() {
+                                                if (!this.searchCity) return this.cities;
+                                                return this.cities.filter(c => c.includes(this.searchCity));
+                                            }
+                                        }">
+                                            <input type="hidden" name="{{ $fid }}" x-ref="hiddenInput" value="{{ is_string($defaultValue) ? $defaultValue : json_encode($currentVal) }}">
+
+                                            {{-- استان --}}
+                                            <div class="relative" @click.outside="openProvince = false">
+                                                <div @click="openProvince = !openProvince"
+                                                     class="flex items-center justify-between cursor-pointer rounded-xl border border-gray-200 bg-gray-50 py-2.5 px-3 text-xs text-gray-900 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100">
+                                                    <span x-text="province ? province : 'انتخاب استان...'" :class="{'text-gray-400 dark:text-gray-500': !province}" class="truncate"></span>
+                                                    <svg class="h-3.5 w-3.5 text-gray-400 transition-transform duration-200 shrink-0 mr-1" :class="{'rotate-180': openProvince}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+
+                                                <div x-show="openProvince" x-transition x-cloak
+                                                     class="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                                                    <div class="p-2 border-b border-gray-100 dark:border-gray-700">
+                                                        <input type="text" x-model="searchProvince" placeholder="جستجوی استان..."
+                                                               class="w-full rounded-lg border-gray-200 bg-gray-50 px-2 py-1 text-xs text-gray-900 focus:border-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                                               @click.stop>
+                                                    </div>
+                                                    <ul class="max-h-48 overflow-y-auto p-1 scrollbar-thin">
+                                                        <template x-for="prov in filteredProvinces" :key="prov">
+                                                            <li @click="province = prov; updateCities(); openProvince = false; searchProvince = ''"
+                                                                class="cursor-pointer select-none py-1.5 px-2.5 text-xs rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                                                                :class="{'bg-indigo-50 text-indigo-700 font-medium dark:bg-indigo-900/30 dark:text-indigo-300': province === prov, 'text-gray-700 dark:text-gray-200': province !== prov}">
+                                                                <span x-text="prov"></span>
+                                                            </li>
+                                                        </template>
+                                                        <li x-show="filteredProvinces.length === 0" class="py-2 px-2 text-[11px] text-gray-400 text-center">
+                                                            یافت نشد
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                            {{-- شهر --}}
+                                            <div class="relative" @click.outside="openCity = false">
+                                                <div @click="if(province && cities.length > 0) openCity = !openCity"
+                                                     class="flex items-center justify-between cursor-pointer rounded-xl border border-gray-200 bg-gray-50 py-2.5 px-3 text-xs text-gray-900 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100"
+                                                     :class="{'opacity-50 cursor-not-allowed': !province || cities.length === 0}">
+                                                    <span x-text="city ? city : 'انتخاب شهر...'" :class="{'text-gray-400 dark:text-gray-500': !city}" class="truncate"></span>
+                                                    <svg class="h-3.5 w-3.5 text-gray-400 transition-transform duration-200 shrink-0 mr-1" :class="{'rotate-180': openCity}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </div>
+
+                                                <div x-show="openCity" x-transition x-cloak
+                                                     class="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                                                    <div class="p-2 border-b border-gray-100 dark:border-gray-700">
+                                                        <input type="text" x-model="searchCity" placeholder="جستجوی شهر..."
+                                                               class="w-full rounded-lg border-gray-200 bg-gray-50 px-2 py-1 text-xs text-gray-900 focus:border-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                                                               @click.stop>
+                                                    </div>
+                                                    <ul class="max-h-48 overflow-y-auto p-1 scrollbar-thin">
+                                                        <template x-for="(cityItem, index) in filteredCities" :key="index">
+                                                            <li @click="city = cityItem; updateValue(); openCity = false; searchCity = ''"
+                                                                class="cursor-pointer select-none py-1.5 px-2.5 text-xs rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                                                                :class="{'bg-indigo-50 text-indigo-700 font-medium dark:bg-indigo-900/30 dark:text-indigo-300': city === cityItem, 'text-gray-700 dark:text-gray-200': city !== cityItem}">
+                                                                <span x-text="cityItem"></span>
+                                                            </li>
+                                                        </template>
+                                                        <li x-show="filteredCities.length === 0" class="py-2 px-2 text-[11px] text-gray-400 text-center">
+                                                            یافت نشد
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    @elseif($fieldType === 'file' || $fieldType === 'profile-photo')
+                                        <input type="file" name="{{ $fid }}" {{ $isRequired ? 'required' : '' }}
+                                               class="block w-full text-xs text-gray-500 file:ml-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-900/30 dark:file:text-indigo-300 cursor-pointer transition-all border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/50">
+
+                                    @elseif($fieldType === 'email')
+                                        <input type="email" name="{{ $fid }}" value="{{ $defaultValue }}" {{ $isRequired ? 'required' : '' }}
+                                               dir="ltr" placeholder="{{ $field['placeholder'] ?? 'info@example.com' }}"
+                                               class="block w-full rounded-xl border-gray-200 bg-gray-50 py-2.5 px-4 text-sm text-gray-900 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100">
+
+                                    @elseif($fieldType === 'number')
+                                        <input type="number" name="{{ $fid }}" value="{{ $defaultValue }}" {{ $isRequired ? 'required' : '' }}
+                                               placeholder="{{ $field['placeholder'] ?? '' }}"
+                                               class="block w-full rounded-xl border-gray-200 bg-gray-50 py-2.5 px-4 text-sm text-gray-900 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100">
+
+                                    @else
+                                        <input type="{{ $fieldType === 'tel' ? 'tel' : 'text' }}"
+                                               name="{{ $fid }}"
+                                               value="{{ $defaultValue }}"
+                                               placeholder="{{ $field['placeholder'] ?? '' }}"
+                                               {{ $isRequired ? 'required' : '' }}
+                                               class="block w-full rounded-xl border-gray-200 bg-gray-50 py-2.5 px-4 text-sm text-gray-900 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100">
+                                    @endif
+                                    
+                                    @error($fid)
+                                        <div class="text-xs text-red-500 mt-1">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @endforeach
+
+                            <button type="submit"
+                                    class="group relative flex w-full justify-center rounded-xl bg-indigo-600 py-3 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 hover:shadow-indigo-600/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 transition-all active:scale-[0.98]">
+                                تکمیل ثبت‌نام و ورود
+                            </button>
+
+                            <a href="{{ route('client.login') }}"
+                               class="block text-center text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors mt-2">
+                                بازگشت به صفحه ورود
+                            </a>
+                        </form>
+                    </div>
+                @else
+
+                {{-- Alpine / JS Wrapper --}}
+                @if($mode === 'both' || $mode === 'otp' || $mode === 'password')
+                    <style>[x-cloak]{display:none!important}</style>
+
+                    <div class="{{ ($mode === 'both' || $mode === 'password') ? 'px-6 pt-5' : 'px-6 py-8' }}"
+                         x-data="clientPortalLogin({
+                            mode: @js($mode),
+                            initialTab: @js($initialTab),
+                            otpSent: @js($otpSent),
+                            otpUsername: @js($otpUsername),
+                            otpResendIn: @js($otpResendIn),
+                            otpSendUrl: @js($otpSendUrl),
+                            otpVerifyUrl: @js($otpVerifyUrl),
+                            checkUsernameUrl: @js(route('client.login.check-username')),
+                            loginUrl: @js(route('client.login')),
+                            csrf: @js(csrf_token()),
+                            dashboardUrl: @js(route('client.dashboard')),
+                            oldUsername: @js(old('username', '')),
+                            hasErrors: @js($errors->any()),
+                            usernameLabelOtp: @js($usernameLabelOtp),
+                            usernameLabelPassword: @js($usernameLabelPassword),
+                         })"
+                         x-init="init()"
+                    >
+                        {{-- Tabs (فقط اگر both) --}}
+                        @if($mode === 'both')
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <button type="button"
+                                        @click="tab='password'; clearAlert()"
+                                        class="px-3 py-2 rounded-xl border transition"
+                                        :class="tab==='password'
+                                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-200'
+                                            : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300'">
+                                    ورود با رمز
+                                </button>
+
+                                <button type="button"
+                                        @click="tab='otp'; clearAlert()"
+                                        class="px-3 py-2 rounded-xl border transition"
+                                        :class="tab==='otp'
+                                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-200'
+                                            : 'border-gray-200 text-gray-600 dark:border-gray-700 dark:text-gray-300'">
+                                    ورود با کد پیامکی
+                                </button>
+                            </div>
+                        @endif
+
+                        {{-- Alert مشترک (برای OTP) --}}
+                        <template x-if="alert.message">
+                            <div class="mt-4 rounded-xl p-3 text-xs font-medium border flex items-center gap-2"
+                                 :class="alert.type==='error'
+                                    ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/20'
+                                    : 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/10 dark:text-emerald-400 dark:border-emerald-900/20'">
+                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span x-text="alert.message"></span>
+                            </div>
+                        </template>
+
+                        {{-- ---------- PASSWORD FORM ---------- --}}
+                        @if($mode === 'both' || $mode === 'password')
+                            <div class="mt-4" x-show="tab==='password'" x-cloak>
+                                <form method="POST" action="{{ route('client.login.submit') }}" class="px-0 py-6 space-y-5" @submit="checkPasswordUsername($event)">
+                                    @csrf
+
+                                    {{-- خطای مربوط به password --}}
+                                    @if($errors->has('username') || $errors->has('password'))
+                                        <div class="rounded-xl bg-red-50 p-3 text-xs font-medium text-red-600 dark:bg-red-900/10 dark:text-red-400 border border-red-100 dark:border-red-900/20 flex items-center gap-2">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span>{{ $errors->first('username') ?: $errors->first('password') }}</span>
+                                        </div>
+                                    @endif
+
+                                     {{-- username --}}
+                                     <div x-show="pwd.step === 1">
+                                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">{{ $usernameLabelPassword }}</label>
+                                         <div class="relative">
+                                             <input type="{{ $usernameInputTypePassword }}" name="username" x-model="pwd.username"
+                                                    autocomplete="username" :required="pwd.step === 1"
+                                                    class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900
+                                                           placeholder-gray-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20
+                                                           transition-all dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100 dark:focus:bg-gray-900 dir-ltr"
+                                                    placeholder="{{ $usernamePlaceholderPassword }}">
+                                             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                     </div>
+
+                                     {{-- username info step 2 --}}
+                                     <div x-show="pwd.step === 2" class="space-y-4" x-cloak>
+                                         <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/30 px-4 py-3 text-xs text-gray-600 dark:text-gray-300 flex justify-between items-center">
+                                             <div>
+                                                 <span class="font-medium">{{ $usernameLabelPassword }}:</span>
+                                                 <span class="font-sans dir-ltr ml-1" x-text="pwd.username"></span>
+                                             </div>
+                                             <button type="button" @click="prevStep()" class="text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold transition-colors">
+                                                 تغییر
+                                             </button>
+                                         </div>
+                                     </div>
+
+                                    {{-- password --}}
+                                    <div x-show="pwd.step === 2" class="animate-in fade-in duration-300" x-cloak>
+                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">رمز عبور</label>
+                                        <div class="relative">
+                                            <input :type="pwd.show ? 'text' : 'password'" name="password" x-model="pwd.password"
+                                                   autocomplete="current-password" :required="pwd.step === 2"
+                                                   class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900
+                                                          placeholder-gray-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20
+                                                          transition-all dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100 dark:focus:bg-gray-900 dir-ltr"
+                                                   placeholder="••••••••">
+                                            <button type="button" @click="pwd.show = !pwd.show"
+                                                    class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 hover:text-gray-600 focus:outline-none">
+                                                <svg x-show="!pwd.show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                <svg x-show="pwd.show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" x-cloak>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between" x-show="pwd.step === 2" x-cloak>
+                                        <label class="flex items-center cursor-pointer group">
+                                            <div class="relative flex items-center">
+                                                <input type="checkbox" name="remember"
+                                                       class="peer h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 cursor-pointer" />
+                                            </div>
+                                            <span class="mr-2 text-xs font-medium text-gray-600 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-300 select-none transition-colors">مرا به خاطر بسپار</span>
+                                        </label>
+                                    </div>
+
+                                    <button type="submit"
+                                            :disabled="pwd.loading"
+                                            class="group relative flex w-full justify-center rounded-xl bg-indigo-600 py-3 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 hover:shadow-indigo-600/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 transition-all active:scale-[0.98] disabled:opacity-50">
+                                        <span x-show="pwd.step === 1 && !pwd.loading">مرحله بعد</span>
+                                        <span x-show="pwd.step === 1 && pwd.loading">در حال بررسی...</span>
+                                        <span x-show="pwd.step === 2">ورود با رمز</span>
+                                        <svg class="mr-2 h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14" />
+                                        </svg>
+                                    </button>
+
+                                    <div class="pt-4 mt-2 border-t border-dashed border-gray-200 dark:border-gray-700 text-center">
+                                        <p class="text-[10px] text-gray-400 dark:text-gray-500">
+                                            در صورت فراموشی رمز عبور، با پشتیبانی تماس بگیرید.
+                                        </p>
+                                    </div>
+                                </form>
+                            </div>
+                        @endif
+
+                        {{-- ---------- OTP UI (برای otp-only و both) ---------- --}}
+                        <div class="{{ $mode === 'both' ? 'mt-4' : '' }}"
+                             x-show="tab==='otp'"
+                             x-cloak
+                        >
+                            {{-- اگر route ها موجود نیستند --}}
+                            @if(! $otpSendUrl || ! $otpVerifyUrl)
+                                <div class="rounded-xl bg-amber-50 p-3 text-xs font-medium text-amber-800 dark:bg-amber-900/10 dark:text-amber-300 border border-amber-100 dark:border-amber-900/20 flex items-center gap-2">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
+                                    </svg>
+                                    <span>
+                                        مسیرهای OTP (client.otp.send / client.otp.verify) تعریف نشده‌اند؛
+                                        برای فعال شدن OTP بدون رفرش، این route ها باید اضافه شوند.
+                                    </span>
+                                </div>
+                             @endif
+
+                             {{-- مرحله ۱: ارسال کد --}}
+                             <div x-show="!otp.sent" class="py-6 space-y-5">
+                                 <div>
+                                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">{{ $usernameLabelOtp }}</label>
+                                     <div class="relative">
+                                         <input type="{{ $usernameInputTypeOtp }}"
+                                                x-model="otp.username"
+                                                autocomplete="username"
+                                                class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900
+                                                       placeholder-gray-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20
+                                                       transition-all dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100 dark:focus:bg-gray-900 dir-ltr"
+                                                placeholder="{{ $usernamePlaceholderOtp }}">
+                                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500">
+                                        کد به شماره موبایل ثبت‌شده ارسال می‌شود.
+                                    </p>
+                                </div>
+
+                                <button type="button"
+                                        @click="sendOtp()"
+                                        :disabled="otp.loading || !otp.username || !otpSendUrl"
+                                        class="group relative flex w-full justify-center rounded-xl bg-indigo-600 py-3 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 hover:shadow-indigo-600/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span x-show="!otp.loading">ارسال کد پیامکی</span>
+                                    <span x-show="otp.loading">در حال ارسال...</span>
+                                    <svg class="mr-2 h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14" />
+                                    </svg>
+                                </button>
+
+                                <div class="pt-4 mt-2 border-t border-dashed border-gray-200 dark:border-gray-700 text-center">
+                                    <p class="text-[10px] text-gray-400 dark:text-gray-500">
+                                        در صورت مشکل در دریافت پیامک، با پشتیبانی تماس بگیرید.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- مرحله ۲: تایید کد --}}
+                            <div x-show="otp.sent" class="py-6 space-y-5">
+                                <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/30 px-4 py-3 text-xs text-gray-600 dark:text-gray-300 flex justify-between items-center">
+                                    <div>
+                                        <span class="font-medium">{{ $usernameLabelOtp }}:</span>
+                                        <span class="font-sans dir-ltr ml-1" x-text="otp.username"></span>
+                                    </div>
+                                    <button type="button" @click="resetOtp()" class="text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold transition-colors">
+                                        تغییر
+                                    </button>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">کد پیامکی</label>
+                                    <div class="relative">
+                                        <input type="text"
+                                               x-model="otp.code"
+                                               inputmode="numeric"
+                                               autocomplete="one-time-code"
+                                               class="block w-full rounded-xl border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900
+                                                      placeholder-gray-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20
+                                                      transition-all dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100 dark:focus:bg-gray-900 dir-ltr"
+                                               placeholder="مثلاً 12345">
+                                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button"
+                                        @click="verifyOtp()"
+                                        :disabled="otp.loading || !otp.code || !otpVerifyUrl"
+                                        class="group relative flex w-full justify-center rounded-xl bg-indigo-600 py-3 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 hover:shadow-indigo-600/40 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span x-show="!otp.loading">تایید و ورود</span>
+                                    <span x-show="otp.loading">در حال بررسی...</span>
+                                    <svg class="mr-2 h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14" />
+                                    </svg>
+                                </button>
+
+                                {{-- Resend با تایمر --}}
+                                <button type="button"
+                                        @click="resendOtp()"
+                                        :disabled="otp.loading || otp.resendRemaining > 0 || !otpSendUrl"
+                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 py-2 text-xs text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                                    <template x-if="otp.resendRemaining <= 0">
+                                        <span>ارسال مجدد کد</span>
+                                    </template>
+                                    <template x-if="otp.resendRemaining > 0">
+                                        <span>ارسال مجدد تا <span x-text="otp.resendRemaining"></span> ثانیه دیگر</span>
+                                    </template>
+                                </button>
+
+                                <button type="button"
+                                        @click="resetOtp()"
+                                        class="w-full text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition">
+                                    تغییر {{ $usernameLabelOtp }}
+                                </button>
+
+                                <div class="pt-4 mt-2 border-t border-dashed border-gray-200 dark:border-gray-700 text-center">
+                                    <p class="text-[10px] text-gray-400 dark:text-gray-500">
+                                        در صورت مشکل در دریافت پیامک، با پشتیبانی تماس بگیرید.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- اگر Alpine لود نشد، x-cloak را بردار تا چیزی مخفی نماند --}}
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            if (!window.Alpine) {
+                                document.querySelectorAll('[x-cloak]').forEach(el => el.removeAttribute('x-cloak'));
+                            }
+                        });
+                    </script>
+
+                    <script>
+                        function clientPortalLogin(cfg) {
+                            return {
+                                mode: cfg.mode,
+                                tab: (cfg.mode === 'both') ? (cfg.initialTab || 'password') : ((cfg.mode === 'password') ? 'password' : 'otp'),
+
+                                otpSendUrl: cfg.otpSendUrl,
+                                otpVerifyUrl: cfg.otpVerifyUrl,
+                                csrf: cfg.csrf,
+                                dashboardUrl: cfg.dashboardUrl,
+
+                                alert: { type: null, message: '' },
+
+                                otp: {
+                                    username: cfg.otpUsername || '',
+                                    code: '',
+                                    sent: !!cfg.otpSent,
+                                    loading: false,
+                                    resendRemaining: 0,
+                                    _timer: null,
+                                },
+
+                                pwd: {
+                                    step: (cfg.hasErrors && cfg.oldUsername) ? 2 : 1,
+                                    username: cfg.oldUsername || '',
+                                    password: '',
+                                    loading: false,
+                                    show: false,
+                                },
+
+                                init() {
+                                    // در otp-only همیشه otp
+                                    if (this.mode === 'otp') this.tab = 'otp';
+                                    if (this.mode === 'password') this.tab = 'password';
+
+                                    // اگر از قبل otp_sent آمده باشد، تایمر را فعال کن
+                                    if (this.otp.sent) {
+                                        const s = parseInt(cfg.otpResendIn || 0, 10);
+                                        if (s > 0) this.startResendTimer(s);
+                                    }
+                                },
+
+                                clearAlert() {
+                                    this.alert.type = null;
+                                    this.alert.message = '';
+                                },
+
+                                setAlert(type, message) {
+                                    this.alert.type = type;
+                                    this.alert.message = message || '';
+                                },
+
+                                startResendTimer(seconds) {
+                                    const s = parseInt(seconds || 0, 10);
+                                    this.otp.resendRemaining = isNaN(s) ? 0 : s;
+
+                                    if (this.otp._timer) clearInterval(this.otp._timer);
+
+                                    if (this.otp.resendRemaining > 0) {
+                                        this.otp._timer = setInterval(() => {
+                                            this.otp.resendRemaining = Math.max(0, this.otp.resendRemaining - 1);
+                                            if (this.otp.resendRemaining <= 0) {
+                                                clearInterval(this.otp._timer);
+                                                this.otp._timer = null;
+                                            }
+                                        }, 1000);
+                                    }
+                                },
+
+                                toEnglishDigits(str) {
+                                    if (!str) return '';
+                                    return str.toString()
+                                        .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+                                        .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+                                },
+
+                                async sendOtp() {
+                                    this.clearAlert();
+
+                                    if (!this.otpSendUrl) {
+                                        this.setAlert('error', 'مسیر ارسال OTP تنظیم نشده است.');
+                                        return;
+                                    }
+
+                                    this.otp.username = this.toEnglishDigits(this.otp.username).trim();
+
+                                    if (!this.otp.username) {
+                                        this.setAlert('error', 'لطفاً ' + (cfg.usernameLabelOtp || 'شماره موبایل') + ' را وارد کنید.');
+                                        return;
+                                    }
+
+                                    this.otp.loading = true;
+
+                                    try {
+                                        const res = await fetch(this.otpSendUrl, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': this.csrf,
+                                                'Accept': 'application/json',
+                                            },
+                                            body: JSON.stringify({ username: this.otp.username }),
+                                        });
+
+                                        const json = await res.json().catch(() => ({}));
+
+                                        if (!res.ok || !json.success) {
+                                            // اگر سرور resend_in داد، تایمر را ست کن
+                                            if (json.resend_in) this.startResendTimer(json.resend_in);
+
+                                            this.setAlert('error', json.message || 'خطا در ارسال کد');
+                                            return;
+                                        }
+
+                                        this.otp.sent = true;
+                                        this.otp.code = '';
+                                        this.setAlert('success', 'کد ارسال شد. لطفاً کد را وارد کنید.');
+
+                                        // اولویت: resend_in از سرور
+                                        this.startResendTimer(json.resend_in || cfg.otpResendIn || 60);
+
+                                    } catch (e) {
+                                        this.setAlert('error', 'خطای شبکه در ارسال کد');
+                                    } finally {
+                                        this.otp.loading = false;
+                                    }
+                                },
+
+                                async resendOtp() {
+                                    // همان sendOtp ولی مرحله ۲
+                                    return this.sendOtp();
+                                },
+
+                                async verifyOtp() {
+                                    this.clearAlert();
+
+                                    if (!this.otpVerifyUrl) {
+                                        this.setAlert('error', 'مسیر تایید OTP تنظیم نشده است.');
+                                        return;
+                                    }
+
+                                    this.otp.username = this.toEnglishDigits(this.otp.username).trim();
+                                    this.otp.code = this.toEnglishDigits(this.otp.code).trim();
+
+                                    if (!this.otp.username) {
+                                        this.setAlert('error', 'لطفاً ' + (cfg.usernameLabelOtp || 'شماره موبایل') + ' را وارد کنید.');
+                                        return;
+                                    }
+
+                                    if (!this.otp.code) {
+                                        this.setAlert('error', 'کد پیامکی را وارد کنید.');
+                                        return;
+                                    }
+
+                                    this.otp.loading = true;
+
+                                    try {
+                                        const res = await fetch(this.otpVerifyUrl, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': this.csrf,
+                                                'Accept': 'application/json',
+                                            },
+                                            body: JSON.stringify({ username: this.otp.username, code: this.otp.code }),
+                                        });
+
+                                        const json = await res.json().catch(() => ({}));
+
+                                        if (!res.ok || !json.success) {
+                                            this.setAlert('error', json.message || 'کد نامعتبر است یا منقضی شده است.');
+                                            return;
+                                        }
+
+                                        if (json.register_mode) {
+                                            window.location.href = cfg.loginUrl + "?register=1&username=" + encodeURIComponent(json.username) + "&via_otp=1";
+                                        } else {
+                                            window.location.href = json.redirect || this.dashboardUrl;
+                                        }
+
+                                    } catch (e) {
+                                        this.setAlert('error', 'خطای شبکه در تایید کد');
+                                    } finally {
+                                        this.otp.loading = false;
+                                    }
+                                },
+
+                                resetOtp() {
+                                    this.clearAlert();
+                                    this.otp.sent = false;
+                                    this.otp.code = '';
+
+                                    if (this.otp._timer) {
+                                        clearInterval(this.otp._timer);
+                                        this.otp._timer = null;
+                                    }
+                                    this.otp.resendRemaining = 0;
+                                },
+
+                                async checkPasswordUsername(event) {
+                                    if (this.pwd.step === 1) {
+                                        event.preventDefault();
+                                        
+                                        this.pwd.username = this.toEnglishDigits(this.pwd.username).trim();
+
+                                        if (!this.pwd.username) {
+                                            this.setAlert('error', 'لطفاً ' + (cfg.usernameLabelPassword || 'نام کاربری') + ' را وارد کنید.');
+                                            return;
+                                        }
+
+                                        this.pwd.loading = true;
+                                        this.clearAlert();
+
+                                        try {
+                                            const res = await fetch(cfg.checkUsernameUrl, {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': this.csrf,
+                                                    'Accept': 'application/json',
+                                                },
+                                                body: JSON.stringify({ username: this.pwd.username }),
+                                            });
+
+                                            const json = await res.json().catch(() => ({}));
+
+                                            if (!res.ok) {
+                                                this.setAlert('error', json.message || 'خطا در بررسی نام کاربری');
+                                                return;
+                                            }
+
+                                            if (json.exists) {
+                                                this.pwd.step = 2;
+                                                this.$nextTick(() => {
+                                                    const pwdInput = document.querySelector('input[name="password"]');
+                                                    if (pwdInput) pwdInput.focus();
+                                                });
+                                            } else {
+                                                if (json.register_enabled) {
+                                                    window.location.href = cfg.loginUrl + "?register=1&username=" + encodeURIComponent(this.pwd.username);
+                                                } else {
+                                                    this.setAlert('error', 'حساب کاربری یافت نشد.');
+                                                }
+                                            }
+                                        } catch (e) {
+                                            this.setAlert('error', 'خطای شبکه در بررسی نام کاربری');
+                                        } finally {
+                                            this.pwd.loading = false;
+                                        }
+                                    }
+                                },
+
+                                prevStep() {
+                                    this.pwd.step = 1;
+                                    this.pwd.password = '';
+                                    this.pwd.show = false;
+                                    this.clearAlert();
+                                }
+                            };
+                        }
+                    </script>
+                @endif
+            @endif
+
+            </div>
+        </div>
+    </div>
+@endsection

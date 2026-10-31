@@ -1,0 +1,175 @@
+<?php
+
+namespace Modules\Projects\App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Modules\Projects\App\Http\Models\Project;
+use Modules\Projects\App\Http\Models\ProjectActivity;
+use Modules\Projects\App\Http\Models\ProjectMessage;
+use Illuminate\Support\Str;
+
+class ProjectsMessageController extends Controller
+{
+    public function index(Project $project)
+    {
+        $this->authorize('view', $project);
+
+        $messages = $project->messages()->with('user')->oldest()->get();
+
+        return response()->json($messages);
+    }
+
+    public function store(Request $request, Project $project)
+    {
+        $this->authorize('sendMessage', $project);
+
+        $request->validate([
+            'body' => 'required|string|max:5000',
+            'attachments' => 'nullable|array',
+            'parent_id' => 'nullable|integer|exists:projects_messages,id',
+        ]);
+
+        $parentId = $request->parent_id;
+        if ($parentId) {
+            $parentExists = $project->messages()->where('id', $parentId)->exists();
+            if (!$parentExists) {
+                $parentId = null;
+            }
+        }
+
+        $message = $project->messages()->create([
+            'parent_id' => $parentId,
+            'user_id' => auth()->id(),
+            'body' => $request->body,
+            'attachments' => $request->attachments,
+        ]);
+
+        cache()->put('project_last_message_id_' . $project->id, $message->id, 3600);
+
+        // Broadcast real-time message via Laravel Reverb
+        $loadedMessage = $message->load(['user', 'parent.user']);
+        $payload = [
+            'id' => $loadedMessage->id,
+            'user_id' => $loadedMessage->user_id,
+            'user_name' => $loadedMessage->user?->name ?? 'کاربر',
+            'user_initial' => mb_substr($loadedMessage->user?->name ?? 'U', 0, 1),
+            'body' => $loadedMessage->body,
+            'is_pinned' => (bool)$loadedMessage->is_pinned,
+            'parent_id' => $loadedMessage->parent_id,
+            'parent_body' => $loadedMessage->parent ? mb_substr($loadedMessage->parent->body, 0, 60) : null,
+            'parent_user' => $loadedMessage->parent?->user?->name,
+            'created_at' => $loadedMessage->created_at?->toISOString(),
+        ];
+        \Modules\Projects\App\Events\ProjectMessageEvent::dispatch($project->id, 'new_message', $payload);
+
+        ProjectActivity::log(
+            projectId: $project->id,
+            action: 'message.sent',
+            subject: 'ارسال پیام: ' . Str::limit($message->body, 60),
+            userId: auth()->id()
+        );
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json($loadedMessage, 201);
+        }
+
+        return redirect()->route('projects.projects.show', ['project' => $project->id, 'tab' => 'messages'])
+            ->with('success', 'پیام شما با موفقیت ارسال شد.');
+    }
+
+    public function destroy(Project $project, ProjectMessage $message)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && $user->hasAnyRole(['super-admin', 'superadmin']);
+        $isOwner = $message->user_id === $user?->id;
+        $canDeleteOthers = $project->userHasPermission($user?->id, 'messages.delete');
+
+        if (!$isOwner && !$isSuperAdmin && !$canDeleteOthers) {
+            abort(403, 'شما فقط مجاز به حذف پیام‌های خودتان هستید.');
+        }
+
+        $messageId = $message->id;
+        $message->delete();
+
+        $deletedKey = 'project_deleted_messages_' . $project->id;
+        $existing = cache()->get($deletedKey, []);
+        $existing[] = ['id' => $messageId, 'time' => time()];
+        if (count($existing) > 50) {
+            $existing = array_slice($existing, -50);
+        }
+        cache()->put($deletedKey, $existing, 600); // 10 minutes
+
+        // Broadcast real-time deletion via Laravel Reverb
+        \Modules\Projects\App\Events\ProjectMessageEvent::dispatch($project->id, 'messages_deleted', [
+            'ids' => [$messageId],
+        ]);
+
+        ProjectActivity::log(
+            projectId: $project->id,
+            action: 'message.deleted',
+            subject: 'حذف پیام توسط: ' . auth()->user()->name,
+            userId: auth()->id()
+        );
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json(['ok' => true]);
+        }
+
+        return redirect()->route('projects.projects.show', ['project' => $project->id, 'tab' => 'messages'])
+            ->with('success', 'پیام با موفقیت حذف شد.');
+    }
+
+    public function togglePin(Project $project, ProjectMessage $message)
+    {
+        $this->authorize('pinMessage', $project);
+
+        $isCurrentlyPinned = (bool) $message->is_pinned;
+
+        $message->update([
+            'is_pinned' => !$isCurrentlyPinned,
+            'pinned_at' => !$isCurrentlyPinned ? now() : null,
+            'pinned_by' => !$isCurrentlyPinned ? auth()->id() : null,
+        ]);
+
+        // Notify clients about pin update
+        $pinKey = 'project_pin_updates_' . $project->id;
+        $existing = cache()->get($pinKey, []);
+        $existing[] = ['id' => $message->id, 'is_pinned' => !$isCurrentlyPinned, 'time' => time()];
+        if (count($existing) > 50) {
+            $existing = array_slice($existing, -50);
+        }
+        cache()->put($pinKey, $existing, 600); // 10 minutes
+
+        // Broadcast real-time pin update via Laravel Reverb
+        \Modules\Projects\App\Events\ProjectMessageEvent::dispatch($project->id, 'pin_updated', [
+            'updates' => [
+                [
+                    'id' => $message->id,
+                    'is_pinned' => !$isCurrentlyPinned,
+                ]
+            ]
+        ]);
+
+        $pinAction = !$isCurrentlyPinned ? 'message.pinned' : 'message.unpinned';
+        ProjectActivity::log(
+            projectId: $project->id,
+            action: $pinAction,
+            subject: (!$isCurrentlyPinned ? 'پین شد: ' : 'آنپین شد: ') . Str::limit($message->body, 50),
+            userId: auth()->id()
+        );
+
+        $statusMsg = !$isCurrentlyPinned ? 'پیام با موفقیت سنجاق (پین) شد.' : 'پیام از حالت سنجاق خارج شد.';
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json([
+                'ok' => true,
+                'is_pinned' => (bool) $message->is_pinned,
+                'message' => $statusMsg,
+            ]);
+        }
+
+        return redirect()->route('projects.projects.show', ['project' => $project->id, 'tab' => 'messages'])
+            ->with('success', $statusMsg);
+    }
+}

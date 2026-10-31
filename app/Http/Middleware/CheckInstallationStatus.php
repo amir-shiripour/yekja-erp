@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Session;
+
+class CheckInstallationStatus
+{
+
+    public function handle(Request $request, Closure $next)
+    {
+        try {
+            // مسیر فایل پرچم نصب
+            $installedFlagPath = storage_path('app/installed.flag');
+
+            // ۱. آیا برنامه نصب شده است؟
+            if (File::exists($installedFlagPath)) {
+                return $next($request);
+            }
+
+            // ۲. برنامه نصب نشده است.
+            \Illuminate\Support\Facades\Log::info('[MIDDLEWARE] CheckInstallationStatus: برنامه نصب نشده است', [
+                'path' => $request->path()
+            ]);
+
+            // از آنجا که برنامه نصب نشده است، تحت هیچ شرایطی نباید از سشن دیتابیس استفاده شود (چون جدول سشن‌ها وجود ندارد)
+            Config::set('session.driver', 'file');
+            session()->setDefaultDriver('file');
+            session()->forgetDrivers();
+            app()->forgetInstance('session.store');
+
+            // ۳. آیا درخواست فعلی برای خود صفحه نصب‌کننده یا خطایابی است؟
+            if ($this->isInstallRoute($request)) {
+                try {
+                    // حالا بگذار درخواست به صفحه نصب‌کننده ادامه یابد.
+                    $response = $next($request);
+                    return $response;
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('[MIDDLEWARE] CheckInstallationStatus: خطا در ادامه request', [
+                        'message' => $e->getMessage(),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    throw $e;
+                }
+            }
+
+            // ۴. برنامه نصب نشده و درخواست برای صفحه دیگری است (مثلاً صفحه اصلی).
+            // درخواست را همینجا متوقف کن و کاربر را به نصب‌کننده هدایت کن.
+            // این کار از اجرای میدل‌ور StartSession جلوگیری می‌کند.
+            return redirect()->to('/install');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('[MIDDLEWARE] CheckInstallationStatus خطا', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * بررسی می‌کند که آیا درخواست فعلی مربوط به مسیر نصب است یا خیر.
+     */
+    private function isInstallRoute(Request $request): bool
+    {
+        // اگر مسیر فعلی با 'install' یا '_ignition' (برای خطاها) شروع می‌شود
+        // به آن اجازه عبور می‌دهیم.
+        return $request->is('install') || $request->is('install/*') || $request->is('_ignition/*');
+    }
+}

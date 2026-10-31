@@ -1,0 +1,2392 @@
+<?php
+
+namespace Modules\Workflows\Services;
+
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Schema;
+use Modules\Booking\App\Models\TreatmentPlan;
+use Modules\Booking\Entities\Appointment;
+use Modules\Booking\Entities\BookingAvailabilityException;
+use Modules\Booking\Entities\BookingAvailabilityRule;
+use Modules\Booking\Entities\BookingSetting;
+use Modules\ClientCalls\Entities\ClientCall;
+use Modules\Clients\Entities\ClientForm;
+use Modules\ResellerHub\App\Models\Reseller;
+use Modules\ResellerHub\App\Models\ResellerInvoice;
+use Modules\ResellerHub\App\Models\ResellerInvoicePayment;
+use Modules\ResellerHub\App\Models\ResellerOrder;
+use Modules\Services\App\Http\Models\Invoice;
+use Modules\Services\App\Http\Models\Order;
+use Modules\Settings\Entities\Setting;
+use Modules\Tasks\Entities\Task;
+use Nwidart\Modules\Facades\Module;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
+use Morilog\Jalali\Jalalian;
+use Modules\Workflows\Entities\Workflow;
+use Modules\Workflows\Entities\WorkflowStage;
+use Modules\Workflows\Entities\WorkflowAction;
+use Modules\Workflows\Entities\WorkflowInstance;
+use Modules\Workflows\Entities\WorkflowLog;
+use Modules\Workflows\Entities\WorkflowTrigger;
+use Modules\Workflows\Entities\WorkflowNode;
+use Modules\Workflows\Entities\WorkflowEdge;
+use Modules\Workflows\Events\NodeReached;
+use Modules\Workflows\Events\WorkflowCompleted;
+use Modules\Workflows\Services\ConditionEvaluator;
+use Spatie\Permission\Models\Role;
+
+class WorkflowEngine
+{
+    public function startWorkflow(Workflow $workflow, ?string $relatedType = null, ?int $relatedId = null, array $payload = []): ?WorkflowInstance
+    {
+        Log::info("[Workflows] Request to start workflow: '{$workflow->key}' for {$relatedType}:{$relatedId}");
+
+        if (!$workflow->is_active) {
+            Log::warning("[Workflows] Workflow inactive: '{$workflow->key}'");
+            return null;
+        }
+
+        $initialStage = $workflow->stages()->where('is_initial', true)->orderBy('sort_order')->first()
+            ?: $workflow->stages()->orderBy('sort_order')->first();
+
+        if (! $initialStage) {
+            Log::warning("[Workflows] No initial stage found for workflow: '{$workflow->name}'");
+            return null;
+        }
+
+        return DB::transaction(function () use ($workflow, $initialStage, $relatedType, $relatedId, $payload) {
+            $instance = WorkflowInstance::create([
+                'workflow_id'      => $workflow->id,
+                'related_type'     => $relatedType ?? 'WORKFLOW_SCHEDULE',
+                'related_id'       => $relatedId ?? 0,
+                'current_stage_id' => $initialStage->id,
+                'status'           => WorkflowInstance::STATUS_ACTIVE,
+                'started_at'       => now(),
+                'created_by'       => Auth::id(),
+                'payload'          => $payload, // Store payload if column exists, or handle it in context
+            ]);
+
+            // If payload column doesn't exist in WorkflowInstance, we can't store it directly there.
+            // But we can pass it to runStageActions.
+            // For now, let's assume we pass it via context building.
+
+            Log::info("[Workflows] Instance created: {$instance->id}. Running initial stage actions.");
+            $this->runStageActions($instance, $initialStage, $payload);
+
+            return $instance;
+        });
+    }
+
+    public function start($workflow, ?string $relatedType = null, ?int $relatedId = null, array $payload = []): ?WorkflowInstance
+    {
+        if (class_exists(Module::class) && !Module::isEnabled('Workflows')) {
+            return null;
+        }
+
+        if (!Schema::hasTable('workflows')) {
+            return null;
+        }
+
+        if ($workflow instanceof Workflow) {
+            return $this->startNodeWorkflow($workflow, $relatedType, $relatedId, $payload);
+        }
+
+        $workflowKey = $workflow;
+
+        // 1. Try to find workflow by key (Legacy/Direct trigger)
+        $workflowModel = Workflow::where('key', $workflowKey)->first();
+        if ($workflowModel) {
+            if ($workflowModel->nodes()->exists()) {
+                return $this->startNodeWorkflow($workflowModel, $relatedType, $relatedId, $payload);
+            }
+            return $this->startWorkflow($workflowModel, $relatedType, $relatedId, $payload);
+        }
+
+        // 2. Try to find workflows by EVENT trigger
+        // We look for workflows that have a trigger of type EVENT with config->event_key matching the workflowKey
+        $workflows = Workflow::where('is_active', true)
+            ->whereHas('triggers', function ($q) use ($workflowKey) {
+                $q->where('type', WorkflowTrigger::TYPE_EVENT)
+                  ->where(function ($query) use ($workflowKey) {
+                      $query->whereJsonContains('config->event_key', $workflowKey)
+                            ->orWhere('config->event_key', $workflowKey);
+                  });
+            })
+            ->with(['triggers' => function ($q) {
+                $q->where('type', WorkflowTrigger::TYPE_EVENT);
+            }])
+            ->get();
+
+        if ($workflows->isEmpty()) {
+            Log::warning("[Workflows] No workflow found for key/event: '{$workflowKey}'");
+            return null;
+        }
+
+        $lastInstance = null;
+        foreach ($workflows as $wf) {
+            $trigger = $wf->triggers->first(function ($t) use ($workflowKey) {
+                $eventKey = $t->config['event_key'] ?? null;
+                if (is_array($eventKey)) {
+                    return in_array($workflowKey, $eventKey);
+                }
+                return $eventKey === $workflowKey;
+            });
+
+            if ($trigger) {
+                $config = $trigger->config;
+
+                // 1. Service Filter
+                if ($relatedType === 'APPOINTMENT' && file_exists(base_path('Modules/Booking/Entities/Appointment.php')) && class_exists('Modules\\Booking\\Entities\\Appointment')) {
+                    $appt = Appointment::find($relatedId);
+                    if ($appt) {
+                        $serviceIds = $config['service_ids'] ?? (isset($config['service_id']) ? [$config['service_id']] : []);
+                        $serviceIds = array_filter(array_map('intval', $serviceIds));
+                        $serviceOperator = $config['service_operator'] ?? 'IN';
+
+                        if (!empty($serviceIds)) {
+                            $inArray = in_array((int)$appt->service_id, $serviceIds, true);
+                            if (($serviceOperator === 'IN' && !$inArray) || ($serviceOperator === 'NOT_IN' && $inArray)) {
+                                Log::info("[Workflows] Skipping workflow {$wf->name} (ID: {$wf->id}) due to service filter mismatch (Operator: {$serviceOperator}).");
+                                continue;
+                            }
+                        }
+
+                        $providerIds = $config['provider_ids'] ?? (isset($config['provider_id']) ? [$config['provider_id']] : []);
+                        $providerIds = array_filter(array_map('intval', $providerIds));
+                        $providerOperator = $config['provider_operator'] ?? 'IN';
+
+                        if (!empty($providerIds)) {
+                            $inArray = in_array((int)$appt->provider_user_id, $providerIds, true);
+                            if (($providerOperator === 'IN' && !$inArray) || ($providerOperator === 'NOT_IN' && $inArray)) {
+                                Log::info("[Workflows] Skipping workflow {$wf->name} (ID: {$wf->id}) due to provider filter mismatch (Operator: {$providerOperator}).");
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                // 2. Treatment Plan Filter
+                if ($relatedType === 'TREATMENT_PLAN' && file_exists(base_path('Modules/Booking/App/Models/TreatmentPlan.php')) && class_exists('Modules\\Booking\\App\\Models\\TreatmentPlan')) {
+                    $plan = TreatmentPlan::find($relatedId);
+                    if ($plan) {
+                        // Previous status filter
+                        $prevStatuses = $config['tp_prev_statuses'] ?? [];
+                        $prevStatuses = array_filter(array_map('strval', $prevStatuses));
+                        if (!empty($prevStatuses)) {
+                            $prevStatus = $payload['previous_status'] ?? null;
+                            if (!in_array((string)$prevStatus, $prevStatuses, true)) {
+                                Log::info("[Workflows] Skipping workflow {$wf->name} (ID: {$wf->id}) due to treatment plan previous status filter mismatch.");
+                                continue;
+                            }
+                        }
+
+                        // Amount filter
+                        $minAmount = isset($config['tp_min_amount']) && $config['tp_min_amount'] !== '' ? (float)$config['tp_min_amount'] : null;
+                        $maxAmount = isset($config['tp_max_amount']) && $config['tp_max_amount'] !== '' ? (float)$config['tp_max_amount'] : null;
+
+                        if ($minAmount !== null && $plan->final_payable < $minAmount) {
+                            Log::info("[Workflows] Skipping workflow {$wf->name} (ID: {$wf->id}) because amount {$plan->final_payable} is less than min {$minAmount}.");
+                            continue;
+                        }
+                        if ($maxAmount !== null && $plan->final_payable > $maxAmount) {
+                            Log::info("[Workflows] Skipping workflow {$wf->name} (ID: {$wf->id}) because amount {$plan->final_payable} is greater than max {$maxAmount}.");
+                            continue;
+                        }
+                    }
+                }
+
+                // 3. Client Filter
+                if ($relatedType === 'CLIENT') {
+                    $client = \Modules\Clients\Entities\Client::find($relatedId);
+                    if ($client) {
+                        // 3.1 Current Status Filter
+                        $currentStatuses = $config['client_current_statuses'] ?? [];
+                        $currentStatuses = array_filter(array_map('strval', $currentStatuses));
+                        if (!empty($currentStatuses)) {
+                            $currentStatus = $payload['current_status'] ?? ($client->status?->key ?? null);
+                            $currentStatus = $currentStatus !== null ? (string)$currentStatus : '';
+                            $currentOperator = $config['client_current_status_operator'] ?? 'IN';
+                            $inArray = in_array($currentStatus, $currentStatuses, true);
+                            if (($currentOperator === 'IN' && !$inArray) || ($currentOperator === 'NOT_IN' && $inArray)) {
+                                Log::info("[Workflows] Skipping workflow {$wf->name} (ID: {$wf->id}) due to client current status filter mismatch (Operator: {$currentOperator}).");
+                                continue;
+                            }
+                        }
+
+                        // 3.2 Previous Status Filter
+                        $prevStatuses = $config['client_prev_statuses'] ?? [];
+                        $prevStatuses = array_filter(array_map('strval', $prevStatuses));
+                        if (!empty($prevStatuses)) {
+                            $prevStatus = $payload['previous_status'] ?? null;
+                            $prevStatus = $prevStatus !== null ? (string)$prevStatus : null;
+                            $prevOperator = $config['client_prev_status_operator'] ?? 'IN';
+
+                            if ($prevStatus === null) {
+                                if ($prevOperator === 'IN') {
+                                    Log::info("[Workflows] Skipping workflow {$wf->name} (ID: {$wf->id}) due to client previous status filter mismatch (Operator: IN but previous status is null).");
+                                    continue;
+                                }
+                            } else {
+                                $inArray = in_array($prevStatus, $prevStatuses, true);
+                                if (($prevOperator === 'IN' && !$inArray) || ($prevOperator === 'NOT_IN' && $inArray)) {
+                                    Log::info("[Workflows] Skipping workflow {$wf->name} (ID: {$wf->id}) due to client previous status filter mismatch (Operator: {$prevOperator}).");
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 4. Call Filter
+                if ($relatedType === 'CLIENT_CALL' && class_exists(ClientCall::class)) {
+                    $call = ClientCall::find($relatedId);
+                    if ($call) {
+                        // Direction filter
+                        $directions = $config['call_directions'] ?? [];
+                        if (!empty($directions) && !in_array($call->direction, $directions, true)) {
+                            Log::info("[Workflows] Skipping workflow {$wf->name} due to call direction filter mismatch.");
+                            continue;
+                        }
+
+                        // Status filter
+                        $callStatuses = $config['call_statuses'] ?? [];
+                        $callStatuses = array_filter(array_map('strval', $callStatuses));
+                        if (!empty($callStatuses)) {
+                            $callStatus = (string)$call->status;
+                            $callOperator = $config['call_status_operator'] ?? 'IN';
+                            $inArray = in_array($callStatus, $callStatuses, true);
+                            if (($callOperator === 'IN' && !$inArray) || ($callOperator === 'NOT_IN' && $inArray)) {
+                                Log::info("[Workflows] Skipping workflow {$wf->name} due to call status filter mismatch.");
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                // 5. Task / FollowUp Filter
+                if (($relatedType === 'TASK' || $relatedType === 'FOLLOW_UP') && class_exists(Task::class)) {
+                    $task = Task::find($relatedId);
+                    if ($task) {
+                        $prefix = $relatedType === 'FOLLOW_UP' ? 'followup' : 'task';
+
+                        // Status filter
+                        $taskStatuses = $config["{$prefix}_statuses"] ?? [];
+                        $taskStatuses = array_filter(array_map('strval', $taskStatuses));
+                        if (!empty($taskStatuses)) {
+                            $taskStatus = (string)$task->status;
+                            $taskOperator = $config["{$prefix}_status_operator"] ?? 'IN';
+                            $inArray = in_array($taskStatus, $taskStatuses, true);
+                            if (($taskOperator === 'IN' && !$inArray) || ($taskOperator === 'NOT_IN' && $inArray)) {
+                                Log::info("[Workflows] Skipping workflow {$wf->name} due to {$relatedType} status filter mismatch.");
+                                continue;
+                            }
+                        }
+
+                        // Priority filter
+                        $taskPriorities = $config["{$prefix}_priorities"] ?? [];
+                        $taskPriorities = array_filter(array_map('strval', $taskPriorities));
+                        if (!empty($taskPriorities)) {
+                            $taskPriority = (string)$task->priority;
+                            $taskOperator = $config["{$prefix}_priority_operator"] ?? 'IN';
+                            $inArray = in_array($taskPriority, $taskPriorities, true);
+                            if (($taskOperator === 'IN' && !$inArray) || ($taskOperator === 'NOT_IN' && $inArray)) {
+                                Log::info("[Workflows] Skipping workflow {$wf->name} due to {$relatedType} priority filter mismatch.");
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                // 6. Services Filter
+                if ($relatedType === 'SERVICE' && class_exists(\Modules\Services\App\Http\Models\Service::class)) {
+                    $service = \Modules\Services\App\Http\Models\Service::find($relatedId);
+                    if ($service) {
+                        $serviceStatuses = $config['service_statuses'] ?? [];
+                        $serviceStatuses = array_filter(array_map('strval', $serviceStatuses));
+                        if (!empty($serviceStatuses) && !in_array((string)$service->status?->name, $serviceStatuses, true)) {
+                            Log::info("[Workflows] Skipping workflow {$wf->name} due to service status filter mismatch.");
+                            continue;
+                        }
+                    }
+                }
+
+                $isReseller = str_starts_with($workflowKey, 'reseller_')
+                    || isset($payload['reseller_id'])
+                    || isset($payload['tenant_id'])
+                    || str_contains($wf->key ?? '', 'reseller');
+
+                if ($isReseller) {
+                    // 7. ResellerHub Invoice Filters
+                    if ($relatedType === 'INVOICE' && class_exists(ResellerInvoice::class)) {
+                        $resellerInvoice = ResellerInvoice::find($relatedId);
+                        if ($resellerInvoice) {
+                            $invStatuses = $config['reseller_invoice_statuses'] ?? ($config['invoice_statuses'] ?? []);
+                            $invStatuses = array_filter(array_map('strval', $invStatuses));
+                            if (!empty($invStatuses)) {
+                                $currentStatus = (string)($payload['status'] ?? $resellerInvoice->status);
+                                if (!in_array($currentStatus, $invStatuses, true)) {
+                                    Log::info("[Workflows] Skipping workflow {$wf->name} (ID: {$wf->id}) due to reseller invoice status filter mismatch (Current: {$currentStatus}).");
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                    // ResellerHub Order Filters
+                    if ($relatedType === 'ORDER' && class_exists(ResellerOrder::class)) {
+                        $resellerOrder = ResellerOrder::find($relatedId);
+                        if ($resellerOrder) {
+                            $orderStatuses = $config['reseller_order_statuses'] ?? ($config['order_statuses'] ?? []);
+                            $orderStatuses = array_filter(array_map('strval', $orderStatuses));
+                            if (!empty($orderStatuses)) {
+                                $currentStatus = (string)($payload['status'] ?? $resellerOrder->status);
+                                if (!in_array($currentStatus, $orderStatuses, true)) {
+                                    Log::info("[Workflows] Skipping workflow {$wf->name} (ID: {$wf->id}) due to reseller order status filter mismatch (Current: {$currentStatus}).");
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Regular Services Filters
+                    if ($relatedType === 'INVOICE' && class_exists(Invoice::class)) {
+                        $invoice = Invoice::find($relatedId);
+                        if ($invoice) {
+                            $invoiceStatuses = $config['invoice_statuses'] ?? [];
+                            $invoiceStatuses = array_filter(array_map('strval', $invoiceStatuses));
+                            if (!empty($invoiceStatuses) && !in_array((string)$invoice->status?->name, $invoiceStatuses, true)) {
+                                Log::info("[Workflows] Skipping workflow {$wf->name} due to invoice status filter mismatch.");
+                                continue;
+                            }
+
+                            $paymentStatuses = $config['payment_statuses'] ?? [];
+                            $paymentStatuses = array_filter(array_map('strval', $paymentStatuses));
+                            if (!empty($paymentStatuses) && !in_array((string)$invoice->status?->name, $paymentStatuses, true)) {
+                                Log::info("[Workflows] Skipping workflow {$wf->name} due to payment status filter mismatch.");
+                                continue;
+                            }
+                        }
+                    }
+
+                    if ($relatedType === 'ORDER' && class_exists(Order::class)) {
+                        $order = Order::find($relatedId);
+                        if ($order) {
+                            $orderStatuses = $config['order_statuses'] ?? [];
+                            $orderStatuses = array_filter(array_map('strval', $orderStatuses));
+                            if (!empty($orderStatuses) && !in_array((string)$order->status?->name, $orderStatuses, true)) {
+                                Log::info("[Workflows] Skipping workflow {$wf->name} due to order status filter mismatch.");
+                                continue;
+                            }
+                        }
+                    }
+
+                    if ($relatedType === 'PAYMENT' && class_exists(\Modules\Services\App\Http\Models\Payment::class)) {
+                        $payment = \Modules\Services\App\Http\Models\Payment::find($relatedId);
+                        if ($payment) {
+                            $paymentStatuses = $config['payment_statuses'] ?? [];
+                            $paymentStatuses = array_filter(array_map('strval', $paymentStatuses));
+                            if (!empty($paymentStatuses)) {
+                                $currentStatus = (string)($payment->status ?? '');
+                                $statusMappings = [
+                                    'pending'   => ['pending', 'در انتظار تایید', 'در انتظار پرداخت'],
+                                    'paid'      => ['paid', 'پرداخت شده', 'موفق'],
+                                    'canceled'  => ['canceled', 'cancelled', 'لغو شده', 'رد شده'],
+                                ];
+                                $matched = in_array($currentStatus, $paymentStatuses, true);
+                                if (!$matched && isset($statusMappings[$currentStatus])) {
+                                    foreach ($paymentStatuses as $pst) {
+                                        if (in_array(trim($pst), $statusMappings[$currentStatus], true)) {
+                                            $matched = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!$matched) {
+                                    Log::info("[Workflows] Skipping workflow {$wf->name} due to payment status filter mismatch.");
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($wf->nodes()->exists()) {
+                $lastInstance = $this->startNodeWorkflow($wf, $relatedType, $relatedId, $payload);
+            } else {
+                $lastInstance = $this->startWorkflow($wf, $relatedType, $relatedId, $payload);
+            }
+        }
+
+        return $lastInstance;
+    }
+
+    public function startNodeWorkflow(Workflow $workflow, $subjectType, $subjectId, array $payload = [], ?int $parentInstanceId = null): ?WorkflowInstance
+    {
+        Log::info("[Workflows] Starting node-based workflow: '{$workflow->key}' for {$subjectType}:{$subjectId}");
+
+        if (!$workflow->is_active) {
+            Log::warning("[Workflows] Workflow inactive: '{$workflow->key}'");
+            return null;
+        }
+
+        $startNode = $workflow->nodes()->where('type', WorkflowNode::TYPE_START)->first();
+
+        if (!$startNode) {
+            Log::warning("[Workflows] No START node found for workflow: '{$workflow->name}'");
+            return null;
+        }
+
+        return DB::transaction(function () use ($workflow, $startNode, $subjectType, $subjectId, $payload, $parentInstanceId) {
+            $instance = WorkflowInstance::create([
+                'workflow_id'        => $workflow->id,
+                'parent_instance_id' => $parentInstanceId,
+                'related_type'       => $subjectType,
+                'related_id'         => $subjectId,
+                'current_node_id'    => $startNode->id,
+                'status'             => WorkflowInstance::STATUS_ACTIVE,
+                'started_at'         => now(),
+                'created_by'         => Auth::id() ?? 1,
+            ]);
+
+            Log::info("[Workflows] Node-based Instance created: {$instance->id}. Current node: START ({$startNode->id})");
+
+            WorkflowLog::create([
+                'instance_id' => $instance->id,
+                'from_node_id' => null,
+                'to_node_id' => $startNode->id,
+                'transition_type' => 'START',
+                'run_at' => now(),
+                'user_id' => Auth::id()
+            ]);
+
+            $context = $this->buildContextData($instance, $payload);
+
+            event(new NodeReached($instance, $startNode, $context));
+
+            $this->advance($instance, $context);
+
+            return $instance;
+        });
+    }
+
+    public function advance(WorkflowInstance $instance, array $context = []): void
+    {
+        if ($instance->status !== WorkflowInstance::STATUS_ACTIVE) {
+            Log::warning("[Workflows] Cannot advance inactive workflow instance {$instance->id}");
+            return;
+        }
+
+        $currentNode = $instance->currentNode;
+        if (!$currentNode) {
+            Log::warning("[Workflows] Workflow instance {$instance->id} has no current node.");
+            return;
+        }
+
+        Log::info("[Workflows] Advancing instance {$instance->id} from node ID {$currentNode->id} ({$currentNode->name}, Type: {$currentNode->type})");
+
+        if (empty($context)) {
+            $context = $this->buildContextData($instance);
+        }
+
+        $edges = WorkflowEdge::where('source_node_id', $currentNode->id)->get();
+        if ($edges->isEmpty()) {
+            Log::info("[Workflows] Node ID {$currentNode->id} has no outgoing edges.");
+            if ($currentNode->type === WorkflowNode::TYPE_END) {
+                $this->completeWorkflow($instance, $context);
+            }
+            return;
+        }
+
+        $evaluator = new ConditionEvaluator();
+        $matchedEdge = null;
+
+        if ($currentNode->type === WorkflowNode::TYPE_CONDITION) {
+            $nodeExpr = $currentNode->config['condition_expression'] ?? null;
+
+            $varName = $nodeExpr ?: 'condition_result';
+            if ($nodeExpr && str_contains($nodeExpr, '=')) {
+                $varName = trim(explode('=', $nodeExpr, 2)[0]);
+            }
+
+            $resolvedValue = $evaluator->resolveValue($varName, $context);
+            if ($resolvedValue === null) {
+                Log::info("[Workflows] Node ID {$currentNode->id} condition variable '{$varName}' is missing. Pausing workflow for user input.");
+                return;
+            }
+
+            if (empty($nodeExpr)) {
+                $nodeResult = in_array($resolvedValue, [true, 'true', 1, '1'], true);
+            } else {
+                $nodeResult = $evaluator->evaluate($nodeExpr, $context);
+            }
+
+            Log::info("[Workflows] Node ID {$currentNode->id} condition expression '" . ($nodeExpr ?: 'NULL') . "' evaluated to " . ($nodeResult ? 'TRUE' : 'FALSE'));
+
+            // Clean transient choice from context to prevent state pollution in chained condition nodes
+            if (isset($context['tokens'][$varName])) {
+                unset($context['tokens'][$varName]);
+            }
+            if (isset($context['tokens']['condition_result'])) {
+                unset($context['tokens']['condition_result']);
+            }
+            if (isset($context[$varName])) {
+                unset($context[$varName]);
+            }
+            if (isset($context['condition_result'])) {
+                unset($context['condition_result']);
+            }
+
+            foreach ($edges as $edge) {
+                $edgeCond = trim($edge->condition);
+                // Map common Persian/English yes/no values to boolean
+                $isYesEdge = in_array(strtolower($edgeCond), ['بله', 'yes', 'true', '1']);
+                $isNoEdge = in_array(strtolower($edgeCond), ['خیر', 'no', 'false', '0']);
+
+                if (($nodeResult && $isYesEdge) || (!$nodeResult && $isNoEdge)) {
+                    $matchedEdge = $edge;
+                    break;
+                }
+            }
+        } else {
+            foreach ($edges as $edge) {
+                if ($evaluator->evaluate($edge->condition, $context)) {
+                    $matchedEdge = $edge;
+                    break;
+                }
+            }
+        }
+
+        if (!$matchedEdge) {
+            Log::warning("[Workflows] No matching transition edge found from node ID {$currentNode->id} for instance {$instance->id}");
+            return;
+        }
+
+        $targetNode = WorkflowNode::find($matchedEdge->target_node_id);
+        if (!$targetNode) {
+            Log::error("[Workflows] Target node ID {$matchedEdge->target_node_id} not found for edge ID {$matchedEdge->id}");
+            return;
+        }
+
+        DB::transaction(function () use ($instance, $currentNode, $targetNode, $context) {
+            WorkflowLog::create([
+                'instance_id' => $instance->id,
+                'from_node_id' => $currentNode->id,
+                'to_node_id' => $targetNode->id,
+                'transition_type' => 'ADVANCE',
+                'run_at' => now(),
+                'user_id' => Auth::id()
+            ]);
+
+            $instance->current_node_id = $targetNode->id;
+            $instance->save();
+            $instance->unsetRelation('currentNode');
+
+            Log::info("[Workflows] Instance {$instance->id} transitioned to node ID {$targetNode->id} ({$targetNode->name})");
+
+            event(new NodeReached($instance, $targetNode, $context));
+            event(new \Modules\Workflows\Events\PatientStageAdvanced($instance, $context));
+
+            if ($targetNode->type === WorkflowNode::TYPE_END) {
+                $this->completeWorkflow($instance, $context);
+            }
+        });
+
+        // Chained auto-advance for CONDITION or START nodes
+        if ($targetNode->type === WorkflowNode::TYPE_CONDITION || $targetNode->type === WorkflowNode::TYPE_START) {
+            Log::info("[Workflows] Chaining auto-advance for node ID {$targetNode->id} (Type: {$targetNode->type})");
+            $this->advance($instance, $context);
+        }
+    }
+
+    protected function completeWorkflow(WorkflowInstance $instance, array $context): void
+    {
+        $instance->status = WorkflowInstance::STATUS_COMPLETED;
+        $instance->completed_at = now();
+        $instance->save();
+
+        Log::info("[Workflows] Workflow instance {$instance->id} reached END node. Status set to COMPLETED.");
+
+        event(new WorkflowCompleted($instance, $context));
+        event(new \Modules\Workflows\Events\PatientStageAdvanced($instance, $context));
+    }
+
+    public function goBack(WorkflowInstance $instance): void
+    {
+        if ($instance->status !== WorkflowInstance::STATUS_ACTIVE) {
+            Log::warning("[Workflows] Cannot go back on an inactive workflow instance {$instance->id}");
+            return;
+        }
+
+        $currentNode = $instance->currentNode;
+        if (!$currentNode) {
+            return;
+        }
+
+        // Find the last transition to this node
+        $lastLog = WorkflowLog::where('instance_id', $instance->id)
+            ->where('to_node_id', $currentNode->id)
+            ->where('transition_type', 'ADVANCE')
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$lastLog || !$lastLog->from_node_id) {
+            Log::warning("[Workflows] No valid previous node found for instance {$instance->id}");
+            return;
+        }
+
+        DB::transaction(function () use ($instance, $currentNode, $lastLog) {
+            // Cancel tasks created at current node
+            $tasksToCancel = Task::where('meta->workflow_instance_id', $instance->id)
+                ->where('meta->workflow_node_id', $currentNode->id)
+                ->whereIn('status', [Task::STATUS_TODO, Task::STATUS_IN_PROGRESS])
+                ->get();
+
+            foreach ($tasksToCancel as $taskToCancel) {
+                $taskToCancel->update([
+                    'status' => Task::STATUS_CANCELED,
+                    'completed_at' => now()
+                ]);
+            }
+
+            WorkflowLog::create([
+                'instance_id' => $instance->id,
+                'from_node_id' => $currentNode->id,
+                'to_node_id' => $lastLog->from_node_id,
+                'transition_type' => 'BACK',
+                'run_at' => now(),
+                'user_id' => Auth::id()
+            ]);
+
+            $instance->current_node_id = $lastLog->from_node_id;
+            $instance->save();
+            $instance->unsetRelation('currentNode');
+
+            Log::info("[Workflows] Instance {$instance->id} reverted to node ID {$lastLog->from_node_id}");
+        });
+    }
+
+    public function moveToStage(WorkflowInstance $instance, WorkflowStage $stage): void
+    {
+        DB::transaction(function () use ($instance, $stage) {
+            $instance->current_stage_id = $stage->id;
+            $instance->save();
+
+            $this->runStageActions($instance, $stage);
+        });
+    }
+
+    protected function runStageActions(WorkflowInstance $instance, WorkflowStage $stage, array $payload = []): void
+    {
+        $actions = $stage->actions()->orderBy('sort_order')->get();
+        Log::info("[Workflows] Found " . $actions->count() . " actions for stage: {$stage->name}");
+
+        $context = $this->buildContextData($instance, $payload);
+
+        foreach ($actions as $action) {
+            try {
+                $result = $this->runAction($instance, $stage, $action, $context);
+
+                WorkflowLog::create([
+                    'instance_id' => $instance->id,
+                    'stage_id'    => $stage->id,
+                    'action_type' => $action->action_type,
+                    'data'        => ['config' => $action->config, 'result' => $result],
+                    'run_at'      => now(),
+                    'user_id'     => Auth::id(),
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('[Workflows] action failed', [
+                    'instance_id' => $instance->id,
+                    'stage_id'    => $stage->id,
+                    'action_id'   => $action->id,
+                    'error'       => $e->getMessage(),
+                    'trace'       => $e->getTraceAsString(),
+                ]);
+            }
+        }
+    }
+
+    public function executeNodeAction(WorkflowInstance $instance, WorkflowNode $node, array $context): array
+    {
+        $action = new WorkflowAction([
+            'action_type' => $node->config['action_type'] ?? 'TASK',
+            'config' => $node->config,
+        ]);
+        $action->id = $node->id;
+
+        $stage = new WorkflowStage();
+        $stage->id = 0;
+
+        return $this->runAction($instance, $stage, $action, $context);
+    }
+
+    protected function runAction(WorkflowInstance $instance, WorkflowStage $stage, WorkflowAction $action, array $context): array
+    {
+        $config = $action->config ?? [];
+        $result = ['status' => 'skipped'];
+        $deps = config('workflows.dependencies', []);
+
+        Log::info("[Workflows] Running action ID: {$action->id} Type: {$action->action_type}", ['config' => $config]);
+
+        // Base date for offsets: appointment start time if available, otherwise workflow start time
+        $baseDate = $context['appointment']->start_at_utc ?? $instance->started_at ?? now();
+
+        // Resolve target user/assignee for Tasks/FollowUps
+        $targetUserId = Auth::id();
+        $assigneeTarget = $config['assignee_target'] ?? 'CURRENT_USER';
+
+        if ($assigneeTarget === 'APPOINTMENT_PROVIDER' && isset($context['appointment'])) {
+            $targetUserId = $context['appointment']->provider_user_id ?? $targetUserId;
+        } elseif ($assigneeTarget === 'SPECIFIC_USER' && !empty($config['assignee_id'])) {
+            $targetUserId = $config['assignee_id'];
+        } elseif ($assigneeTarget === 'TREATMENT_PLAN_CREATOR' && isset($context['treatment_plan'])) {
+            $targetUserId = $context['treatment_plan']->user_id ?? $targetUserId;
+        } elseif ($assigneeTarget === 'TREATMENT_PLAN_CLIENT_ASSIGNEE' && isset($context['treatment_plan'])) {
+            $targetUserId = $context['treatment_plan']->client_id ?? $targetUserId;
+        } elseif (str_starts_with($assigneeTarget, 'TREATMENT_PLAN_ROLE_')) {
+            $roleId = (int) str_replace('TREATMENT_PLAN_ROLE_', '', $assigneeTarget);
+            $assignedUsers = $context['assigned_users_by_role'][$roleId] ?? [];
+            if (!empty($assignedUsers)) {
+                $targetUserId = $assignedUsers[0]['user_id'];
+            }
+        } elseif ($assigneeTarget === 'CLIENT_CREATOR' && isset($context['client'])) {
+            $targetUserId = $context['client']->created_by ?? $targetUserId;
+        } elseif ($assigneeTarget === 'CLIENT_ASSIGNED_USER' && isset($context['client'])) {
+            $assignedUser = $context['client']->users()->first();
+            $targetUserId = $assignedUser?->id ?? $targetUserId;
+        } elseif ($assigneeTarget === 'CALL_CREATOR' && isset($context['call'])) {
+            $targetUserId = $context['call']->user_id ?? $targetUserId;
+        } elseif (($assigneeTarget === 'TASK_CREATOR' || $assigneeTarget === 'FOLLOWUP_CREATOR') && (isset($context['task']) || isset($context['followup']))) {
+            $taskObj = $context['task'] ?? $context['followup'];
+            $targetUserId = $taskObj->creator_id ?? $targetUserId;
+        } elseif (($assigneeTarget === 'TASK_ASSIGNEE' || $assigneeTarget === 'FOLLOWUP_ASSIGNEE') && (isset($context['task']) || isset($context['followup']))) {
+            $taskObj = $context['task'] ?? $context['followup'];
+            $targetUserId = $taskObj->assignee_id ?? $targetUserId;
+        } elseif ($assigneeTarget === 'INVOICE_CREATOR' && isset($context['invoice'])) {
+            $targetUserId = $context['invoice']->created_by ?? $targetUserId;
+        } elseif ($assigneeTarget === 'ORDER_CREATOR' && isset($context['order'])) {
+            $targetUserId = $context['order']->created_by ?? $targetUserId;
+        } elseif ($assigneeTarget === 'RESELLER_ADMIN') {
+            $reseller = $context['reseller'] ?? ($context['invoice']?->reseller ?? ($context['order']?->reseller ?? null));
+            if ($reseller && $reseller->user_id) {
+                $targetUserId = $reseller->user_id;
+            }
+        } elseif ($assigneeTarget === 'RESELLER_INVOICE_CREATOR') {
+            $invoice = $context['invoice'] ?? ($context['reseller_invoice'] ?? null);
+            if ($invoice && $invoice->created_by) {
+                $targetUserId = $invoice->created_by;
+            }
+        } elseif ($assigneeTarget === 'RESELLER_TENANT_USER' || $assigneeTarget === 'RESELLER_SUBACCOUNT') {
+            $subAccount = null;
+            $invoice = $context['invoice'] ?? ($context['reseller_invoice'] ?? null);
+            if ($invoice && method_exists($invoice, 'getSubAccountModel')) {
+                $subAccount = $invoice->getSubAccountModel();
+            }
+            if (!$subAccount) {
+                $order = $context['order'] ?? ($context['reseller_order'] ?? null);
+                if ($order && method_exists($order, 'getSubAccountModel')) {
+                    $subAccount = $order->getSubAccountModel();
+                }
+            }
+            if ($subAccount && $subAccount->user_id) {
+                $targetUserId = $subAccount->user_id;
+            }
+        }
+
+        switch ($action->action_type) {
+            case WorkflowAction::TYPE_CREATE_TASK:
+            case WorkflowAction::TYPE_CREATE_FOLLOWUP:
+                $isTask = $action->action_type === WorkflowAction::TYPE_CREATE_TASK;
+                $module = $isTask ? ($deps['tasks'] ?? null) : ($deps['followups'] ?? null);
+                $class = $isTask ? 'Modules\\Tasks\\Entities\\Task' : 'Modules\\FollowUps\\Entities\\FollowUp';
+
+                if ($this->isModuleEnabled($module) && class_exists($class)) {
+                    $Model = $class;
+
+                    $dueAt = $this->calcTaskDueAt($targetUserId, (int)($config['offset_days'] ?? 0), $baseDate);
+                    $title = $this->renderTemplate($config['title'] ?? $stage->name, $context);
+                    $description = $this->renderTemplate($config['description'] ?? '', $context);
+
+                    $clientId = $this->resolveClientId($instance);
+                    $taskRelatedType = $clientId ? 'CLIENT' : $instance->related_type;
+                    $taskRelatedId = $clientId ?: $instance->related_id;
+
+                    try {
+                        $task = $Model::create([
+                            'title'        => $title,
+                            'description'  => $description,
+                            'task_type'    => $isTask ? ($config['task_type'] ?? 'GENERAL') : 'FOLLOW_UP',
+                            'assignee_id'  => $targetUserId,
+                            'creator_id'   => $instance->created_by ?: Auth::id(),
+                            'status'       => $config['status'] ?? 'TODO',
+                            'priority'     => $config['priority'] ?? ($isTask ? 'MEDIUM' : 'HIGH'),
+                            'due_at'       => $dueAt,
+                            'related_type' => $taskRelatedType,
+                            'related_id'   => $taskRelatedId,
+                            'meta'         => [
+                                'workflow_instance_id' => $instance->id,
+                                'auto_advance'         => (bool) ($config['auto_advance'] ?? true),
+                                'related_target'       => $clientId ? 'client' : 'none',
+                                'related_client_ids'   => $clientId ? [$clientId] : [],
+                            ]
+                        ]);
+                        Log::info("[Workflows] Task created successfully. ID: {$task->id} linked to client ID {$taskRelatedId}");
+                        $result = ['status' => 'created', 'task_id' => $task->id];
+                    } catch (\Exception $e) {
+                        Log::error("[Workflows] Task creation threw exception: " . $e->getMessage());
+                        throw $e;
+                    }
+                } else {
+                    Log::warning("[Workflows] Module $module not enabled or class $class not found.");
+                }
+                break;
+
+            case WorkflowAction::TYPE_SEND_NOTIFICATION:
+                $message = $this->renderTemplate($config['message'] ?? ('اجرای مرحله '.$stage->name), $context);
+                Log::info('[Workflows] notification template rendered', [
+                    'instance_id' => $instance->id,
+                    'message'     => $message,
+                ]);
+
+                $notifTarget = $config['notification_target'] ?? 'CURRENT_USER';
+
+                // Resolve Action URL (direct link to the relevant resource, e.g. invoice)
+                $actionUrl = null;
+                if (isset($context['invoice']) && $context['invoice'] instanceof ResellerInvoice) {
+                    $actionUrl = '/user/reseller/invoices/' . $context['invoice']->id;
+                } elseif (isset($context['reseller_invoice']) && !empty($context['reseller_invoice']->id)) {
+                    $actionUrl = '/user/reseller/invoices/' . $context['reseller_invoice']->id;
+                } elseif (isset($context['order']) && $context['order'] instanceof ResellerOrder) {
+                    $actionUrl = '/user/reseller/orders/' . $context['order']->id;
+                } elseif (isset($context['reseller_order']) && !empty($context['reseller_order']->id)) {
+                    $actionUrl = '/user/reseller/orders/' . $context['reseller_order']->id;
+                } elseif (isset($context['invoice']) && !empty($context['invoice']->id)) {
+                    $actionUrl = '/user/services/invoices/' . $context['invoice']->id;
+                } elseif (isset($context['payment']) && !empty($context['payment']->invoice_id)) {
+                    $actionUrl = '/user/services/invoices/' . $context['payment']->invoice_id;
+                } elseif (isset($context['order']) && !empty($context['order']->id)) {
+                    $actionUrl = '/user/services/orders/' . $context['order']->id;
+                } elseif (isset($context['client']) && !empty($context['client']->id)) {
+                    $actionUrl = '/user/clients/' . $context['client']->id;
+                }
+
+                // Check if target is a system Role (e.g. ROLE_1, ROLE_2)
+                if (str_starts_with($notifTarget, 'ROLE_')) {
+                    $roleId = (int) str_replace('ROLE_', '', $notifTarget);
+                    $recipients = collect();
+                    if (class_exists(Role::class)) {
+                        $role = Role::findById($roleId);
+                        $recipients = $role ? $role->users : collect();
+                    }
+                    if ($recipients->isEmpty()) {
+                        $recipients = User::whereHas('roles', function ($q) use ($roleId) {
+                            $q->where('id', $roleId);
+                        })->get();
+                    }
+
+                    if ($recipients->isNotEmpty() && class_exists(\Modules\Workflows\Notifications\SystemNotification::class)) {
+                        $title = 'گردش کار: ' . ($instance->workflow->name ?? 'اعلان سیستم');
+                        $sentCount = 0;
+                        foreach ($recipients as $recipientUser) {
+                            $recipientUser->notify(new \Modules\Workflows\Notifications\SystemNotification($title, $message, $actionUrl));
+                            $sentCount++;
+                            Log::info("[Workflows] Sent system notification to Role User ID {$recipientUser->id} (Role ID: {$roleId})");
+                        }
+                        $result = ['status' => 'sent', 'recipients_count' => $sentCount];
+                    } else {
+                        Log::warning("[Workflows] No recipients found for Role ID: {$roleId}");
+                        $result = ['status' => 'role_empty'];
+                    }
+                    break;
+                }
+
+                $notifUserId = Auth::id() ?: ($instance->created_by ?? null);
+
+                if ($notifTarget === 'APPOINTMENT_PROVIDER' && isset($context['appointment'])) {
+                    $notifUserId = $context['appointment']->provider_user_id ?? $notifUserId;
+                } elseif ($notifTarget === 'SPECIFIC_USER' && !empty($config['notification_target_user_id'])) {
+                    $notifUserId = $config['notification_target_user_id'];
+                } elseif ($notifTarget === 'TREATMENT_PLAN_CREATOR' && isset($context['treatment_plan'])) {
+                    $notifUserId = $context['treatment_plan']->user_id ?? $notifUserId;
+                } elseif ($notifTarget === 'TREATMENT_PLAN_CLIENT_ASSIGNEE' && isset($context['treatment_plan'])) {
+                    $notifUserId = $context['treatment_plan']->client_id ?? $notifUserId;
+                } elseif (str_starts_with($notifTarget, 'TREATMENT_PLAN_ROLE_')) {
+                    $roleId = (int) str_replace('TREATMENT_PLAN_ROLE_', '', $notifTarget);
+                    $assignedUsers = $context['assigned_users_by_role'][$roleId] ?? [];
+                    if (!empty($assignedUsers)) {
+                        $notifUserId = $assignedUsers[0]['user_id'];
+                    }
+                } elseif ($notifTarget === 'CLIENT_CREATOR' && isset($context['client'])) {
+                    $notifUserId = $context['client']->created_by ?? $notifUserId;
+                } elseif ($notifTarget === 'CLIENT_ASSIGNED_USER' && isset($context['client'])) {
+                    $assignedUser = $context['client']->users()->first();
+                    $notifUserId = $assignedUser?->id ?? $notifUserId;
+                } elseif ($notifTarget === 'CALL_CREATOR' && isset($context['call'])) {
+                    $notifUserId = $context['call']->user_id ?? $notifUserId;
+                } elseif (($notifTarget === 'TASK_CREATOR' || $notifTarget === 'FOLLOWUP_CREATOR') && (isset($context['task']) || isset($context['followup']))) {
+                    $taskObj = $context['task'] ?? $context['followup'];
+                    $notifUserId = $taskObj->creator_id ?? $notifUserId;
+                } elseif (($notifTarget === 'TASK_ASSIGNEE' || $notifTarget === 'FOLLOWUP_ASSIGNEE') && (isset($context['task']) || isset($context['followup']))) {
+                    $taskObj = $context['task'] ?? $context['followup'];
+                    $notifUserId = $taskObj->assignee_id ?? $notifUserId;
+                } elseif ($notifTarget === 'INVOICE_CREATOR' && isset($context['invoice'])) {
+                    $notifUserId = $context['invoice']->created_by ?? $notifUserId;
+                } elseif ($notifTarget === 'RESELLER_ADMIN') {
+                    $reseller = $context['reseller'] ?? ($context['invoice']?->reseller ?? ($context['order']?->reseller ?? null));
+                    if ($reseller && $reseller->user_id) {
+                        $notifUserId = $reseller->user_id;
+                    }
+                } elseif ($notifTarget === 'RESELLER_INVOICE_CREATOR') {
+                    $invoice = $context['invoice'] ?? ($context['reseller_invoice'] ?? null);
+                    if ($invoice && $invoice->created_by) {
+                        $notifUserId = $invoice->created_by;
+                    }
+                } elseif ($notifTarget === 'RESELLER_TENANT_USER' || $notifTarget === 'RESELLER_SUBACCOUNT') {
+                    $subAccount = null;
+                    $invoice = $context['invoice'] ?? ($context['reseller_invoice'] ?? null);
+                    if ($invoice && method_exists($invoice, 'getSubAccountModel')) {
+                        $subAccount = $invoice->getSubAccountModel();
+                    }
+                    if (!$subAccount) {
+                        $order = $context['order'] ?? ($context['reseller_order'] ?? null);
+                        if ($order && method_exists($order, 'getSubAccountModel')) {
+                            $subAccount = $order->getSubAccountModel();
+                        }
+                    }
+                    if ($subAccount && $subAccount->user_id) {
+                        $notifUserId = $subAccount->user_id;
+                    }
+                }
+
+                $recipient = $notifUserId ? User::find($notifUserId) : null;
+
+                if ($recipient && class_exists(\Modules\Workflows\Notifications\SystemNotification::class)) {
+                    $title = 'گردش کار: ' . ($instance->workflow->name ?? 'اعلان سیستم');
+                    $recipient->notify(new \Modules\Workflows\Notifications\SystemNotification($title, $message, $actionUrl));
+                    Log::info("[Workflows] Sent system notification to User ID {$recipient->id}");
+                    $result = ['status' => 'sent', 'user_id' => $recipient->id];
+                } else {
+                    Log::warning("[Workflows] Recipient not found or SystemNotification class does not exist. Target: {$notifTarget}, Resolved User ID: {$notifUserId}");
+                    $result = ['status' => 'logged_only'];
+                }
+                break;
+
+            case WorkflowAction::TYPE_SEND_SMS:
+                if ($this->isModuleEnabled($deps['sms'] ?? null) && class_exists('Modules\\Sms\\Services\\SmsManager')) {
+                    $to = $this->resolveTargetPhone($config, $context);
+                    Log::info("[Workflows] Sending SMS to: " . ($to ?? 'NULL'));
+
+                    if ($to) {
+                        $Sms = app(\Modules\Sms\Services\SmsManager::class);
+                        $params = $this->resolveSmsParams($config['params'] ?? [], $context);
+                        $message = $this->renderTemplate($config['message'] ?? '', $context, $params);
+
+                        $options = [
+                            'type' => \Modules\Sms\Entities\SmsMessage::TYPE_SYSTEM,
+                            'related_type' => $instance->related_type,
+                            'related_id' => $instance->related_id,
+                            'meta' => [
+                                'workflow_id' => $instance->workflow_id,
+                                'workflow_name' => $instance->workflow?->name,
+                                'workflow_instance_id' => $instance->id,
+                            ],
+                        ];
+
+                        if (!empty($config['offset_minutes'])) {
+                            $options['scheduled_at'] = $this->calcOffsetMinutes((int) $config['offset_minutes'], $baseDate);
+                        }
+
+                        if (!empty($config['pattern_key'])) {
+                            Log::info("[Workflows] Sending Pattern SMS: {$config['pattern_key']}");
+                            $sms = $Sms->sendPattern($to, $config['pattern_key'], $params, $options);
+                            $result = ['status' => 'pattern_sent', 'sms_id' => $sms->id, 'to' => $to];
+                        } else {
+                            Log::info("[Workflows] Sending Text SMS: {$message}");
+                            $sms = $Sms->sendText($to, $message, $options);
+                            $result = ['status' => 'text_sent', 'sms_id' => $sms->id, 'to' => $to];
+                        }
+                    } else {
+                        Log::warning("[Workflows] SMS skipped: No phone number found.");
+                        $result = ['status' => 'skipped', 'reason' => 'missing_phone'];
+                    }
+                } else {
+                    Log::warning("[Workflows] SMS module not enabled or manager not found.");
+                }
+                break;
+
+
+
+            case WorkflowAction::TYPE_CHANGE_RESELLER_STATUS:
+                // تغییر وضعیت اختصاصی فاکتور و سفارش ماژول نمایندگی (ResellerHub)
+                $entityType = $config['entity_type'] ?? 'order'; // order | invoice
+                $rawStatus  = $config['status'] ?? ($config['status_name'] ?? 'active');
+
+                try {
+                    if ($entityType === 'invoice') {
+                        $mappedStatus = match(mb_strtolower(trim((string)$rawStatus))) {
+                            'پرداخت شده', 'paid' => ResellerInvoice::STATUS_PAID,
+                            'لغو شده', 'cancelled', 'canceled' => ResellerInvoice::STATUS_CANCELLED,
+                            'معوقه', 'overdue' => ResellerInvoice::STATUS_OVERDUE,
+                            default => ResellerInvoice::STATUS_UNPAID,
+                        };
+
+                        if (isset($context['invoice']) && $context['invoice'] instanceof ResellerInvoice) {
+                            $invoiceObj = $context['invoice'];
+                            $invoiceObj->status = $mappedStatus;
+                            $invoiceObj->save();
+                            Log::info("[Workflows] CHANGE_RESELLER_STATUS: Changed ResellerInvoice ID {$invoiceObj->id} status to '{$mappedStatus}'.");
+                            $result = ['status' => 'changed', 'entity' => 'reseller_invoice', 'id' => $invoiceObj->id, 'new_status' => $mappedStatus];
+                        } elseif (isset($context['order']) && $context['order'] instanceof ResellerOrder && $context['order']->invoice_id) {
+                            $invoiceObj = ResellerInvoice::find($context['order']->invoice_id);
+                            if ($invoiceObj) {
+                                $invoiceObj->status = $mappedStatus;
+                                $invoiceObj->save();
+                                Log::info("[Workflows] CHANGE_RESELLER_STATUS: Changed ResellerInvoice ID {$invoiceObj->id} status to '{$mappedStatus}'.");
+                                $result = ['status' => 'changed', 'entity' => 'reseller_invoice', 'id' => $invoiceObj->id, 'new_status' => $mappedStatus];
+                            } else {
+                                Log::warning("[Workflows] CHANGE_RESELLER_STATUS: ResellerInvoice not found for Order ID {$context['order']->id}.");
+                                $result = ['status' => 'skipped', 'reason' => 'reseller_invoice_not_found'];
+                            }
+                        } else {
+                            Log::warning("[Workflows] CHANGE_RESELLER_STATUS: No reseller invoice context found.");
+                            $result = ['status' => 'skipped', 'reason' => 'no_invoice_context'];
+                        }
+                    } else { // order
+                        $mappedStatus = match(mb_strtolower(trim((string)$rawStatus))) {
+                            'فعال', 'active' => ResellerOrder::STATUS_ACTIVE,
+                            'لغو شده', 'cancelled', 'canceled' => ResellerOrder::STATUS_CANCELLED,
+                            'غیر فعال', 'معلق', 'inactive', 'suspended' => ResellerOrder::STATUS_INACTIVE,
+                            default => ResellerOrder::STATUS_PENDING,
+                        };
+
+                        if (isset($context['order']) && $context['order'] instanceof ResellerOrder) {
+                            $orderObj = $context['order'];
+                            $orderObj->status = $mappedStatus;
+                            $orderObj->save();
+                            Log::info("[Workflows] CHANGE_RESELLER_STATUS: Changed ResellerOrder ID {$orderObj->id} status to '{$mappedStatus}'.");
+                            $result = ['status' => 'changed', 'entity' => 'reseller_order', 'id' => $orderObj->id, 'new_status' => $mappedStatus];
+                        } elseif (isset($context['invoice']) && $context['invoice'] instanceof ResellerInvoice) {
+                            $invoice = $context['invoice'];
+                            $orders = ResellerOrder::where('invoice_id', $invoice->id)->get();
+                            $ordersUpdated = 0;
+                            foreach ($orders as $ord) {
+                                $ord->status = $mappedStatus;
+                                $ord->save();
+                                $ordersUpdated++;
+                            }
+                            Log::info("[Workflows] CHANGE_RESELLER_STATUS: Changed {$ordersUpdated} ResellerOrder(s) for ResellerInvoice ID {$invoice->id} status to '{$mappedStatus}'.");
+                            $result = ['status' => 'changed', 'entity' => 'reseller_orders', 'count' => $ordersUpdated, 'new_status' => $mappedStatus];
+                        } else {
+                            Log::warning("[Workflows] CHANGE_RESELLER_STATUS: No reseller order/invoice context found.");
+                            $result = ['status' => 'skipped', 'reason' => 'no_order_context'];
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    Log::error("[Workflows] CHANGE_RESELLER_STATUS failed: " . $e->getMessage());
+                    $result = ['status' => 'error', 'message' => $e->getMessage()];
+                }
+                break;
+
+            case WorkflowAction::TYPE_CHANGE_SERVICE_STATUS:
+                // تغییر وضعیت موجودیت‌های سرویس خدمات (Invoice, Order, Payment, Service)
+                $entityType   = $config['entity_type'] ?? 'invoice'; // invoice | order | payment | service
+                $statusName   = $config['status_name'] ?? null;
+                $statusType   = $config['status_type'] ?? null; // payment | service | invoice
+
+                if (!$statusName) {
+                    Log::warning("[Workflows] CHANGE_SERVICE_STATUS: No status_name configured.");
+                    $result = ['status' => 'skipped', 'reason' => 'no_status_name'];
+                    break;
+                }
+
+                try {
+                    $targetStatus = null;
+                    if (class_exists('Modules\\Services\\App\\Http\\Models\\Status')) {
+                        $StatusModel = \Modules\Services\App\Http\Models\Status::class;
+                        $statusQuery = $StatusModel::where('name', $statusName);
+                        if ($statusType) {
+                            $statusQuery->where('type', $statusType);
+                        }
+                        $targetStatus = $statusQuery->first();
+                    }
+
+                    if (!$targetStatus) {
+                        Log::warning("[Workflows] CHANGE_SERVICE_STATUS: Status '{$statusName}' (type: {$statusType}) not found.");
+                        $result = ['status' => 'skipped', 'reason' => 'status_not_found'];
+                        break;
+                    }
+
+                    if ($entityType === 'invoice' && isset($context['invoice'])) {
+                        $invoiceObj = $context['invoice'];
+                        $invoiceObj->status_id = $targetStatus->id;
+                        $invoiceObj->save();
+                        Log::info("[Workflows] Changed Invoice ID {$invoiceObj->id} status to '{$statusName}'.");
+                        $result = ['status' => 'changed', 'entity' => 'invoice', 'id' => $invoiceObj->id, 'new_status' => $statusName];
+
+                    } elseif ($entityType === 'order') {
+                        // If we have direct order context
+                        if (isset($context['order'])) {
+                            $orderObj = $context['order'];
+                            $orderObj->status_id = $targetStatus->id;
+                            $orderObj->save();
+                            Log::info("[Workflows] Changed Order ID {$orderObj->id} status to '{$statusName}'.");
+                            $result = ['status' => 'changed', 'entity' => 'order', 'id' => $orderObj->id, 'new_status' => $statusName];
+                        } elseif (isset($context['invoice']) && class_exists('Modules\\Services\\App\\Http\\Models\\Order')) {
+                            // Change all orders of the invoice
+                            $invoice = $context['invoice'];
+                            $ordersUpdated = Order::where('invoice_id', $invoice->id)
+                                ->update(['status_id' => $targetStatus->id]);
+                            Log::info("[Workflows] Changed {$ordersUpdated} Order(s) for Invoice ID {$invoice->id} status to '{$statusName}'.");
+                            $result = ['status' => 'changed', 'entity' => 'orders', 'count' => $ordersUpdated, 'new_status' => $statusName];
+                        } elseif (isset($context['service']) && class_exists('Modules\\Services\\App\\Http\\Models\\Order')) {
+                            // Change all orders of the service
+                            $service = $context['service'];
+                            $ordersUpdated = Order::where('service_id', $service->id)
+                                ->update(['status_id' => $targetStatus->id]);
+                            Log::info("[Workflows] Changed {$ordersUpdated} Order(s) for Service ID {$service->id} status to '{$statusName}'.");
+                            $result = ['status' => 'changed', 'entity' => 'orders', 'count' => $ordersUpdated, 'new_status' => $statusName];
+                        } else {
+                            Log::warning("[Workflows] CHANGE_SERVICE_STATUS: No order/invoice/service context found.");
+                            $result = ['status' => 'skipped', 'reason' => 'no_order_context'];
+                        }
+
+                    } elseif ($entityType === 'payment') {
+                        if (isset($context['payment'])) {
+                            $paymentObj = $context['payment'];
+                            // Payment uses 'status' string field not status_id
+                            $paymentObj->status = strtolower(str_replace(' ', '_', $statusName));
+                            $paymentObj->save();
+                            Log::info("[Workflows] Changed Payment ID {$paymentObj->id} status to '{$statusName}'.");
+                            $result = ['status' => 'changed', 'entity' => 'payment', 'id' => $paymentObj->id, 'new_status' => $statusName];
+                        } elseif (isset($context['invoice']) && class_exists('Modules\\Services\\App\\Http\\Models\\Payment')) {
+                            // Change all non-canceled payments of the invoice
+                            $invoice = $context['invoice'];
+                            $paymentsUpdated = \Modules\Services\App\Http\Models\Payment::where('invoice_id', $invoice->id)
+                                ->where('status', '!=', 'canceled')
+                                ->update(['status' => strtolower(str_replace(' ', '_', $statusName))]);
+                            Log::info("[Workflows] Changed {$paymentsUpdated} Payment(s) for Invoice ID {$invoice->id} status to '{$statusName}'.");
+                            $result = ['status' => 'changed', 'entity' => 'payments', 'count' => $paymentsUpdated, 'new_status' => $statusName];
+                        } else {
+                            Log::warning("[Workflows] CHANGE_SERVICE_STATUS: No payment/invoice context found.");
+                            $result = ['status' => 'skipped', 'reason' => 'no_payment_context'];
+                        }
+                    } elseif ($entityType === 'service') {
+                        if (isset($context['service'])) {
+                            $serviceObj = $context['service'];
+                            $serviceObj->status_id = $targetStatus->id;
+                            $serviceObj->save();
+                            Log::info("[Workflows] Changed Service ID {$serviceObj->id} status to '{$statusName}'.");
+                            $result = ['status' => 'changed', 'entity' => 'service', 'id' => $serviceObj->id, 'new_status' => $statusName];
+                        } elseif (isset($context['invoice']) && class_exists('Modules\\Services\\App\\Http\\Models\\Service')) {
+                            $invoice = $context['invoice'];
+                            if ($invoice->service_id) {
+                                \Modules\Services\App\Http\Models\Service::where('id', $invoice->service_id)
+                                    ->update(['status_id' => $targetStatus->id]);
+                                Log::info("[Workflows] Changed Service ID {$invoice->service_id} for Invoice ID {$invoice->id} status to '{$statusName}'.");
+                                $result = ['status' => 'changed', 'entity' => 'service', 'id' => $invoice->service_id, 'new_status' => $statusName];
+                            } else {
+                                Log::warning("[Workflows] CHANGE_SERVICE_STATUS: Invoice {$invoice->id} has no service_id.");
+                                $result = ['status' => 'skipped', 'reason' => 'no_service_linked'];
+                            }
+                        } else {
+                            Log::warning("[Workflows] CHANGE_SERVICE_STATUS: No service/invoice context found.");
+                            $result = ['status' => 'skipped', 'reason' => 'no_service_context'];
+                        }
+                    } else {
+                        Log::warning("[Workflows] CHANGE_SERVICE_STATUS: Unknown entity_type '{$entityType}'.");
+                        $result = ['status' => 'skipped', 'reason' => 'unknown_entity_type'];
+                    }
+                } catch (\Throwable $e) {
+                    Log::error("[Workflows] CHANGE_SERVICE_STATUS failed: " . $e->getMessage());
+                    $result = ['status' => 'error', 'message' => $e->getMessage()];
+                }
+                break;
+
+            case WorkflowAction::TYPE_CREATE_RESELLER_INVOICE:
+                // صدور خودکار فاکتور تمدید سفارش نمایندگی (ResellerHub)
+                try {
+                    $order = null;
+                    if (isset($context['order']) && $context['order'] instanceof ResellerOrder) {
+                        $order = $context['order'];
+                    } elseif (isset($context['invoice']) && $context['invoice'] instanceof ResellerInvoice && $context['invoice']->order) {
+                        $order = $context['invoice']->order;
+                    }
+
+                    if (!$order) {
+                        Log::warning("[Workflows] CREATE_RESELLER_INVOICE: No ResellerOrder context found.");
+                        $result = ['status' => 'skipped', 'reason' => 'no_reseller_order_context'];
+                        break;
+                    }
+
+                    $billingService = app(\Modules\ResellerHub\App\Services\ResellerBillingService::class);
+                    $invoice = $billingService->createRenewalInvoiceFromOrder($order, array_merge(is_array($config) ? $config : [], [
+                        'created_by_workflow' => true,
+                        'manual' => false,
+                    ]));
+                    Log::info("[Workflows] CREATE_RESELLER_INVOICE: Created Renewal ResellerInvoice ID {$invoice->id} for ResellerOrder ID {$order->id}");
+                    $result = ['status' => 'created', 'entity' => 'reseller_renewal_invoice', 'id' => $invoice->id];
+                } catch (\Throwable $e) {
+                    Log::error("[Workflows] CREATE_RESELLER_INVOICE failed: " . $e->getMessage());
+                    $result = ['status' => 'error', 'message' => $e->getMessage()];
+                }
+                break;
+
+            case WorkflowAction::TYPE_CREATE_INVOICE:
+                if ($this->isModuleEnabled($deps['services'] ?? 'Services') && class_exists('Modules\\Services\\App\\Http\\Models\\Invoice')) {
+                    if (isset($context['order'])) {
+                        $order = $context['order'];
+
+                        try {
+                            $invoiceTotal = $order->renewal_price ?: $order->total_amount;
+                            $dueDateOffset = (int)($config['due_date_offset'] ?? 0);
+                            $dueDate = $dueDateOffset > 0 ? now()->addDays($dueDateOffset) : $order->renewal_date;
+
+                            $invoiceData = [
+                                'customer_id' => $order->customer_id,
+                                'service_id' => $order->service_id,
+                                'project_id' => $order->project_id ?? null,
+                                'client_name' => $order->client_name,
+                                'client_phone' => $order->client_phone,
+                                'client_email' => $order->client_email,
+                                'issue_date' => now(),
+                                'due_date' => $dueDate,
+                                'subtotal' => $invoiceTotal,
+                                'total' => $invoiceTotal,
+                                'tax_amount' => 0,
+                                'discount_amount' => 0,
+                                'paid_amount' => 0,
+                                'created_by' => Auth::id() ?: 1,
+                                'meta' => [
+                                    'created_by_workflow' => true,
+                                    'source_order_id' => $order->id,
+                                ],
+                            ];
+
+                            $invoice = Invoice::create($invoiceData);
+
+                            // Try to create invoice item if service exists
+                            if ($order->service && class_exists('Modules\\Services\\App\\Http\\Models\\InvoiceItem')) {
+                                \Modules\Services\App\Http\Models\InvoiceItem::create([
+                                    'invoice_id' => $invoice->id,
+                                    'service_id' => $order->service_id,
+                                    'custom_service_name' => $order->service->name ?? 'تمدید سفارش',
+                                    'description' => 'تمدید سفارش',
+                                    'quantity' => 1,
+                                    'unit_price' => $invoiceTotal,
+                                    'total' => $invoiceTotal,
+                                    'discount' => 0,
+                                    'tax_amount' => 0,
+                                ]);
+                            }
+
+                            Log::info("[Workflows] Created Invoice ID {$invoice->id} for Order ID {$order->id}");
+
+                            // Check and auto-merge concurrent invoices if enabled
+                            $finalInvoiceId = $invoice->id;
+                            if (class_exists(\Modules\Services\App\Services\InvoiceMergeService::class)) {
+                                try {
+                                    $mergedInvoice = app(\Modules\Services\App\Services\InvoiceMergeService::class)->checkAndAutoMergeConcurrentInvoices($invoice);
+                                    if ($mergedInvoice) {
+                                        $finalInvoiceId = $mergedInvoice->id;
+                                        Log::info("[Workflows][AutoMerge] Invoice ID {$invoice->id} was automatically merged into Invoice ID {$finalInvoiceId}");
+                                    }
+                                } catch (\Throwable $e) {
+                                    Log::error("[Workflows][AutoMerge] Failed during auto-merge check: " . $e->getMessage());
+                                }
+                            }
+
+                            if (class_exists(\Modules\Workflows\Services\WorkflowEngine::class)) {
+                                app(\Modules\Workflows\Services\WorkflowEngine::class)->start('invoice_created', 'INVOICE', $finalInvoiceId, []);
+                            }
+
+                            $result = ['status' => 'created', 'invoice_id' => $finalInvoiceId];
+                        } catch (\Throwable $e) {
+                            Log::error("[Workflows] Invoice creation failed: " . $e->getMessage());
+                            $result = ['status' => 'error', 'message' => $e->getMessage()];
+                        }
+                    } else {
+                        Log::warning("[Workflows] CREATE_INVOICE skipped: No order context found.");
+                        $result = ['status' => 'skipped', 'reason' => 'no_order_context'];
+                    }
+                }
+                break;
+        }
+
+        return $result;
+    }
+
+    protected function isModuleEnabled(?string $moduleName): bool
+    {
+        if (!$moduleName) return false;
+        if (class_exists('Nwidart\\Modules\\Facades\\Module')) {
+            return \Nwidart\Modules\Facades\Module::has($moduleName) && \Nwidart\Modules\Facades\Module::isEnabled($moduleName);
+        }
+        return true;
+    }
+
+    protected function calcOffsetDate(int $days, $base)
+    {
+        $base = $base ? Carbon::parse($base) : now();
+        return $days ? $base->copy()->addDays($days) : $base;
+    }
+
+    protected function calcOffsetMinutes(int $minutes, $base)
+    {
+        $base = $base ? Carbon::parse($base) : now();
+        return $minutes ? $base->copy()->addMinutes($minutes) : $base;
+    }
+
+    public static function translatePaymentStatus(?string $status): string
+    {
+        if (empty($status)) {
+            return '';
+        }
+
+        $statusMap = [
+            'pending'   => 'در انتظار تایید',
+            'paid'      => 'پرداخت شده',
+            'canceled'  => 'لغو شده',
+            'cancelled' => 'لغو شده',
+            'failed'    => 'ناموفق',
+            'rejected'  => 'رد شده',
+            'refunded'  => 'مسترد شده',
+            'completed' => 'تکمیل شده',
+        ];
+
+        $clean = strtolower(trim((string)$status));
+        return $statusMap[$clean] ?? (string)$status;
+    }
+
+    public static function formatCurrencyValue($amount, ?string $currencyLabel = null): string
+    {
+        if (!is_numeric($amount)) {
+            return (string)$amount;
+        }
+
+        if (empty($currencyLabel)) {
+            $currencyLabel = 'تومان';
+            if (class_exists(Setting::class)) {
+                $currSetting = strtolower(Setting::where('key', 'currency')->value('value')
+                    ?? Setting::where('key', 'payment_currency')->value('value')
+                    ?? 'rial');
+                $currencyLabel = in_array($currSetting, ['rial', 'irr', 'ریال']) ? 'ریال' : 'تومان';
+            }
+        }
+
+        return number_format((float)$amount) . ' ' . $currencyLabel;
+    }
+
+    public function buildContextData(WorkflowInstance $instance, array $payload = []): array
+    {
+        $data = ['tokens' => []];
+
+        // Merge payload into tokens
+        if (!empty($payload)) {
+            $data['tokens'] = array_merge($data['tokens'], $payload);
+            if (isset($data['tokens']['payment_status'])) {
+                $data['tokens']['payment_status'] = self::translatePaymentStatus($data['tokens']['payment_status']);
+            }
+        }
+
+        if ($instance->related_type === 'APPOINTMENT' && file_exists(base_path('Modules/Booking/Entities/Appointment.php')) && class_exists('Modules\\Booking\\Entities\\Appointment')) {
+            $appt = Appointment::query()
+                ->with(['client', 'service', 'provider', 'payments'])
+                ->find($instance->related_id);
+
+            if ($appt) {
+                $scheduleTz = config('booking.timezones.display_default', 'Asia/Tehran');
+                $dateJalali = $appt->start_at_utc ? Jalalian::fromDateTime($appt->start_at_utc->copy()->timezone($scheduleTz)) : null;
+
+                // Resolve valid payment link (prioritize client appointment details page as requested by user)
+                $paymentLink = '#';
+                if (Route::has('client.appointments.show')) {
+                    $paymentLink = route('client.appointments.show', ['appointment' => $appt->id]);
+                } elseif (Route::has('booking.public.result')) {
+                    $paymentLink = route('booking.public.result', ['appointment' => $appt->id]);
+                } elseif (Route::has('user.booking.appointments.show')) {
+                    $paymentLink = route('user.booking.appointments.show', ['appointment' => $appt->id]);
+                } else {
+                    $paymentLink = url('/clients/appointments/' . $appt->id);
+                }
+
+                // Resolve currency settings from BookingSetting
+                $currencyUnit = 'IRR';
+                $currencyLabel = 'ریال';
+                if (file_exists(base_path('Modules/Booking/Entities/BookingSetting.php')) && class_exists('Modules\\Booking\\Entities\\BookingSetting')) {
+                    try {
+                        $bs = BookingSetting::current();
+                        $currencyUnit = $bs->currency_unit ?? 'IRR';
+                        $currencyLabel = $currencyUnit === 'IRT' ? 'تومان' : 'ریال';
+                    } catch (\Throwable $e) {
+                        $currencyUnit = config('booking.defaults.currency_unit', 'IRR');
+                        $currencyLabel = $currencyUnit === 'IRT' ? 'تومان' : 'ریال';
+                    }
+                }
+
+                // Resolve pending payment amount if exists, or service price
+                $pendingPayment = $appt->payments
+                    ? $appt->payments->first(fn($p) => strtoupper((string)$p->status) === 'PENDING')
+                    : null;
+
+                if ($pendingPayment) {
+                    $rawAmountInDb = (float)$pendingPayment->amount;
+                    $rawAmount = ($currencyUnit === 'IRT') ? ($rawAmountInDb / 10) : $rawAmountInDb;
+                } else {
+                    $priceInDb = $appt->service ? (float)($appt->service->discount_price ?? $appt->service->base_price ?? 0) : 0;
+                    $rawAmount = $priceInDb;
+                }
+
+                $formattedAmount = number_format($rawAmount) . ' ' . $currencyLabel;
+
+                $firstPayment = $pendingPayment ?? ($appt->payments ? $appt->payments->first() : null);
+                $bookingPaymentId = $firstPayment ? $firstPayment->id : $appt->id;
+
+                $data['appointment'] = $appt;
+                $data['tokens'] = array_merge($data['tokens'], [
+                    'appointment_id' => $appt->id,
+                    'appointment_details_id' => $appt->id,
+                    'appointment_payment_id' => $bookingPaymentId,
+                    'client_name' => $appt->client?->full_name,
+                    'patient_name' => $appt->client?->full_name,
+                    'client_phone' => $appt->client?->phone,
+                    'service_name' => $appt->service?->name,
+                    'provider_name' => $appt->provider?->name,
+                    'appointment_date_jalali' => $dateJalali?->format('Y/m/d'),
+                    'appointment_time_jalali' => $dateJalali?->format('H:i'),
+                    'appointment_datetime_jalali' => $dateJalali?->format('Y/m/d H:i'),
+                    'amount' => $formattedAmount,
+                    'payable_amount' => $formattedAmount,
+                    'raw_amount' => $rawAmount,
+                    'payment_link' => $paymentLink,
+                    'online_payment_url' => $paymentLink,
+                ]);
+            }
+        }
+
+        // Handle STATEMENT context
+        if ($instance->related_type === 'STATEMENT' && file_exists(base_path('Modules/Booking/Entities/BookingStatement.php')) && class_exists('Modules\\Booking\\Entities\\BookingStatement')) {
+            $statement = \Modules\Booking\Entities\BookingStatement::with(['provider', 'user'])->find($instance->related_id);
+
+            if ($statement) {
+                $data['statement'] = $statement;
+
+                // Convert dates to Jalali for tokens
+                $startDateJalali = Jalalian::fromCarbon(\Carbon\Carbon::parse($statement->start_date))->format('Y/m/d');
+                $endDateJalali = Jalalian::fromCarbon(\Carbon\Carbon::parse($statement->end_date))->format('Y/m/d');
+
+                $data['tokens'] = array_merge($data['tokens'], [
+                    'statement_id' => $statement->id,
+                    'provider_name' => $statement->provider?->name,
+                    'provider_phone' => $statement->provider?->mobile ?? $statement->provider?->phone,
+                    'start_date' => $startDateJalali,
+                    'end_date' => $endDateJalali,
+                    'status' => $statement->status,
+                    'first_appointment_time' => $statement->first_appointment_time,
+                    'last_appointment_time' => $statement->last_appointment_time,
+                    'notes' => $statement->notes,
+                ]);
+            }
+        }
+
+        // Handle TREATMENT_PLAN context
+        if ($instance->related_type === 'TREATMENT_PLAN' && file_exists(base_path('Modules/Booking/App/Models/TreatmentPlan.php')) && class_exists('Modules\\Booking\\App\\Models\\TreatmentPlan')) {
+            $plan = TreatmentPlan::with(['client', 'patient', 'user'])->find($instance->related_id);
+            if ($plan) {
+                $data['treatment_plan'] = $plan;
+
+                $assignedUsers = $plan->assigned_users ?? [];
+                $assignedUserModels = [];
+                $assignedByRole = [];
+
+                $cureAssignableRoles = [];
+                if (file_exists(base_path('Modules/Booking/Entities/BookingSetting.php')) && class_exists('Modules\\Booking\\Entities\\BookingSetting')) {
+                    try {
+                        $cureAssignableRoles = BookingSetting::current()?->cure_assignable_roles ?? [];
+                    } catch (\Throwable $e) {
+                    }
+                }
+
+                foreach ($assignedUsers as $assignment) {
+                    $userId = $assignment['user_id'] ?? null;
+                    $roleId = $assignment['role_id'] ?? null;
+                    if (!$userId) continue;
+
+                    $userModel = User::find($userId);
+                    if (!$userModel) continue;
+
+                    $assignedUserModels[$roleId][] = $userModel;
+                    $assignedByRole[$roleId][] = [
+                        'user_id' => $userId,
+                        'name' => $userModel->name,
+                        'phone' => $userModel->phone ?? $userModel->mobile,
+                        'email' => $userModel->email,
+                    ];
+                }
+
+                $data['assigned_users_by_role'] = $assignedByRole;
+                $data['assigned_user_models'] = $assignedUserModels;
+
+                $toothContext = $payload['tooth_context'] ?? $instance->tooth_context ?? null;
+                $itemContext = $payload['item_context'] ?? $instance->item_context ?? null;
+                if (is_string($itemContext)) {
+                    $itemContext = json_decode($itemContext, true);
+                }
+
+                $data['tokens'] = array_merge([
+                    'plan_id' => $plan->id,
+                    'patient_name' => $plan->patient_name ?? $plan->client?->full_name,
+                    'status' => $plan->status,
+                    'status_label' => $plan->status_label,
+                    'notes' => $plan->notes,
+                    'total' => $plan->total,
+                    'final_payable' => $plan->final_payable,
+                    'currency' => $plan->currency ?? 'تومان',
+                    'client_phone' => $plan->client?->phone ?? $plan->client?->mobile,
+                    'creator_name' => $plan->user?->name,
+                    'creator_phone' => $plan->user?->phone ?? $plan->user?->mobile,
+                    'tooth' => $toothContext,
+                    'item_service_name' => $itemContext['service_name'] ?? null,
+                    'item_price' => $itemContext['price'] ?? null,
+                    'item_tooth' => $itemContext['tooth'] ?? $itemContext['tooth_id'] ?? null,
+                ], $this->buildRoleTokens($assignedByRole, $cureAssignableRoles), $data['tokens']);
+            }
+        }
+
+        // Handle CLIENT_CALL context
+        if ($instance->related_type === 'CLIENT_CALL' && class_exists(ClientCall::class)) {
+            $call = ClientCall::with(['client', 'user'])->find($instance->related_id);
+            if ($call) {
+                $data['call'] = $call;
+                if ($call->client) {
+                    $data['client'] = $call->client;
+                }
+
+                $callTokens = [
+                    'call_id' => $call->id,
+                    'call_date' => $call->call_date?->format('Y-m-d') ?? '',
+                    'call_time' => $call->call_time?->format('H:i') ?? '',
+                    'call_reason' => $call->reason ?? '',
+                    'call_result' => $call->result ?? '',
+                    'call_status' => $call->status ?? '',
+                    'call_direction' => $call->direction === 'inbound' ? 'ورودی' : 'خروجی',
+                    'call_duration' => $call->duration_seconds ?? 0,
+                    'call_notes' => $call->notes ?? '',
+                    'call_next_action' => $call->next_action ?? '',
+                    'call_next_action_date' => $call->next_action_date?->format('Y-m-d') ?? '',
+                    'call_phone' => $call->contact_phone ?? '',
+                ];
+
+                $data['tokens'] = array_merge($data['tokens'], $callTokens);
+            }
+        }
+
+        // Handle TASK / FOLLOW_UP context
+        if (($instance->related_type === 'TASK' || $instance->related_type === 'FOLLOW_UP') && class_exists(Task::class)) {
+            $task = Task::find($instance->related_id);
+            if ($task) {
+                $taskTypeKey = $instance->related_type === 'FOLLOW_UP' ? 'followup' : 'task';
+                $data[$taskTypeKey] = $task;
+
+                if ($task->related_type === 'CLIENT' && class_exists(\Modules\Clients\Entities\Client::class)) {
+                    $client = \Modules\Clients\Entities\Client::with(['creator', 'status'])->find($task->related_id);
+                    if ($client) {
+                        $data['client'] = $client;
+                    }
+                }
+
+                $assigneeName = $task->assignee_id ? (User::find($task->assignee_id)?->name ?? '') : '';
+                $assigneePhone = $task->assignee_id ? (User::find($task->assignee_id)?->phone ?? '') : '';
+
+                $taskTokens = [
+                    "{$taskTypeKey}_id" => $task->id,
+                    "{$taskTypeKey}_title" => $task->title ?? '',
+                    "{$taskTypeKey}_description" => $task->description ?? '',
+                    "{$taskTypeKey}_type" => $task->task_type ?? '',
+                    "{$taskTypeKey}_status" => $task->status ?? '',
+                    "{$taskTypeKey}_priority" => $task->priority ?? '',
+                    "{$taskTypeKey}_due_at" => $task->due_at?->format('Y-m-d H:i') ?? '',
+                    "{$taskTypeKey}_completed_at" => $task->completed_at?->format('Y-m-d H:i') ?? '',
+                    "{$taskTypeKey}_assignee_name" => $assigneeName,
+                    "{$taskTypeKey}_assignee_phone" => $assigneePhone,
+                    "{$taskTypeKey}_creator_name" => $task->creator_id ? (User::find($task->creator_id)?->name ?? '') : '',
+                ];
+
+                $data['tokens'] = array_merge($data['tokens'], $taskTokens);
+            }
+        }
+
+        // Handle CLIENT context
+        if (isset($data['client']) || ($instance->related_type === 'CLIENT' && class_exists('Modules\\Clients\\Entities\\Client'))) {
+            $client = $data['client'] ?? \Modules\Clients\Entities\Client::with(['creator', 'status'])->find($instance->related_id);
+            if ($client) {
+                $data['client'] = $client;
+
+                $clientTokens = [
+                    'client_id' => $client->id,
+                    'client_name' => $client->full_name,
+                    'patient_name' => $client->full_name,
+                    'client_username' => $client->username,
+                    'client_phone' => $client->phone,
+                    'client_email' => $client->email,
+                    'client_national_code' => $client->national_code,
+                    'client_case_number' => $client->case_number,
+                    'client_notes' => $client->notes,
+                    'client_status' => $client->status?->label ?? $client->status?->key,
+                    'client_created_at_jalali' => $client->created_at ? Jalalian::fromCarbon($client->created_at)->format('Y/m/d H:i') : null,
+                    'client_creator_name' => $client->creator?->name,
+                ];
+
+                // Expose custom fields from Form Builder schema
+                if (class_exists('Modules\\Clients\\Entities\\ClientForm')) {
+                    $form = ClientForm::default();
+                    if ($form) {
+                        $fields = $form->schema['fields'] ?? [];
+                        foreach ($fields as $field) {
+                            $fieldId = $field['id'] ?? null;
+                            if ($fieldId && !ClientForm::isSystemFieldId($fieldId)) {
+                                $metaVal = $client->meta[$fieldId] ?? null;
+                                if (is_array($metaVal)) {
+                                    $metaVal = implode('، ', $metaVal);
+                                }
+                                $clientTokens["client_custom_{$fieldId}"] = $metaVal;
+                            }
+                        }
+                    }
+                }
+
+                $data['tokens'] = array_merge($clientTokens, $data['tokens']);
+            }
+        }
+
+        // Handle INVOICE context
+        if ($instance->related_type === 'INVOICE') {
+            $isReseller = isset($payload['reseller_id']) || isset($payload['tenant_id']) || str_contains($instance->workflow?->key ?? '', 'reseller');
+            $invoice = null;
+            if ($isReseller && class_exists('Modules\\ResellerHub\\App\\Models\\ResellerInvoice')) {
+                $invoice = ResellerInvoice::with(['tenant', 'payments'])->find($instance->related_id);
+            }
+            if (!$invoice && class_exists('Modules\\Services\\App\\Http\\Models\\Invoice')) {
+                $invoice = Invoice::with(['customer', 'status', 'items.service', 'payments'])->find($instance->related_id);
+            }
+            if (!$invoice && class_exists('Modules\\ResellerHub\\App\\Models\\ResellerInvoice')) {
+                $invoice = ResellerInvoice::with(['tenant', 'payments'])->find($instance->related_id);
+            }
+            if ($invoice) {
+                $data['invoice'] = $invoice;
+                if (isset($invoice->customer) && $invoice->customer) {
+                    $data['client'] = $invoice->customer;
+                }
+
+                $currencyLabel = $invoice->currency_label ?? 'تومان';
+
+                $invoiceTokens = [
+                    'invoice_id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number ?? ($invoice->proforma_invoice_number ?? null),
+                    'invoice_total' => self::formatCurrencyValue($invoice->total, $currencyLabel),
+                    'invoice_total_raw' => $invoice->total,
+                    'invoice_paid_amount' => self::formatCurrencyValue($invoice->paid_amount, $currencyLabel),
+                    'invoice_paid_amount_raw' => $invoice->paid_amount,
+                    'invoice_remaining' => self::formatCurrencyValue($invoice->remainingAmount(), $currencyLabel),
+                    'invoice_remaining_raw' => $invoice->remainingAmount(),
+                    'invoice_currency' => $currencyLabel,
+                    'currency' => $currencyLabel,
+                    'invoice_status' => is_object($invoice->status) ? $invoice->status?->name : ($invoice->status_label ?? $invoice->status),
+                    'invoice_due_date' => $invoice->due_date ? Jalalian::fromCarbon($invoice->due_date)->format('Y/m/d') : null,
+                    'invoice_issue_date' => $invoice->issue_date ? Jalalian::fromCarbon($invoice->issue_date)->format('Y/m/d') : null,
+                    'client_name' => $invoice->client_name,
+                    'client_phone' => $invoice->client_phone ?? $invoice->client_mobile,
+                    'client_email' => $invoice->client_email,
+                    'invoice_client_name' => $invoice->client_name,
+                    'invoice_client_phone' => $invoice->client_phone ?? $invoice->client_mobile,
+                    'invoice_client_email' => $invoice->client_email,
+                    'invoice_is_paid' => $invoice->isPaid() ? 'بله' : 'خیر',
+                    'invoice_is_overdue' => $invoice->isOverdue() ? 'بله' : 'خیر',
+                    'invoice_has_payment' => $invoice->paid_amount > 0 ? 'بله' : 'خیر',
+                ];
+
+                // Add invoice creator info
+                if ($invoice->created_by) {
+                    $creator = User::find($invoice->created_by);
+                    if ($creator) {
+                        $invoiceTokens['invoice_creator_name'] = $creator->name;
+                        $invoiceTokens['invoice_creator_phone'] = $creator->phone ?? $creator->mobile ?? null;
+                    }
+                    $data['invoice_creator'] = $creator ?? null;
+                }
+
+                $data['tokens'] = array_merge($data['tokens'], $invoiceTokens);
+
+                if ($invoice instanceof ResellerInvoice) {
+                    $this->populateResellerTokens($data, $invoice);
+                }
+            }
+        }
+
+        // Handle PAYMENT context
+        if ($instance->related_type === 'PAYMENT') {
+            $isReseller = isset($payload['reseller_id']) || isset($payload['tenant_id']) || str_contains($instance->workflow?->key ?? '', 'reseller');
+            $payment = null;
+            if ($isReseller && class_exists('Modules\\ResellerHub\\App\\Models\\ResellerInvoicePayment')) {
+                $payment = ResellerInvoicePayment::with(['invoice.tenant'])->find($instance->related_id);
+            }
+            if (!$payment && class_exists('Modules\\Services\\App\\Http\\Models\\Payment')) {
+                $payment = \Modules\Services\App\Http\Models\Payment::with(['invoice.customer', 'invoice.status', 'invoice.payments'])->find($instance->related_id);
+            }
+            if (!$payment && class_exists('Modules\\ResellerHub\\App\\Models\\ResellerInvoicePayment')) {
+                $payment = ResellerInvoicePayment::with(['invoice.tenant'])->find($instance->related_id);
+            }
+            if ($payment) {
+                $data['payment'] = $payment;
+                $invoice = $payment->invoice;
+                if ($invoice) {
+                    $data['invoice'] = $invoice;
+                    if (isset($invoice->customer) && $invoice->customer) {
+                        $data['client'] = $invoice->customer;
+                    }
+                    if ($invoice instanceof ResellerInvoice) {
+                        $this->populateResellerTokens($data, $invoice);
+                    }
+                }
+
+                $currencyLabel = $invoice?->currency_label;
+                if (empty($currencyLabel) && class_exists(Setting::class)) {
+                    $currSetting = strtolower(Setting::where('key', 'currency')->value('value')
+                        ?? Setting::where('key', 'payment_currency')->value('value')
+                        ?? 'rial');
+                    $currencyLabel = in_array($currSetting, ['rial', 'irr', 'ریال']) ? 'ریال' : 'تومان';
+                }
+                $currencyLabel = $currencyLabel ?: 'تومان';
+
+                $paymentStatusPersian = self::translatePaymentStatus($payment->status);
+                $formattedPaymentAmount = self::formatCurrencyValue($payment->amount, $currencyLabel);
+                $methodLabel = $payment->method_label ?? $payment->method;
+
+                $paidAtFormatted = $payment->paid_at
+                    ? Jalalian::fromCarbon($payment->paid_at)->format('Y/m/d H:i')
+                    : ($payment->created_at ? Jalalian::fromCarbon($payment->created_at)->format('Y/m/d H:i') : null);
+
+                $formattedInvoiceTotal = ($invoice && is_numeric($invoice->total))
+                    ? self::formatCurrencyValue($invoice->total, $currencyLabel)
+                    : $invoice?->total;
+
+                $formattedInvoiceRemaining = ($invoice && is_numeric($invoice->remainingAmount()))
+                    ? self::formatCurrencyValue($invoice->remainingAmount(), $currencyLabel)
+                    : $invoice?->remainingAmount();
+
+                $formattedInvoicePaid = ($invoice && is_numeric($invoice->paid_amount))
+                    ? self::formatCurrencyValue($invoice->paid_amount, $currencyLabel)
+                    : $invoice?->paid_amount;
+
+                $invoiceNumber = $invoice?->invoice_number ?? ($invoice?->proforma_invoice_number ?? null);
+                $invoiceClientName = $invoice?->client_name ?? ($payment->invoice?->client_name ?? null);
+                $invoiceClientPhone = $invoice?->client_phone ?? ($invoice?->client_mobile ?? ($payment->invoice?->client_phone ?? $payment->invoice?->client_mobile ?? null));
+
+                $paymentTokens = [
+                    'payment_id'                => $payment->id,
+                    'payment_amount'            => $formattedPaymentAmount,
+                    'payment_amount_raw'        => $payment->amount,
+                    'amount'                    => $formattedPaymentAmount,
+                    'amount_raw'                => $payment->amount,
+                    'payment_currency'          => $currencyLabel,
+                    'currency'                  => $currencyLabel,
+                    'payment_method'            => $methodLabel,
+                    'payment_method_raw'        => $payment->method,
+                    'payment_status'            => $paymentStatusPersian,
+                    'payment_status_raw'        => $payment->status,
+                    'status'                    => $paymentStatusPersian,
+                    'status_raw'                => $payment->status,
+                    'payment_paid_at'           => $paidAtFormatted,
+                    'payment_date'              => $paidAtFormatted,
+                    'payment_gateway'           => $payment->gateway,
+                    'payment_ref_id'            => $payment->transaction_id,
+                    'payment_transaction_id'   => $payment->transaction_id,
+                    'payment_is_late'           => ($invoice && $invoice->due_date && $payment->paid_at && $payment->paid_at->isAfter($invoice->due_date->endOfDay())) ? 'بله' : 'خیر',
+                    'invoice_number'            => $invoiceNumber,
+                    'payment_invoice_number'   => $invoiceNumber,
+                    'invoice_total'             => $formattedInvoiceTotal,
+                    'payment_invoice_total'     => $formattedInvoiceTotal,
+                    'invoice_total_raw'         => $invoice?->total,
+                    'payment_invoice_total_raw' => $invoice?->total,
+                    'invoice_remaining'         => $formattedInvoiceRemaining,
+                    'payment_invoice_remaining' => $formattedInvoiceRemaining,
+                    'invoice_remaining_raw'     => $invoice?->remainingAmount(),
+                    'invoice_paid_amount'       => $formattedInvoicePaid,
+                    'payment_invoice_paid'      => $formattedInvoicePaid,
+                    'invoice_is_paid'           => $invoice?->isPaid() ? 'بله' : 'خیر',
+                    'payment_invoice_is_paid'   => $invoice?->isPaid() ? 'بله' : 'خیر',
+                    'client_name'               => $invoiceClientName,
+                    'payment_client_name'       => $invoiceClientName,
+                    'client_phone'              => $invoiceClientPhone,
+                    'payment_client_phone'      => $invoiceClientPhone,
+                ];
+
+                $data['tokens'] = array_merge($data['tokens'], $paymentTokens);
+            }
+        }
+
+        // Handle ORDER context
+        if ($instance->related_type === 'ORDER') {
+            $isReseller = isset($payload['reseller_id']) || isset($payload['tenant_id']) || str_contains($instance->workflow?->key ?? '', 'reseller');
+            $order = null;
+            if ($isReseller && class_exists('Modules\\ResellerHub\\App\\Models\\ResellerOrder')) {
+                $order = ResellerOrder::with(['tenant', 'invoice'])->find($instance->related_id);
+            }
+            if (!$order && class_exists('Modules\\Services\\App\\Http\\Models\\Order')) {
+                $order = Order::with(['customer', 'status', 'service', 'invoice'])->find($instance->related_id);
+            }
+            if (!$order && class_exists('Modules\\ResellerHub\\App\\Models\\ResellerOrder')) {
+                $order = ResellerOrder::with(['tenant', 'invoice'])->find($instance->related_id);
+            }
+            if ($order) {
+                $data['order'] = $order;
+                if ($order->invoice) {
+                    $data['invoice'] = $order->invoice;
+                }
+
+                $currencyLabel = $order->currency_label ?? 'تومان';
+
+                $orderTokens = [
+                    'order_id'           => $order->id,
+                    'order_number'       => $order->order_number,
+                    'order_status'       => is_object($order->status) ? $order->status?->name : ($order->status_label ?? $order->status),
+                    'order_total'        => self::formatCurrencyValue($order->total_amount, $currencyLabel),
+                    'order_total_raw'    => $order->total_amount,
+                    'order_currency'     => $currencyLabel,
+                    'currency'           => $currencyLabel,
+                    'order_service_name' => (isset($order->service) && $order->service) ? $order->service->name : ($order->notes ?? 'پلن نمایندگی'),
+                    'order_issue_date'   => $order->issue_date ? Jalalian::fromCarbon($order->issue_date)->format('Y/m/d') : ($order->start_date ? Jalalian::fromCarbon($order->start_date)->format('Y/m/d') : null),
+                    'order_renewal_date' => $order->renewal_date ? Jalalian::fromCarbon($order->renewal_date)->format('Y/m/d') : null,
+                    'client_name'        => $order->client_name,
+                    'client_phone'       => $order->client_phone ?? $order->client_mobile,
+                    'order_client_name'  => $order->client_name,
+                    'order_client_phone' => $order->client_phone ?? $order->client_mobile,
+                    'order_client_email' => $order->client_email,
+                ];
+
+                if ($order->created_by) {
+                    $creator = User::find($order->created_by);
+                    if ($creator) {
+                        $orderTokens['order_creator_name'] = $creator->name;
+                        $orderTokens['order_creator_phone'] = $creator->phone ?? $creator->mobile ?? null;
+                    }
+                    $data['order_creator'] = $creator ?? null;
+                }
+
+                $data['tokens'] = array_merge($data['tokens'], $orderTokens);
+
+                if ($order instanceof ResellerOrder) {
+                    $this->populateResellerTokens($data, null, $order);
+                }
+            }
+        }
+
+        // Handle SERVICE context
+        if ($instance->related_type === 'SERVICE' && class_exists('Modules\\Services\\App\\Http\\Models\\Service')) {
+            $service = \Modules\Services\App\Http\Models\Service::with(['status'])->find($instance->related_id);
+            if ($service) {
+                $data['service'] = $service;
+
+                $currencyLabel = 'تومان';
+                if (class_exists(Setting::class)) {
+                    $currSetting = strtolower(Setting::where('key', 'currency')->value('value')
+                        ?? Setting::where('key', 'payment_currency')->value('value')
+                        ?? 'rial');
+                    $currencyLabel = in_array($currSetting, ['rial', 'irr', 'ریال']) ? 'ریال' : 'تومان';
+                }
+
+                $serviceTokens = [
+                    'service_id' => $service->id,
+                    'service_name' => $service->name,
+                    'service_status' => $service->status?->name,
+                    'service_price' => self::formatCurrencyValue($service->base_price, $currencyLabel),
+                    'service_price_raw' => $service->base_price,
+                    'service_currency' => $currencyLabel,
+                    'currency' => $currencyLabel,
+                    'service_type' => $service->billing_type,
+                ];
+
+                $data['tokens'] = array_merge($data['tokens'], $serviceTokens);
+            }
+        }
+
+        // Handle direct RESELLER_INVOICE context
+        if ($instance->related_type === 'RESELLER_INVOICE' && class_exists('Modules\\ResellerHub\\App\\Models\\ResellerInvoice')) {
+            $invoice = ResellerInvoice::with(['tenant', 'payments', 'reseller.user'])->find($instance->related_id);
+            if ($invoice) {
+                $this->populateResellerTokens($data, $invoice);
+            }
+        }
+
+        // Handle direct RESELLER_ORDER context
+        if ($instance->related_type === 'RESELLER_ORDER' && class_exists('Modules\\ResellerHub\\App\\Models\\ResellerOrder')) {
+            $order = ResellerOrder::with(['tenant', 'invoice', 'reseller.user'])->find($instance->related_id);
+            if ($order) {
+                $this->populateResellerTokens($data, null, $order);
+            }
+        }
+
+        return $data;
+    }
+
+    protected function populateResellerTokens(array &$data, $invoice = null, $order = null, $reseller = null): void
+    {
+        $currencyLabel = 'تومان';
+
+        if ($invoice) {
+            $data['invoice'] = $invoice;
+            $data['reseller_invoice'] = $invoice;
+
+            $paymentLink = '#';
+            if (\Illuminate\Support\Facades\Route::has('user.reseller.invoices.show')) {
+                $paymentLink = route('user.reseller.invoices.show', $invoice->id);
+            } else {
+                $paymentLink = url('/user/reseller/invoices/' . $invoice->id);
+            }
+
+            $invDueDate = $invoice->due_date ? Jalalian::fromCarbon($invoice->due_date)->format('Y/m/d') : null;
+            $invIssueDate = $invoice->issue_date ? Jalalian::fromCarbon($invoice->issue_date)->format('Y/m/d') : null;
+
+            $invTokens = [
+                'reseller_invoice_id' => $invoice->id,
+                'reseller_invoice_number' => $invoice->invoice_number,
+                'reseller_invoice_total' => self::formatCurrencyValue($invoice->total, $currencyLabel),
+                'reseller_invoice_total_raw' => $invoice->total,
+                'reseller_invoice_paid_amount' => self::formatCurrencyValue($invoice->paid_amount, $currencyLabel),
+                'reseller_invoice_paid_amount_raw' => $invoice->paid_amount,
+                'reseller_invoice_remaining' => self::formatCurrencyValue($invoice->remainingAmount(), $currencyLabel),
+                'reseller_invoice_remaining_raw' => $invoice->remainingAmount(),
+                'reseller_invoice_status' => $invoice->status_label ?? $invoice->status,
+                'reseller_invoice_due_date' => $invDueDate,
+                'reseller_invoice_issue_date' => $invIssueDate,
+                'reseller_invoice_subaccount_name' => $invoice->client_name,
+                'reseller_invoice_subaccount_phone' => $invoice->client_mobile ?? $invoice->client_phone,
+                'reseller_invoice_subaccount_email' => $invoice->client_email,
+                'reseller_subaccount_name' => $invoice->client_name,
+                'reseller_subaccount_phone' => $invoice->client_mobile ?? $invoice->client_phone,
+                'reseller_subaccount_email' => $invoice->client_email,
+                'reseller_invoice_payment_link' => $paymentLink,
+            ];
+
+            $data['tokens'] = array_merge($data['tokens'], $invTokens);
+
+            if (!$order && class_exists('\Modules\ResellerHub\App\Models\ResellerOrder')) {
+                $order = ResellerOrder::where('invoice_id', $invoice->id)->first();
+            }
+            if (!$reseller && $invoice->reseller_id && class_exists('\Modules\ResellerHub\App\Models\Reseller')) {
+                $reseller = $invoice->reseller ?? Reseller::with('user')->find($invoice->reseller_id);
+            }
+        }
+
+        if ($order) {
+            $data['order'] = $order;
+            $data['reseller_order'] = $order;
+
+            $planName = 'پلن نمایندگی';
+            if (!empty($order->modules_snapshot['package_name'])) {
+                $planName = $order->modules_snapshot['package_name'];
+            } elseif ($order->notes) {
+                $planName = $order->notes;
+            }
+
+            $orderStartDate = $order->start_date ? Jalalian::fromCarbon($order->start_date)->format('Y/m/d') : null;
+            $orderRenewalDate = $order->renewal_date ? Jalalian::fromCarbon($order->renewal_date)->format('Y/m/d') : null;
+
+            $orderTokens = [
+                'reseller_order_id' => $order->id,
+                'reseller_order_number' => $order->order_number,
+                'reseller_order_status' => $order->status_label ?? $order->status,
+                'reseller_order_total' => self::formatCurrencyValue($order->total_amount, $currencyLabel),
+                'reseller_order_total_raw' => $order->total_amount,
+                'reseller_order_plan_name' => $planName,
+                'reseller_order_billing_cycle' => $order->billing_cycle_label ?? $order->billing_cycle,
+                'reseller_order_start_date' => $orderStartDate,
+                'reseller_order_renewal_date' => $orderRenewalDate,
+                'reseller_order_subaccount_name' => $order->client_name,
+                'reseller_order_subaccount_phone' => $order->client_mobile ?? $order->client_phone,
+                'reseller_subaccount_name' => $order->client_name,
+                'reseller_subaccount_phone' => $order->client_mobile ?? $order->client_phone,
+            ];
+
+            $data['tokens'] = array_merge($data['tokens'], $orderTokens);
+
+            if (!$reseller && $order->reseller_id && class_exists('\Modules\ResellerHub\App\Models\Reseller')) {
+                $reseller = $order->reseller ?? Reseller::with('user')->find($order->reseller_id);
+            }
+        }
+
+        // Resolve Sub-Account (زیرمجموعه نمایندگی)
+        $subAccount = null;
+        if ($invoice && method_exists($invoice, 'getSubAccountModel')) {
+            $subAccount = $invoice->getSubAccountModel();
+        }
+        if (!$subAccount && $order && method_exists($order, 'getSubAccountModel')) {
+            $subAccount = $order->getSubAccountModel();
+        }
+
+        if ($subAccount) {
+            $data['subaccount'] = $subAccount;
+            $data['reseller_subaccount'] = $subAccount;
+
+            $subAccountTokens = [
+                'reseller_subaccount_name'    => $subAccount->name ?? ($invoice->client_name ?? ($order->client_name ?? '')),
+                'reseller_subaccount_mobile'  => $subAccount->mobile ?? ($invoice->client_mobile ?? ($order->client_mobile ?? '')),
+                'reseller_subaccount_email'   => $subAccount->email ?? ($invoice->client_email ?? ($order->client_email ?? '')),
+                'reseller_subaccount_company' => $subAccount->company_name ?? '',
+            ];
+            $data['tokens'] = array_merge($data['tokens'], $subAccountTokens);
+        } else {
+            $fallbackName = $invoice?->client_name ?? ($order?->client_name ?? '');
+            $fallbackPhone = $invoice?->client_mobile ?? ($order?->client_mobile ?? ($invoice?->client_phone ?? ($order?->client_phone ?? '')));
+            $fallbackEmail = $invoice?->client_email ?? ($order?->client_email ?? '');
+            $subAccountTokens = [
+                'reseller_subaccount_name'    => $fallbackName,
+                'reseller_subaccount_mobile'  => $fallbackPhone,
+                'reseller_subaccount_email'   => $fallbackEmail,
+                'reseller_subaccount_company' => '',
+            ];
+            $data['tokens'] = array_merge($data['tokens'], $subAccountTokens);
+        }
+
+        if ($reseller) {
+            $data['reseller'] = $reseller;
+
+            $tenant = ($order && $order->tenant) ? $order->tenant : ($invoice ? $invoice->tenant : null);
+
+            $resellerTokens = [
+                'reseller_company_name' => $reseller->company_name ?? $reseller->brand_title,
+                'reseller_name'         => $reseller->user?->name,
+                'reseller_phone'        => $reseller->support_phone ?? $reseller->user?->mobile ?? $reseller->user?->phone,
+                'reseller_email'        => $reseller->support_email ?? $reseller->user?->email,
+                'reseller_domain'       => $tenant?->domain ?? '',
+            ];
+
+            $data['tokens'] = array_merge($data['tokens'], $resellerTokens);
+        }
+    }
+
+    protected function buildRoleTokens(array $assignedByRole, array $cureAssignableRoles): array
+    {
+        $tokens = [];
+        $roles = Role::whereIn('id', $cureAssignableRoles)->get();
+
+        foreach ($roles as $role) {
+            $users = $assignedByRole[$role->id] ?? [];
+            $first = $users[0] ?? null;
+
+            $roleSlug = preg_replace('/[^a-zA-Z0-9_\x7f-\xff]/u', '_', $role->name);
+            $roleSlug = trim(preg_replace('/_+/', '_', $roleSlug), '_');
+            if (empty($roleSlug)) {
+                $roleSlug = 'role_' . $role->id;
+            }
+
+            $tokens["plan_role_{$roleSlug}_name"] = $first['name'] ?? '';
+            $tokens["plan_role_{$roleSlug}_phone"] = $first['phone'] ?? '';
+            $tokens["plan_role_{$roleSlug}_all_names"] = implode('، ', array_column($users, 'name'));
+        }
+
+        return $tokens;
+    }
+
+    protected function resolveClientId(WorkflowInstance $instance): ?int
+    {
+        if ($instance->related_type === 'TREATMENT_PLAN') {
+            if (file_exists(base_path('Modules/Booking/App/Models/TreatmentPlan.php')) && class_exists('Modules\\Booking\\App\\Models\\TreatmentPlan')) {
+                $plan = TreatmentPlan::find($instance->related_id);
+                return $plan?->client_id;
+            }
+        } elseif ($instance->related_type === 'APPOINTMENT') {
+            if (file_exists(base_path('Modules/Booking/Entities/Appointment.php')) && class_exists('Modules\\Booking\\Entities\\Appointment')) {
+                $appt = Appointment::find($instance->related_id);
+                return $appt?->client_id;
+            }
+        } elseif ($instance->related_type === 'CLIENT') {
+            return $instance->related_id;
+        } elseif ($instance->related_type === 'CLIENT_CALL') {
+            if (class_exists(ClientCall::class)) {
+                $call = ClientCall::find($instance->related_id);
+                return $call?->client_id;
+            }
+        } elseif ($instance->related_type === 'TASK' || $instance->related_type === 'FOLLOW_UP') {
+            if (class_exists(Task::class)) {
+                $task = Task::find($instance->related_id);
+                if ($task && $task->related_type === 'CLIENT') {
+                    return $task->related_id;
+                }
+            }
+        }
+        return null;
+    }
+
+    protected function resolveTargetPhone(array $config, array $context): ?string
+    {
+        $target = $config['target'] ?? 'APPOINTMENT_CLIENT';
+
+        if ($target === 'APPOINTMENT_CLIENT') {
+            return $context['tokens']['client_phone'] ?? null;
+        }
+
+        if ($target === 'APPOINTMENT_PROVIDER') {
+            // Assuming provider has a phone number in User model or profile
+            $provider = $context['appointment']->provider ?? null;
+            return $provider?->phone ?? $provider?->mobile ?? null;
+        }
+
+        if ($target === 'INVOICE_CLIENT' || $target === 'ORDER_CLIENT' || $target === 'PAYMENT_CLIENT') {
+            return $context['tokens']['client_phone'] ?? null;
+        }
+
+        if ($target === 'INVOICE_CREATOR') {
+            $invoice = $context['invoice'] ?? null;
+            if ($invoice && $invoice->created_by) {
+                $creator = User::find($invoice->created_by);
+                return $creator?->phone ?? $creator?->mobile ?? null;
+            }
+            return null;
+        }
+
+        if ($target === 'ORDER_CREATOR') {
+            $order = $context['order'] ?? null;
+            if ($order && $order->created_by) {
+                $creator = User::find($order->created_by);
+                return $creator?->phone ?? $creator?->mobile ?? null;
+            }
+            return null;
+        }
+
+        if (in_array($target, ['RESELLER_SUBACCOUNT', 'RESELLER_INVOICE_SUBACCOUNT', 'RESELLER_ORDER_SUBACCOUNT', 'RESELLER_TENANT_USER', 'RESELLER_SUBACCOUNT_MANAGER'], true)) {
+            $invoice = $context['invoice'] ?? ($context['reseller_invoice'] ?? null);
+            $order = $context['order'] ?? ($context['reseller_order'] ?? null);
+
+            $subAccount = null;
+            if ($invoice && method_exists($invoice, 'getSubAccountModel')) {
+                $subAccount = $invoice->getSubAccountModel();
+            }
+            if (!$subAccount && $order && method_exists($order, 'getSubAccountModel')) {
+                $subAccount = $order->getSubAccountModel();
+            }
+
+            // 1. Direct phone from SubAccount model or linked user
+            if ($subAccount) {
+                $phone = $subAccount->mobile ?? $subAccount->phone ?? $subAccount->user?->mobile ?? $subAccount->user?->phone;
+                if (!empty($phone)) {
+                    return $phone;
+                }
+            }
+
+            // 2. Tenant owner / manager phone
+            $tenant = $invoice?->tenant ?? $order?->tenant ?? null;
+            if ($tenant) {
+                $manager = $tenant->subAccount?->user ?? $tenant->users()->first();
+                if ($manager) {
+                    $phone = $manager->mobile ?? $manager->phone;
+                    if (!empty($phone)) {
+                        return $phone;
+                    }
+                }
+            }
+
+            // 3. Fallback to invoice / order direct fields
+            return $invoice?->client_mobile
+                ?? $order?->client_mobile
+                ?? ($context['tokens']['reseller_subaccount_phone'] ?? $context['tokens']['reseller_invoice_subaccount_phone'] ?? $context['tokens']['reseller_order_subaccount_phone'] ?? null);
+        }
+
+        if ($target === 'RESELLER_ADMIN') {
+            $reseller = $context['reseller'] ?? null;
+            if (!$reseller) {
+                $invoice = $context['invoice'] ?? ($context['reseller_invoice'] ?? null);
+                $reseller = $invoice?->reseller ?? null;
+            }
+            if (!$reseller) {
+                $order = $context['order'] ?? ($context['reseller_order'] ?? null);
+                $reseller = $order?->reseller ?? null;
+            }
+            $adminUser = $reseller?->user ?? ($reseller?->user_id ? User::find($reseller->user_id) : null);
+            return $adminUser?->mobile ?? $adminUser?->phone ?? $reseller?->support_phone ?? null;
+        }
+
+        // New target for Statement Provider
+        if ($target === 'STATEMENT_PROVIDER') {
+            return $context['tokens']['provider_phone'] ?? null;
+        }
+
+        if ($target === 'SPECIFIC_USER') {
+            $userId = $config['target_user_id'] ?? null;
+            if ($userId) {
+                $user = User::find($userId);
+                return $user?->phone ?? $user?->mobile ?? null;
+            }
+        }
+
+        if ($target === 'CUSTOM_PHONE') {
+            return $config['phone'] ?? null;
+        }
+
+        if ($target === 'TREATMENT_PLAN_CLIENT') {
+            return $context['tokens']['client_phone'] ?? null;
+        }
+
+        if ($target === 'TREATMENT_PLAN_CREATOR') {
+            return $context['tokens']['creator_phone'] ?? null;
+        }
+
+        if (str_starts_with($target, 'TREATMENT_PLAN_ROLE_')) {
+            $roleId = (int)str_replace('TREATMENT_PLAN_ROLE_', '', $target);
+            $assignedUsers = $context['assigned_users_by_role'][$roleId] ?? [];
+            return $assignedUsers[0]['phone'] ?? null;
+        }
+
+        if ($target === 'CLIENT') {
+            return $context['tokens']['client_phone'] ?? null;
+        }
+
+        if ($target === 'CLIENT_CREATOR') {
+            $creator = $context['client']->creator ?? null;
+            return $creator?->phone ?? $creator?->mobile ?? null;
+        }
+
+        if ($target === 'CALL_CREATOR' && isset($context['call'])) {
+            $user = $context['call']->user ?? null;
+            return $user?->phone ?? $user?->mobile ?? null;
+        }
+
+        if (($target === 'TASK_CREATOR' || $target === 'FOLLOWUP_CREATOR') && (isset($context['task']) || isset($context['followup']))) {
+            $taskObj = $context['task'] ?? $context['followup'];
+            $user = User::find($taskObj->creator_id);
+            return $user?->phone ?? $user?->mobile ?? null;
+        }
+
+        if (($target === 'TASK_ASSIGNEE' || $target === 'FOLLOWUP_ASSIGNEE') && (isset($context['task']) || isset($context['followup']))) {
+            $taskObj = $context['task'] ?? $context['followup'];
+            $user = User::find($taskObj->assignee_id);
+            return $user?->phone ?? $user?->mobile ?? null;
+        }
+
+        return null;
+    }
+
+    protected function resolveSmsParams(array $paramKeys, array $context): array
+    {
+        $tokens = $context['tokens'] ?? [];
+        $params = [];
+        foreach ($paramKeys as $key) {
+            // If key is a token name, use its value. If it's a raw string (not in tokens), use it as is?
+            // For now, we assume keys are token names from the dropdown.
+            $params[] = $tokens[$key] ?? $key;
+        }
+        return $params;
+    }
+
+    protected function renderTemplate(string $template, array $context, array $indexedParams = []): string
+    {
+        $tokens = $context['tokens'] ?? [];
+
+        // Replace indexed placeholders {0}, {1}, ...
+        if (!empty($indexedParams)) {
+            foreach ($indexedParams as $idx => $value) {
+                $template = str_replace('{' . $idx . '}', (string)$value, $template);
+            }
+        }
+
+        // Replace named placeholders like {client_name}
+        foreach ($tokens as $key => $value) {
+            $template = str_replace('{' . $key . '}', (string)$value, $template);
+        }
+
+        return $template;
+    }
+
+    public function calcTaskDueAt(?int $assigneeId, int $offsetDays, $baseDate): Carbon
+    {
+        $base = $baseDate ? Carbon::parse($baseDate) : now();
+
+        $bookingEnabled = $this->isModuleEnabled('Booking')
+            && class_exists('\Modules\Booking\Entities\BookingAvailabilityRule')
+            && class_exists('\Modules\Booking\Entities\BookingAvailabilityException');
+
+        if ($bookingEnabled && $assigneeId) {
+            // Check if provider has schedule rules
+            $hasSchedule = BookingAvailabilityRule::query()
+                ->where('scope_type', BookingAvailabilityRule::SCOPE_SERVICE_PROVIDER)
+                ->where('scope_id', $assigneeId)
+                ->exists();
+
+            if ($hasSchedule) {
+                $current = $base->copy();
+
+                if ($offsetDays <= 0) {
+                    // Check if open on base date
+                    if ($this->isProviderOpenOnDate($assigneeId, $current)) {
+                        return $current;
+                    }
+                    // Otherwise search for the first open day
+                    $safetyCounter = 0;
+                    while ($safetyCounter < 365) {
+                        $current->addDay();
+                        $safetyCounter++;
+                        if ($this->isProviderOpenOnDate($assigneeId, $current)) {
+                            return $current;
+                        }
+                    }
+                    return $base->copy();
+                }
+
+                $workDaysRemaining = $offsetDays;
+                $safetyCounter = 0;
+
+                while ($workDaysRemaining > 0 && $safetyCounter < 365) {
+                    $current->addDay();
+                    $safetyCounter++;
+
+                    // Check if open on this day
+                    $isOpen = $this->isProviderOpenOnDate($assigneeId, $current);
+                    if ($isOpen) {
+                        $workDaysRemaining--;
+                    }
+                }
+
+                return $current;
+            }
+        }
+
+        return $offsetDays <= 0 ? $base : $base->copy()->addDays($offsetDays);
+    }
+
+    /**
+     * Check if a provider is open on a specific date based on rules and exceptions.
+     */
+    protected function isProviderOpenOnDate(int $providerUserId, Carbon $date): bool
+    {
+        $localDateStr = $date->toDateString();
+
+        // 1. Check Exception
+        $exception = BookingAvailabilityException::query()
+            ->where('scope_type', BookingAvailabilityException::SCOPE_SERVICE_PROVIDER)
+            ->where('scope_id', $providerUserId)
+            ->whereDate('local_date', $localDateStr)
+            ->first();
+
+        if ($exception) {
+            return !$exception->is_closed;
+        }
+
+        // 2. Check Rule
+        $weekday = ((int)$date->dayOfWeek + 1) % 7; // 0=Sat .. 6=Fri
+        $rule = BookingAvailabilityRule::query()
+            ->where('scope_type', BookingAvailabilityRule::SCOPE_SERVICE_PROVIDER)
+            ->where('scope_id', $providerUserId)
+            ->where('weekday', $weekday)
+            ->first();
+
+        if ($rule) {
+            return !$rule->is_closed;
+        }
+
+        return false;
+    }
+}

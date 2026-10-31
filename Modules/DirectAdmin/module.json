@@ -1,0 +1,10 @@
+{
+  "name": "DirectAdmin",
+  "alias": "directadmin",
+  "description": "DirectAdmin Connection Module for Server and Hosting Account Management",
+  "priority": 130,
+  "providers": [
+    "Modules\\DirectAdmin\\Providers\\DirectAdminServiceProvider"
+  ],
+  "files": []
+}

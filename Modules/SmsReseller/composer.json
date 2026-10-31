@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/smsreseller",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\SmsReseller\\": "app/",
+            "Modules\\SmsReseller\\Database\\Factories\\": "database/factories/",
+            "Modules\\SmsReseller\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\SmsReseller\\Tests\\": "tests/"
+        }
+    }
+}

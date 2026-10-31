@@ -1,0 +1,2219 @@
+@php
+    $action = $action ?? '';
+    // Load existing triggers or default to one empty trigger
+    $triggers = old('triggers', isset($workflow) ? $workflow->triggers->toArray() : []);
+    if (empty($triggers)) {
+        $triggers = [['type' => '', 'config' => []]];
+    }
+@endphp
+
+<style>
+    /* Premium Glassmorphism and Custom Micro-Animations */
+    .premium-card {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(229, 231, 235, 0.8);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dark .premium-card {
+        background: rgba(26, 32, 44, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(75, 85, 99, 0.35);
+    }
+    .premium-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 24px -10px rgba(99, 102, 241, 0.12);
+        border-color: rgba(99, 102, 241, 0.35);
+    }
+    .trigger-item {
+        animation: slideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .event-group-toggle svg.rotate-180 {
+        transform: rotate(180deg);
+    }
+</style>
+
+<form method="post" action="{{ $action }}" class="space-y-8">
+    @csrf
+    @if(($method ?? '') === 'patch')
+        @method('patch')
+    @endif
+
+    <!-- بخش اطلاعات پایه -->
+    <div class="premium-card shadow-sm rounded-2xl p-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+            <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            اطلاعات کلی گردش کار
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- نام -->
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">نام گردش کار <span class="text-red-500">*</span></label>
+                <input type="text" name="name" id="wf-name" value="{{ old('name', $workflow->name ?? '') }}"
+                       class="block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:border-indigo-500 focus:ring-indigo-500/20 focus:ring-4 transition-all py-3 px-4 shadow-sm"
+                       placeholder="مثال: ارسال پیامک تایید نوبت" required>
+                <p class="text-xs text-gray-400">یک نام گویا برای این فرآیند انتخاب کنید.</p>
+            </div>
+
+            <!-- کلید (پیشرفته) -->
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    شناسه سیستمی (Key)
+                    <span class="text-xs font-normal text-gray-400">(تولید خودکار فینگلیش)</span>
+                </label>
+                <input type="text" name="key" id="wf-key" value="{{ old('key', $workflow->key ?? '') }}"
+                       class="block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500/20 focus:ring-4 transition-all py-3 px-4 shadow-sm font-mono text-left" dir="ltr"
+                       required>
+                <p class="text-xs text-gray-400">شناسه یکتا برای سیستم (انگلیسی، حروف و اعداد و خط تیره).</p>
+            </div>
+
+            <!-- توضیحات -->
+            <div class="col-span-1 md:col-span-2 space-y-2">
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">توضیحات (اختیاری)</label>
+                <textarea name="description" rows="2.5"
+                          class="block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:border-indigo-500 focus:ring-indigo-500/20 focus:ring-4 transition-all py-3 px-4 shadow-sm"
+                          placeholder="یادداشتی برای مدیران سیستم...">{{ old('description', $workflow->description ?? '') }}</textarea>
+            </div>
+
+            <!-- وضعیت فعال -->
+            <div class="col-span-1 md:col-span-2">
+                <div class="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-gray-900/30 rounded-xl border border-gray-200 dark:border-gray-700">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-gray-800 dark:text-gray-200">وضعیت گردش کار</span>
+                        <span class="text-xs text-gray-400 mt-0.5">در صورت غیرفعال بودن، این گردش کار به هیچ وجه اجرا نخواهد شد.</span>
+                    </div>
+                    <div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="hidden" name="is_active" value="0">
+                            <input type="checkbox" name="is_active" id="is_active" value="1" @checked(old('is_active', $workflow->is_active ?? true)) class="sr-only peer">
+                            <div class="w-12 h-6 bg-gray-200 dark:bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:after:bg-gray-300 dark:border-gray-600 peer-checked:bg-emerald-500 transition-colors"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بخش شرایط شروع -->
+    <div class="premium-card shadow-sm rounded-2xl p-6 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
+
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    شرایط شروع (Triggers)
+                </h3>
+                <p class="mt-1 text-xs text-gray-400">مشخص کنید این گردش کار تحت چه فیلترها و شرایطی باید فعال و شروع شود.</p>
+            </div>
+
+            <button type="button" id="add-trigger-btn"
+                    class="inline-flex items-center px-4 py-2.5 border border-transparent text-sm font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                افزودن شرط شروع جدید
+            </button>
+        </div>
+
+        <div id="triggers-container" class="space-y-6">
+            @foreach($triggers as $index => $trigger)
+                @php
+                    $triggerType = $trigger['type'] ?? '';
+                    $tConfig = $trigger['config'] ?? [];
+                @endphp
+                <div class="trigger-item group relative bg-gray-50/50 dark:bg-gray-900/10 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 transition-all hover:border-indigo-300 dark:hover:border-indigo-800">
+
+                    <!-- دکمه حذف -->
+                    <button type="button" class="remove-trigger absolute top-4 left-4 text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title="حذف شرط">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        <!-- انتخاب نوع شرط -->
+                        <div class="lg:col-span-4 space-y-2">
+                            <label class="block text-sm font-bold text-gray-800 dark:text-gray-200">نوع شرط شروع</label>
+                            <select name="triggers[{{ $index }}][type]" class="trigger-type-select block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white py-2.5 px-3 focus:border-indigo-500 focus:ring-indigo-500/20 focus:ring-4 shadow-sm text-sm">
+                                <option value="">انتخاب کنید...</option>
+                                <optgroup label="بر اساس رویداد (آنی)">
+                                    <option value="EVENT" @selected($triggerType === 'EVENT')>وقتی رویدادی رخ می‌دهد (Event)</option>
+                                </optgroup>
+                                <optgroup label="بر اساس زمان (یادآوری نوبت)">
+                                    <option value="APPOINTMENT_REMINDER" @selected($triggerType === 'APPOINTMENT_REMINDER')>یادآوری نوبت‌دهی (قبل/بعد از نوبت)</option>
+                                    <option value="BOOKING_PAYMENT_REMINDER" @selected($triggerType === 'BOOKING_PAYMENT_REMINDER')>براساس زمان پرداخت نوبت (قبل/بعد از ایجاد پرداخت)</option>
+                                </optgroup>
+                                <optgroup label="بر اساس زمان (سرویس خدمات)">
+                                    <option value="INVOICE_REMINDER" @selected($triggerType === 'INVOICE_REMINDER')>یادآوری سررسید فاکتور سرویس خدمات (قبل/بعد از سررسید)</option>
+                                    <option value="ORDER_RENEWAL_REMINDER" @selected($triggerType === 'ORDER_RENEWAL_REMINDER')>یادآوری تمدید سفارش سرویس خدمات (ساخت خودکار فاکتور)</option>
+                                </optgroup>
+                                @if(class_exists(\Modules\ResellerHub\App\Models\ResellerOrder::class))
+                                <optgroup label="بر اساس زمان (نمایندگی - ResellerHub)">
+                                    <option value="RESELLER_ORDER_RENEWAL_REMINDER" @selected($triggerType === 'RESELLER_ORDER_RENEWAL_REMINDER')>یادآوری موعد تمدید سفارش نمایندگی (صدور خودکار فاکتور تمدید)</option>
+                                    <option value="RESELLER_INVOICE_REMINDER" @selected($triggerType === 'RESELLER_INVOICE_REMINDER')>یادآوری سررسید و معوقه فاکتور نمایندگی (Reseller Invoice)</option>
+                                </optgroup>
+                                @endif
+                                <optgroup label="بر اساس زمان‌بندی (دوره‌ای)">
+                                    <option value="SCHEDULE" @selected($triggerType === 'SCHEDULE')>زمان‌بندی دوره‌ای خاص (Cron Job)</option>
+                                </optgroup>
+                            </select>
+                            <p class="text-xs text-gray-400">محرک اصلی اجرای گردش کار را تعیین کنید.</p>
+                        </div>
+
+                        <!-- تنظیمات مربوطه -->
+                        <div class="lg:col-span-8 border-t lg:border-t-0 lg:border-r border-gray-200 dark:border-gray-800 pt-6 lg:pt-0 lg:pr-6">
+
+                            <!-- راهنما -->
+                            <div class="trigger-config config-empty text-sm text-gray-400 italic flex items-center justify-center min-h-[100px]">
+                                لطفا ابتدا یک نوع شرط را در سمت راست انتخاب کنید.
+                            </div>
+
+                            <!-- 1. EVENT CONFIG -->
+                            <div class="trigger-config config-EVENT hidden space-y-6">
+                                <!-- رویدادهای محرک (دسته‌بندی شده) -->
+                                <div class="space-y-3">
+                                    <label class="block text-sm font-bold text-gray-800 dark:text-gray-200">رویدادهای محرک <span class="text-red-500">*</span></label>
+                                    @php
+                                        $selectedEvents = (array)($tConfig['event_key'] ?? []);
+                                    @endphp
+
+                                    <div class="space-y-3">
+                                        <!-- دسته‌بندی نوبت‌دهی -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800/50 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                                                <span>رویدادهای نوبت‌دهی (Appointment Events)</span>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                @php
+                                                    $aptEvents = [
+                                                        'appointment_created' => 'ایجاد نوبت جدید',
+                                                        'appointment_created_online' => 'رزرو آنلاین نوبت (توسط بیمار)',
+                                                        'appointment_created_operator' => 'ثبت نوبت توسط اپراتور',
+                                                        'appointment_canceled' => 'لغو نوبت',
+                                                        'appointment_no_show' => 'عدم حضور بیمار (No-Show)'
+                                                    ];
+                                                    if (isset($triggerOptions['APPOINTMENT'])) {
+                                                        foreach($triggerOptions['APPOINTMENT'] as $k => $lbl) {
+                                                            if (!str_starts_with($k, 'appointment_reminder_') && !isset($aptEvents[$k])) {
+                                                                $aptEvents[$k] = $lbl;
+                                                            }
+                                                        }
+                                                    }
+                                                @endphp
+                                                @foreach($aptEvents as $k => $label)
+                                                    <label class="flex items-center gap-3 p-2 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all select-none">
+                                                        <input type="checkbox" name="triggers[{{ $index }}][config][event_key][]" value="{{ $k }}" @checked(in_array($k, $selectedEvents))
+                                                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 event-checkbox h-4.5 w-4.5">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        <!-- دسته‌بندی سرویس خدمات -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800/50 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                                                <span>رویدادهای سرویس خدمات (Services)</span>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 grid grid-cols-1 md:grid-cols-2 gap-3 hidden">
+                                                @php
+                                                    $serviceEvents = [
+                                                        'invoice_created'         => 'ایجاد فاکتور جدید',
+                                                        'invoice_status_changed'  => 'تغییر وضعیت فاکتور',
+                                                        'invoice_paid'            => 'تکمیل پرداخت فاکتور',
+                                                        'invoice_unpaid'          => 'لغو یا بازگشت پرداخت فاکتور',
+                                                        'invoice_cancelled'       => 'لغو فاکتور',
+                                                        'payment_created'         => 'ثبت پرداخت جدید',
+                                                        'payment_cancelled'       => 'لغو پرداخت',
+                                                        'payment_status_changed'  => 'تغییر وضعیت پرداخت',
+                                                        'service_created'         => 'ایجاد سرویس جدید',
+                                                        'service_status_changed'  => 'تغییر وضعیت سرویس',
+                                                        'order_created'           => 'ایجاد سفارش جدید',
+                                                        'order_status_changed'    => 'تغییر وضعیت سفارش',
+                                                    ];
+                                                @endphp
+                                                @foreach($serviceEvents as $k => $label)
+                                                    <label class="flex items-center gap-3 p-2 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all select-none">
+                                                        <input type="checkbox" name="triggers[{{ $index }}][config][event_key][]" value="{{ $k }}" @checked(in_array($k, $selectedEvents))
+                                                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 event-checkbox h-4.5 w-4.5">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        @if(class_exists(\Modules\ResellerHub\App\Models\ResellerInvoice::class))
+                                        <!-- دسته‌بندی فاکتور و سفارش نمایندگی (ResellerHub) -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800/50 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                                                <span>رویدادهای فاکتور و سفارش نمایندگی (ResellerHub)</span>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 grid grid-cols-1 md:grid-cols-2 gap-3 hidden">
+                                                @php
+                                                    $resellerEvents = [
+                                                        'reseller_invoice_created'        => 'ایجاد فاکتور جدید نمایندگی',
+                                                        'reseller_invoice_status_changed' => 'تغییر وضعیت فاکتور نمایندگی',
+                                                        'reseller_invoice_paid'           => 'تکمیل پرداخت فاکتور نمایندگی',
+                                                        'reseller_invoice_unpaid'         => 'لغو یا بازگشت پرداخت فاکتور نمایندگی',
+                                                        'reseller_invoice_cancelled'      => 'لغو فاکتور نمایندگی',
+                                                        'reseller_payment_created'        => 'ثبت پرداخت جدید نمایندگی',
+                                                        'reseller_payment_cancelled'      => 'لغو پرداخت فاکتور نمایندگی',
+                                                        'reseller_order_created'          => 'ایجاد خودکار سفارش نمایندگی (از فاکتور)',
+                                                        'reseller_order_status_changed'   => 'تغییر وضعیت سفارش نمایندگی',
+                                                        'reseller_order_renewed'          => 'تمدید سفارش نمایندگی',
+                                                    ];
+                                                @endphp
+                                                @foreach($resellerEvents as $k => $label)
+                                                    <label class="flex items-center gap-3 p-2 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all select-none">
+                                                        <input type="checkbox" name="triggers[{{ $index }}][config][event_key][]" value="{{ $k }}" @checked(in_array($k, $selectedEvents))
+                                                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 event-checkbox h-4.5 w-4.5">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        <!-- دسته‌بندی صورت وضعیت مالی -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800/50 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                                                <span>رویدادهای صورت وضعیت مالی (Statements)</span>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 grid grid-cols-1 md:grid-cols-2 gap-3 hidden">
+                                                @php
+                                                    $stEvents = [
+                                                        'statement_created' => 'ایجاد صورت وضعیت جدید',
+                                                        'statement_status_changed' => 'تغییر وضعیت صورت وضعیت',
+                                                        'statement_approved' => 'تایید صورت وضعیت',
+                                                        'statement_completed' => 'تکمیل صورت وضعیت'
+                                                    ];
+                                                @endphp
+                                                @foreach($stEvents as $k => $label)
+                                                    <label class="flex items-center gap-3 p-2 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all select-none">
+                                                        <input type="checkbox" name="triggers[{{ $index }}][config][event_key][]" value="{{ $k }}" @checked(in_array($k, $selectedEvents))
+                                                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 event-checkbox h-4.5 w-4.5">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        <!-- دسته‌بندی سفارشات لابراتوار -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800/50 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                                                <span>رویدادهای سفارشات لابراتوار (Laboratory Events)</span>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 grid grid-cols-1 md:grid-cols-2 gap-3 hidden">
+                                                @php
+                                                    $labEvents = [
+                                                        'laboratory_order_created'  => 'ثبت سفارش جدید در لابراتوار',
+                                                        'laboratory_order_received' => 'تحویل پروتز از لابراتوار به مطب (سبز شدن کار)',
+                                                        'laboratory_stage_completed'=> 'تایید و تکمیل مرحله ساخت پروتز',
+                                                        'laboratory_stage_overdue'  => 'بروز تاخیر در مرحله لابراتوار',
+                                                    ];
+                                                @endphp
+                                                @foreach($labEvents as $k => $label)
+                                                    <label class="flex items-center gap-3 p-2 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all select-none">
+                                                        <input type="checkbox" name="triggers[{{ $index }}][config][event_key][]" value="{{ $k }}" @checked(in_array($k, $selectedEvents))
+                                                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 event-checkbox h-4.5 w-4.5">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        <!-- دسته‌بندی طرح درمان -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800/50 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                                                <span>رویدادهای طرح درمان (Treatment Plans)</span>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 grid grid-cols-1 md:grid-cols-2 gap-3 hidden">
+                                                @php
+                                                    $tpEvents = [];
+                                                    if (!empty($cureStatuses)) {
+                                                        foreach ($cureStatuses as $st) {
+                                                            $key = 'treatment_plan_' . strtolower($st['id']);
+                                                            $tpEvents[$key] = 'طرح درمان: ' . ($st['name'] ?? $st['id']);
+                                                        }
+                                                    } else {
+                                                        $tpEvents = [
+                                                            'treatment_plan_draft' => 'طرح درمان: پیش‌نویس',
+                                                            'treatment_plan_confirmed' => 'طرح درمان: تأیید شده',
+                                                        ];
+                                                    }
+
+                                                    // Add extra triggers
+                                                    $tpEvents['treatment_plan_created'] = 'طرح درمان: ایجاد جدید (هر وضعیتی)';
+                                                    $tpEvents['treatment_plan_item_added'] = 'طرح درمان: اضافه شدن آیتم جدید';
+                                                    $tpEvents['treatment_plan_item_removed'] = 'طرح درمان: حذف شدن آیتم';
+                                                @endphp
+                                                @foreach($tpEvents as $k => $label)
+                                                    <label class="flex items-center gap-3 p-2 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all select-none">
+                                                        <input type="checkbox" name="triggers[{{ $index }}][config][event_key][]" value="{{ $k }}" @checked(in_array($k, $selectedEvents))
+                                                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 event-checkbox h-4.5 w-4.5">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+
+                                        <!-- دسته‌بندی پرونده کلاینت -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-800/50 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                                                <span>رویدادهای پرونده کلاینت (Clients)</span>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 grid grid-cols-1 md:grid-cols-2 gap-3 hidden">
+                                                @php
+                                                    $clientEvents = [
+                                                        'client_created' => 'ایجاد پرونده کلاینت جدید',
+                                                        'client_updated' => 'به‌روزرسانی اطلاعات کلاینت',
+                                                        'client_status_changed' => 'تغییر وضعیت کلاینت',
+                                                    ];
+                                                @endphp
+                                                @foreach($clientEvents as $k => $label)
+                                                    <label class="flex items-center gap-3 p-2 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all select-none">
+                                                        <input type="checkbox" name="triggers[{{ $index }}][config][event_key][]" value="{{ $k }}" @checked(in_array($k, $selectedEvents))
+                                                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 event-checkbox h-4.5 w-4.5">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $label }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- فیلترهای شرطی پیشرفته (اختیاری) -->
+                                <div class="border-t border-gray-200 dark:border-gray-800 pt-5 space-y-3">
+                                    <div class="flex items-center gap-2 pb-1">
+                                        <svg class="h-4.5 w-4.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                        </svg>
+                                        <span class="text-xs font-extrabold text-gray-800 dark:text-gray-200">فیلترهای شرطی پیشرفته (اختیاری)</span>
+                                    </div>
+
+                                    <div class="space-y-3">
+                                        <!-- ۱. خدمات و پزشکان -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900/40">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50/70 dark:bg-gray-800/20 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800">
+                                                <div class="flex items-center gap-2">
+                                                    <span>فیلتر خدمات و پزشکان (نوبت‌دهی)</span>
+                                                    <span class="badge-services-providers hidden bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full text-[10px] font-extrabold border border-indigo-100 dark:border-indigo-900/50"></span>
+                                                </div>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 space-y-5 hidden">
+                                                <!-- فیلتر خدمات (شامل / شامل نشود) -->
+                                                <div class="space-y-2">
+                                                    <div class="flex items-center justify-between">
+                                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">فیلتر خدمات/سرویس‌ها</label>
+                                                        <select name="triggers[{{ $index }}][config][service_operator]" class="operator-select text-[11px] font-bold rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2">
+                                                            <option value="IN" @selected(($tConfig['service_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                                            <option value="NOT_IN" @selected(($tConfig['service_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد (به جز...)</option>
+                                                        </select>
+                                                    </div>
+                                                    @php
+                                                        $selectedServices = (array)($tConfig['service_ids'] ?? (isset($tConfig['service_id']) ? [$tConfig['service_id']] : []));
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 max-h-40 overflow-y-auto p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($services as $service)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][service_ids][]" value="{{ $service->id }}" @checked(in_array($service->id, $selectedServices))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 service-checkbox h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300">{{ $service->name }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+
+                                                <!-- فیلتر پزشکان (شامل / شامل نشود) -->
+                                                <div class="space-y-2">
+                                                    <div class="flex items-center justify-between">
+                                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">فیلتر پزشک/ارائه‌دهنده</label>
+                                                        <select name="triggers[{{ $index }}][config][provider_operator]" class="operator-select text-[11px] font-bold rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2">
+                                                            <option value="IN" @selected(($tConfig['provider_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                                            <option value="NOT_IN" @selected(($tConfig['provider_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد (به جز...)</option>
+                                                        </select>
+                                                    </div>
+                                                    @php
+                                                        $selectedProviders = (array)($tConfig['provider_ids'] ?? (isset($tConfig['provider_id']) ? [$tConfig['provider_id']] : []));
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 max-h-40 overflow-y-auto p-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach(($providers ?? $users) as $user)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][provider_ids][]" value="{{ $user->id }}" @checked(in_array($user->id, $selectedProviders))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 provider-checkbox h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300">{{ $user->name }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ۲. فیلترهای اختصاصی طرح درمان -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900/40">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50/70 dark:bg-gray-800/20 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800">
+                                                <div class="flex items-center gap-2">
+                                                    <span>فیلترهای اختصاصی طرح درمان (Treatment Plans)</span>
+                                                    <span class="badge-treatment-plans hidden bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full text-[10px] font-extrabold border border-indigo-100 dark:border-indigo-900/50"></span>
+                                                </div>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 space-y-4 hidden">
+                                                <!-- فیلتر وضعیت قبلی -->
+                                                <div class="space-y-2">
+                                                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">فقط در صورت انتقال از وضعیت(های) قبلی:</label>
+                                                    @php
+                                                        $selectedPrevStatuses = (array)($tConfig['tp_prev_statuses'] ?? []);
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-gray-50/50 dark:bg-gray-800/30 p-2.5 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($cureStatuses as $st)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][tp_prev_statuses][]" value="{{ $st['id'] }}" @checked(in_array($st['id'], $selectedPrevStatuses))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $st['name'] }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+
+                                                <!-- فیلتر مبلغ -->
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50/50 dark:bg-gray-800/30 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                    <div class="space-y-1">
+                                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">حداقل مبلغ طرح درمان (تومان)</label>
+                                                        <input type="number" name="triggers[{{ $index }}][config][tp_min_amount]" value="{{ $tConfig['tp_min_amount'] ?? '' }}"
+                                                               class="block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white py-2 px-3 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                                    </div>
+                                                    <div class="space-y-1">
+                                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">حداکثر مبلغ طرح درمان (تومان)</label>
+                                                        <input type="number" name="triggers[{{ $index }}][config][tp_max_amount]" value="{{ $tConfig['tp_max_amount'] ?? '' }}"
+                                                               class="block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white py-2 px-3 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ۳. فیلترهای اختصاصی پرونده کلاینت -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900/40">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50/70 dark:bg-gray-800/20 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800">
+                                                <div class="flex items-center gap-2">
+                                                    <span>فیلترهای اختصاصی پرونده کلاینت (Clients)</span>
+                                                    <span class="badge-clients hidden bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full text-[10px] font-extrabold border border-indigo-100 dark:border-indigo-900/50"></span>
+                                                </div>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 space-y-4 hidden">
+                                                <!-- ۱. فیلتر وضعیت جاری/هدف -->
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 font-bold">وضعیت(های) جاری/هدف کلاینت:</label>
+                                                        <select name="triggers[{{ $index }}][config][client_current_status_operator]"
+                                                                class="block w-full md:w-auto rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5 shadow-sm">
+                                                            <option value="IN" @selected(($tConfig['client_current_status_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد (IN)</option>
+                                                            <option value="NOT_IN" @selected(($tConfig['client_current_status_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد (به جز...)</option>
+                                                        </select>
+                                                    </div>
+                                                    @php
+                                                        $selectedClientCurrentStatuses = (array)($tConfig['client_current_statuses'] ?? []);
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @if(isset($clientStatuses))
+                                                            @foreach($clientStatuses as $st)
+                                                                <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                    <input type="checkbox" name="triggers[{{ $index }}][config][client_current_statuses][]" value="{{ $st->key }}" @checked(in_array($st->key, $selectedClientCurrentStatuses))
+                                                                           class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 h-4 w-4">
+                                                                    <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $st->label }}</span>
+                                                                </label>
+                                                            @endforeach
+                                                        @endif
+                                                    </div>
+                                                    <p class="text-[10px] text-gray-400">در صورت عدم انتخاب هیچ گزینه‌ای، فیلتر وضعیت جاری اعمال نشده و تمامی وضعیت‌ها مجاز خواهند بود.</p>
+                                                </div>
+
+                                                <!-- ۲. فیلتر وضعیت قبلی -->
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 font-bold">وضعیت(های) قبلی کلاینت (قبل از انتقال):</label>
+                                                        <select name="triggers[{{ $index }}][config][client_prev_status_operator]"
+                                                                class="block w-full md:w-auto rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5 shadow-sm">
+                                                            <option value="IN" @selected(($tConfig['client_prev_status_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد (IN)</option>
+                                                            <option value="NOT_IN" @selected(($tConfig['client_prev_status_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد (به جز...)</option>
+                                                        </select>
+                                                    </div>
+                                                    @php
+                                                        $selectedClientPrevStatuses = (array)($tConfig['client_prev_statuses'] ?? []);
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @if(isset($clientStatuses))
+                                                            @foreach($clientStatuses as $st)
+                                                                <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                    <input type="checkbox" name="triggers[{{ $index }}][config][client_prev_statuses][]" value="{{ $st->key }}" @checked(in_array($st->key, $selectedClientPrevStatuses))
+                                                                           class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 h-4 w-4">
+                                                                    <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $st->label }}</span>
+                                                                </label>
+                                                            @endforeach
+                                                        @endif
+                                                    </div>
+                                                    <p class="text-[10px] text-gray-400">در صورت عدم انتخاب هیچ گزینه‌ای، فیلتر وضعیت قبلی اعمال نشده و تمامی وضعیت‌ها مجاز خواهند بود.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ۴. فیلترهای اختصاصی تماس کلاینت -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900/40">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50/70 dark:bg-gray-800/20 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800">
+                                                <div class="flex items-center gap-2">
+                                                    <span>فیلترهای اختصاصی تماس (Calls)</span>
+                                                    <span class="badge-calls hidden bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full text-[10px] font-extrabold border border-indigo-100 dark:border-indigo-900/50"></span>
+                                                </div>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 space-y-4 hidden">
+                                                <!-- ۱. فیلتر جهت تماس -->
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">جهت تماس:</label>
+                                                    @php
+                                                        $selectedCallDirections = (array)($tConfig['call_directions'] ?? []);
+                                                    @endphp
+                                                    <div class="flex gap-4">
+                                                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                                                            <input type="checkbox" name="triggers[{{ $index }}][config][call_directions][]" value="inbound" @checked(in_array('inbound', $selectedCallDirections))
+                                                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                                            <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">ورودی</span>
+                                                        </label>
+                                                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                                                            <input type="checkbox" name="triggers[{{ $index }}][config][call_directions][]" value="outbound" @checked(in_array('outbound', $selectedCallDirections))
+                                                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                                            <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">خروجی</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <!-- ۲. فیلتر وضعیت تماس -->
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 font-bold">وضعیت(های) تماس:</label>
+                                                        <select name="triggers[{{ $index }}][config][call_status_operator]"
+                                                                class="block w-full md:w-auto rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5 shadow-sm">
+                                                            <option value="IN" @selected(($tConfig['call_status_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                                            <option value="NOT_IN" @selected(($tConfig['call_status_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد</option>
+                                                        </select>
+                                                    </div>
+                                                    @php
+                                                        $selectedCallStatuses = (array)($tConfig['call_statuses'] ?? []);
+                                                        $callStatusesList = [
+                                                            'done' => 'پاسخ داده شده / موفق',
+                                                            'pending' => 'در انتظار تماس',
+                                                            'no_answer' => 'بدون پاسخ',
+                                                            'busy' => 'اشغال',
+                                                            'failed' => 'ناموفق',
+                                                        ];
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($callStatusesList as $key => $lbl)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][call_statuses][]" value="{{ $key }}" @checked(in_array($key, $selectedCallStatuses))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $lbl }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ۵. فیلترهای اختصاصی وظایف -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900/40">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50/70 dark:bg-gray-800/20 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800">
+                                                <div class="flex items-center gap-2">
+                                                    <span>فیلترهای اختصاصی وظایف (Tasks)</span>
+                                                    <span class="badge-tasks hidden bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full text-[10px] font-extrabold border border-indigo-100 dark:border-indigo-900/50"></span>
+                                                </div>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 space-y-4 hidden">
+                                                <!-- ۱. فیلتر وضعیت وظیفه -->
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 font-bold">وضعیت(های) وظیفه:</label>
+                                                        <select name="triggers[{{ $index }}][config][task_status_operator]"
+                                                                class="block w-full md:w-auto rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5 shadow-sm">
+                                                            <option value="IN" @selected(($tConfig['task_status_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                                            <option value="NOT_IN" @selected(($tConfig['task_status_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد</option>
+                                                        </select>
+                                                    </div>
+                                                    @php
+                                                        $selectedTaskStatuses = (array)($tConfig['task_statuses'] ?? []);
+                                                        $taskStatusesList = [
+                                                            'TODO' => 'در صف انجام',
+                                                            'IN_PROGRESS' => 'در حال انجام',
+                                                            'DONE' => 'انجام شده',
+                                                            'CANCELED' => 'لغو شده',
+                                                        ];
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($taskStatusesList as $key => $lbl)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][task_statuses][]" value="{{ $key }}" @checked(in_array($key, $selectedTaskStatuses))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $lbl }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+
+                                                <!-- ۲. فیلتر اولویت وظیفه -->
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 font-bold">اولویت(های) وظیفه:</label>
+                                                        <select name="triggers[{{ $index }}][config][task_priority_operator]"
+                                                                class="block w-full md:w-auto rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5 shadow-sm">
+                                                            <option value="IN" @selected(($tConfig['task_priority_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                                            <option value="NOT_IN" @selected(($tConfig['task_priority_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد</option>
+                                                        </select>
+                                                    </div>
+                                                    @php
+                                                        $selectedTaskPriorities = (array)($tConfig['task_priorities'] ?? []);
+                                                        $taskPrioritiesList = [
+                                                            'LOW' => 'کم',
+                                                            'MEDIUM' => 'معمولی',
+                                                            'HIGH' => 'زیاد',
+                                                            'CRITICAL' => 'بحرانی',
+                                                        ];
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($taskPrioritiesList as $key => $lbl)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][task_priorities][]" value="{{ $key }}" @checked(in_array($key, $selectedTaskPriorities))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $lbl }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ۶. فیلترهای اختصاصی پیگیری‌ها -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900/40">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50/70 dark:bg-gray-800/20 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800">
+                                                <div class="flex items-center gap-2">
+                                                    <span>فیلترهای اختصاصی پیگیری (Follow-ups)</span>
+                                                    <span class="badge-followups hidden bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full text-[10px] font-extrabold border border-indigo-100 dark:border-indigo-900/50"></span>
+                                                </div>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 space-y-4 hidden">
+                                                <!-- ۱. فیلتر وضعیت پیگیری -->
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 font-bold">وضعیت(های) پیگیری:</label>
+                                                        <select name="triggers[{{ $index }}][config][followup_status_operator]"
+                                                                class="block w-full md:w-auto rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5 shadow-sm">
+                                                            <option value="IN" @selected(($tConfig['followup_status_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                                            <option value="NOT_IN" @selected(($tConfig['followup_status_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد</option>
+                                                        </select>
+                                                    </div>
+                                                    @php
+                                                        $selectedFollowupStatuses = (array)($tConfig['followup_statuses'] ?? []);
+                                                        $followupStatusesList = [
+                                                            'TODO' => 'در صف انجام',
+                                                            'IN_PROGRESS' => 'در حال انجام',
+                                                            'DONE' => 'انجام شده',
+                                                            'CANCELED' => 'لغو شده',
+                                                        ];
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($followupStatusesList as $key => $lbl)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][followup_statuses][]" value="{{ $key }}" @checked(in_array($key, $selectedFollowupStatuses))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $lbl }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+
+                                                <!-- ۲. فیلتر اولویت پیگیری -->
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 font-bold">اولویت(های) پیگیری:</label>
+                                                        <select name="triggers[{{ $index }}][config][followup_priority_operator]"
+                                                                class="block w-full md:w-auto rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5 shadow-sm">
+                                                            <option value="IN" @selected(($tConfig['followup_priority_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                                            <option value="NOT_IN" @selected(($tConfig['followup_priority_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد</option>
+                                                        </select>
+                                                    </div>
+                                                    @php
+                                                        $selectedFollowupPriorities = (array)($tConfig['followup_priorities'] ?? []);
+                                                        $followupPrioritiesList = [
+                                                            'LOW' => 'کم',
+                                                            'MEDIUM' => 'معمولی',
+                                                            'HIGH' => 'زیاد',
+                                                            'CRITICAL' => 'بحرانی',
+                                                        ];
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($followupPrioritiesList as $key => $lbl)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][followup_priorities][]" value="{{ $key }}" @checked(in_array($key, $selectedFollowupPriorities))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $lbl }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- ۷. فیلترهای اختصاصی سرویس خدمات -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900/40">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50/70 dark:bg-gray-800/20 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800">
+                                                <div class="flex items-center gap-2">
+                                                    <span>فیلترهای اختصاصی سرویس خدمات (Services)</span>
+                                                    <span class="badge-services-module hidden bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full text-[10px] font-extrabold border border-indigo-100 dark:border-indigo-900/50"></span>
+                                                </div>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 space-y-4 hidden">
+                                                <!-- فیلتر وضعیت سرویس -->
+                                                @if(isset($serviceModuleStatuses['service']))
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">وضعیت(های) سرویس:</label>
+                                                    @php $selectedServiceStatuses = (array)($tConfig['service_statuses'] ?? []); @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($serviceModuleStatuses['service'] as $st)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][service_statuses][]" value="{{ $st['name'] }}" @checked(in_array($st['name'], $selectedServiceStatuses))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $st['name'] }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                                @endif
+
+                                                <!-- فیلتر وضعیت فاکتور -->
+                                                @if(isset($serviceModuleStatuses['invoice']))
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">وضعیت(های) فاکتور:</label>
+                                                    @php $selectedInvoiceStatuses = (array)($tConfig['invoice_statuses'] ?? []); @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($serviceModuleStatuses['invoice'] as $st)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][invoice_statuses][]" value="{{ $st['name'] }}" @checked(in_array($st['name'], $selectedInvoiceStatuses))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $st['name'] }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                                @endif
+
+                                                <!-- فیلتر وضعیت پرداخت -->
+                                                @if(isset($serviceModuleStatuses['payment']))
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">وضعیت(های) پرداخت:</label>
+                                                    @php $selectedPaymentStatuses = (array)($tConfig['payment_statuses'] ?? []); @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($serviceModuleStatuses['payment'] as $st)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][payment_statuses][]" value="{{ $st['name'] }}" @checked(in_array($st['name'], $selectedPaymentStatuses))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $st['name'] }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        @if(class_exists(\Modules\ResellerHub\App\Models\ResellerInvoice::class) || class_exists(\Modules\ResellerHub\App\Models\ResellerOrder::class))
+                                        <!-- ۸. فیلترهای اختصاصی فاکتور و سفارش نمایندگی (ResellerHub) -->
+                                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-900/40">
+                                            <button type="button" class="event-group-toggle w-full flex justify-between items-center px-4 py-3 bg-gray-50/70 dark:bg-gray-800/20 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800">
+                                                <div class="flex items-center gap-2">
+                                                    <span>فیلترهای اختصاصی فاکتور و سفارش نمایندگی (ResellerHub)</span>
+                                                    <span class="badge-reseller-module hidden bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full text-[10px] font-extrabold border border-indigo-100 dark:border-indigo-900/50"></span>
+                                                </div>
+                                                <svg class="h-4 w-4 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                            </button>
+                                            <div class="event-group-content p-4 space-y-4 hidden">
+                                                <!-- فیلتر وضعیت سفارش نمایندگی -->
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">وضعیت(های) سفارش نمایندگی:</label>
+                                                    @php
+                                                        $selectedResellerOrderStatuses = (array)($tConfig['reseller_order_statuses'] ?? ($tConfig['order_statuses'] ?? []));
+                                                        $resellerOrderStatusesList = [
+                                                            'active'    => 'فعال (Active)',
+                                                            'pending'   => 'در انتظار (Pending)',
+                                                            'inactive'  => 'غیرفعال / معلق (Inactive)',
+                                                            'cancelled' => 'لغو شده (Cancelled)',
+                                                        ];
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($resellerOrderStatusesList as $stKey => $stLabel)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][reseller_order_statuses][]" value="{{ $stKey }}" @checked(in_array($stKey, $selectedResellerOrderStatuses))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 reseller-order-status-checkbox h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $stLabel }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+
+                                                <!-- فیلتر وضعیت فاکتور نمایندگی -->
+                                                <div class="space-y-3 bg-gray-50/30 dark:bg-gray-800/10 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">وضعیت(های) فاکتور نمایندگی:</label>
+                                                    @php
+                                                        $selectedResellerInvoiceStatuses = (array)($tConfig['reseller_invoice_statuses'] ?? ($tConfig['invoice_statuses'] ?? []));
+                                                        $resellerInvoiceStatusesList = [
+                                                            'unpaid'    => 'پرداخت نشده / در انتظار پرداخت (Unpaid)',
+                                                            'paid'      => 'پرداخت شده (Paid)',
+                                                            'overdue'   => 'معوقه (Overdue)',
+                                                            'cancelled' => 'لغو شده (Cancelled)',
+                                                            'draft'     => 'پیش‌نویس (Draft)',
+                                                        ];
+                                                    @endphp
+                                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2 bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                                        @foreach($resellerInvoiceStatusesList as $stKey => $stLabel)
+                                                            <label class="flex items-center gap-2 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                                <input type="checkbox" name="triggers[{{ $index }}][config][reseller_invoice_statuses][]" value="{{ $stKey }}" @checked(in_array($stKey, $selectedResellerInvoiceStatuses))
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 reseller-invoice-status-checkbox h-4 w-4">
+                                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $stLabel }}</span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. APPOINTMENT_REMINDER CONFIG -->
+                            <div class="trigger-config config-APPOINTMENT_REMINDER hidden space-y-6">
+                                <!-- زمان دقیق ارسال یادآوری و ساعت اجرا -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">فاصله زمانی از نوبت</label>
+                                        @php
+                                            $rawOffset = (int)($tConfig['offset_minutes'] ?? -60);
+                                            $direction = $rawOffset < 0 ? -1 : 1;
+                                            $absMinutes = abs($rawOffset);
+
+                                            $val = $absMinutes;
+                                            $unit = 1;
+
+                                            if ($absMinutes % 1440 === 0) {
+                                                $val = $absMinutes / 1440;
+                                                $unit = 1440;
+                                            } elseif ($absMinutes % 60 === 0) {
+                                                $val = $absMinutes / 60;
+                                                $unit = 60;
+                                            }
+                                        @endphp
+                                        <div class="flex rounded-lg shadow-sm border border-gray-300 dark:border-gray-700 overflow-hidden">
+                                            <input type="number" value="{{ $val }}" min="1" class="offset-val-input block w-20 border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 text-center focus:ring-0 focus:outline-none text-sm font-semibold">
+                                            <select class="offset-unit-select block border-r border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-0 focus:outline-none border-gray-300 dark:border-gray-700 text-xs font-bold">
+                                                <option value="1" @selected($unit === 1)>دقیقه</option>
+                                                <option value="60" @selected($unit === 60)>ساعت</option>
+                                                <option value="1440" @selected($unit === 1440)>روز</option>
+                                            </select>
+                                            <select class="offset-dir-select block border-r border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-0 focus:outline-none border-gray-300 dark:border-gray-700 text-xs font-bold">
+                                                <option value="-1" @selected($direction === -1)>قبل از شروع</option>
+                                                <option value="1" @selected($direction === 1)>بعد از شروع</option>
+                                            </select>
+                                        </div>
+                                        <input type="hidden" name="triggers[{{ $index }}][config][offset_minutes]" value="{{ $rawOffset }}" class="real-offset-input">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">ساعت اجرای مشخص روز (اختیاری)</label>
+                                        <input type="time" name="triggers[{{ $index }}][config][run_at_time]" value="{{ $tConfig['run_at_time'] ?? '' }}"
+                                               class="run-at-time-input block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold">
+                                        <p class="text-[10px] text-gray-400 leading-normal">برای مثال: «ارسال ۳ روز قبل، رأس ساعت ۰۸:۰۰ صبح». در صورت خالی بودن، به صورت آنی در همان دقیقه محاسبه شده ارسال می‌شود.</p>
+                                    </div>
+                                </div>
+
+                                <!-- وضعیت‌های نوبت (لیست کامل ۹ وضعیت) -->
+                                <div class="space-y-3">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">وضعیت‌های نوبت مجاز</label>
+                                    @php
+                                        $selectedStatuses = (array)($tConfig['statuses'] ?? [$tConfig['status'] ?? 'CONFIRMED']);
+                                    @endphp
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                        @php
+                                            $appointmentStatuses = [
+                                                'CONFIRMED' => 'تایید شده (Confirmed)',
+                                                'PENDING' => 'در انتظار تایید (Pending)',
+                                                'PENDING_PAYMENT' => 'در انتظار پرداخت',
+                                                'DRAFT' => 'پیش‌نویس (Draft)',
+                                                'DONE' => 'انجام شده (Done)',
+                                                'RESCHEDULED' => 'تغییر زمان داده شده',
+                                                'CANCELED_BY_CLIENT' => 'لغو توسط بیمار',
+                                                'CANCELED_BY_ADMIN' => 'لغو توسط سیستم/پزشک',
+                                                'NO_SHOW' => 'عدم حضور بیمار (No-Show)'
+                                            ];
+                                        @endphp
+                                        @foreach($appointmentStatuses as $k => $label)
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                <input type="checkbox" name="triggers[{{ $index }}][config][statuses][]" value="{{ $k }}" @checked(in_array($k, $selectedStatuses))
+                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 status-checkbox h-4 w-4">
+                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $label }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <!-- فیلتر خدمات (شامل / شامل نشود) -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">فیلتر خدمات/سرویس‌ها</label>
+                                        <select name="triggers[{{ $index }}][config][service_operator]" class="operator-select text-xs font-bold rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5">
+                                            <option value="IN" @selected(($tConfig['service_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                            <option value="NOT_IN" @selected(($tConfig['service_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد (به جز...)</option>
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 max-h-40 overflow-y-auto p-3.5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+                                        @foreach($services as $service)
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                <input type="checkbox" name="triggers[{{ $index }}][config][service_ids][]" value="{{ $service->id }}" @checked(in_array($service->id, $selectedServices))
+                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 service-checkbox h-4 w-4">
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $service->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <!-- فیلتر پزشکان (شامل / شامل نشود) -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">فیلتر پزشک/ارائه‌دهنده</label>
+                                        <select name="triggers[{{ $index }}][config][provider_operator]" class="operator-select text-xs font-bold rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5">
+                                            <option value="IN" @selected(($tConfig['provider_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                            <option value="NOT_IN" @selected(($tConfig['provider_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد (به جز...)</option>
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 max-h-40 overflow-y-auto p-3.5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+                                        @foreach(($providers ?? $users) as $user)
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                <input type="checkbox" name="triggers[{{ $index }}][config][provider_ids][]" value="{{ $user->id }}" @checked(in_array($user->id, $selectedProviders))
+                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 provider-checkbox h-4 w-4">
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $user->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. BOOKING_PAYMENT_REMINDER CONFIG -->
+                            <div class="trigger-config config-BOOKING_PAYMENT_REMINDER hidden space-y-6">
+                                <!-- زمان دقیق ارسال و ساعت اجرا -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">فاصله زمانی از ثبت/پرداخت نوبت</label>
+                                        @php
+                                            $rawOffset = (int)($tConfig['offset_minutes'] ?? 0);
+                                            $direction = $rawOffset < 0 ? -1 : 1;
+                                            $absMinutes = abs($rawOffset);
+
+                                            $val = $absMinutes;
+                                            $unit = 1;
+
+                                            if ($absMinutes % 1440 === 0 && $absMinutes > 0) {
+                                                $val = $absMinutes / 1440;
+                                                $unit = 1440;
+                                            } elseif ($absMinutes % 60 === 0 && $absMinutes > 0) {
+                                                $val = $absMinutes / 60;
+                                                $unit = 60;
+                                            }
+                                        @endphp
+                                        <div class="flex rounded-lg shadow-sm border border-gray-300 dark:border-gray-700 overflow-hidden">
+                                            <input type="number" value="{{ $val }}" min="0" class="offset-val-input block w-20 border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 text-center focus:ring-0 focus:outline-none text-sm font-semibold">
+                                            <select class="offset-unit-select block border-r border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-0 focus:outline-none border-gray-300 dark:border-gray-700 text-xs font-bold">
+                                                <option value="1" @selected($unit === 1)>دقیقه</option>
+                                                <option value="60" @selected($unit === 60)>ساعت</option>
+                                                <option value="1440" @selected($unit === 1440)>روز</option>
+                                            </select>
+                                            <select class="offset-dir-select block border-r border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-0 focus:outline-none border-gray-300 dark:border-gray-700 text-xs font-bold">
+                                                <option value="1" @selected($direction === 1)>بعد از ایجاد/پرداخت</option>
+                                                <option value="-1" @selected($direction === -1)>قبل از ایجاد/پرداخت</option>
+                                            </select>
+                                        </div>
+                                        <input type="hidden" name="triggers[{{ $index }}][config][offset_minutes]" value="{{ $rawOffset }}" class="real-offset-input">
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">ساعت اجرای مشخص روز (اختیاری)</label>
+                                        <input type="time" name="triggers[{{ $index }}][config][run_at_time]" value="{{ $tConfig['run_at_time'] ?? '' }}"
+                                               class="run-at-time-input block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold">
+                                        <p class="text-[10px] text-gray-400 leading-normal">در صورت خالی بودن، به صورت آنی پس از گذشت زمان تعیین‌شده اجرا می‌شود.</p>
+                                    </div>
+                                </div>
+
+                                <!-- وضعیت‌های پرداخت -->
+                                <div class="space-y-3">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">وضعیت‌های پرداخت مجاز</label>
+                                    @php
+                                        $selectedPaymentStatuses = (array)($tConfig['statuses'] ?? ['PAID']);
+                                        $bookingPaymentStatuses = [
+                                            'PAID' => 'پرداخت موفق (PAID)',
+                                            'PENDING' => 'در انتظار پرداخت (PENDING)',
+                                            'FAILED' => 'پرداخت ناموفق (FAILED)',
+                                            'REFUNDED' => 'استردادشده (REFUNDED)',
+                                        ];
+                                    @endphp
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                        @foreach($bookingPaymentStatuses as $k => $label)
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                <input type="checkbox" name="triggers[{{ $index }}][config][statuses][]" value="{{ $k }}" @checked(in_array($k, $selectedPaymentStatuses))
+                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 status-checkbox h-4 w-4">
+                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $label }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <!-- فیلتر خدمات -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">فیلتر خدمات/سرویس‌ها</label>
+                                        <select name="triggers[{{ $index }}][config][service_operator]" class="operator-select text-xs font-bold rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5">
+                                            <option value="IN" @selected(($tConfig['service_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                            <option value="NOT_IN" @selected(($tConfig['service_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد (به جز...)</option>
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 max-h-40 overflow-y-auto p-3.5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+                                        @foreach($services as $service)
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                <input type="checkbox" name="triggers[{{ $index }}][config][service_ids][]" value="{{ $service->id }}" @checked(in_array($service->id, $selectedServices))
+                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 service-checkbox h-4 w-4">
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $service->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <!-- فیلتر پزشکان -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">فیلتر پزشک/ارائه‌دهنده</label>
+                                        <select name="triggers[{{ $index }}][config][provider_operator]" class="operator-select text-xs font-bold rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5">
+                                            <option value="IN" @selected(($tConfig['provider_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                            <option value="NOT_IN" @selected(($tConfig['provider_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد (به جز...)</option>
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 max-h-40 overflow-y-auto p-3.5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+                                        @foreach(($providers ?? $users) as $user)
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                <input type="checkbox" name="triggers[{{ $index }}][config][provider_ids][]" value="{{ $user->id }}" @checked(in_array($user->id, $selectedProviders))
+                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 provider-checkbox h-4 w-4">
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $user->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. INVOICE_REMINDER CONFIG -->
+                            <div class="trigger-config config-INVOICE_REMINDER hidden space-y-6">
+                                <!-- زمان دقیق بررسی و ساعت اجرا -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">فاصله زمانی از سررسید فاکتور</label>
+                                        @php
+                                            $rawOffsetDays = (int)($tConfig['offset_days'] ?? 0);
+                                            $invoiceDirection = $rawOffsetDays <= 0 ? -1 : 1;
+                                            $absOffsetDays = abs($rawOffsetDays);
+                                        @endphp
+                                        <div class="flex rounded-lg shadow-sm border border-gray-300 dark:border-gray-700 overflow-hidden">
+                                            <input type="number" value="{{ $absOffsetDays }}" min="0" class="invoice-offset-val-input block w-20 border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 text-center focus:ring-0 focus:outline-none text-sm font-semibold">
+                                            <input type="hidden" name="triggers[{{ $index }}][config][offset_days]" value="{{ $rawOffsetDays }}" class="real-invoice-offset-input">
+                                            <select class="invoice-offset-dir-select block border-r border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-0 focus:outline-none border-gray-300 dark:border-gray-700 text-xs font-bold">
+                                                <option value="-1" @selected($invoiceDirection === -1)>روز قبل از سررسید</option>
+                                                <option value="1" @selected($invoiceDirection === 1)>روز بعد از سررسید</option>
+                                            </select>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 leading-normal">عدد ۰ = در روز سررسید. اعداد مثبت = بعد از سررسید (برای یادآوری پرداخت نشده‌ها). اعداد منفی = قبل از سررسید (برای پیش‌یادآوری).</p>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">ساعت اجرای بررسی روزانه</label>
+                                        <input type="time" name="triggers[{{ $index }}][config][run_at_time]" value="{{ $tConfig['run_at_time'] ?? '08:00' }}"
+                                               class="run-at-time-invoice-input block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold">
+                                        <p class="text-[10px] text-gray-400 leading-normal">هر روز رأس این ساعت، فاکتورهای مشمول شرط بررسی می‌شوند.</p>
+                                    </div>
+                                </div>
+
+                                <!-- وضعیت‌های پرداخت مجاز -->
+                                @if(isset($serviceModuleStatuses['payment']) && count($serviceModuleStatuses['payment']) > 0)
+                                <div class="space-y-3">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">وضعیت‌های پرداخت مجاز (فقط فاکتورهایی با این وضعیت‌ها بررسی می‌شوند)</label>
+                                    @php
+                                        $selectedInvoiceReminderPaymentStatuses = (array)($tConfig['payment_statuses'] ?? []);
+                                    @endphp
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                        @foreach($serviceModuleStatuses['payment'] as $st)
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                <input type="checkbox" name="triggers[{{ $index }}][config][payment_statuses][]" value="{{ $st['name'] }}" @checked(in_array($st['name'], $selectedInvoiceReminderPaymentStatuses))
+                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 invoice-payment-status-checkbox h-4 w-4">
+                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $st['name'] }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <p class="text-[10px] text-gray-400">اگر هیچ‌کدام انتخاب نشود، فاکتورها با هر وضعیت پرداختی بررسی می‌شوند.</p>
+                                </div>
+                                @endif
+
+                                <!-- فیلتر خدمات/سرویس‌ها -->
+                                @php $selectedInvoiceServices = (array)($tConfig['service_ids'] ?? []); @endphp
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">فیلتر خدمات/سرویس‌ها (اختیاری)</label>
+                                        <select name="triggers[{{ $index }}][config][service_operator]" class="operator-select text-xs font-bold rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-indigo-500 focus:border-indigo-500 py-1 px-2.5">
+                                            <option value="IN" @selected(($tConfig['service_operator'] ?? 'IN') === 'IN')>شامل موارد زیر باشد</option>
+                                            <option value="NOT_IN" @selected(($tConfig['service_operator'] ?? 'IN') === 'NOT_IN')>شامل موارد زیر نباشد (به جز...)</option>
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 max-h-40 overflow-y-auto p-3.5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+                                        @foreach($services as $service)
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                <input type="checkbox" name="triggers[{{ $index }}][config][service_ids][]" value="{{ $service->id }}" @checked(in_array($service->id, $selectedInvoiceServices))
+                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 service-checkbox h-4 w-4">
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $service->name }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 5. ORDER_RENEWAL_REMINDER CONFIG -->
+                            <div class="trigger-config config-ORDER_RENEWAL_REMINDER hidden space-y-6">
+                                <!-- زمان دقیق بررسی و ساعت اجرا -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">فاصله زمانی از تاریخ تمدید سفارش</label>
+                                        @php
+                                            $rawOrderOffsetDays = (int)($tConfig['offset_days'] ?? 0);
+                                            $orderDirection = $rawOrderOffsetDays <= 0 ? -1 : 1;
+                                            $absOrderOffsetDays = abs($rawOrderOffsetDays);
+                                        @endphp
+                                        <div class="flex rounded-lg shadow-sm border border-gray-300 dark:border-gray-700 overflow-hidden">
+                                            <input type="number" value="{{ $absOrderOffsetDays }}" min="0" class="order-offset-val-input block w-20 border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 text-center focus:ring-0 focus:outline-none text-sm font-semibold">
+                                            <input type="hidden" name="triggers[{{ $index }}][config][offset_days]" value="{{ $rawOrderOffsetDays }}" class="real-order-offset-input">
+                                            <select class="order-offset-dir-select block border-r border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-0 focus:outline-none border-gray-300 dark:border-gray-700 text-xs font-bold">
+                                                <option value="-1" @selected($orderDirection === -1)>روز قبل از تمدید</option>
+                                                <option value="1" @selected($orderDirection === 1)>روز بعد از تمدید</option>
+                                            </select>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 leading-normal">عدد ۰ = در روز تاریخ تمدید. اعداد منفی = قبل از تاریخ تمدید.</p>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">ساعت اجرای بررسی روزانه</label>
+                                        <input type="time" name="triggers[{{ $index }}][config][run_at_time]" value="{{ $tConfig['run_at_time'] ?? '08:00' }}"
+                                               class="run-at-time-order-input block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold">
+                                        <p class="text-[10px] text-gray-400 leading-normal">هر روز رأس این ساعت، سفارش‌های مشمول شرط بررسی می‌شوند.</p>
+                                    </div>
+                                </div>
+
+                                <!-- وضعیت‌های سفارش مجاز -->
+                                @if(isset($serviceModuleStatuses['order']) && count($serviceModuleStatuses['order']) > 0)
+                                <div class="space-y-3">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">وضعیت‌های سفارش مجاز</label>
+                                    @php
+                                        $selectedOrderStatuses = (array)($tConfig['order_statuses'] ?? []);
+                                    @endphp
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                        @foreach($serviceModuleStatuses['order'] as $st)
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                <input type="checkbox" name="triggers[{{ $index }}][config][order_statuses][]" value="{{ $st['name'] }}" @checked(in_array($st['name'], $selectedOrderStatuses))
+                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 order-status-checkbox h-4 w-4">
+                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $st['name'] }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <p class="text-[10px] text-gray-400">اگر هیچ‌کدام انتخاب نشود، سفارش‌ها با هر وضعیتی بررسی می‌شوند.</p>
+                                </div>
+                                @endif
+                            </div>
+
+                            @if(class_exists(\Modules\ResellerHub\App\Models\ResellerOrder::class))
+                            <!-- 6. RESELLER_ORDER_RENEWAL_REMINDER CONFIG -->
+                            <div class="trigger-config config-RESELLER_ORDER_RENEWAL_REMINDER hidden space-y-6">
+                                <!-- زمان دقیق بررسی و ساعت اجرا -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">فاصله زمانی از تاریخ تمدید سفارش نمایندگی</label>
+                                        @php
+                                            $rawResellerOrderOffsetDays = (int)($tConfig['offset_days'] ?? 0);
+                                            $resellerOrderDirection = $rawResellerOrderOffsetDays <= 0 ? -1 : 1;
+                                            $absResellerOrderOffsetDays = abs($rawResellerOrderOffsetDays);
+                                        @endphp
+                                        <div class="flex rounded-lg shadow-sm border border-gray-300 dark:border-gray-700 overflow-hidden">
+                                            <input type="number" value="{{ $absResellerOrderOffsetDays }}" min="0" class="reseller-order-offset-val-input block w-20 border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 text-center focus:ring-0 focus:outline-none text-sm font-semibold">
+                                            <input type="hidden" name="triggers[{{ $index }}][config][offset_days]" value="{{ $rawResellerOrderOffsetDays }}" class="real-reseller-order-offset-input">
+                                            <select class="reseller-order-offset-dir-select block border-r border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-0 focus:outline-none border-gray-300 dark:border-gray-700 text-xs font-bold">
+                                                <option value="-1" @selected($resellerOrderDirection === -1)>روز قبل از تمدید</option>
+                                                <option value="1" @selected($resellerOrderDirection === 1)>روز بعد از تمدید</option>
+                                            </select>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 leading-normal">عدد ۰ = در روز تاریخ تمدید. اعداد منفی = قبل از تاریخ تمدید (صدور پیش‌فاکتور تمدید قبل از پایان اعتبار). اعداد مثبت = بعد از تاریخ تمدید.</p>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">ساعت اجرای بررسی روزانه</label>
+                                        <input type="time" name="triggers[{{ $index }}][config][run_at_time]" value="{{ $tConfig['run_at_time'] ?? '08:00' }}"
+                                               class="run-at-time-reseller-order-input block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold">
+                                        <p class="text-[10px] text-gray-400 leading-normal">هر روز رأس این ساعت، سفارش‌های نمایندگی مشمول شرط بررسی می‌شوند.</p>
+                                    </div>
+                                </div>
+
+                                <!-- وضعیت‌های سفارش نمایندگی مجاز -->
+                                <div class="space-y-3">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">وضعیت‌های سفارش نمایندگی مجاز</label>
+                                    @php
+                                        $selectedResellerOrderStatuses = (array)($tConfig['reseller_order_statuses'] ?? ($tConfig['order_statuses'] ?? []));
+                                        $resellerOrderStatusesList = [
+                                            'active'    => 'فعال (Active)',
+                                            'pending'   => 'در انتظار بررسی/پرداخت (Pending)',
+                                            'inactive'  => 'غیرفعال / معلق (Inactive)',
+                                            'cancelled' => 'لغو شده (Cancelled)',
+                                        ];
+                                    @endphp
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                        @foreach($resellerOrderStatusesList as $stKey => $stLabel)
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                <input type="checkbox" name="triggers[{{ $index }}][config][reseller_order_statuses][]" value="{{ $stKey }}" @checked(in_array($stKey, $selectedResellerOrderStatuses))
+                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 reseller-order-status-checkbox h-4 w-4">
+                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $stLabel }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <p class="text-[10px] text-gray-400">اگر هیچ‌کدام انتخاب نشود، تمام سفارش‌های نمایندگی در موعد مقرر بررسی می‌شوند.</p>
+                                </div>
+                            </div>
+
+                            <!-- 7. RESELLER_INVOICE_REMINDER CONFIG -->
+                            <div class="trigger-config config-RESELLER_INVOICE_REMINDER hidden space-y-6">
+                                <!-- زمان دقیق بررسی و ساعت اجرا -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">فاصله زمانی از سررسید فاکتور نمایندگی</label>
+                                        @php
+                                            $rawResellerInvoiceOffsetDays = (int)($tConfig['offset_days'] ?? 0);
+                                            $resellerInvoiceDirection = $rawResellerInvoiceOffsetDays <= 0 ? -1 : 1;
+                                            $absResellerInvoiceOffsetDays = abs($rawResellerInvoiceOffsetDays);
+                                        @endphp
+                                        <div class="flex rounded-lg shadow-sm border border-gray-300 dark:border-gray-700 overflow-hidden">
+                                            <input type="number" value="{{ $absResellerInvoiceOffsetDays }}" min="0" class="reseller-invoice-offset-val-input block w-20 border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 text-center focus:ring-0 focus:outline-none text-sm font-semibold">
+                                            <input type="hidden" name="triggers[{{ $index }}][config][offset_days]" value="{{ $rawResellerInvoiceOffsetDays }}" class="real-reseller-invoice-offset-input">
+                                            <select class="reseller-invoice-offset-dir-select block border-r border-0 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-0 focus:outline-none border-gray-300 dark:border-gray-700 text-xs font-bold">
+                                                <option value="-1" @selected($resellerInvoiceDirection === -1)>روز قبل از سررسید</option>
+                                                <option value="1" @selected($resellerInvoiceDirection === 1)>روز بعد از سررسید</option>
+                                            </select>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 leading-normal">عدد ۰ = در روز سررسید. اعداد مثبت = بعد از سررسید (برای معوقه شدن و مسدودسازی خودکار). اعداد منفی = قبل از سررسید (یادآوری پرداخت).</p>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400">ساعت اجرای بررسی روزانه</label>
+                                        <input type="time" name="triggers[{{ $index }}][config][run_at_time]" value="{{ $tConfig['run_at_time'] ?? '08:00' }}"
+                                               class="run-at-time-reseller-invoice-input block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold">
+                                        <p class="text-[10px] text-gray-400 leading-normal">هر روز رأس این ساعت، فاکتورهای نمایندگی مشمول شرط بررسی می‌شوند.</p>
+                                    </div>
+                                </div>
+
+                                <!-- وضعیت‌های فاکتور نمایندگی مجاز -->
+                                <div class="space-y-3">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">وضعیت‌های فاکتور نمایندگی مجاز</label>
+                                    @php
+                                        $selectedResellerInvoiceStatuses = (array)($tConfig['reseller_invoice_statuses'] ?? ($tConfig['invoice_statuses'] ?? []));
+                                        $resellerInvoiceStatusesList = [
+                                            'unpaid'    => 'پرداخت نشده / در انتظار پرداخت (Unpaid)',
+                                            'overdue'   => 'معوقه / سررسید گذشته (Overdue)',
+                                            'draft'     => 'پیش‌نویس (Draft)',
+                                            'cancelled' => 'لغو شده (Cancelled)',
+                                        ];
+                                    @endphp
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                        @foreach($resellerInvoiceStatusesList as $stKey => $stLabel)
+                                            <label class="flex items-center gap-2.5 p-1.5 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 select-none">
+                                                <input type="checkbox" name="triggers[{{ $index }}][config][reseller_invoice_statuses][]" value="{{ $stKey }}" @checked(in_array($stKey, $selectedResellerInvoiceStatuses))
+                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 reseller-invoice-status-checkbox h-4 w-4">
+                                                <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $stLabel }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <p class="text-[10px] text-gray-400">اگر هیچ‌کدام انتخاب نشود، فاکتورهای غیر پرداخت‌شده بررسی می‌شوند.</p>
+                                </div>
+                            </div>
+                            @endif
+
+                            <!-- 3. SCHEDULE CONFIG -->
+
+                            <div class="trigger-config config-SCHEDULE hidden space-y-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200">الگوهای آماده زمان‌بندی</label>
+                                        <select class="cron-preset-select block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white py-2.5 px-3 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                            <option value="">-- انتخاب الگوی پیش‌فرض --</option>
+                                            <option value="0 8 * * *">هر روز ساعت ۸:۰۰ صبح</option>
+                                            <option value="0 12 * * *">هر روز ساعت ۱۲:۰۰ ظهر</option>
+                                            <option value="0 18 * * *">هر روز ساعت ۶:۰۰ عصر</option>
+                                            <option value="0 8 * * 6">شنبه‌ها ساعت ۸:۰۰ صبح</option>
+                                            <option value="0 0 * * *">هر شب ساعت ۱۲:۰۰ بامداد</option>
+                                            <option value="custom">تنظیم دستی فرمت کرون</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-bold text-gray-800 dark:text-gray-200">کد زمان‌بندی (Cron Expression)</label>
+                                        <input type="text" name="triggers[{{ $index }}][config][cron]" value="{{ $tConfig['cron'] ?? '0 8 * * *' }}"
+                                               class="cron-input block w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-mono text-left py-2.5 px-4 focus:ring-indigo-500 focus:border-indigo-500 text-sm" dir="ltr"
+                                               placeholder="* * * * *">
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-400">فرمت کرون‌جاب لینوکسی استاندارد شامل ۵ فیلد: (دقیقه ساعت روز ماه هفته)</p>
+                            </div>
+
+                            <!-- توضیح زبانی روان (Dynamic NLP Preview Card) -->
+                            <div class="nlp-preview-card mt-5 p-4 bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/50 dark:border-indigo-900/20 rounded-xl flex items-start gap-2.5">
+                                <div class="text-indigo-600 dark:text-indigo-400 mt-0.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="space-y-1">
+                                    <span class="text-xs font-bold text-indigo-700 dark:text-indigo-400">خلاصه عملکرد این شرط:</span>
+                                    <p class="nlp-text text-sm text-indigo-950 dark:text-indigo-200 leading-relaxed font-medium">لطفاً نوع شرط را انتخاب کنید...</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- دکمه‌های عملیات -->
+    <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+        @if(($method ?? '') === 'patch')
+            <a href="{{ route('user.workflows.index') }}"
+               class="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 transition-colors">
+                انصراف
+            </a>
+        @endif
+
+        <button type="submit"
+                class="inline-flex justify-center px-8 py-3 text-sm font-bold text-white bg-indigo-600 border border-transparent rounded-xl shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-all hover:shadow-lg hover:shadow-indigo-500/10">
+            {{ ($method ?? '') === 'patch' ? 'ذخیره تغییرات عمومی' : 'ایجاد گردش کار جدید' }}
+        </button>
+    </div>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- Transliterate Persian text to Finglish for system Key ---
+        function transliteratePersianToEnglish(text) {
+            const map = {
+                'آ': 'a', 'ا': 'a', 'ب': 'b', 'پ': 'p', 'ت': 't', 'ث': 's', 'ج': 'j', 'چ': 'ch',
+                'ح': 'h', 'خ': 'kh', 'د': 'd', 'ذ': 'z', 'ر': 'r', 'ز': 'z', 'ژ': 'zh', 'س': 's',
+                'ش': 'sh', 'ص': 's', 'ض': 'z', 'ط': 't', 'ظ': 'z', 'ع': 'a', 'غ': 'gh', 'ف': 'f',
+                'ق': 'gh', 'ک': 'k', 'گ': 'g', 'ل': 'l', 'م': 'm', 'ن': 'n', 'و': 'v', 'ه': 'h',
+                'ی': 'y', 'ئ': 'e', 'ء': 'a', 'ی': 'y', 'ک': 'k', 'ه': 'h',
+                ' ': '_', '-': '_', '_': '_'
+            };
+
+            return text.split('').map(char => {
+                return map[char] || (/[a-zA-Z0-9]/.test(char) ? char.toLowerCase() : '');
+            }).join('')
+            .replace(/_+/g, '_')
+            .replace(/^_+|_+$/g, '');
+        }
+
+        const nameInput = document.getElementById('wf-name');
+        const keyInput = document.getElementById('wf-key');
+
+        if (nameInput && keyInput) {
+            nameInput.addEventListener('input', function() {
+                let generatedSlug = transliteratePersianToEnglish(nameInput.value);
+
+                if (keyInput.value === '' || keyInput.dataset.auto === 'true') {
+                    keyInput.value = generatedSlug;
+                    keyInput.dataset.auto = 'true';
+                }
+            });
+
+            keyInput.addEventListener('input', function() {
+                keyInput.dataset.auto = 'false';
+            });
+
+            if (keyInput.value === '') keyInput.dataset.auto = 'true';
+        }
+
+        // --- Event groups accordion logic ---
+        const container = document.getElementById('triggers-container');
+        const addBtn = document.getElementById('add-trigger-btn');
+
+        function initAccordions(element) {
+            element.querySelectorAll('.event-group-toggle').forEach(btn => {
+                // Remove existing click listener to avoid duplicate bindings on cloning
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const content = newBtn.nextElementSibling;
+                    const icon = newBtn.querySelector('svg');
+
+                    if (content.classList.contains('hidden')) {
+                        content.classList.remove('hidden');
+                        icon.classList.add('rotate-180');
+                    } else {
+                        content.classList.add('hidden');
+                        icon.classList.remove('rotate-180');
+                    }
+                });
+            });
+        }
+        initAccordions(document);
+
+        // --- Mappings for human translation ---
+        const eventLabels = {
+            'appointment_created': 'ایجاد نوبت جدید',
+            'appointment_created_online': 'رزرو آنلاین نوبت بیمار',
+            'appointment_created_operator': 'ثبت نوبت توسط اپراتور',
+            'appointment_canceled': 'لغو نوبت',
+            'appointment_no_show': 'عدم حضور بیمار (No-Show)',
+            'statement_created': 'ایجاد صورت وضعیت مالی',
+            'statement_status_changed': 'تغییر وضعیت صورت وضعیت',
+            'statement_approved': 'تایید صورت وضعیت مالی',
+            'statement_completed': 'تکمیل صورت وضعیت مالی',
+            'treatment_plan_draft': 'طرح درمان در وضعیت پیش‌نویس',
+            'treatment_plan_active': 'طرح درمان در وضعیت فعال',
+            'treatment_plan_completed': 'طرح درمان در وضعیت تکمیل شده'
+        };
+
+        const statusLabels = {
+            'CONFIRMED': 'تایید شده',
+            'PENDING': 'در انتظار تایید',
+            'PENDING_PAYMENT': 'در انتظار پرداخت',
+            'DRAFT': 'پیش‌نویس',
+            'DONE': 'انجام شده',
+            'RESCHEDULED': 'تغییر زمان داده شده',
+            'CANCELED_BY_CLIENT': 'لغو شده توسط بیمار',
+            'CANCELED_BY_ADMIN': 'لغو شده توسط ادمین',
+            'NO_SHOW': 'عدم حضور بیمار'
+        };
+
+        function updateNlpText(item) {
+            const typeSelect = item.querySelector('.trigger-type-select');
+            const type = typeSelect.value;
+            const nlpTextEl = item.querySelector('.nlp-text');
+
+            if (!type) {
+                nlpTextEl.textContent = 'لطفاً نوع شرط را انتخاب کنید...';
+                return;
+            }
+
+            if (type === 'EVENT') {
+                // Read checked events
+                const checkedEvents = Array.from(item.querySelectorAll('.event-checkbox:checked')).map(el => {
+                    return eventLabels[el.value] || el.value;
+                });
+                // Read checked services
+                const checkedServices = Array.from(item.querySelectorAll('.service-checkbox:checked')).map(el => {
+                    const label = el.nextElementSibling ? el.nextElementSibling.textContent.trim() : el.value;
+                    return `«${label}»`;
+                });
+                const serviceOp = item.querySelector('[name*="[service_operator]"]').value;
+
+                // Read checked providers
+                const checkedProviders = Array.from(item.querySelectorAll('.provider-checkbox:checked')).map(el => {
+                    const label = el.nextElementSibling ? el.nextElementSibling.textContent.trim() : el.value;
+                    return `«${label}»`;
+                });
+                const providerOp = item.querySelector('[name*="[provider_operator]"]').value;
+
+                let text = 'وقتی ';
+                if (checkedEvents.length > 0) {
+                    text += 'رویداد ' + checkedEvents.join(' یا ') + ' رخ دهد';
+                } else {
+                    text += 'هر کدام از رویدادها رخ دهد';
+                }
+
+                if (checkedServices.length > 0) {
+                    if (serviceOp === 'IN') {
+                        text += ' و خدمتِ نوبت مربوط به ' + checkedServices.join(' یا ') + ' باشد';
+                    } else {
+                        text += ' و خدمتِ نوبت مربوط به هر کدام از خدمات باشد، به جز ' + checkedServices.join(' و ');
+                    }
+                }
+
+                if (checkedProviders.length > 0) {
+                    if (providerOp === 'IN') {
+                        text += ' و پزشکِ نوبت مربوط به ' + checkedProviders.join(' یا ') + ' باشد';
+                    } else {
+                        text += ' و پزشکِ نوبت مربوط به هر پزشکی باشد، به جز ' + checkedProviders.join(' و ');
+                    }
+                }
+
+                text += '، این گردش کار به طور آنی اجرا خواهد شد.';
+                nlpTextEl.textContent = text;
+            } else if (type === 'APPOINTMENT_REMINDER') {
+                const configDiv = item.querySelector('.config-APPOINTMENT_REMINDER');
+                const valInput = configDiv ? configDiv.querySelector('.offset-val-input') : null;
+                const val = valInput ? (parseInt(valInput.value) || 0) : 0;
+                const unitSelect = configDiv ? configDiv.querySelector('.offset-unit-select') : null;
+                const unitText = (unitSelect && unitSelect.selectedIndex >= 0) ? unitSelect.options[unitSelect.selectedIndex].text : '';
+                const dirSelect = configDiv ? configDiv.querySelector('.offset-dir-select') : null;
+                const dirText = (dirSelect && dirSelect.selectedIndex >= 0) ? dirSelect.options[dirSelect.selectedIndex].text : '';
+                const runAtEl = configDiv ? configDiv.querySelector('.run-at-time-input') : null;
+                const runAtTime = runAtEl ? runAtEl.value : '';
+
+                const checkedStatuses = configDiv ? Array.from(configDiv.querySelectorAll('.status-checkbox:checked')).map(el => {
+                    return statusLabels[el.value] || el.value;
+                }) : [];
+                const checkedServices = configDiv ? Array.from(configDiv.querySelectorAll('.service-checkbox:checked')).map(el => {
+                    return `«${el.nextElementSibling.textContent.trim()}»`;
+                }) : [];
+                const serviceOpEl = configDiv ? configDiv.querySelector('[name*="[service_operator]"]') : null;
+                const serviceOp = serviceOpEl ? serviceOpEl.value : 'IN';
+
+                const checkedProviders = configDiv ? Array.from(configDiv.querySelectorAll('.provider-checkbox:checked')).map(el => {
+                    return `«${el.nextElementSibling.textContent.trim()}»`;
+                }) : [];
+                const providerOpEl = configDiv ? configDiv.querySelector('[name*="[provider_operator]"]') : null;
+                const providerOp = providerOpEl ? providerOpEl.value : 'IN';
+
+                let text = `دقیقاً ${val} ${unitText} ${dirText}`;
+                if (runAtTime) {
+                    text += ` رأس ساعت ${runAtTime} صبح/عصر`;
+                }
+
+                if (checkedStatuses.length > 0) {
+                    text += ` برای نوبت‌هایی با وضعیت ${checkedStatuses.join(' یا ')}`;
+                } else {
+                    text += ' برای نوبت‌ها با هر وضعیتی';
+                }
+
+                if (checkedServices.length > 0) {
+                    if (serviceOp === 'IN') {
+                        text += ` مربوط به خدمت(های) ${checkedServices.join(' یا ')}`;
+                    } else {
+                        text += ` مربوط به تمام خدمات به جز ${checkedServices.join(' و ')}`;
+                    }
+                }
+                if (checkedProviders.length > 0) {
+                    if (providerOp === 'IN') {
+                        text += ` برای پزشک(ها) ${checkedProviders.join(' یا ')}`;
+                    } else {
+                        text += ` برای تمام پزشکان به جز ${checkedProviders.join(' و ')}`;
+                    }
+                }
+
+                text += '، این فرآیند زمان‌بندی شده اجرا می‌شود.';
+                nlpTextEl.textContent = text;
+            } else if (type === 'BOOKING_PAYMENT_REMINDER') {
+                const configDiv = item.querySelector('.config-BOOKING_PAYMENT_REMINDER');
+                const valInput = configDiv ? configDiv.querySelector('.offset-val-input') : null;
+                const val = valInput ? (parseInt(valInput.value) || 0) : 0;
+                const unitSelect = configDiv ? configDiv.querySelector('.offset-unit-select') : null;
+                const unitText = (unitSelect && unitSelect.selectedIndex >= 0) ? unitSelect.options[unitSelect.selectedIndex].text : '';
+                const dirSelect = configDiv ? configDiv.querySelector('.offset-dir-select') : null;
+                const dirText = (dirSelect && dirSelect.selectedIndex >= 0) ? dirSelect.options[dirSelect.selectedIndex].text : '';
+                const runAtEl = configDiv ? configDiv.querySelector('.run-at-time-input') : null;
+                const runAtTime = runAtEl ? runAtEl.value : '';
+
+                const paymentStatusLabels = {
+                    'PAID': 'پرداخت موفق',
+                    'PENDING': 'در انتظار پرداخت',
+                    'FAILED': 'پرداخت ناموفق',
+                    'REFUNDED': 'استردادشده'
+                };
+
+                const checkedStatuses = configDiv ? Array.from(configDiv.querySelectorAll('.status-checkbox:checked')).map(el => {
+                    return paymentStatusLabels[el.value] || el.value;
+                }) : [];
+                const checkedServices = configDiv ? Array.from(configDiv.querySelectorAll('.service-checkbox:checked')).map(el => {
+                    return `«${el.nextElementSibling.textContent.trim()}»`;
+                }) : [];
+                const serviceOpEl = configDiv ? configDiv.querySelector('[name*="[service_operator]"]') : null;
+                const serviceOp = serviceOpEl ? serviceOpEl.value : 'IN';
+
+                const checkedProviders = configDiv ? Array.from(configDiv.querySelectorAll('.provider-checkbox:checked')).map(el => {
+                    return `«${el.nextElementSibling.textContent.trim()}»`;
+                }) : [];
+                const providerOpEl = configDiv ? configDiv.querySelector('[name*="[provider_operator]"]') : null;
+                const providerOp = providerOpEl ? providerOpEl.value : 'IN';
+
+                let text = `دقیقاً ${val} ${unitText} ${dirText}`;
+                if (val === 0) text = `دقیقاً هنگام ایجاد/پرداخت نوبت`;
+                if (runAtTime) {
+                    text += ` رأس ساعت ${runAtTime} صبح/عصر`;
+                }
+
+                if (checkedStatuses.length > 0) {
+                    text += ` برای پرداخت‌هایی با وضعیت ${checkedStatuses.join(' یا ')}`;
+                } else {
+                    text += ' برای پرداخت‌ها با هر وضعیتی';
+                }
+
+                if (checkedServices.length > 0) {
+                    if (serviceOp === 'IN') {
+                        text += ` مربوط به خدمت(های) ${checkedServices.join(' یا ')}`;
+                    } else {
+                        text += ` مربوط به تمام خدمات به جز ${checkedServices.join(' و ')}`;
+                    }
+                }
+                if (checkedProviders.length > 0) {
+                    if (providerOp === 'IN') {
+                        text += ` برای پزشک(ها) ${checkedProviders.join(' یا ')}`;
+                    } else {
+                        text += ` برای تمام پزشکان به جز ${checkedProviders.join(' و ')}`;
+                    }
+                }
+
+                text += '، این فرآیند زمان‌بندی شده اجرا می‌شود.';
+                nlpTextEl.textContent = text;
+            } else if (type === 'INVOICE_REMINDER') {
+                const valEl = item.querySelector('.invoice-offset-val-input');
+                const val = valEl ? (parseInt(valEl.value) || 0) : 0;
+                const dirEl = item.querySelector('.invoice-offset-dir-select');
+                const dirText = dirEl ? dirEl.options[dirEl.selectedIndex].text : '';
+                const runAtEl = item.querySelector('.run-at-time-invoice-input');
+                const runAtTime = runAtEl ? runAtEl.value : '';
+
+                let text = `دقیقاً ${val} ${dirText}`;
+                if (val === 0) text = `دقیقاً در روز سررسید`;
+
+                if (runAtTime) {
+                    text += ` رأس ساعت ${runAtTime} صبح/عصر`;
+                }
+                text += ' فاکتورهای مشمول این شرط بررسی می‌شوند.';
+                nlpTextEl.textContent = text;
+            } else if (type === 'ORDER_RENEWAL_REMINDER') {
+                const valEl = item.querySelector('.order-offset-val-input');
+                const val = valEl ? (parseInt(valEl.value) || 0) : 0;
+                const dirEl = item.querySelector('.order-offset-dir-select');
+                const dirText = dirEl ? dirEl.options[dirEl.selectedIndex].text : '';
+                const runAtEl = item.querySelector('.run-at-time-order-input');
+                const runAtTime = runAtEl ? runAtEl.value : '';
+
+                let text = `دقیقاً ${val} ${dirText}`;
+                if (val === 0) text = `دقیقاً در روز تاریخ تمدید`;
+
+                if (runAtTime) {
+                    text += ` رأس ساعت ${runAtTime} صبح/عصر`;
+                }
+                text += ' سفارش‌های مشمول بررسی شده و گردش کار اجرا می‌شود.';
+                nlpTextEl.textContent = text;
+            } else if (type === 'RESELLER_ORDER_RENEWAL_REMINDER') {
+                const valEl = item.querySelector('.reseller-order-offset-val-input');
+                const val = valEl ? (parseInt(valEl.value) || 0) : 0;
+                const dirEl = item.querySelector('.reseller-order-offset-dir-select');
+                const dirText = dirEl ? dirEl.options[dirEl.selectedIndex].text : '';
+                const runAtEl = item.querySelector('.run-at-time-reseller-order-input');
+                const runAtTime = runAtEl ? runAtEl.value : '';
+
+                let text = `دقیقاً ${val} ${dirText}`;
+                if (val === 0) text = `دقیقاً در روز تاریخ تمدید`;
+
+                if (runAtTime) {
+                    text += ` رأس ساعت ${runAtTime} صبح/عصر`;
+                }
+                text += ' سفارش‌های نمایندگی مشمول بررسی شده و گردش کار اجرا می‌شود.';
+                nlpTextEl.textContent = text;
+            } else if (type === 'RESELLER_INVOICE_REMINDER') {
+                const valEl = item.querySelector('.reseller-invoice-offset-val-input');
+                const val = valEl ? (parseInt(valEl.value) || 0) : 0;
+                const dirEl = item.querySelector('.reseller-invoice-offset-dir-select');
+                const dirText = dirEl ? dirEl.options[dirEl.selectedIndex].text : '';
+                const runAtEl = item.querySelector('.run-at-time-reseller-invoice-input');
+                const runAtTime = runAtEl ? runAtEl.value : '';
+
+                let text = `دقیقاً ${val} ${dirText}`;
+                if (val === 0) text = `دقیقاً در روز سررسید`;
+
+                if (runAtTime) {
+                    text += ` رأس ساعت ${runAtTime} صبح/عصر`;
+                }
+                text += ' فاکتورهای نمایندگی مشمول این شرط بررسی می‌شوند.';
+                nlpTextEl.textContent = text;
+            } else if (type === 'SCHEDULE') {
+                const cronVal = item.querySelector('.cron-input').value;
+                const presetSelect = item.querySelector('.cron-preset-select');
+                let presetText = presetSelect.selectedIndex > 0 && presetSelect.value !== 'custom'
+                    ? presetSelect.options[presetSelect.selectedIndex].text
+                    : '';
+
+                if (presetText) {
+                    nlpTextEl.textContent = `این گردش کار به صورت زمان‌بندی شده و منظم در ${presetText} (با کد کرون: ${cronVal}) اجرا خواهد شد.`;
+                } else {
+                    nlpTextEl.textContent = `این گردش کار طبق زمان‌بندی سفارشی با کد کرون [ ${cronVal} ] به طور خودکار اجرا خواهد شد.`;
+                }
+            }
+        }
+
+        function updateFilterBadges(item) {
+            // 1. Services & Providers
+            const serviceCount = item.querySelectorAll('.service-checkbox:checked').length;
+            const providerCount = item.querySelectorAll('.provider-checkbox:checked').length;
+            updateBadge(item, '.badge-services-providers', serviceCount + providerCount);
+
+            // 2. Treatment Plan
+            const tpPrevCount = item.querySelectorAll('[name*="[tp_prev_statuses][]"]:checked').length;
+            const tpMinAmount = item.querySelector('[name*="[tp_min_amount]"]') ? item.querySelector('[name*="[tp_min_amount]"]').value : '';
+            const tpMaxAmount = item.querySelector('[name*="[tp_max_amount]"]') ? item.querySelector('[name*="[tp_max_amount]"]').value : '';
+            const tpActiveCount = tpPrevCount + (tpMinAmount !== '' ? 1 : 0) + (tpMaxAmount !== '' ? 1 : 0);
+            updateBadge(item, '.badge-treatment-plans', tpActiveCount);
+
+            // 3. Client File
+            const clientCurrCount = item.querySelectorAll('[name*="[client_current_statuses][]"]:checked').length;
+            const clientPrevCount = item.querySelectorAll('[name*="[client_prev_statuses][]"]:checked').length;
+            updateBadge(item, '.badge-clients', clientCurrCount + clientPrevCount);
+
+            // 4. Calls
+            const callDirCount = item.querySelectorAll('[name*="[call_directions][]"]:checked').length;
+            const callStatusCount = item.querySelectorAll('[name*="[call_statuses][]"]:checked').length;
+            updateBadge(item, '.badge-calls', callDirCount + callStatusCount);
+
+            // 5. Tasks
+            const taskStatusCount = item.querySelectorAll('[name*="[task_statuses][]"]:checked').length;
+            const taskPriorityCount = item.querySelectorAll('[name*="[task_priorities][]"]:checked').length;
+            updateBadge(item, '.badge-tasks', taskStatusCount + taskPriorityCount);
+
+            // 6. Follow-ups
+            const followupStatusCount = item.querySelectorAll('[name*="[followup_statuses][]"]:checked').length;
+            const followupPriorityCount = item.querySelectorAll('[name*="[followup_priorities][]"]:checked').length;
+            updateBadge(item, '.badge-followups', followupStatusCount + followupPriorityCount);
+
+            // 7. Services Module
+            const serviceStatusCount = item.querySelectorAll('[name*="[service_statuses][]"]:checked').length;
+            const invoiceStatusCount = item.querySelectorAll('[name*="[invoice_statuses][]"]:checked').length;
+            const paymentStatusCount = item.querySelectorAll('[name*="[payment_statuses][]"]:checked').length;
+            updateBadge(item, '.badge-services-module', serviceStatusCount + invoiceStatusCount + paymentStatusCount);
+
+            // 8. Reseller Module
+            const resOrderCount = item.querySelectorAll('[name*="[reseller_order_statuses][]"]:checked').length;
+            const resInvoiceCount = item.querySelectorAll('[name*="[reseller_invoice_statuses][]"]:checked').length;
+            updateBadge(item, '.badge-reseller-module', resOrderCount + resInvoiceCount);
+        }
+
+        function updateBadge(item, selector, count) {
+            const badge = item.querySelector(selector);
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count + ' فیلتر فعال';
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function initAccordionExpansion(item) {
+            // 1. Services & Providers
+            const serviceCount = item.querySelectorAll('.service-checkbox:checked').length;
+            const providerCount = item.querySelectorAll('.provider-checkbox:checked').length;
+            if (serviceCount + providerCount > 0) {
+                expandAccordion(item, '.badge-services-providers');
+            }
+
+            // 2. Treatment Plan
+            const tpPrevCount = item.querySelectorAll('[name*="[tp_prev_statuses][]"]:checked').length;
+            const tpMinAmount = item.querySelector('[name*="[tp_min_amount]"]') ? item.querySelector('[name*="[tp_min_amount]"]').value : '';
+            const tpMaxAmount = item.querySelector('[name*="[tp_max_amount]"]') ? item.querySelector('[name*="[tp_max_amount]"]').value : '';
+            if (tpPrevCount + (tpMinAmount !== '' ? 1 : 0) + (tpMaxAmount !== '' ? 1 : 0) > 0) {
+                expandAccordion(item, '.badge-treatment-plans');
+            }
+
+            // 3. Client File
+            const clientCurrCount = item.querySelectorAll('[name*="[client_current_statuses][]"]:checked').length;
+            const clientPrevCount = item.querySelectorAll('[name*="[client_prev_statuses][]"]:checked').length;
+            if (clientCurrCount + clientPrevCount > 0) {
+                expandAccordion(item, '.badge-clients');
+            }
+
+            // 4. Calls
+            const callDirCount = item.querySelectorAll('[name*="[call_directions][]"]:checked').length;
+            const callStatusCount = item.querySelectorAll('[name*="[call_statuses][]"]:checked').length;
+            if (callDirCount + callStatusCount > 0) {
+                expandAccordion(item, '.badge-calls');
+            }
+
+            // 5. Tasks
+            const taskStatusCount = item.querySelectorAll('[name*="[task_statuses][]"]:checked').length;
+            const taskPriorityCount = item.querySelectorAll('[name*="[task_priorities][]"]:checked').length;
+            if (taskStatusCount + taskPriorityCount > 0) {
+                expandAccordion(item, '.badge-tasks');
+            }
+
+            // 6. Follow-ups
+            const followupStatusCount = item.querySelectorAll('[name*="[followup_statuses][]"]:checked').length;
+            const followupPriorityCount = item.querySelectorAll('[name*="[followup_priorities][]"]:checked').length;
+            if (followupStatusCount + followupPriorityCount > 0) {
+                expandAccordion(item, '.badge-followups');
+            }
+
+            // 7. Services Module
+            const serviceStatusCount = item.querySelectorAll('[name*="[service_statuses][]"]:checked').length;
+            const invoiceStatusCount = item.querySelectorAll('[name*="[invoice_statuses][]"]:checked').length;
+            const paymentStatusCount = item.querySelectorAll('[name*="[payment_statuses][]"]:checked').length;
+            if (serviceStatusCount + invoiceStatusCount + paymentStatusCount > 0) {
+                expandAccordion(item, '.badge-services-module');
+            }
+
+            // 8. Reseller Module
+            const resOrderCount = item.querySelectorAll('[name*="[reseller_order_statuses][]"]:checked').length;
+            const resInvoiceCount = item.querySelectorAll('[name*="[reseller_invoice_statuses][]"]:checked').length;
+            if (resOrderCount + resInvoiceCount > 0) {
+                expandAccordion(item, '.badge-reseller-module');
+            }
+
+            // 9. Auto-expand event group accordions that have checked event-checkboxes
+            item.querySelectorAll('.event-group-toggle').forEach(btn => {
+                const content = btn.nextElementSibling;
+                if (content && content.querySelectorAll('.event-checkbox:checked').length > 0) {
+                    content.classList.remove('hidden');
+                    const icon = btn.querySelector('svg');
+                    if (icon) icon.classList.add('rotate-180');
+                }
+            });
+        }
+
+        function expandAccordion(item, badgeSelector) {
+            const badge = item.querySelector(badgeSelector);
+            if (!badge) return;
+            const btn = badge.closest('.event-group-toggle');
+            if (!btn) return;
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('svg');
+            if (content && content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                if (icon) icon.classList.add('rotate-180');
+            }
+        }
+
+        function handleTypeChange(select) {
+            const item = select.closest('.trigger-item');
+            const type = select.value;
+
+            // Hide configs
+            item.querySelectorAll('.trigger-config').forEach(el => el.classList.add('hidden'));
+
+            // Disable all inner fields
+            item.querySelectorAll('.trigger-config input, .trigger-config select').forEach(input => {
+                input.disabled = true;
+            });
+
+            if (type) {
+                const configDiv = item.querySelector(`.config-${type}`);
+                if (configDiv) {
+                    configDiv.classList.remove('hidden');
+                    configDiv.querySelectorAll('input, select').forEach(input => {
+                        input.disabled = false;
+                    });
+                }
+                item.querySelector('.config-empty').classList.add('hidden');
+            } else {
+                item.querySelector('.config-empty').classList.remove('hidden');
+            }
+
+            updateNlpText(item);
+        }
+
+        function calculateOffset(item, targetInput) {
+            const configDiv = targetInput ? targetInput.closest('.trigger-config') : item.querySelector('.trigger-config:not(.hidden)');
+            if (!configDiv) return;
+
+            const valEl = configDiv.querySelector('.offset-val-input');
+            const unitEl = configDiv.querySelector('.offset-unit-select');
+            const dirEl = configDiv.querySelector('.offset-dir-select');
+            const realEl = configDiv.querySelector('.real-offset-input');
+            if (!valEl || !unitEl || !dirEl || !realEl) return;
+
+            const val = parseInt(valEl.value) || 0;
+            const unit = parseInt(unitEl.value) || 1;
+            const dir = parseInt(dirEl.value) || 1;
+
+            const finalOffset = val * unit * dir;
+            realEl.value = finalOffset;
+
+            updateNlpText(item);
+        }
+
+        function calculateInvoiceOffset(item) {
+            const valEl = item.querySelector('.invoice-offset-val-input');
+            const dirEl = item.querySelector('.invoice-offset-dir-select');
+            const hiddenEl = item.querySelector('.real-invoice-offset-input');
+            if (!valEl || !dirEl || !hiddenEl) return;
+
+            const val = parseInt(valEl.value) || 0;
+            const dir = parseInt(dirEl.value) || 1;
+            hiddenEl.value = val * dir;
+
+            updateNlpText(item);
+        }
+
+        function calculateOrderOffset(item) {
+            const valEl = item.querySelector('.order-offset-val-input');
+            const dirEl = item.querySelector('.order-offset-dir-select');
+            const hiddenEl = item.querySelector('.real-order-offset-input');
+            if (!valEl || !dirEl || !hiddenEl) return;
+
+            const val = parseInt(valEl.value) || 0;
+            const dir = parseInt(dirEl.value) || 1;
+            hiddenEl.value = val * dir;
+
+            updateNlpText(item);
+        }
+
+        function calculateResellerOrderOffset(item) {
+            const valEl = item.querySelector('.reseller-order-offset-val-input');
+            const dirEl = item.querySelector('.reseller-order-offset-dir-select');
+            const hiddenEl = item.querySelector('.real-reseller-order-offset-input');
+            if (!valEl || !dirEl || !hiddenEl) return;
+
+            const val = parseInt(valEl.value) || 0;
+            const dir = parseInt(dirEl.value) || 1;
+            hiddenEl.value = val * dir;
+
+            updateNlpText(item);
+        }
+
+        function calculateResellerInvoiceOffset(item) {
+            const valEl = item.querySelector('.reseller-invoice-offset-val-input');
+            const dirEl = item.querySelector('.reseller-invoice-offset-dir-select');
+            const hiddenEl = item.querySelector('.real-reseller-invoice-offset-input');
+            if (!valEl || !dirEl || !hiddenEl) return;
+
+            const val = parseInt(valEl.value) || 0;
+            const dir = parseInt(dirEl.value) || 1;
+            hiddenEl.value = val * dir;
+
+            updateNlpText(item);
+        }
+
+        // Initialize all trigger views on page load
+        container.querySelectorAll('.trigger-item').forEach(item => {
+            const typeSelect = item.querySelector('.trigger-type-select');
+            handleTypeChange(typeSelect);
+
+            const cronInput = item.querySelector('.cron-input');
+            if (cronInput) {
+                const presetSelect = item.querySelector('.cron-preset-select');
+                let matched = false;
+                Array.from(presetSelect.options).forEach(opt => {
+                    if (opt.value === cronInput.value) {
+                        presetSelect.value = opt.value;
+                        matched = true;
+                    }
+                });
+                if (!matched && cronInput.value !== '') {
+                    presetSelect.value = 'custom';
+                }
+            }
+
+            // Recount and expand active filters
+            updateFilterBadges(item);
+            initAccordionExpansion(item);
+        });
+
+        // Event delegation
+        container.addEventListener('change', function(e) {
+            const item = e.target.closest('.trigger-item');
+            if (!item) return;
+
+            if (e.target.classList.contains('trigger-type-select')) {
+                handleTypeChange(e.target);
+            }
+
+            if (e.target.classList.contains('offset-val-input') || e.target.classList.contains('offset-unit-select') || e.target.classList.contains('offset-dir-select')) {
+                calculateOffset(item, e.target);
+            }
+
+            if (e.target.classList.contains('invoice-offset-val-input') || e.target.classList.contains('invoice-offset-dir-select')) {
+                calculateInvoiceOffset(item);
+            }
+
+            if (e.target.classList.contains('order-offset-val-input') || e.target.classList.contains('order-offset-dir-select')) {
+                calculateOrderOffset(item);
+            }
+
+            if (e.target.classList.contains('reseller-invoice-offset-val-input') || e.target.classList.contains('reseller-invoice-offset-dir-select')) {
+                calculateResellerInvoiceOffset(item);
+            }
+
+            if (e.target.classList.contains('reseller-order-offset-val-input') || e.target.classList.contains('reseller-order-offset-dir-select')) {
+                calculateResellerOrderOffset(item);
+            }
+
+            if (e.target.classList.contains('event-checkbox') || e.target.classList.contains('service-checkbox') || e.target.classList.contains('provider-checkbox') || e.target.classList.contains('status-checkbox') || e.target.classList.contains('reseller-order-status-checkbox') || e.target.classList.contains('reseller-invoice-status-checkbox') || e.target.classList.contains('operator-select') || e.target.classList.contains('run-at-time-input') || e.target.classList.contains('run-at-time-invoice-input') || e.target.classList.contains('run-at-time-order-input') || e.target.classList.contains('run-at-time-reseller-order-input') || e.target.classList.contains('run-at-time-reseller-invoice-input')) {
+                updateNlpText(item);
+            }
+
+            if (e.target.classList.contains('cron-preset-select')) {
+                const val = e.target.value;
+                const cronInput = item.querySelector('.cron-input');
+                if (val && val !== 'custom') {
+                    cronInput.value = val;
+                    cronInput.readOnly = true;
+                    cronInput.classList.add('bg-gray-100', 'dark:bg-gray-800');
+                } else if (val === 'custom') {
+                    cronInput.readOnly = false;
+                    cronInput.classList.remove('bg-gray-100', 'dark:bg-gray-800');
+                }
+                updateNlpText(item);
+            }
+
+            // Recount badges on any change
+            updateFilterBadges(item);
+        });
+
+        container.addEventListener('input', function(e) {
+            const item = e.target.closest('.trigger-item');
+            if (!item) return;
+
+            if (e.target.classList.contains('offset-val-input')) {
+                calculateOffset(item);
+            }
+
+            if (e.target.classList.contains('invoice-offset-val-input')) {
+                calculateInvoiceOffset(item);
+            }
+
+            if (e.target.classList.contains('order-offset-val-input')) {
+                calculateOrderOffset(item);
+            }
+
+            if (e.target.classList.contains('reseller-invoice-offset-val-input')) {
+                calculateResellerInvoiceOffset(item);
+            }
+
+            if (e.target.classList.contains('reseller-order-offset-val-input')) {
+                calculateResellerOrderOffset(item);
+            }
+
+            if (e.target.classList.contains('cron-input')) {
+                updateNlpText(item);
+            }
+
+            // Recount badges on input
+            updateFilterBadges(item);
+        });
+
+        // Add Trigger
+        addBtn.addEventListener('click', function() {
+            const index = container.children.length;
+            const firstItem = container.querySelector('.trigger-item');
+
+            let newItem;
+            if (firstItem) {
+                newItem = firstItem.cloneNode(true);
+            } else {
+                location.reload();
+                return;
+            }
+
+            // Reset inputs and update array index names
+            newItem.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.disabled = true;
+                const name = cb.getAttribute('name');
+                if (name) {
+                    cb.setAttribute('name', name.replace(/triggers\[\d+\]/, `triggers[${index}]`));
+                }
+            });
+
+            newItem.querySelectorAll('select, input[type="text"], input[type="number"], input[type="hidden"], input[type="time"]').forEach(input => {
+                if (input.tagName === 'SELECT') {
+                    if (input.classList.contains('operator-select')) {
+                        input.value = 'IN';
+                    } else {
+                        input.selectedIndex = 0;
+                    }
+                } else if (input.classList.contains('cron-input')) {
+                    input.value = '0 8 * * *';
+                    input.readOnly = false;
+                    input.classList.remove('bg-gray-100', 'dark:bg-gray-800');
+                } else if (input.classList.contains('real-offset-input')) {
+                    input.value = '-60';
+                } else if (input.classList.contains('offset-val-input')) {
+                    input.value = '1';
+                } else {
+                    input.value = '';
+                }
+                input.disabled = true;
+
+                const name = input.getAttribute('name');
+                if (name) {
+                    input.setAttribute('name', name.replace(/triggers\[\d+\]/, `triggers[${index}]`));
+                }
+            });
+
+            // Enable select type again
+            const typeSelect = newItem.querySelector('.trigger-type-select');
+            typeSelect.disabled = false;
+
+            // Remove trigger button ensure
+            let removeBtn = newItem.querySelector('.remove-trigger');
+            if (!removeBtn) {
+                removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'remove-trigger absolute top-4 left-4 text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20';
+                removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>';
+                newItem.appendChild(removeBtn);
+            }
+
+            container.appendChild(newItem);
+            initAccordions(newItem);
+            handleTypeChange(typeSelect);
+        });
+
+        // Remove Trigger delegation
+        container.addEventListener('click', function(e) {
+            const btn = e.target.closest('.remove-trigger');
+            if (btn) {
+                if (container.children.length > 1) {
+                    btn.closest('.trigger-item').remove();
+                } else {
+                    alert('حداقل یک شرط برای شروع گردش کار لازم است.');
+                }
+            }
+        });
+    });
+</script>

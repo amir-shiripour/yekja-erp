@@ -1,0 +1,421 @@
+<?php
+
+namespace Modules\Services\App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+use Morilog\Jalali\Jalalian;
+use Modules\Clients\Entities\Client;
+use Modules\Services\App\Http\Models\Order;
+use Modules\Services\App\Http\Models\Status;
+use Modules\Services\App\Http\Models\Service;
+use Modules\Services\App\Http\Models\ServiceCategory;
+use Modules\Services\App\Http\Models\Invoice;
+use Modules\Services\App\Http\Models\InvoiceItem;
+use Modules\Services\App\Http\Models\ActivityLog;
+use Modules\Settings\Entities\Setting;
+use Modules\Workflows\Services\WorkflowEngine;
+
+class OrderController extends Controller
+{
+    public function index(Request $request)
+    {
+        $this->authorize('viewAny', Order::class);
+
+        $user = $request->user();
+        $canViewAll = $user->can('services.orders.view.all') || $user->can('services.orders.manage');
+
+        $isDaActive = Order::isDirectAdminActive();
+        $isDmActive = Order::isDomainManagerActive();
+
+        $withRelations = ['customer', 'status', 'service.category', 'invoice.payments'];
+        if ($isDaActive) {
+            $withRelations[] = 'hostingAccount';
+        }
+        if ($isDmActive) {
+            $withRelations[] = 'domainRecord';
+        }
+
+        $query = Order::with($withRelations)
+            ->when(!$canViewAll, fn($q) => $q->where('created_by', $user->id))
+            ->when($request->search, function ($q, $s) use ($isDaActive, $isDmActive) {
+                $q->where(function ($sub) use ($s, $isDaActive, $isDmActive) {
+                    $sub->where('order_number', 'like', "%$s%")
+                        ->orWhere('client_name', 'like', "%$s%")
+                        ->orWhereHas('service', function ($q) use ($s) {
+                            $q->where('name', 'like', "%$s%");
+                        })
+                        ->orWhereHas('invoice', function ($q) use ($s) {
+                            $q->where('invoice_number', 'like', "%$s%")
+                                ->orWhere('proforma_invoice_number', 'like', "%$s%");
+                        })
+                        ->orWhereHas('customer', function ($q) use ($s) {
+                            $q->where('full_name', 'like', "%$s%")
+                                ->orWhere('phone', 'like', "%$s%")
+                                ->orWhere('email', 'like', "%$s%");
+                        });
+
+                    if ($isDaActive) {
+                        $sub->orWhereHas('hostingAccount', function ($q) use ($s) {
+                            $q->where('username', 'like', "%$s%")
+                                ->orWhere('domain', 'like', "%$s%");
+                        });
+                    }
+
+                    if ($isDmActive) {
+                        $sub->orWhereHas('domainRecord', function ($q) use ($s) {
+                            $q->where('domain_name', 'like', "%$s%");
+                        });
+                    }
+                });
+            })
+            ->when($request->status_id, function ($q, $v) {
+                $q->where('status_id', $v);
+            })
+            ->when($request->service_id, function ($q, $v) {
+                $q->where('service_id', $v);
+            })
+            ->when($request->customer_id, function ($q, $v) {
+                $q->where('customer_id', $v);
+            });
+        $sortBy = $request->input('sort_by', 'latest');
+        $sortOrder = strtolower($request->input('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        switch ($sortBy) {
+            case 'oldest':
+                $query->orderBy('service_orders.id', 'asc');
+                break;
+            case 'latest':
+            case 'id':
+                $query->orderBy('service_orders.id', $sortOrder);
+                break;
+            case 'order_number':
+                $query->orderBy('service_orders.order_number', $sortOrder);
+                break;
+            case 'order_number_asc':
+                $query->orderBy('service_orders.order_number', 'asc');
+                break;
+            case 'order_number_desc':
+                $query->orderBy('service_orders.order_number', 'desc');
+                break;
+            case 'client':
+            case 'customer':
+            case 'client_name':
+                $query->leftJoin('clients', 'service_orders.customer_id', '=', 'clients.id')
+                    ->select('service_orders.*')
+                    ->orderBy(DB::raw("COALESCE(clients.full_name, service_orders.client_name, '')"), $sortOrder);
+                break;
+            case 'service':
+                $query->leftJoin('services', 'service_orders.service_id', '=', 'services.id')
+                    ->select('service_orders.*')
+                    ->orderBy('services.name', $sortOrder);
+                break;
+            case 'invoice':
+            case 'invoice_id':
+                $query->orderBy('service_orders.invoice_id', $sortOrder);
+                break;
+            case 'total_amount':
+            case 'amount':
+                $query->orderBy('service_orders.total_amount', $sortOrder);
+                break;
+            case 'amount_desc':
+                $query->orderBy('service_orders.total_amount', 'desc');
+                break;
+            case 'amount_asc':
+                $query->orderBy('service_orders.total_amount', 'asc');
+                break;
+            case 'renewal_price':
+                $query->orderBy('service_orders.renewal_price', $sortOrder);
+                break;
+            case 'issue_date':
+                $query->orderByRaw("service_orders.issue_date IS NULL, service_orders.issue_date {$sortOrder}")
+                    ->orderBy('service_orders.id', $sortOrder);
+                break;
+            case 'issue_date_desc':
+                $query->orderByRaw("service_orders.issue_date IS NULL, service_orders.issue_date desc")
+                    ->orderBy('service_orders.id', 'desc');
+                break;
+            case 'issue_date_asc':
+                $query->orderByRaw("service_orders.issue_date IS NULL, service_orders.issue_date asc")
+                    ->orderBy('service_orders.id', 'asc');
+                break;
+            case 'renewal_date':
+                $query->orderByRaw("service_orders.renewal_date IS NULL, service_orders.renewal_date {$sortOrder}")
+                    ->orderBy('service_orders.id', $sortOrder);
+                break;
+            case 'renewal_date_asc':
+                $query->orderByRaw("service_orders.renewal_date IS NULL, service_orders.renewal_date asc")
+                    ->orderBy('service_orders.id', 'asc');
+                break;
+            case 'renewal_date_desc':
+                $query->orderByRaw("service_orders.renewal_date IS NULL, service_orders.renewal_date desc")
+                    ->orderBy('service_orders.id', 'desc');
+                break;
+            case 'status':
+            case 'status_id':
+                $query->orderBy('service_orders.status_id', $sortOrder);
+                break;
+            default:
+                $query->orderBy('service_orders.id', 'desc');
+                break;
+        }
+
+        $orders = $query->paginate(20)->withQueryString();
+
+        $statuses = Status::where('type', 'order')->orderBy('sort_order')->get();
+        $services = Service::orderBy('name')->get();
+        $customers = Client::orderBy('full_name')->get();
+        $currency = Setting::where('key', 'currency')->value('value') ?? 'toman';
+
+        return view('services::orders.index', compact('orders', 'statuses', 'services', 'customers', 'currency', 'isDaActive', 'isDmActive'));
+    }
+
+    public function show(Order $order)
+    {
+        $this->authorize('view', $order);
+
+        $order->load(['customer', 'status', 'service', 'invoice.payments']);
+
+        $statuses = Status::where('type', 'order')->orderBy('sort_order')->get();
+        $currency = Setting::where('key', 'currency')->value('value') ?? 'toman';
+
+        return view('services::orders.show', compact('order', 'statuses', 'currency'));
+    }
+
+    public function update(Request $request, Order $order)
+    {
+        $this->authorize('update', $order);
+
+        if ($request->has('renewal_price')) {
+            $request->merge(['renewal_price' => str_replace(',', '', $request->renewal_price)]);
+        }
+
+        $validated = $request->validate([
+            'status_id' => 'nullable|exists:services_statuses,id',
+            'renewal_date' => 'nullable|string',
+            'renewal_price_type' => 'required|in:auto,manual',
+            'renewal_price' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string'
+        ]);
+
+        if ($request->filled('renewal_date')) {
+            try {
+                $englishDate = str_replace(
+                    ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'],
+                    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+                    $request->renewal_date
+                );
+                $validated['renewal_date'] = Jalalian::fromFormat('Y/m/d', $englishDate)->toCarbon();
+            } catch (Exception $e) {
+                unset($validated['renewal_date']);
+            }
+        }
+
+        if ($validated['renewal_price_type'] === 'auto') {
+            $validated['renewal_price'] = $order->renewal_price;
+        }
+
+        $order->update($validated);
+
+        return back()->with('success', 'اطلاعات سفارش با موفقیت بروزرسانی شد.');
+    }
+
+    public function createRenewalInvoice(Request $request, Order $order)
+    {
+        $this->authorize('update', $order);
+
+        if (!$order->billing_cycle) {
+            return back()->with('error', 'این سفارش یک سرویس دوره‌ای نیست یا دوره تمدید برای آن مشخص نشده است.');
+        }
+
+        $service = $order->service_id ? Service::find($order->service_id) : null;
+
+        // Determine renewal price
+        $renewalPrice = (float)$order->calculated_renewal_price;
+
+
+        // Determine tax percent
+        $taxPercent = 0;
+        if ($order->invoice) {
+            $taxPercent = (float)($order->invoice->tax_percent ?? 0);
+            if ($taxPercent == 0 && $order->invoice->items->isNotEmpty()) {
+                $matchingItem = $order->invoice->items->firstWhere('service_id', $order->service_id);
+                if ($matchingItem && $matchingItem->tax_percent > 0) {
+                    $taxPercent = (float)$matchingItem->tax_percent;
+                }
+            }
+        } else {
+            $settings = Setting::pluck('value', 'key')->toArray();
+            $taxMode = $settings['services_tax_mode'] ?? 'invoice';
+            if ($taxMode !== 'none') {
+                $taxPercent = (float)($settings['services_default_tax_rate'] ?? 0);
+            }
+        }
+
+        $quantity = 1;
+        $itemSubtotal = $renewalPrice * $quantity;
+        $itemTax = $taxPercent > 0 ? round(($itemSubtotal * $taxPercent) / 100) : 0;
+        $itemTotal = $itemSubtotal + $itemTax;
+
+        $currentRenewalDate = $order->renewal_date ? Carbon::parse($order->renewal_date) : now();
+        $renewalDateStr = $currentRenewalDate->format('Y-m-d');
+        $renewalInvoiceNumber = Invoice::generateNumber();
+
+        $pendingStatus = Status::where('type', 'payment')->where('name', 'در انتظار پرداخت')->first()
+            ?? Status::where('type', 'invoice')->where('name', 'در انتظار پرداخت')->first()
+            ?? Status::where('type', 'payment')->first()
+            ?? $order->status_id;
+
+        $settings = Setting::pluck('value', 'key')->toArray();
+        $currency = $settings['currency'] ?? $settings['payment_currency'] ?? $order->invoice?->currency ?? 'toman';
+
+        $billingCycleLabels = [
+            'monthly' => 'ماهانه',
+            'quarterly' => 'فصلی',
+            'semi_annual' => 'شش ماهه',
+            'annual' => 'سالانه',
+        ];
+        $cycleLabel = $billingCycleLabels[$order->billing_cycle] ?? $order->billing_cycle;
+
+        // Calculate next renewal date based on subscription type (billing cycle)
+        $nextRenewalDate = null;
+        if (class_exists(Jalalian::class)) {
+            try {
+                $jalali = Jalalian::fromCarbon($currentRenewalDate);
+                switch ($order->billing_cycle) {
+                    case 'monthly':
+                        $nextJalali = $jalali->addMonths(1);
+                        break;
+                    case 'quarterly':
+                        $nextJalali = $jalali->addMonths(3);
+                        break;
+                    case 'semi_annual':
+                        $nextJalali = $jalali->addMonths(6);
+                        break;
+                    case 'annual':
+                        $nextJalali = $jalali->addYears(1);
+                        break;
+                    default:
+                        $nextJalali = null;
+                        break;
+                }
+                if (isset($nextJalali)) {
+                    $nextRenewalDate = $nextJalali->toCarbon()->format('Y-m-d');
+                }
+            } catch (\Throwable $e) {
+            }
+        }
+        if (!$nextRenewalDate) {
+            switch ($order->billing_cycle) {
+                case 'monthly':
+                    $nextRenewalDate = $currentRenewalDate->copy()->addMonth()->format('Y-m-d');
+                    break;
+                case 'quarterly':
+                    $nextRenewalDate = $currentRenewalDate->copy()->addMonths(3)->format('Y-m-d');
+                    break;
+                case 'semi_annual':
+                    $nextRenewalDate = $currentRenewalDate->copy()->addMonths(6)->format('Y-m-d');
+                    break;
+                case 'annual':
+                    $nextRenewalDate = $currentRenewalDate->copy()->addYear()->format('Y-m-d');
+                    break;
+                default:
+                    $nextRenewalDate = $currentRenewalDate->copy()->addMonth()->format('Y-m-d');
+                    break;
+            }
+        }
+
+        $renewalInvoice = null;
+
+        DB::transaction(function () use (
+            &$renewalInvoice, $order, $service, $renewalInvoiceNumber,
+            $pendingStatus, $renewalDateStr, $nextRenewalDate, $taxPercent, $itemSubtotal,
+            $itemTax, $itemTotal, $currency, $cycleLabel, $renewalPrice,
+            $quantity
+        ) {
+            $clientName = $order->client_name ?: ($order->customer?->full_name ?: '—');
+            $clientPhone = $order->client_phone ?: $order->customer?->phone;
+            $clientEmail = $order->client_email ?: $order->customer?->email;
+
+            $renewalInvoice = Invoice::create([
+                'invoice_number' => $renewalInvoiceNumber,
+                'service_id' => $order->service_id,
+                'customer_id' => $order->customer_id,
+                'created_by' => auth()->id() ?? $order->created_by ?? 1,
+                'status_id' => $pendingStatus?->id ?? $order->status_id,
+                'client_name' => $clientName,
+                'client_phone' => $clientPhone,
+                'client_email' => $clientEmail,
+                'issue_date' => $renewalDateStr,
+                'due_date' => $nextRenewalDate,
+                'tax_percent' => $taxPercent,
+                'subtotal' => (int)$itemSubtotal,
+                'discount_amount' => 0,
+                'tax_amount' => (int)$itemTax,
+                'total' => (int)$itemTotal,
+                'paid_amount' => 0,
+                'currency' => $currency,
+                'notes' => 'فاکتور تمدید دوره‌ای برای سفارش ' . ($order->order_number ?? '') . ' (' . ($service->name ?? $order->notes ?? '') . ') - صدور دستی',
+                'meta' => [
+                    'is_renewal' => true,
+                    'created_by_manual_renewal' => true,
+                    'source_invoice_id' => $order->invoice_id,
+                    'source_order_id' => $order->id,
+                    'billing_period' => $order->billing_cycle,
+                    'skip_auto_renewal_invoice' => true,
+                ],
+            ]);
+
+            $serviceName = $service?->name ?? $order->notes ?? 'تمدید سرویس';
+
+            $renewalInvoice->items()->create([
+                'service_id' => $order->service_id,
+                'custom_service_name' => $serviceName,
+                'description' => 'تمدید دوره سرویس (' . $cycleLabel . ')',
+                'unit' => 'عدد',
+                'quantity' => $quantity,
+                'unit_price' => (int)$renewalPrice,
+                'discount' => 0,
+                'tax_percent' => $taxPercent,
+                'tax_amount' => (int)$itemTax,
+                'total' => (int)$itemTotal,
+                'meta' => [
+                    'billing_period' => $order->billing_cycle,
+                    'is_renewal_item' => true,
+                ],
+            ]);
+
+            // Advance Order's renewal_date to the NEXT billing cycle
+            if ($nextRenewalDate) {
+                $order->update(['renewal_date' => $nextRenewalDate]);
+            }
+
+            ActivityLog::log(
+                'صدور دستی فاکتور تمدید',
+                $renewalInvoice,
+                "فاکتور تمدید دوره‌ای دستی شماره {$renewalInvoice->invoice_number} برای سفارش {$order->order_number} صادر گردید."
+            );
+
+            // Trigger invoice_created workflow on the renewal invoice so other workflows continue to run
+            if (class_exists(WorkflowEngine::class)) {
+                try {
+                    app(WorkflowEngine::class)->start('invoice_created', 'INVOICE', $renewalInvoice->id, [
+                        'source_order_id' => $order->id,
+                        'is_renewal' => true,
+                    ]);
+                } catch (\Throwable $e) {
+                    Log::error('[Workflows] Error starting invoice_created workflow for manual renewal: ' . $e->getMessage());
+                }
+            }
+        });
+
+        $order->refresh();
+        $nextJalaliStr = $order->renewal_date ? Jalalian::fromCarbon(Carbon::parse($order->renewal_date))->format('Y/m/d') : '—';
+
+        return back()->with('success', "فاکتور تمدید دستی با شماره {$renewalInvoice->invoice_number} با موفقیت صادر شد و تاریخ سررسید تمدید بعدی سفارش به {$nextJalaliStr} منتقل گردید.");
+    }
+}

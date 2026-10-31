@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews
+    </IfModule>
+
+    RewriteEngine On
+
+    # اگر درخواست قبلاً به public هدایت شده، بازنویسی را متوقف کن (جلوگیری از حلقه)
+    RewriteRule ^public/ - [L]
+
+    # همه درخواست‌ها را به پوشه public بفرست
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

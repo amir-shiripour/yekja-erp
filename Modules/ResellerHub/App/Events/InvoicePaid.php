@@ -1,0 +1,22 @@
+<?php
+
+namespace Modules\ResellerHub\App\Events;
+
+use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+use Modules\ResellerHub\App\Models\ResellerInvoice;
+use Modules\ResellerHub\App\Models\ResellerInvoicePayment;
+
+class InvoicePaid implements ShouldDispatchAfterCommit
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public function __construct(
+        public ResellerInvoice         $invoice,
+        public ?ResellerInvoicePayment $payment = null
+    )
+    {
+    }
+}

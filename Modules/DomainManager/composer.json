@@ -1,0 +1,22 @@
+{
+    "name": "amir-shiripour/domain-manager-module",
+    "description": "Domain Management module integrating with reseller.world API.",
+    "authors": [
+        {
+            "name": "Antigravity",
+            "email": "antigravity@gemini.google"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\DomainManager\\Providers\\DomainManagerServiceProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\DomainManager\\": ""
+        }
+    }
+}

@@ -1,0 +1,150 @@
+<?php
+
+namespace Modules\Market\Entities;
+
+use App\Tenancy\TenantManager;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
+
+class MarketSetting extends Model
+{
+    protected $table = 'market_settings';
+    protected $fillable = ['tenant_id', 'key', 'value'];
+
+    public const DEFAULTS = [
+        'checkout' => [
+            'sync_require_approval' => false,
+            'auto_fill_from_client' => true,
+            'default_form_key' => null,
+            'allow_product_override' => true,
+            'allow_category_override' => true,
+        ],
+        'wms' => [
+            'stock_deduction_strategy' => 'combined',
+            'enabled' => false,
+        ],
+        'system' => [
+            'store_type' => 'single',
+            'store_display_type' => 'by_product',
+            'enable_reports' => true,
+            'enable_coupons' => true,
+            'sequential_discounts' => false,
+            'enable_wallet' => false,
+            'enable_affiliate' => false,
+            'product_prefix' => 'SIT',
+        ],
+        'general' => [
+            'is_market_active' => true,
+            'currency' => 'toman',
+            'currency_position' => 'right_space',
+            'hide_out_of_stock' => false,
+            'selling_location' => 'all',
+            'specific_locations' => '[]',
+            'business_days' => '',
+            'variant_display_mode' => 'grouped',
+            'single_vendor_redirect_after_save' => 'catalog',
+        ],
+        'ui' => [
+            'show_category_on_card' => true,
+            'show_vendor_on_product_page' => true,
+            'show_stock_warning' => true,
+            'product_card_style' => 'modern',
+        ],
+        'tax' => [
+            'enable_taxes' => false,
+            'prices_include_tax' => false,
+            'tax_calculation_based_on' => 'customer_shipping',
+            'default_tax_rate' => '9',
+        ],
+        'vendors' => [
+            'auto_approve_vendors' => false,
+            'products_require_approval' => true,
+            'vendor_can_view_customer_info' => false,
+            'vendor_can_create_variants' => false,
+            'default_commission_rate' => '10',
+            'max_vendor_addresses' => 3,
+            'vendor_can_create_catalog' => false,
+            'vendor_catalog_default_status' => 'draft',
+            'vendor_can_manage_prices' => true,
+        ],
+        'orders' => [
+            'allow_guest_checkout' => false,
+            'min_order_amount' => '0',
+            'auto_cancel_unpaid_hours' => 24,
+            'return_policy_days' => 7,
+            'invoice_prefix' => 'INV-',
+        ],
+        'finance' => [
+            'default_gateway' => 'zarinpal',
+            'min_withdrawal_amount' => '500000',
+            'withdrawal_schedule' => 'on_demand',
+        ],
+        'map' => [
+            'provider' => 'neshan',
+            'api_key' => '',
+        ],
+    ];
+
+    protected static function getCacheKey(string $key): string
+    {
+        $tenantId = app(TenantManager::class)->getTenantId() ?? 'direct';
+        return "market_setting_{$tenantId}_{$key}";
+    }
+
+    public static function getValue(string $key, $default = null)
+    {
+        try {
+            if (!\Illuminate\Support\Facades\Schema::hasTable('market_settings')) {
+                return self::getDefaultValue($key, $default);
+            }
+        } catch (\Throwable $e) {
+            return self::getDefaultValue($key, $default);
+        }
+
+        $cacheKey = self::getCacheKey($key);
+
+        try {
+            return Cache::rememberForever($cacheKey, function () use ($key, $default) {
+                try {
+                    $setting = self::where('key', $key)->first();
+                    if ($setting) {
+                        return $setting->value;
+                    }
+                } catch (\Throwable $e) {
+                    return self::getDefaultValue($key, $default);
+                }
+
+                return self::getDefaultValue($key, $default);
+            });
+        } catch (\Throwable $e) {
+            return self::getDefaultValue($key, $default);
+        }
+    }
+
+    protected static function getDefaultValue(string $key, $default = null)
+    {
+        $keys = explode('.', $key);
+        $value = self::DEFAULTS;
+        foreach ($keys as $k) {
+            if (!isset($value[$k])) {
+                return $default;
+            }
+            $value = $value[$k];
+        }
+        return $value;
+    }
+
+    public static function setValue(string $key, $value)
+    {
+        try {
+            if (!\Illuminate\Support\Facades\Schema::hasTable('market_settings')) {
+                return null;
+            }
+            $setting = self::updateOrCreate(['key' => $key], ['value' => $value]);
+            Cache::forget(self::getCacheKey($key));
+            return $setting;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+}

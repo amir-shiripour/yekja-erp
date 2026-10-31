@@ -1,0 +1,188 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Modules\Clients\Middleware\EnsureClientsModuleEnabled;
+use Modules\Clients\App\Http\Controllers\User\ClientController as UserClientController;
+use Modules\Clients\App\Http\Controllers\User\DashboardController as UserClientDashboardController;
+use Modules\Clients\App\Livewire\Settings\ClientFormBuilder;
+use Modules\Clients\App\Livewire\Settings\ClientUsernameSettings;
+use Modules\Clients\App\Livewire\Settings\ClientStatusesManager;
+use Modules\Clients\App\Http\Controllers\Portal\ClientAuthController;
+use Modules\Clients\App\Http\Controllers\Portal\ClientDashboardController;
+use Modules\Clients\App\Http\Controllers\Portal\ClientAppointmentController;
+use Modules\Clients\App\Http\Controllers\Portal\ClientPaymentController;
+use Modules\Clients\App\Http\Controllers\Portal\ClientProfileController;
+use Modules\Clients\App\Http\Controllers\Portal\ClientInvoiceController;
+use Modules\Clients\App\Http\Controllers\Portal\ClientOrderController;
+use Modules\Clients\App\Livewire\Settings\ClientAuthSettings;
+use Modules\Clients\App\Livewire\Settings\CsvImporter;
+use Modules\Clients\App\Livewire\Settings\CsvExporter;
+
+Route::middleware(['web', 'auth', EnsureClientsModuleEnabled::class])
+    ->prefix('user')
+    ->name('user.')
+    ->group(function () {
+
+        // صفحه داشبورد اختصاصی ماژول (اگر نیاز باشه)
+        Route::get('/clients/dashboard', [UserClientDashboardController::class, 'index'])
+            ->name('clients.dashboard');
+
+        Route::prefix('clients')
+            ->name('clients.')
+            ->group(function () {
+
+                Route::get('/', [UserClientController::class, 'index'])
+                    ->name('index')
+                    ->middleware('permission:clients.view');
+
+                Route::get('/create', [UserClientController::class, 'create'])
+                    ->name('create')
+                    ->middleware('permission:clients.create');
+
+                Route::post('/', [UserClientController::class, 'store'])
+                    ->name('store')
+                    ->middleware('permission:clients.create');
+
+                // جستجوی clients برای فیلدهای select و سرچ‌بار
+                Route::get('/search', [UserClientController::class, 'search'])
+                    ->name('search')
+                    ->middleware('permission:clients.view');
+
+                Route::get('/{client}', [UserClientController::class, 'show'])
+                    ->name('show')
+                    ->middleware('permission:clients.view');
+
+                Route::get('/{client}/edit', [UserClientController::class, 'edit'])
+                    ->name('edit')
+                    ->middleware('permission:clients.edit');
+
+                Route::put('/{client}', [UserClientController::class, 'update'])
+                    ->name('update')
+                    ->middleware('permission:clients.edit');
+
+                Route::delete('/{client}', [UserClientController::class, 'destroy'])
+                    ->name('destroy')
+                    ->middleware('permission:clients.delete');
+
+                // Trash Management
+                Route::post('/{id}/restore', [UserClientController::class, 'restore'])
+                    ->name('restore')
+                    ->middleware('permission:clients.delete');
+                Route::delete('/{id}/force-delete', [UserClientController::class, 'forceDelete'])
+                    ->name('force-delete')
+                    ->middleware('permission:clients.delete');
+
+                Route::post('/bulk', [UserClientController::class, 'bulkUpdate'])
+                    ->name('bulk-update')
+                    ->middleware('permission:clients.edit');
+
+                // 🔹 این روت جدید برای "ورود به پنل مشتری در تب جدید" است
+                Route::get('/{client}/portal-login', [ClientAuthController::class, 'autoLoginFromAdmin'])
+                    ->name('portal-login')
+                    ->middleware('permission:clients.view');
+            });
+    });
+
+Route::post('user/clients/quick-store', [UserClientController::class, 'quickStore'])
+    ->name('user.clients.quick-store')
+    ->middleware('auth');
+
+Route::middleware(['web', 'auth', EnsureClientsModuleEnabled::class, 'permission:clients.manage'])
+    ->prefix('user/settings/clients')
+    ->name('user.settings.clients.')
+    ->group(function () {
+        Route::get('/dashboard', \Modules\Clients\App\Livewire\Settings\ClientDashboardSettings::class)->name('dashboard');
+        Route::get('/forms', ClientFormBuilder::class)->name('forms');
+        Route::get('/username', ClientUsernameSettings::class)->name('username');
+        Route::get('/statuses', ClientStatusesManager::class)->name('statuses');
+        Route::get('/auth', ClientAuthSettings::class)->name('auth');
+        Route::get('/import', CsvImporter::class)->name('import');
+        Route::get('/export', CsvExporter::class)->name('export');
+    });
+
+Route::prefix('clients')
+    ->name('client.')
+    ->middleware('web')
+    ->group(function () {
+
+        // مهمان‌های کلاینت (کسی که با گارد client لاگین نیست)
+        Route::middleware('guest:client')->group(function () {
+            Route::get('login', [ClientAuthController::class, 'showLoginForm'])
+                ->name('login');
+
+            Route::post('login', [ClientAuthController::class, 'login'])
+                ->name('login.submit');
+
+            Route::post('login/check-username', [ClientAuthController::class, 'checkUsername'])
+                ->name('login.check-username');
+
+            Route::post('login/otp/send', [ClientAuthController::class, 'sendOtp'])
+                ->name('otp.send');
+
+            Route::post('login/otp/verify', [ClientAuthController::class, 'verifyOtp'])
+                ->name('otp.verify');
+
+            Route::post('register', [ClientAuthController::class, 'register'])
+                ->name('register.submit');
+        });
+
+        // کلاینت‌های لاگین کرده
+        Route::middleware('auth:client')->group(function () {
+            Route::get('dashboard', [ClientDashboardController::class, 'index'])
+                ->name('dashboard');
+
+            Route::post('terms/accept', [\Modules\Clients\App\Http\Controllers\Portal\ClientTermsController::class, 'accept'])
+                ->name('terms.accept');
+
+            Route::get('profile', [ClientProfileController::class, 'show'])
+                ->name('profile.show');
+            Route::put('profile', [ClientProfileController::class, 'update'])
+                ->name('profile.update');
+
+            Route::get('appointments', [ClientAppointmentController::class, 'index'])
+                ->name('appointments.index');
+            Route::get('appointments/{appointment}', [ClientAppointmentController::class, 'show'])
+                ->name('appointments.show');
+            Route::post('appointments/{appointment}/cancel', [ClientAppointmentController::class, 'cancel'])
+                ->name('appointments.cancel');
+
+            Route::get('payments', [ClientPaymentController::class, 'index'])
+                ->name('payments.index');
+            Route::get('payments/{type}/{id}', [ClientPaymentController::class, 'show'])
+                ->name('payments.show');
+            Route::post('payments/{id}/process', [ClientPaymentController::class, 'processPayment'])
+                ->name('payments.process');
+
+            // 📄 Service Invoices Routes
+            Route::get('invoices', [ClientInvoiceController::class, 'index'])
+                ->name('invoices.index');
+            Route::get('invoices/{invoice}', [ClientInvoiceController::class, 'show'])
+                ->name('invoices.show');
+            Route::get('invoices/{invoice}/print', [ClientInvoiceController::class, 'print'])
+                ->name('invoices.print');
+            Route::post('invoices/{invoice}/pay', [ClientInvoiceController::class, 'processPayment'])
+                ->name('invoices.pay');
+            Route::match(['get', 'post'], 'invoices/{invoice}/verify/{gateway?}', [ClientInvoiceController::class, 'verifyOnlinePayment'])
+                ->name('invoices.verify');
+
+            // 📦 Service Orders Routes
+            Route::get('orders', [ClientOrderController::class, 'index'])
+                ->name('orders.index');
+            Route::get('orders/{order}', [ClientOrderController::class, 'show'])
+                ->name('orders.show');
+
+            // 🛍️ Market Orders Routes
+            Route::get('market/orders', [ClientPaymentController::class, 'marketOrdersIndex'])
+                ->name('market.orders.index');
+            Route::get('market/orders/{id}', [ClientPaymentController::class, 'marketOrderShow'])
+                ->name('market.orders.show');
+
+            if (class_exists('Modules\Market\App\Livewire\Client\InteractionsManager')) {
+                Route::get('market/interactions', \Modules\Market\App\Livewire\Client\InteractionsManager::class)
+                    ->name('market.interactions');
+            }
+
+            Route::post('logout', [ClientAuthController::class, 'logout'])
+                ->name('logout');
+        });
+    });

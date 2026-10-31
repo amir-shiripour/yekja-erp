@@ -1,0 +1,475 @@
+@extends('layouts.user')
+
+@php
+    use App\Models\Tenant;
+    use App\Support\WidgetRegistry;
+    use App\Models\WidgetSetting;
+    use App\Models\UserDashboardSetting;
+    use App\Tenancy\TenantManager;
+    use Modules\ResellerHub\App\Services\Onboarding\OnboardingStateService;
+    use Modules\ResellerHub\App\Models\ResellerSetting;
+
+    $title = 'داشبورد';
+
+    // همه ویجت‌های ثبت‌شده از هسته + ماژول‌ها
+    $allWidgets = WidgetRegistry::all();
+
+    $userWidgetsKeys = [];
+    $userLayout = [];
+
+    if(auth()->check()) {
+        $user = auth()->user();
+
+        // اگر User از Spatie\HasRoles استفاده می‌کند:
+        $roleIds = method_exists($user, 'roles')
+            ? $user->roles()->pluck('id')
+            : collect();
+
+        if ($roleIds->isNotEmpty()) {
+            $userWidgetsKeys = WidgetSetting::whereIn('role_id', $roleIds)
+                ->where('is_active', true)
+                ->pluck('widget_key')
+                ->unique()
+                ->toArray();
+        }
+
+        // دریافت تنظیمات چیدمان کاربر
+        $dashboardSetting = UserDashboardSetting::where('user_id', $user->id)->first();
+        if ($dashboardSetting && !empty($dashboardSetting->layout)) {
+            $userLayout = $dashboardSetting->layout;
+        }
+    }
+
+    // فیلتر کردن ویجت‌های مجاز
+    $authorizedWidgets = [];
+    foreach($allWidgets as $key => $widget) {
+        $enabledForRole = in_array($widget['key'], $userWidgetsKeys, true);
+        $hasPermission = true;
+        if (!empty($widget['permission']) && auth()->check()) {
+            $hasPermission = auth()->user()->can($widget['permission']);
+        }
+
+        if ($enabledForRole && $hasPermission) {
+            $authorizedWidgets[$key] = $widget;
+        }
+    }
+
+    // مرتب‌سازی ویجت‌ها بر اساس چیدمان کاربر
+    $sortedWidgets = [];
+    $hiddenWidgets = []; // برای استفاده در JS
+
+    // لیست نهایی برای رندر (شامل مخفی‌ها هم می‌شود تا در DOM باشند)
+    $renderList = [];
+
+    // اگر کاربر چیدمان ذخیره شده دارد
+    if (!empty($userLayout)) {
+        // ویجت‌های موجود در چیدمان کاربر
+        foreach ($userLayout as $item) {
+            if (isset($authorizedWidgets[$item['key']])) {
+                $widget = $authorizedWidgets[$item['key']];
+                $widget['visible'] = $item['visible'] ?? true;
+                $widget['colSpan'] = $item['colSpan'] ?? 1;
+                $widget['rowSpan'] = $item['rowSpan'] ?? 1;
+
+                $renderList[] = $widget;
+
+                if (!$widget['visible']) {
+                    $hiddenWidgets[$item['key']] = $widget;
+                }
+
+                // حذف از لیست اصلی تا تکراری نشود
+                unset($authorizedWidgets[$item['key']]);
+            }
+        }
+    }
+
+    // اضافه کردن ویجت‌های جدید که هنوز در چیدمان کاربر نیستند
+    foreach ($authorizedWidgets as $widget) {
+        $widget['visible'] = true; // پیش‌فرض نمایش داده شوند
+
+        // تنظیمات پیش‌فرض برای عرض و ارتفاع ویجت‌ها
+        if ($widget['key'] === 'today_reminders') {
+             $widget['colSpan'] = 2;
+        } else {
+             $widget['colSpan'] = 1;
+        }
+        $widget['rowSpan'] = 1;
+
+        $renderList[] = $widget;
+    }
+
+    $tenantForDashboard = app()->bound(TenantManager::class) ? app(TenantManager::class)->getTenant() : null;
+    if (!$tenantForDashboard && auth()->check()) {
+        $tenantForDashboard = auth()->user()->tenant;
+        if (!$tenantForDashboard && auth()->user()->tenant_id) {
+            $tenantForDashboard = Tenant::find(auth()->user()->tenant_id);
+        }
+    }
+
+    $isOnboardingActive = false;
+    if ($tenantForDashboard) {
+        $onboardingProgress = app(OnboardingStateService::class)->getTenantProgress($tenantForDashboard);
+        $tourConfig = \Modules\ResellerHub\App\Models\ResellerSetting::getOnboardingTourConfig($tenantForDashboard->reseller_id);
+        $isOnboardingActive = ($tourConfig['enabled'] ?? true)
+            && !($onboardingProgress['is_finished'] ?? false)
+            && !empty($onboardingProgress['total'])
+            && !session('onboarding_widget_dismissed', false);
+    }
+@endphp
+
+@section('content')
+    <div x-data="dashboardManager(@js($renderList), @js($hiddenWidgets))" class="space-y-8 pb-12">
+
+        {{-- هدر و دکمه ویرایش --}}
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            @if($isOnboardingActive)
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <span
+                            class="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </span>
+                        راه‌اندازی سامانه CRM
+                    </h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-14">
+                        مراحل اولیه راه‌اندازی و فعال‌سازی سامانه اختصاصی خود را تکمیل کنید
+                    </p>
+                </div>
+            @else
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <span
+                            class="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                            </svg>
+                        </span>
+                        پیشخوان و داشبورد
+                    </h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-14">
+                        نمای کلی وضعیت سیستم و ویجت‌های کاربردی
+                    </p>
+                </div>
+
+                <button
+                    @click="toggleEditMode()"
+                    class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all transform active:scale-95"
+                    :class="editMode ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm'"
+                >
+                    <svg x-show="!editMode" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                    <svg x-show="editMode" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span x-text="editMode ? 'ذخیره چیدمان' : 'شخصی‌سازی داشبورد'"></span>
+                </button>
+            @endif
+        </div>
+
+        {{-- بنر اخطار و پرداخت سفارش در انتظار پرداخت --}}
+        @includeIf('resellerhub::partials.unpaid-order-banner')
+
+        {{-- ویجت بنتو آنبوردینگ و تور راه‌اندازی سریع سامانه --}}
+        @livewire('resellerhub.onboarding-widget')
+
+        @if(!$isOnboardingActive)
+            {{-- پنل ویجت‌های مخفی (فقط در حالت ویرایش) --}}
+            <div x-show="editMode && Object.keys(hiddenWidgets).length > 0" x-transition
+                 class="bg-indigo-50 dark:bg-indigo-900/10 border-2 border-dashed border-indigo-200 dark:border-indigo-800/50 rounded-2xl p-6 animate-in fade-in slide-in-from-top-4">
+                <div class="flex items-center gap-2 mb-4">
+                    <span
+                        class="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path
+                                stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                    </span>
+                    <h3 class="text-sm font-bold text-indigo-900 dark:text-indigo-100">ویجت‌های مخفی شده</h3>
+                    <span
+                        class="text-xs text-indigo-500 dark:text-indigo-400 mr-auto">برای افزودن به داشبورد کلیک کنید</span>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                    <template x-for="(widget, key) in hiddenWidgets" :key="key">
+                        <button
+                            @click="showWidget(key)"
+                            class="group flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 rounded-xl border border-indigo-100 dark:border-gray-700 shadow-sm hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                        >
+                            <svg class="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            <span
+                                class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+                                x-text="widget.label || widget.key"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            {{-- شبکه ویجت‌ها --}}
+            <div
+                x-ref="grid"
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 grid-flow-row-dense items-start"
+            >
+                @foreach($renderList as $widget)
+                    @php
+                        $colClass = '';
+                        if ($widget['colSpan'] == 2) $colClass = 'md:col-span-2 lg:col-span-2';
+                        elseif ($widget['colSpan'] == 3) $colClass = 'md:col-span-2 lg:col-span-3';
+                        else $colClass = 'col-span-1';
+
+                        $rowClass = '';
+                        if ($widget['rowSpan'] == 2) $rowClass = 'row-span-2';
+                        else $rowClass = 'row-span-1';
+                    @endphp
+                    <div
+                        class="widget-card group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-300 hover:shadow-md {{ !$widget['visible'] ? 'hidden' : '' }} {{ $colClass }} {{ $rowClass }}"
+                        :class="{'ring-2 ring-indigo-500 ring-offset-4 ring-offset-gray-50 dark:ring-offset-gray-900 cursor-move scale-[0.98] opacity-90 hover:opacity-100 hover:scale-100': editMode}"
+                        data-key="{{ $widget['key'] }}"
+                        data-colspan="{{ $widget['colSpan'] }}"
+                        data-rowspan="{{ $widget['rowSpan'] }}"
+                        id="widget-{{ $widget['key'] }}"
+                    >
+                        {{-- لایه پوششی برای جلوگیری از تعامل با محتوای ویجت در حالت ویرایش --}}
+                        <div x-show="editMode"
+                             class="absolute inset-0 z-10 bg-white/10 dark:bg-black/10 backdrop-blur-[1px] rounded-2xl cursor-move flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div
+                                class="bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg shadow-lg text-xs font-bold text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                                جابجایی
+                            </div>
+                        </div>
+
+                        {{-- هدر ویجت در حالت ویرایش --}}
+                        <div x-show="editMode"
+                             class="relative z-20 px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50/80 dark:bg-gray-800/80 rounded-t-2xl backdrop-blur-sm">
+                            <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                <span class="text-xs font-bold">{{ $widget['label'] ?? $widget['key'] }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                {{-- کنترل‌های تغییر اندازه --}}
+                                <div
+                                    class="flex items-center bg-white dark:bg-gray-700 rounded-lg p-0.5 border border-gray-200 dark:border-gray-600">
+                                    <button @click="changeSize('{{ $widget['key'] }}', 1, 1)"
+                                            class="px-2 py-1 text-[10px] font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
+                                            title="کوچک (1x1)">1x1
+                                    </button>
+                                    <button @click="changeSize('{{ $widget['key'] }}', 2, 1)"
+                                            class="px-2 py-1 text-[10px] font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
+                                            title="عریض (2x1)">2x1
+                                    </button>
+                                    <button @click="changeSize('{{ $widget['key'] }}', 1, 2)"
+                                            class="px-2 py-1 text-[10px] font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors"
+                                            title="بلند (1x2)">1x2
+                                    </button>
+                                    <button @click="changeSize('{{ $widget['key'] }}', 2, 2)"
+                                            class="px-2 py-1 text-[10px] font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors hidden md:block"
+                                            title="بزرگ (2x2)">2x2
+                                    </button>
+                                    <button @click="changeSize('{{ $widget['key'] }}', 3, 1)"
+                                            class="px-2 py-1 text-[10px] font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-colors hidden lg:block"
+                                            title="تمام عرض (3x1)">3x1
+                                    </button>
+                                </div>
+
+                                <button @click="hideWidget('{{ $widget['key'] }}')"
+                                        class="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-lg transition-all cursor-pointer"
+                                        title="مخفی کردن">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-6 flex-1">
+                            @include($widget['view'])
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- پیام خالی بودن داشبورد --}}
+            <div x-show="!editMode && document.querySelectorAll('.widget-card:not(.hidden)').length === 0"
+                 class="text-center py-20">
+                <div
+                    class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">داشبورد شما خالی است</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">هیچ ویجتی برای نمایش وجود ندارد. برای
+                    افزودن ویجت‌ها روی دکمه شخصی‌سازی کلیک کنید.</p>
+                <button @click="toggleEditMode()"
+                        class="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/30">
+                    شخصی‌سازی داشبورد
+                </button>
+            </div>
+        @endif
+
+    </div>
+
+    <script>
+        function dashboardManager(allWidgets, initialHidden) {
+            return {
+                editMode: false,
+                // تبدیل آرایه ویجت‌ها به آبجکت برای دسترسی سریع‌تر
+                widgetsMap: allWidgets.reduce((acc, w) => {
+                    acc[w.key] = w;
+                    return acc;
+                }, {}),
+                hiddenWidgets: initialHidden,
+                sortable: null,
+
+                init() {
+                    // مقداردهی اولیه SortableJS
+                    if (this.$refs.grid && typeof Sortable !== 'undefined') {
+                        this.sortable = new Sortable(this.$refs.grid, {
+                            animation: 200,
+                            disabled: true, // در ابتدا غیرفعال
+                            ghostClass: 'opacity-40',
+                            dragClass: 'cursor-grabbing',
+                            onEnd: () => {
+                                // ترتیب جدید را ذخیره نمی‌کنیم تا زمانی که دکمه ذخیره زده شود
+                            }
+                        });
+                    }
+                },
+
+                toggleEditMode() {
+                    this.editMode = !this.editMode;
+
+                    // فعال/غیرفعال کردن Sortable
+                    if (this.sortable) {
+                        this.sortable.option("disabled", !this.editMode);
+                    }
+
+                    if (!this.editMode) {
+                        this.saveLayout();
+                    }
+                },
+
+                hideWidget(key) {
+                    const el = document.getElementById('widget-' + key);
+                    if (el) {
+                        // انیمیشن مخفی شدن
+                        el.classList.add('scale-90', 'opacity-0');
+                        setTimeout(() => {
+                            el.classList.add('hidden');
+                            el.classList.remove('scale-90', 'opacity-0');
+
+                            // اضافه کردن به لیست مخفی‌ها
+                            if (this.widgetsMap[key]) {
+                                this.hiddenWidgets[key] = this.widgetsMap[key];
+                            }
+                        }, 200);
+                    }
+                },
+
+                showWidget(key) {
+                    const el = document.getElementById('widget-' + key);
+                    if (el) {
+                        el.classList.remove('hidden');
+                        delete this.hiddenWidgets[key];
+
+                        // اسکرول به ویجت
+                        el.scrollIntoView({behavior: 'smooth', block: 'center'});
+
+                        // انیمیشن
+                        el.classList.add('ring-4', 'ring-emerald-500', 'scale-105');
+                        setTimeout(() => el.classList.remove('ring-4', 'ring-emerald-500', 'scale-105'), 600);
+                    }
+                },
+
+                changeSize(key, cols, rows) {
+                    const el = document.getElementById('widget-' + key);
+                    if (el) {
+                        // حذف کلاس‌های قبلی
+                        el.classList.remove('col-span-1', 'md:col-span-2', 'lg:col-span-2', 'lg:col-span-3', 'row-span-1', 'row-span-2');
+
+                        // اضافه کردن کلاس‌های جدید برای ستون
+                        if (cols === 2) {
+                            el.classList.add('md:col-span-2', 'lg:col-span-2');
+                        } else if (cols === 3) {
+                            el.classList.add('md:col-span-2', 'lg:col-span-3'); // md max is 2 cols
+                        } else {
+                            el.classList.add('col-span-1');
+                        }
+
+                        // اضافه کردن کلاس‌های جدید برای ردیف
+                        if (rows === 2) {
+                            el.classList.add('row-span-2');
+                        } else {
+                            el.classList.add('row-span-1');
+                        }
+
+                        // بروزرسانی dataset برای ذخیره در هنگام saveLayout
+                        el.setAttribute('data-colspan', cols);
+                        el.setAttribute('data-rowspan', rows);
+
+                        // آپدیت sortable در صورت نیاز
+                        setTimeout(() => {
+                            // در مرورگرهایی که grid dense استفاده می‌شود تغییر اندازه بلافاصله اعمال می‌شود
+                        }, 50);
+                    }
+                },
+
+                saveLayout() {
+                    // جمع‌آوری ترتیب فعلی از DOM
+                    const grid = this.$refs.grid;
+                    const items = Array.from(grid.children);
+                    const layout = items.map(item => {
+                        const key = item.getAttribute('data-key');
+                        const isHidden = item.classList.contains('hidden');
+                        const colSpan = parseInt(item.getAttribute('data-colspan') || 1);
+                        const rowSpan = parseInt(item.getAttribute('data-rowspan') || 1);
+                        return {
+                            key: key,
+                            visible: !isHidden,
+                            colSpan: colSpan,
+                            rowSpan: rowSpan
+                        };
+                    });
+
+                    // ارسال به سرور
+                    fetch('{{ route("user.dashboard.update-layout") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({layout: layout})
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.dispatchEvent(new CustomEvent('notify', {
+                                    detail: {type: 'success', text: 'چیدمان داشبورد با موفقیت ذخیره شد'}
+                                }));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            window.dispatchEvent(new CustomEvent('notify', {
+                                detail: {type: 'error', text: 'خطا در ذخیره چیدمان'}
+                            }));
+                        });
+                }
+            }
+        }
+    </script>
+@endsection

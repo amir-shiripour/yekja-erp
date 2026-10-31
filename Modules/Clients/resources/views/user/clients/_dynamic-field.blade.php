@@ -1,0 +1,1488 @@
+{{-- clients::user.clients._dynamic-field --}}
+{{-- Cache Buster: {{ time() }} --}}
+@php
+    // تعیین ID نهایی فیلد
+    $fid = $fid ?? ($field['id'] ?? null);
+
+    // نگاشت فیلدهای سیستمی به پراپرتی‌های لایووایر
+    $systemModelMap = [
+    'full_name' => 'full_name',
+    'phone' => 'phone',
+    'email' => 'email',
+    'national_code' => 'national_code',
+    'case_number' => 'case_number',
+    'notes' => 'notes',
+    'password' => 'password',
+    // status_id را عمداً اینجا نمی‌گذاریم؛ خودش جدا کنترل می‌شود
+    ];
+
+    // اگر فیلد سیستمی باشد → مستقیم به پراپرتی، در غیر این صورت → meta.*
+    $model = $systemModelMap[$fid] ?? "meta.$fid";
+
+    $type = $field['type'] ?? 'text';
+    $placeholder = $field['placeholder'] ?? '';
+
+    // options برای select / radio
+    $opts = [];
+    if (!empty($field['options_json'])) {
+    $parsed = json_decode($field['options_json'], true);
+    if (is_array($parsed)) {
+    $opts = $parsed;
+    }
+    }
+
+    // کلاس پایه ورودی‌ها (هماهنگ با UI پروژه)
+    $baseInputClass = "w-full rounded-xl border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400
+    focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200
+    dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-100 dark:focus:bg-gray-900";
+@endphp
+@includeIf('partials.jalali-date-picker')
+
+{{-- textarea --}}
+@if ($type === 'textarea')
+    <textarea rows="4" wire:model.defer="{{ $model }}" placeholder="{{ $placeholder }}"
+              class="{{ $baseInputClass }} resize-y min-h-[100px]"></textarea>
+
+    {{-- text / email / number / date --}}
+@elseif (in_array($type, ['text','email','number'], true))
+    <input type="{{ $type === 'text' ? 'text' : $type }}" wire:model.defer="{{ $model }}" placeholder="{{ $placeholder }}"
+           class="{{ $baseInputClass }}" />
+
+@elseif (in_array($type, ['date'], true))
+    <input type="text" wire:model.defer="{{ $model }}" placeholder="{{ $placeholder }}" class="{{ $baseInputClass }}"
+           data-jdp-only-date />
+    {{-- password --}}
+@elseif ($type === 'password')
+    <div class="flex gap-2 items-center" x-data="{ show: false }">
+        <div class="relative flex-1">
+            <input x-bind:type="show ? 'text' : 'password'" wire:model.defer="{{ $model }}"
+                   placeholder="{{ $placeholder ?: 'رمز عبور امن وارد کنید...' }}" autocomplete="new-password"
+                   class="{{ $baseInputClass }} pr-10 dir-ltr" />
+            {{-- آیکون چشم --}}
+            <button type="button"
+                    class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    @click="show = !show" x-tooltip.raw="نمایش / مخفی کردن رمز">
+                <svg x-show="!show" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7
+                             -1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <svg x-show="show" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7
+                             .51-1.626 1.48-3.059 2.75-4.155M9.88 9.88a3 3 0 014.24 4.24
+                             M6.1 6.1L4 4m0 0l16 16m-2.1-2.1L20 20" />
+                </svg>
+            </button>
+        </div>
+
+        <button type="button" wire:click="generatePassword"
+                class="inline-flex items-center px-3 py-2 rounded-xl text-xs font-medium border border-indigo-200 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-300 dark:border-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200 dark:hover:bg-indigo-800/70 transition-colors">
+            ساخت خودکار
+        </button>
+    </div>
+    <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+        حداقل ۸ کاراکتر و شامل حروف و اعداد باشد. در صورت کلیک روی «ساخت خودکار»، رمز امن تولید و در همین فیلد پر
+        می‌شود.
+    </p>
+
+    {{-- checkbox --}}
+@elseif ($type === 'checkbox')
+    @if(!empty($opts))
+        <div class="flex flex-wrap gap-4 pt-1">
+            @foreach($opts as $ov => $ol)
+                @php
+                    $val = is_string($ov) ? $ov : $ol;
+                    $lab = is_string($ol) ? $ol : $ov;
+                @endphp
+                <label class="inline-flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" value="{{ $val }}" wire:model.defer="{{ $model }}"
+                           class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 transition-colors cursor-pointer" />
+                    <span class="text-sm text-gray-700 group-hover:text-indigo-600 dark:text-gray-300 transition-colors">
+                        {{ $lab }}
+                    </span>
+                </label>
+            @endforeach
+        </div>
+    @else
+        <div class="flex items-center h-full pt-2">
+            <input type="checkbox" id="chk-{{ $fid }}" wire:model.defer="{{ $model }}"
+                   class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 transition-colors cursor-pointer" />
+            <label for="chk-{{ $fid }}" class="mr-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">
+                {{ $placeholder ?: 'فعال / تأیید' }}
+            </label>
+        </div>
+    @endif
+
+    {{-- radio --}}
+@elseif ($type === 'radio')
+    <div class="flex flex-wrap gap-4 pt-1">
+        @foreach($opts as $ov => $ol)
+            @php
+                $val = is_string($ov) ? $ov : $ol;
+                $lab = is_string($ol) ? $ol : $ov;
+            @endphp
+            <label class="inline-flex items-center gap-2 cursor-pointer group">
+                <div class="relative flex items-center">
+                    <input type="radio" class="peer sr-only" value="{{ $val }}" wire:model.defer="{{ $model }}">
+                    <div
+                        class="w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-indigo-600 peer-checked:bg-indigo-600 transition-all dark:border-gray-600">
+                    </div>
+                    <div
+                        class="absolute inset-0 m-auto w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity">
+                    </div>
+                </div>
+                <span class="text-sm text-gray-700 group-hover:text-indigo-600 dark:text-gray-300 transition-colors">
+            {{ $lab }}
+        </span>
+            </label>
+        @endforeach
+    </div>
+
+    {{-- select --}}
+@elseif ($type === 'select')
+    @php
+        // چک کردن اینکه آیا از لیست clients استفاده می‌شود
+        $useClientsList = !empty($field['use_clients_list']);
+
+        // مقدار فعلی
+        $currentValue = $meta[$fid] ?? null;
+        if (is_string($currentValue)) {
+        // اگر JSON string است
+        $decoded = json_decode($currentValue, true);
+        if (is_array($decoded)) {
+        $currentValue = $decoded;
+        }
+        }
+        if (!is_array($currentValue)) {
+        $currentValue = $currentValue ? [$currentValue] : [];
+        }
+        // تبدیل به string برای Alpine.js
+        $currentValue = array_map('strval', $currentValue);
+
+        // اگر از clients استفاده می‌شود، options را خالی می‌گذاریم (از API می‌آید)
+        $selectOptions = [];
+        if (!$useClientsList) {
+        // تبدیل options به فرمت مورد نیاز برای inline-multiselect
+        foreach ($opts as $ov => $ol) {
+        $value = is_string($ov) ? $ov : $ol;
+        $label = is_string($ol) ? $ol : $ov;
+        $selectOptions[] = ['value' => (string) $value, 'label' => $label];
+        }
+        }
+    @endphp
+
+    @if($useClientsList)
+        {{-- استفاده از لیست clients با جستجو --}}
+        @php
+            $searchUrl = route('user.clients.search');
+        @endphp
+        <div x-data="{
+    options: @js($selectOptions),
+    selectedValues: @js($currentValue),
+    search: '',
+    open: false,
+    loading: false,
+    placeholder: @js($placeholder ?: 'جستجو و انتخاب مشتری...'),
+    searchUrl: @js($searchUrl),
+    isMultiple: @js(!empty($field['multiple'])),
+    init() {
+        // بارگذاری اولیه مقادیر انتخاب شده
+        this.loadSelectedClients();
+        // sync با Livewire
+        this.$watch('selectedValues', (values) => {
+            const arr = Array.isArray(values) ? values : [];
+            if (this.isMultiple) {
+                @this.set('{{ $model }}', arr);
+            } else {
+                @this.set('{{ $model }}', arr[0] || null);
+            }
+        }, { deep: true });
+    },
+    async searchClients() {
+        if (this.search.length < 2) {
+            this.options = [];
+            return;
+        }
+        this.loading = true;
+        try {
+            const response = await fetch(`${this.searchUrl}?q=${encodeURIComponent(this.search)}&limit=20`);
+            const data = await response.json();
+            this.options = data.results || [];
+        } catch (error) {
+            console.error('Error searching clients:', error);
+            this.options = [];
+        } finally {
+            this.loading = false;
+        }
+    },
+    async loadSelectedClients() {
+        if (this.selectedValues.length === 0) return;
+        this.loading = true;
+        try {
+            const ids = this.selectedValues.join(',');
+            const response = await fetch(`${this.searchUrl}?ids=${ids}`);
+            const data = await response.json();
+            // اضافه کردن به options برای نمایش
+            if (data.results) {
+                this.options = [...this.options, ...data.results];
+            }
+        } catch (error) {
+            console.error('Error loading selected clients:', error);
+        } finally {
+            this.loading = false;
+        }
+    },
+    toggle(value) {
+        value = String(value);
+        if (this.isMultiple) {
+            if (this.selectedValues.includes(value)) {
+                this.selectedValues = this.selectedValues.filter(v => v !== value);
+            } else {
+                this.selectedValues.push(value);
+            }
+        } else {
+            // در حالت تک انتخابی، اگر همان مقدار انتخاب شده باشد، حذف کن
+            if (this.selectedValues.includes(value)) {
+                this.selectedValues = [];
+            } else {
+                this.selectedValues = [value];
+            }
+            this.open = false;
+            this.search = '';
+        }
+    },
+    remove(value) {
+        this.selectedValues = this.selectedValues.filter(v => v !== String(value));
+    },
+    get filteredOptions() {
+        return this.options;
+    }
+}" wire:ignore>
+            <div class="relative group" @click.outside="open = false">
+                <div class="flex items-center gap-1.5 min-h-[42px] w-full rounded-xl border px-2 py-1.5 transition-all duration-200 cursor-text shadow-sm"
+                     :class="[
+                open ? 'border-indigo-500 ring-1 ring-indigo-500 bg-white dark:bg-gray-800' : 'border-gray-200 bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500',
+                isMultiple ? 'flex-wrap' : ''
+            ]"
+                     @click="if (!open) { open = true; if (!isMultiple && selectedValues.length > 0) { search = ''; } $nextTick(() => $refs.searchInput?.focus()); }">
+                    <template x-if="selectedValues.length === 0 && !search && !open">
+                <span class="text-xs text-gray-400 dark:text-gray-500 px-1 pointer-events-none select-none">
+                    <span x-text="placeholder"></span>
+                </span>
+                    </template>
+
+                    {{-- حالت چند انتخابی: نمایش تگ‌ها --}}
+                    <template x-for="value in (isMultiple ? selectedValues : [])" :key="value">
+                        <div
+                            class="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 text-xs font-medium rounded-lg
+                            bg-indigo-100 text-indigo-700 border border-transparent
+                            dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/10 transition-colors animate-in fade-in zoom-in duration-200">
+                            <span x-text="options.find(o => o.value == value)?.label ?? value"></span>
+                            <button type="button"
+                                    class="p-0.5 rounded-md hover:bg-indigo-200/50 dark:hover:bg-white/20 text-indigo-600 dark:text-indigo-300 transition-colors"
+                                    @click.stop="remove(value)">
+                                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+
+                    {{-- حالت تک انتخابی: نمایش مقدار انتخاب شده (فقط وقتی dropdown بسته است) --}}
+                    <template x-if="!isMultiple && selectedValues.length > 0 && !open">
+                <span class="text-xs text-gray-900 dark:text-gray-100 truncate flex-1"
+                      x-text="options.find(o => o.value == selectedValues[0])?.label ?? selectedValues[0]"></span>
+                    </template>
+
+                    <input x-show="isMultiple || selectedValues.length === 0 || open" x-ref="searchInput" type="text"
+                           x-model="search" @input.debounce.300ms="searchClients()"
+                           class="flex-1 min-w-[60px] border-0 bg-transparent p-0 text-xs text-gray-900 focus:ring-0 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 leading-relaxed"
+                           @keydown.backspace="if(search === '' && selectedValues.length > 0 && isMultiple) remove(selectedValues[selectedValues.length - 1])"
+                           placeholder="جستجو بر اساس نام، کد ملی، تلفن، شماره پرونده...">
+
+                    <div class="ml-auto pl-1 text-gray-400 pointer-events-none">
+                        <svg x-show="!loading" class="w-4 h-4 transition-transform duration-200"
+                             :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 translate-y-1" style="display: none;" class="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl ring-1 ring-black ring-opacity-5
+                   dark:border-gray-700 dark:bg-gray-800 dark:ring-white/10">
+                    <ul
+                        class="max-h-60 overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+                        <template x-for="option in filteredOptions" :key="option.value">
+                            <li @click="toggle(option.value); $refs.searchInput.focus()"
+                                class="relative cursor-pointer select-none py-2 pl-9 pr-3 text-right text-xs rounded-lg transition-colors group"
+                                :class="selectedValues.includes(option.value)
+                            ? 'bg-indigo-50 text-indigo-700 font-medium dark:bg-indigo-900/30 dark:text-indigo-300'
+                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700/50'">
+                                <span x-text="option.label"></span>
+                                <span x-show="selectedValues.includes(option.value)"
+                                      class="absolute inset-y-0 left-2 flex items-center text-indigo-600 dark:text-indigo-400">
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                      clip-rule="evenodd" />
+                            </svg>
+                        </span>
+                            </li>
+                        </template>
+                        <li x-show="filteredOptions.length === 0 && !loading"
+                            class="py-3 text-center text-xs text-gray-500 dark:text-gray-400 italic">
+                            <span x-show="search.length < 2">حداقل ۲ کاراکتر برای جستجو وارد کنید.</span>
+                            <span x-show="search.length >= 2">موردی یافت نشد.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @elseif(!empty($field['multiple']))
+        {{-- حالت چند انتخابی با inline-multiselect (بدون clients) --}}
+        @php
+            $selectOptions = [];
+            foreach ($opts as $ov => $ol) {
+            $value = is_string($ov) ? $ov : $ol;
+            $label = is_string($ol) ? $ol : $ov;
+            $selectOptions[] = ['value' => (string) $value, 'label' => $label];
+            }
+        @endphp
+        <div x-data="{
+    options: @js($selectOptions),
+    selectedValues: @js($currentValue),
+    search: '',
+    open: false,
+    placeholder: @js($placeholder ?: 'انتخاب کنید...'),
+    creatable: @js(!empty($field['creatable'])),
+    init() {
+        if (this.creatable) {
+            const arr = Array.isArray(this.selectedValues) ? this.selectedValues : [];
+            arr.forEach(val => {
+                if (val && !this.options.some(o => o.value == val)) {
+                    this.options.push({ value: String(val), label: String(val) });
+                }
+            });
+        }
+        // sync با Livewire - فقط زمانی که تغییر می‌کند
+        this.$watch('selectedValues', (values) => {
+            // تبدیل به آرایه و sync با Livewire
+            const arr = Array.isArray(values) ? values : [];
+            @this.set('{{ $model }}', arr);
+        }, { deep: true });
+    },
+    toggle(value) {
+        value = String(value);
+        if (this.selectedValues.includes(value)) {
+            this.selectedValues = this.selectedValues.filter(v => v !== value);
+        } else {
+            this.selectedValues.push(value);
+        }
+    },
+    remove(value) {
+        this.selectedValues = this.selectedValues.filter(v => v !== String(value));
+    },
+    addNewOption() {
+        const val = this.search.trim();
+        if (val && !this.options.some(o => o.value.toLowerCase() === val.toLowerCase())) {
+            const newOpt = { value: val, label: val };
+            this.options.push(newOpt);
+            this.toggle(val);
+            this.search = '';
+        }
+    },
+    get filteredOptions() {
+        if (!this.search) return this.options;
+        return this.options.filter(o => o.label.toLowerCase().includes(this.search.toLowerCase()));
+    }
+}" wire:ignore>
+            @include('clients::components.inline-multiselect')
+        </div>
+    @elseif(!empty($field['searchable']) || !empty($field['creatable']))
+        {{-- حالت تک انتخابی با امکان جستجو (Searchable Single Select) --}}
+        @php
+            $selectOptions = [];
+            foreach ($opts as $ov => $ol) {
+                $value = is_string($ov) ? $ov : $ol;
+                $label = is_string($ol) ? $ol : $ov;
+                $selectOptions[] = ['value' => (string) $value, 'label' => $label];
+            }
+        @endphp
+        <div x-data="{
+            options: @js($selectOptions),
+            selectedValues: @js($currentValue),
+            search: '',
+            open: false,
+            placeholder: @js($placeholder ?: 'انتخاب کنید...'),
+            creatable: @js(!empty($field['creatable'])),
+            init() {
+                // Sync values and handle initial value if it's not in options (creatable fallback)
+                const initialVal = Array.isArray(this.selectedValues) ? this.selectedValues[0] : this.selectedValues;
+                if (initialVal && this.creatable && !this.options.some(o => o.value == initialVal)) {
+                    this.options.push({ value: String(initialVal), label: String(initialVal) });
+                }
+                
+                // sync با Livewire
+                this.$watch('selectedValues', (values) => {
+                    const arr = Array.isArray(values) ? values : [];
+                    @this.set('{{ $model }}', arr[0] || null);
+                }, { deep: true });
+            },
+            toggle(value) {
+                value = String(value);
+                if (this.selectedValues.includes(value)) {
+                    this.selectedValues = [];
+                } else {
+                    this.selectedValues = [value];
+                }
+                this.open = false;
+                this.search = '';
+            },
+            remove(value) {
+                this.selectedValues = [];
+            },
+            addNewOption() {
+                const val = this.search.trim();
+                if (val && !this.options.some(o => o.value.toLowerCase() === val.toLowerCase())) {
+                    const newOpt = { value: val, label: val };
+                    this.options.push(newOpt);
+                    this.toggle(val);
+                }
+            },
+            get filteredOptions() {
+                if (!this.search) return this.options;
+                return this.options.filter(o => o.label.toLowerCase().includes(this.search.toLowerCase()));
+            }
+        }" wire:ignore>
+            <div class="relative group" @click.outside="open = false">
+                {{-- کانتینر اصلی (شبیه اینپوت) --}}
+                <div class="flex items-center gap-1.5 min-h-[42px] w-full rounded-xl border px-2 py-1.5 transition-all duration-200 cursor-text shadow-sm"
+                     :class="open
+                        ? 'border-indigo-500 ring-1 ring-indigo-500 bg-white dark:bg-gray-800'
+                        : 'border-gray-200 bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500'"
+                     @click="if (!open) { open = true; search = ''; $nextTick(() => $refs.searchInput?.focus()); }">
+                    
+                    {{-- متن راهنما (زمانی که خالی است) --}}
+                    <template x-if="selectedValues.length === 0 && !search && !open">
+                        <span class="text-xs text-gray-400 dark:text-gray-500 px-1 pointer-events-none select-none">
+                            <span x-text="placeholder"></span>
+                        </span>
+                    </template>
+                    
+                    {{-- نمایش مقدار انتخاب شده --}}
+                    <template x-if="selectedValues.length > 0 && !open">
+                        <span class="text-xs text-gray-900 dark:text-gray-100 truncate flex-1 px-1"
+                              x-text="options.find(o => o.value == selectedValues[0])?.label ?? selectedValues[0]"></span>
+                    </template>
+                    
+                    {{-- اینپوت جستجو --}}
+                    <input x-show="selectedValues.length === 0 || open" x-ref="searchInput" type="text" x-model="search"
+                           class="flex-1 min-w-[60px] border-0 bg-transparent p-0 text-xs text-gray-900 focus:ring-0 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 leading-relaxed"
+                           placeholder="جستجو...">
+                    
+                    {{-- دکمه‌ها و آیکون فلش --}}
+                    <div class="ml-auto pl-1 text-gray-400 pointer-events-none flex items-center gap-1">
+                        <template x-if="selectedValues.length > 0 && !open">
+                            <button type="button" class="p-0.5 rounded-md hover:bg-gray-200 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 pointer-events-auto" @click.stop="remove(selectedValues[0])">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </template>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+                
+                {{-- لیست کشویی --}}
+                <div x-show="open" x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 translate-y-1" style="display: none;" 
+                     class="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl ring-1 ring-black ring-opacity-5 dark:border-gray-700 dark:bg-gray-800 dark:ring-white/10">
+                    <ul class="max-h-60 overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+                        <template x-for="option in filteredOptions" :key="option.value">
+                            <li @click="toggle(option.value); $refs.searchInput.focus()"
+                                class="relative cursor-pointer select-none py-2 pl-9 pr-3 text-right text-xs rounded-lg transition-colors group"
+                                :class="selectedValues.includes(option.value) ? 'bg-indigo-50 text-indigo-700 font-medium dark:bg-indigo-900/30 dark:text-indigo-300' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700/50'">
+                                <span x-text="option.label"></span>
+                                <span x-show="selectedValues.includes(option.value)" class="absolute inset-y-0 left-2 flex items-center text-indigo-600 dark:text-indigo-400">
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                                </span>
+                            </li>
+                        </template>
+                        
+                        {{-- امکان افزودن گزینه جدید در صورتی که creatable فعال باشد و جستجو با هیچ گزینه‌ای مطابق نباشد --}}
+                        <template x-if="creatable && search.trim() && !options.some(o => o.label.toLowerCase() === search.trim().toLowerCase())">
+                            <li @click="addNewOption(); $refs.searchInput.focus()"
+                                class="relative cursor-pointer select-none py-2 px-3 text-right text-xs text-indigo-600 bg-indigo-50/50 hover:bg-indigo-50 rounded-lg transition-colors font-medium dark:text-indigo-400 dark:bg-indigo-950/20 dark:hover:bg-indigo-900/30">
+                                <span>« افزودن گزینه جدید: <span class="font-bold" x-text="search.trim()"></span> »</span>
+                            </li>
+                        </template>
+
+                        <li x-show="filteredOptions.length === 0 && (!creatable || !search.trim())" class="py-3 text-center text-xs text-gray-500 dark:text-gray-400 italic">
+                            موردی یافت نشد.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @else
+        {{-- حالت تک انتخابی (select معمولی) --}}
+        <div class="relative">
+            <select wire:model.defer="{{ $model }}" class="{{ $baseInputClass }} appearance-none">
+                <option value="">{{ $placeholder ?: 'انتخاب کنید...' }}</option>
+
+                @foreach($opts as $ov => $ol)
+                    <option value="{{ is_string($ov) ? $ov : $ol }}">
+                        {{ is_string($ol) ? $ol : $ov }}
+                    </option>
+                @endforeach
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+        </div>
+    @endif
+
+    {{-- status (وضعیت کلاینت) --}}
+@elseif ($type === 'status')
+    @php
+        // لیست وضعیت‌های مجاز برای این فرم / وضعیت فعلی
+        $statusList = collect($availableStatuses ?? []);
+
+        if (!empty($field['status_keys'] ?? [])) {
+        $statusList = $statusList->whereIn('key', (array) $field['status_keys']);
+        }
+
+        $currentStatusId = $status_id ?? optional($client ?? null)->status_id;
+        $currentStatus = null;
+
+        if ($currentStatusId) {
+        $currentStatus = $statusList->firstWhere('id', $currentStatusId);
+
+        if (!$currentStatus && isset($client) && $client && $client->relationLoaded('status') ? $client->status :
+        $client->status ?? null) {
+        $currentStatus = $client->status;
+        }
+
+        if (!$currentStatus) {
+        $currentStatus = (object)[
+        'id' => $currentStatusId,
+        'label' => 'وضعیت فعلی (خارج از لیست مجاز)',
+        ];
+        }
+
+        if ($statusList->where('id', $currentStatus->id)->isEmpty()) {
+        $statusList->prepend($currentStatus);
+        }
+        }
+
+        $statusList = $statusList->values();
+    @endphp
+
+    <div class="relative">
+        <select wire:model.defer="status_id" class="{{ $baseInputClass }} appearance-none">
+            <option value="">{{ $placeholder ?: 'انتخاب وضعیت...' }}</option>
+
+            @foreach($statusList as $st)
+                @php
+                    $isCurrent = isset($currentStatus) && $currentStatus && $st->id === $currentStatus->id;
+                @endphp
+                <option value="{{ $st->id }}">
+                    {{ $st->label }}
+                    @if($isCurrent)
+                        (وضعیت فعلی)
+                    @endif
+                </option>
+            @endforeach
+        </select>
+        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </div>
+    </div>
+
+    {{-- file --}}
+@elseif ($type === 'file')
+    <div class="relative w-full space-y-3">
+        <label for="file_{{ $fid }}" class="relative flex flex-col items-center justify-center w-full py-4 px-4 transition-all bg-white dark:bg-gray-800/50 border-2 border-gray-200 dark:border-gray-700 border-dashed rounded-xl cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-gray-800 group overflow-hidden">
+            <div class="flex flex-col items-center space-y-1 text-center transition-all duration-300">
+                <div class="p-2 bg-indigo-50 dark:bg-indigo-900/40 rounded-full text-indigo-500 group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-bold text-xs text-indigo-600 dark:text-indigo-400">برای آپلود فایل کلیک کنید</span>
+                </div>
+                <p class="text-[10px] text-gray-400 dark:text-gray-500">
+                    {{ !empty($field['multiple']) ? 'امکان آپلود همزمان چند فایل' : 'یا فایل خود را اینجا رها کنید' }}
+                </p>
+            </div>
+        </label>
+
+        <input id="file_{{ $fid }}"
+               type="file"
+               wire:model="upload_files.{{ $fid }}"
+               class="hidden"
+               @if(!empty($field['multiple'])) multiple @endif
+               @if(!empty($field['accept'])) accept="{{ $field['accept'] }}" @endif />
+
+        {{-- نمایش وضعیت آپلود لایووایر --}}
+        <div wire:loading wire:target="upload_files.{{ $fid }}" class="w-full">
+            <div class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 overflow-hidden">
+                <div class="bg-indigo-600 h-1.5 rounded-full animate-pulse" style="width: 100%"></div>
+            </div>
+            <span class="text-[10px] text-gray-400 mt-1 block text-right">در حال بارگذاری فایل...</span>
+        </div>
+
+        @php
+            $existing = $this->meta[$fid] ?? null;
+            $allFiles = [];
+            if ($existing) {
+                if (is_array($existing)) {
+                    $allFiles = $existing;
+                } else {
+                    $decoded = json_decode($existing, true);
+                    if (is_array($decoded)) {
+                        $allFiles = $decoded;
+                    } else {
+                        $allFiles = [$existing];
+                    }
+                }
+            }
+        @endphp
+
+        @if(!empty($allFiles))
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                @foreach($allFiles as $fIndex => $f)
+                    @php
+                        $isImage = false;
+                        $url = '#';
+                        $name = '';
+                        if ($f instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                            $name = $f->getClientOriginalName();
+                            $isImage = str_starts_with($f->getMimeType(), 'image/');
+                            try {
+                                $url = $isImage ? $f->temporaryUrl() : '#';
+                            } catch (\Throwable $e) {
+                                $url = '#';
+                            }
+                        } else {
+                            $name = basename($f);
+                            $url = Storage::disk('public')->url($f);
+                            $isImage = in_array(strtolower(pathinfo($f, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
+                        }
+                    @endphp
+                    <div class="flex items-center justify-between gap-3 p-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800 transition-all hover:bg-white dark:hover:bg-gray-900">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            @if($isImage && $url !== '#')
+                                <a href="{{ $url }}" target="_blank" class="block shrink-0 relative group">
+                                    <img src="{{ $url }}" class="w-10 h-10 object-cover rounded-lg border border-gray-200 dark:border-gray-700" />
+                                    <div class="absolute inset-0 bg-black/40 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </div>
+                                </a>
+                            @else
+                                <div class="p-2 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 rounded-lg shrink-0">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                            @endif
+                            <div class="min-w-0">
+                                <p class="text-xs font-semibold text-gray-700 dark:text-gray-200 truncate dir-ltr text-left" title="{{ $name }}">{{ $name }}</p>
+                                @if($f instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
+                                    <span class="text-[9px] text-amber-500 font-medium">جدید (ذخیره نشده)</span>
+                                @else
+                                    <span class="text-[9px] text-emerald-500 font-medium">ذخیره شده</span>
+                                @endif
+                            </div>
+                        </div>
+                        <button type="button" wire:click="deleteDynamicFile('{{ $fid }}', {{ $fIndex }})" class="p-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-500 rounded-lg transition-all shrink-0">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+
+    {{-- profile-photo (تصویر پروفایل) --}}
+@elseif ($type === 'profile-photo')
+    @php
+        $existing = $this->meta[$fid] ?? null;
+        $fileUrl = null;
+        $isTemporary = false;
+        
+        if ($existing) {
+            if ($existing instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                $isTemporary = true;
+                try {
+                    $fileUrl = $existing->temporaryUrl();
+                } catch (\Throwable $e) {
+                    $fileUrl = null;
+                }
+            } elseif (is_string($existing)) {
+                $fileUrl = Storage::disk('public')->url($existing);
+            }
+        }
+    @endphp
+
+    <div class="flex items-center gap-4 p-3.5 bg-white dark:bg-gray-800/60 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-2xs">
+        <div class="relative group shrink-0">
+            <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-dashed border-indigo-300 dark:border-indigo-600 bg-gray-50 dark:bg-gray-900 flex items-center justify-center relative shadow-inner">
+                @if($fileUrl)
+                    <img src="{{ $fileUrl }}" class="w-full h-full object-cover" alt="Profile Photo" />
+                @else
+                    <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                @endif
+            </div>
+
+            @if($existing)
+                <button type="button" wire:click="deleteDynamicFile('{{ $fid }}', 0)"
+                        class="absolute -top-1 -right-1 bg-rose-500 hover:bg-rose-600 text-white rounded-full p-1 shadow-md transition-transform hover:scale-110"
+                        title="حذف تصویر">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            @endif
+        </div>
+
+        <div class="flex-1 min-w-0 space-y-1.5">
+            <label for="profile_photo_{{ $fid }}"
+                   class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:hover:bg-indigo-900/60 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-700/60 text-xs font-bold transition-all cursor-pointer shadow-2xs">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{{ $existing ? 'تغییر تصویر پروفایل' : 'انتخاب تصویر پروفایل' }}</span>
+            </label>
+
+            <input id="profile_photo_{{ $fid }}"
+                   type="file"
+                   wire:model="upload_files.{{ $fid }}"
+                   class="hidden"
+                   accept="image/*" />
+
+            <p class="text-[11px] text-gray-400 dark:text-gray-500">
+                فرمت‌های مجاز: JPG, PNG, WEBP (حداکثر ۵ مگابایت)
+            </p>
+
+            <div wire:loading wire:target="upload_files.{{ $fid }}" class="w-full max-w-xs">
+                <div class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700 overflow-hidden">
+                    <div class="bg-indigo-600 h-1.5 rounded-full animate-pulse" style="width: 100%"></div>
+                </div>
+                <span class="text-[10px] text-gray-400 mt-0.5 block text-right">در حال بارگذاری و بهینه‌سازی تصویر...</span>
+            </div>
+        </div>
+    </div>
+
+    {{-- select-user-by-role --}}
+@elseif ($type === 'select-user-by-role')
+    <div class="relative">
+        <select wire:model.defer="{{ $model }}"
+                class="{{ $baseInputClass }} @if(!empty($field['multiple'])) min-h-[44px] @endif"
+                @if(!empty($field['multiple'])) multiple @endif>
+
+            @if (empty($field['multiple']))
+                <option value="">{{ $placeholder ?: 'انتخاب کاربر...' }}</option>
+            @endif
+
+            @foreach($this->usersForRole($field['role'] ?? null) as $u)
+                <option value="{{ $u->id }}">{{ $u->name }}</option>
+            @endforeach
+        </select>
+        @if (empty($field['multiple']))
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+        @endif
+    </div>
+
+    {{-- select-province-city --}}
+@elseif ($type === 'select-province-city')
+    @php
+        // بارگذاری داده‌های استان و شهر
+        $jsonPath = base_path('Modules/Clients/resources/data/iran-provinces-cities.json');
+        $provincesData = [];
+        if (file_exists($jsonPath)) {
+        $provincesData = json_decode(file_get_contents($jsonPath), true) ?? [];
+        }
+        $provinces = array_keys($provincesData);
+
+        // مقدار فعلی (می‌تواند یک آرایه باشد: ['province' => 'تهران', 'city' => 'تهران'])
+        $currentValue = $meta[$fid] ?? [];
+        if (is_string($currentValue)) {
+        $currentValue = json_decode($currentValue, true) ?? [];
+        }
+        if (!is_array($currentValue)) {
+        $currentValue = [];
+        }
+        $selectedProvince = $currentValue['province'] ?? '';
+        $selectedCity = $currentValue['city'] ?? '';
+
+        // شهرهای استان انتخاب شده
+        $cities = [];
+        if ($selectedProvince && isset($provincesData[$selectedProvince])) {
+        $cities = $provincesData[$selectedProvince];
+        }
+    @endphp
+
+    <div class="space-y-3 flex items-center gap-3.5" wire:key="field-{{ $fid }}-province-city" x-data="{
+        province: @js($selectedProvince),
+        city: @js($selectedCity),
+        provinces: @js($provinces),
+        cities: @js($cities),
+        provincesData: @js($provincesData),
+        searchProvince: '',
+        searchCity: '',
+        openProvince: false,
+        openCity: false,
+        init() {
+            // بارگذاری اولیه شهرها بر اساس استان انتخاب شده
+            if (this.province && this.provincesData[this.province]) {
+                this.cities = this.provincesData[this.province];
+            }
+        },
+        updateCities() {
+            if (this.province && this.provincesData[this.province]) {
+                this.cities = this.provincesData[this.province];
+                this.city = ''; // ریست شهر هنگام تغییر استان
+                this.searchCity = '';
+                this.updateValue();
+            } else {
+                this.cities = [];
+                this.city = '';
+                this.searchCity = '';
+                this.updateValue();
+            }
+        },
+        updateValue() {
+            const value = JSON.stringify({province: this.province || '', city: this.city || ''});
+            @this.set('meta.{{ $fid }}', value);
+        },
+        get filteredProvinces() {
+            if (this.searchProvince === '') return this.provinces;
+            return this.provinces.filter(p => p.includes(this.searchProvince));
+        },
+        get filteredCities() {
+            if (this.searchCity === '') return this.cities;
+            return this.cities.filter(c => c.includes(this.searchCity));
+        }
+    }" wire:ignore>
+        {{-- سلکتور استان با جستجو --}}
+        <div class="relative w-full m-0" @click.outside="openProvince = false">
+            <div @click="openProvince = !openProvince"
+                 class="{{ $baseInputClass }} flex items-center justify-between cursor-pointer">
+                <span x-text="province ? province : 'انتخاب استان...'" :class="{'text-gray-400': !province}"></span>
+                <svg class="h-4 w-4 text-gray-500 transition-transform duration-200" :class="{'rotate-180': openProvince}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+
+            <div x-show="openProvince" x-transition
+                 class="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl ring-1 ring-black ring-opacity-5 dark:border-gray-700 dark:bg-gray-800 dark:ring-white/10"
+                 style="display: none;">
+                <div class="p-2 border-b border-gray-100 dark:border-gray-700">
+                    <input type="text" x-model="searchProvince" placeholder="جستجو..."
+                           class="w-full rounded-lg border-gray-200 bg-gray-50 px-2 py-1.5 text-xs text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                           @click.stop>
+                </div>
+                <ul class="max-h-60 overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+                    <template x-for="prov in filteredProvinces" :key="prov">
+                        <li @click="province = prov; updateCities(); openProvince = false; searchProvince = ''"
+                            class="cursor-pointer select-none py-2 px-3 text-xs rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                            :class="{'bg-indigo-50 text-indigo-700 font-medium dark:bg-indigo-900/30 dark:text-indigo-300': province === prov, 'text-gray-700 dark:text-gray-200': province !== prov}">
+                            <span x-text="prov"></span>
+                        </li>
+                    </template>
+                    <li x-show="filteredProvinces.length === 0" class="py-2 px-3 text-xs text-gray-500 dark:text-gray-400 text-center">
+                        موردی یافت نشد
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {{-- سلکتور شهر با جستجو --}}
+        <div class="relative w-full" @click.outside="openCity = false">
+            <div @click="if(province && cities.length > 0) openCity = !openCity"
+                 class="{{ $baseInputClass }} flex items-center justify-between cursor-pointer"
+                 :class="{'opacity-50 cursor-not-allowed': !province || cities.length === 0}">
+                <span x-text="city ? city : 'انتخاب شهر...'" :class="{'text-gray-400': !city}"></span>
+                <svg class="h-4 w-4 text-gray-500 transition-transform duration-200" :class="{'rotate-180': openCity}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+
+            <div x-show="openCity" x-transition
+                 class="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl ring-1 ring-black ring-opacity-5 dark:border-gray-700 dark:bg-gray-800 dark:ring-white/10"
+                 style="display: none;">
+                <div class="p-2 border-b border-gray-100 dark:border-gray-700">
+                    <input type="text" x-model="searchCity" placeholder="جستجو..."
+                           class="w-full rounded-lg border-gray-200 bg-gray-50 px-2 py-1.5 text-xs text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                           @click.stop>
+                </div>
+                <ul class="max-h-60 overflow-y-auto p-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+                    <template x-for="(cityItem, index) in filteredCities" :key="index">
+                        <li @click="city = cityItem; updateValue(); openCity = false; searchCity = ''"
+                            class="cursor-pointer select-none py-2 px-3 text-xs rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                            :class="{'bg-indigo-50 text-indigo-700 font-medium dark:bg-indigo-900/30 dark:text-indigo-300': city === cityItem, 'text-gray-700 dark:text-gray-200': city !== cityItem}">
+                            <span x-text="cityItem"></span>
+                        </li>
+                    </template>
+                    <li x-show="filteredCities.length === 0" class="py-2 px-3 text-xs text-gray-500 dark:text-gray-400 text-center">
+                        موردی یافت نشد
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {{-- booking_waitlist --}}
+@elseif ($type === 'booking_waitlist')
+    @php
+        $isBookingActive = \Modules\Clients\Entities\ClientForm::isBookingModuleActive();
+        $queueEnabled = $isBookingActive
+            && class_exists(\Modules\Booking\Entities\BookingSetting::class)
+            && \Modules\Booking\Entities\BookingSetting::isQueueEnabled();
+
+        $waitlistEntries = [];
+        $otherQueuesCount = 0;
+        if ($queueEnabled && !empty($client?->id)) {
+            $waitlistEntries = \Modules\Booking\Entities\BookingWaitlist::query()
+                ->where('client_id', $client->id)
+                ->whereIn('status', [\Modules\Booking\Entities\BookingWaitlist::STATUS_WAITING, \Modules\Booking\Entities\BookingWaitlist::STATUS_NOTIFIED, \Modules\Booking\Entities\BookingWaitlist::STATUS_IN_PROGRESS])
+                ->with(['service', 'provider'])
+                ->orderBy('id', 'desc')
+                ->get();
+            $otherQueuesCount = count($waitlistEntries);
+        }
+
+        $servicesData = [];
+        $providersData = [];
+        if ($queueEnabled) {
+            $servicesData = \Modules\Booking\Entities\BookingService::query()
+                ->where('status', \Modules\Booking\Entities\BookingService::STATUS_ACTIVE)
+                ->with(['providers' => function ($q) {
+                    $q->wherePivot('is_active', true);
+                }])
+                ->orderBy('name')
+                ->get()
+                ->map(function ($s) {
+                    return [
+                        'id' => (int)$s->id,
+                        'name' => (string)$s->name,
+                        'provider_ids' => $s->providers->pluck('id')->map(fn($v) => (int)$v)->values()->toArray(),
+                    ];
+                })->values()->toArray();
+
+            $providersData = \App\Models\User::query()
+                ->whereIn('id', function ($q) {
+                    $q->select('provider_user_id')->from('booking_service_providers')->where('is_active', true);
+                })
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(function ($p) {
+                    $serviceIds = \Illuminate\Support\Facades\DB::table('booking_service_providers')
+                        ->where('provider_user_id', $p->id)
+                        ->where('is_active', true)
+                        ->pluck('service_id')
+                        ->map(fn($v) => (int)$v)
+                        ->values()
+                        ->toArray();
+                    return [
+                        'id' => (int)$p->id,
+                        'name' => (string)$p->name,
+                        'service_ids' => $serviceIds,
+                    ];
+                })->values()->toArray();
+
+            if (empty($providersData)) {
+                $providersData = \App\Models\User::orderBy('name')->limit(50)->get(['id', 'name'])->map(function ($p) {
+                    return [
+                        'id' => (int)$p->id,
+                        'name' => (string)$p->name,
+                        'service_ids' => [],
+                    ];
+                })->values()->toArray();
+            }
+        }
+    @endphp
+
+    @if(!$isBookingActive)
+        <div class="p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/60 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2.5">
+            <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>ماژول نوبت‌دهی (Booking) نصب یا فعال نیست.</span>
+        </div>
+    @elseif(!$queueEnabled)
+        <div class="p-3.5 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/70 dark:bg-amber-950/30 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-2.5">
+            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="font-medium">صف انتظار نوبت در حال حاضر در تنظیمات نوبت‌دهی غیرفعال است.</span>
+        </div>
+    @else
+        <div class="space-y-3.5" x-data="{
+            showAddForm: false,
+            services: @js($servicesData),
+            providers: @js($providersData),
+            serviceId: @entangle('waitlistServiceId').live,
+            providerId: @entangle('waitlistProviderId').live,
+            serviceSearch: '',
+            providerSearch: '',
+            openService: false,
+            openProvider: false,
+
+            get availableServices() {
+                let list = this.services;
+                if (this.providerId) {
+                    list = list.filter(s => s.provider_ids.includes(Number(this.providerId)));
+                }
+                if (this.serviceSearch.trim()) {
+                    const sTerm = this.serviceSearch.toLowerCase();
+                    list = list.filter(s => s.name.toLowerCase().includes(sTerm));
+                }
+                return list;
+            },
+
+            get availableProviders() {
+                let list = this.providers;
+                if (this.serviceId) {
+                    list = list.filter(p => p.service_ids.includes(Number(this.serviceId)));
+                }
+                if (this.providerSearch.trim()) {
+                    const pTerm = this.providerSearch.toLowerCase();
+                    list = list.filter(p => p.name.toLowerCase().includes(pTerm));
+                }
+                return list;
+            },
+
+            get selectedServiceName() {
+                if (!this.serviceId) return 'صف عمومی (بدون سرویس خاص)';
+                const s = this.services.find(item => item.id == this.serviceId);
+                return s ? s.name : 'انتخاب سرویس...';
+            },
+
+            get selectedProviderName() {
+                if (!this.providerId) return 'هر ارائه‌دهنده‌ای (بدون ترجیح)';
+                const p = this.providers.find(item => item.id == this.providerId);
+                return p ? p.name : 'انتخاب ارائه‌دهنده...';
+            },
+
+            selectService(id) {
+                this.serviceId = id;
+                this.openService = false;
+                this.serviceSearch = '';
+                if (id && this.providerId) {
+                    const s = this.services.find(item => item.id == id);
+                    if (s && !s.provider_ids.includes(Number(this.providerId))) {
+                        this.providerId = null;
+                    }
+                }
+            },
+
+            selectProvider(id) {
+                this.providerId = id;
+                this.openProvider = false;
+                this.providerSearch = '';
+                if (id && this.serviceId) {
+                    const p = this.providers.find(item => item.id == id);
+                    if (p && !p.service_ids.includes(Number(this.serviceId))) {
+                        this.serviceId = null;
+                    }
+                }
+            }
+        }">
+            {{-- نمایش صف‌های فعال مراجع --}}
+            @if($otherQueuesCount > 0)
+                <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
+                    <div class="px-4 py-3 bg-gray-50/70 dark:bg-gray-900/40 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] font-black">
+                                {{ $otherQueuesCount }}
+                            </span>
+                            <span class="text-xs font-bold text-gray-900 dark:text-gray-100">صف‌های انتظار فعال این مراجع:</span>
+                        </div>
+                    </div>
+
+                    <div class="divide-y divide-gray-100 dark:divide-gray-700/60">
+                        @foreach($waitlistEntries as $entry)
+                            <div class="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50/80 dark:hover:bg-gray-700/40 transition-colors duration-150">
+                                <div class="flex items-center gap-3">
+                                    {{-- Position Badge --}}
+                                    <div>
+                                        @if($entry->queue_rank === 1)
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold whitespace-nowrap shadow-2xs">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                <span>نفر ۱ (نوبت بعدی)</span>
+                                            </span>
+                                        @else
+                                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-700/60 text-gray-800 dark:text-gray-200 text-xs font-bold whitespace-nowrap">
+                                                <span>نفر {{ $entry->queue_rank }}</span>
+                                                @if($entry->queue_ahead_count > 0)
+                                                    <span class="text-[11px] font-normal text-gray-500 dark:text-gray-400">({{ $entry->queue_ahead_count }} نفر جلوتر)</span>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    {{-- Details --}}
+                                    <div>
+                                        <div class="text-xs font-bold text-gray-900 dark:text-gray-100 flex items-center flex-wrap gap-2">
+                                            <span>{{ $entry->service ? $entry->service->name : '🌐 صف عمومی نوبت‌دهی' }}</span>
+                                            @if($entry->provider)
+                                                <span class="text-[11px] text-gray-500 dark:text-gray-400 font-normal">({{ $entry->provider->name }})</span>
+                                            @endif
+                                            <span class="text-[10px] px-2 py-0.5 rounded-md font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200 border border-amber-200 dark:border-amber-800/40">
+                                                {{ $entry->status_label }}
+                                            </span>
+                                        </div>
+                                        <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-3">
+                                            @if($entry->preferred_date)
+                                                <span class="text-gray-700 dark:text-gray-300 font-medium">📅 تاریخ ترجیحی: {{ \Morilog\Jalali\Jalalian::fromDateTime($entry->preferred_date)->format('Y/m/d') }}</span>
+                                            @endif
+                                            <span>ثبت: {{ \Morilog\Jalali\Jalalian::fromDateTime($entry->created_at)->format('Y/m/d H:i') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Cancel button --}}
+                                <div class="flex sm:justify-end">
+                                    <button type="button"
+                                            wire:click="removeFromWaitlist({{ $entry->id }})"
+                                            onclick="return confirm('آیا از خروج این مراجع از صف اطمینان دارید؟')"
+                                            class="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:text-rose-400 dark:hover:text-rose-300 dark:hover:bg-rose-900/30 font-medium transition whitespace-nowrap">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        <span>خروج از صف</span>
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            {{-- افزودن به صف در پرونده موجود --}}
+            @if(!empty($client?->id))
+                <div>
+                    <button type="button" @click="showAddForm = !showAddForm"
+                            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-xs font-bold transition shadow-xs">
+                        <span x-text="showAddForm ? '✕ انصراف و بستن' : '+ افزودن این مراجع به صف انتظار جدید'"></span>
+                    </button>
+
+                    <div x-show="showAddForm" x-collapse class="mt-3 p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40 space-y-4 shadow-sm">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {{-- انتخاب سرویس --}}
+                            <div class="relative" @click.outside="openService = false">
+                                <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1 flex items-center justify-between">
+                                    <span>🛠️ سرویس نوبت (اختیاری)</span>
+                                    <template x-if="providerId">
+                                        <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-normal">وابسته به ارائه‌دهنده</span>
+                                    </template>
+                                </label>
+
+                                <div @click="openService = !openService"
+                                     class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-xs font-medium text-gray-900 dark:text-gray-100 flex items-center justify-between cursor-pointer focus:ring-2 focus:ring-indigo-500/20">
+                                    <span class="truncate font-semibold" x-text="selectedServiceName"></span>
+                                    <div class="flex items-center gap-1 text-gray-400">
+                                        <template x-if="serviceId">
+                                            <button type="button" @click.stop="selectService(null)" class="hover:text-rose-500 font-bold text-xs p-0.5">✕</button>
+                                        </template>
+                                        <svg class="w-3.5 h-3.5 transition-transform" :class="openService ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </div>
+                                </div>
+
+                                <div x-show="openService" x-transition.opacity class="absolute top-full right-0 left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-2 max-h-56 overflow-y-auto space-y-1">
+                                    <input type="text" x-model="serviceSearch" placeholder="🔍 جستجوی سرویس..." @click.stop
+                                           class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-2.5 py-1.5 text-xs text-gray-900 dark:text-gray-100 mb-1">
+
+                                    <div @click="selectService(null)"
+                                         :class="!serviceId ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                                         class="p-2 rounded-xl text-xs cursor-pointer flex items-center justify-between">
+                                        <span>🌐 صف عمومی (بدون سرویس خاص)</span>
+                                        <template x-if="!serviceId"><span class="text-indigo-600 dark:text-indigo-400 font-bold">✓</span></template>
+                                    </div>
+
+                                    <template x-for="s in availableServices" :key="s.id">
+                                        <div @click="selectService(s.id)"
+                                             :class="serviceId == s.id ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                                             class="p-2 rounded-xl text-xs cursor-pointer flex items-center justify-between">
+                                            <span class="truncate" x-text="s.name"></span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400" x-text="s.provider_ids.length + ' ارائه‌دهنده'"></span>
+                                                <template x-if="serviceId == s.id"><span class="text-indigo-600 dark:text-indigo-400 font-bold">✓</span></template>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="availableServices.length === 0">
+                                        <div class="p-2 text-center text-[11px] text-gray-400">سرویسی متناسب یافت نشد</div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            {{-- انتخاب ارائه‌دهنده --}}
+                            <div class="relative" @click.outside="openProvider = false">
+                                <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1 flex items-center justify-between">
+                                    <span>👨‍⚕️ {{ config('booking.labels.provider', 'ارائه‌دهنده') }} (اختیاری)</span>
+                                    <template x-if="serviceId">
+                                        <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-normal">وابسته به سرویس</span>
+                                    </template>
+                                </label>
+
+                                <div @click="openProvider = !openProvider"
+                                     class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-xs font-medium text-gray-900 dark:text-gray-100 flex items-center justify-between cursor-pointer focus:ring-2 focus:ring-indigo-500/20">
+                                    <span class="truncate font-semibold" x-text="selectedProviderName"></span>
+                                    <div class="flex items-center gap-1 text-gray-400">
+                                        <template x-if="providerId">
+                                            <button type="button" @click.stop="selectProvider(null)" class="hover:text-rose-500 font-bold text-xs p-0.5">✕</button>
+                                        </template>
+                                        <svg class="w-3.5 h-3.5 transition-transform" :class="openProvider ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </div>
+                                </div>
+
+                                <div x-show="openProvider" x-transition.opacity class="absolute top-full right-0 left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-2 max-h-56 overflow-y-auto space-y-1">
+                                    <input type="text" x-model="providerSearch" placeholder="🔍 جستجوی ارائه‌دهنده..." @click.stop
+                                           class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-2.5 py-1.5 text-xs text-gray-900 dark:text-gray-100 mb-1">
+
+                                    <div @click="selectProvider(null)"
+                                         :class="!providerId ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                                         class="p-2 rounded-xl text-xs cursor-pointer flex items-center justify-between">
+                                        <span>بدون ترجیح (هر ارائه‌دهنده‌ای)</span>
+                                        <template x-if="!providerId"><span class="text-indigo-600 dark:text-indigo-400 font-bold">✓</span></template>
+                                    </div>
+
+                                    <template x-for="p in availableProviders" :key="p.id">
+                                        <div @click="selectProvider(p.id)"
+                                             :class="providerId == p.id ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                                             class="p-2 rounded-xl text-xs cursor-pointer flex items-center justify-between">
+                                            <span class="truncate" x-text="p.name"></span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400" x-text="p.service_ids.length + ' سرویس'"></span>
+                                                <template x-if="providerId == p.id"><span class="text-indigo-600 dark:text-indigo-400 font-bold">✓</span></template>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="availableProviders.length === 0">
+                                        <div class="p-3 text-center text-xs text-amber-600 dark:text-amber-400 font-medium">هیچ ارائه‌دهنده‌ای برای این سرویس فعال نیست</div>
+                                    </template>
+                                </div>
+                            </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {{-- زمان مورد نیاز --}}
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1 flex items-center justify-between">
+                                    <span>⏱️ زمان مورد نیاز (دقیقه)</span>
+                                    <span class="text-[10px] text-gray-400 font-normal">اختیاری</span>
+                                </label>
+                                <input type="number" min="5" step="5" wire:model.defer="waitlistDurationMinutes" placeholder="مثال: ۳۰"
+                                       class="{{ $baseInputClass }} text-center" />
+                            </div>
+
+                            {{-- تاریخ ترجیحی --}}
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">📅 تاریخ ترجیحی (اختیاری)</label>
+                                <input type="text" wire:model.defer="waitlistPreferredDate" placeholder="۱۴۰۵/۰۶/۰۱"
+                                       class="{{ $baseInputClass }} text-center" data-jdp-only-date />
+                            </div>
+                        </div>
+
+                        {{-- Service Custom Form (if active and attached to service) --}}
+                        @if ($waitlistFormSchema && !empty($waitlistFormSchema['fields']))
+                            @includeIf('booking::components.service-dynamic-form', [
+                                'formSchema' => $waitlistFormSchema,
+                                'formType' => $waitlistFormType,
+                                'formName' => $waitlistFormName,
+                                'formResponses' => $waitlistFormResponses,
+                                'modelPrefix' => 'waitlistFormResponses'
+                            ])
+                        @endif
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 dark:text-gray-300 mb-1">📝 یادداشت / علت صف</label>
+                            <input type="text" wire:model.defer="waitlistNotes" placeholder="توضیحات و درخواست خاص مراجع..."
+                                   class="{{ $baseInputClass }}" />
+                        </div>
+
+                        <div class="flex justify-end pt-1">
+                            <button type="button" wire:click="addWaitlistEntryForClient"
+                                    class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition cursor-pointer">
+                                ثبت در صف انتظار
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @else
+                {{-- هنگام ایجاد پرونده جدید --}}
+                <div class="p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40 space-y-3">
+                    <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input type="checkbox" wire:model.live="addToWaitlist" class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-800">
+                        <span class="text-xs font-bold text-gray-800 dark:text-gray-200">افزودن مستقیم این مراجع به صف انتظار پس از ذخیره پرونده</span>
+                    </label>
+
+                    <div x-show="$wire.addToWaitlist" x-collapse class="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {{-- انتخاب سرویس --}}
+                            <div class="relative" @click.outside="openService = false">
+                                <label class="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-between">
+                                    <span>سرویس (اختیاری)</span>
+                                    <template x-if="providerId">
+                                        <span class="text-[10px] text-indigo-600 dark:text-indigo-400">وابسته به ارائه‌دهنده</span>
+                                    </template>
+                                </label>
+
+                                <div @click="openService = !openService"
+                                     class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-900 dark:text-gray-100 flex items-center justify-between cursor-pointer">
+                                    <span class="truncate" x-text="selectedServiceName"></span>
+                                    <div class="flex items-center gap-1 text-gray-400">
+                                        <template x-if="serviceId">
+                                            <button type="button" @click.stop="selectService(null)" class="hover:text-rose-500 font-bold text-xs p-0.5">✕</button>
+                                        </template>
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </div>
+                                </div>
+
+                                <div x-show="openService" x-transition.opacity class="absolute top-full right-0 left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-2 max-h-52 overflow-y-auto space-y-1">
+                                    <input type="text" x-model="serviceSearch" placeholder="🔍 جستجوی سرویس..." @click.stop
+                                           class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-2.5 py-1.5 text-xs text-gray-900 dark:text-gray-100 mb-1">
+
+                                    <div @click="selectService(null)"
+                                         :class="!serviceId ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                                         class="p-1.5 rounded-xl text-xs cursor-pointer flex items-center justify-between">
+                                        <span>صف عمومی (بدون سرویس خاص)</span>
+                                    </div>
+
+                                    <template x-for="s in availableServices" :key="s.id">
+                                        <div @click="selectService(s.id)"
+                                             :class="serviceId == s.id ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                                             class="p-1.5 rounded-xl text-xs cursor-pointer flex items-center justify-between">
+                                            <span class="truncate" x-text="s.name"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            {{-- انتخاب ارائه‌دهنده --}}
+                            <div class="relative" @click.outside="openProvider = false">
+                                <label class="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-between">
+                                    <span>{{ config('booking.labels.provider', 'ارائه‌دهنده') }} (اختیاری)</span>
+                                    <template x-if="serviceId">
+                                        <span class="text-[10px] text-indigo-600 dark:text-indigo-400">وابسته به سرویس</span>
+                                    </template>
+                                </label>
+
+                                <div @click="openProvider = !openProvider"
+                                     class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-gray-900 dark:text-gray-100 flex items-center justify-between cursor-pointer">
+                                    <span class="truncate" x-text="selectedProviderName"></span>
+                                    <div class="flex items-center gap-1 text-gray-400">
+                                        <template x-if="providerId">
+                                            <button type="button" @click.stop="selectProvider(null)" class="hover:text-rose-500 font-bold text-xs p-0.5">✕</button>
+                                        </template>
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </div>
+                                </div>
+
+                                <div x-show="openProvider" x-transition.opacity class="absolute top-full right-0 left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-2 max-h-52 overflow-y-auto space-y-1">
+                                    <input type="text" x-model="providerSearch" placeholder="🔍 جستجوی ارائه‌دهنده..." @click.stop
+                                           class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-2.5 py-1.5 text-xs text-gray-900 dark:text-gray-100 mb-1">
+
+                                    <div @click="selectProvider(null)"
+                                         :class="!providerId ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                                         class="p-1.5 rounded-xl text-xs cursor-pointer flex items-center justify-between">
+                                        <span>بدون ترجیح (هر ارائه‌دهنده‌ای)</span>
+                                    </div>
+
+                                    <template x-for="p in availableProviders" :key="p.id">
+                                        <div @click="selectProvider(p.id)"
+                                             :class="providerId == p.id ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-bold' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                                             class="p-1.5 rounded-xl text-xs cursor-pointer flex items-center justify-between">
+                                            <span class="truncate" x-text="p.name"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-between">
+                                    <span>⏱️ زمان مورد نیاز (دقیقه)</span>
+                                    <span class="text-[10px] text-gray-400 font-normal">اختیاری</span>
+                                </label>
+                                <input type="number" min="5" step="5" wire:model.defer="waitlistDurationMinutes" placeholder="مثال: ۳۰" class="{{ $baseInputClass }} text-center" />
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1">📅 تاریخ ترجیحی (اختیاری)</label>
+                                <input type="text" wire:model.defer="waitlistPreferredDate" placeholder="۱۴۰۵/۰۶/۰۱" class="{{ $baseInputClass }} text-center" data-jdp-only-date />
+                            </div>
+                        </div>
+
+                        {{-- Service Custom Form --}}
+                        @if ($waitlistFormSchema && !empty($waitlistFormSchema['fields']))
+                            @includeIf('booking::components.service-dynamic-form', [
+                                'formSchema' => $waitlistFormSchema,
+                                'formType' => $waitlistFormType,
+                                'formName' => $waitlistFormName,
+                                'formResponses' => $waitlistFormResponses,
+                                'modelPrefix' => 'waitlistFormResponses'
+                            ])
+                        @endif
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1">توضیحات</label>
+                            <input type="text" wire:model.defer="waitlistNotes" placeholder="توضیحات صف..." class="{{ $baseInputClass }}" />
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+    @endif
+
+    {{-- fallback --}}
+@else
+    <input type="text" wire:model.defer="{{ $model }}" placeholder="{{ $placeholder }}" class="{{ $baseInputClass }}" />
+@endif
+
+@php
+    // اگر فیلد status باشد، کلید خطا باید status_id باشد، نه meta.status_id
+    $errorKey = ($type === 'status') ? 'status_id' : $model;
+@endphp
+
+@error($errorKey)
+<div class="flex items-center gap-1 text-xs font-medium text-red-600 mt-1.5">
+    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    {{ $message }}
+</div>
+@enderror

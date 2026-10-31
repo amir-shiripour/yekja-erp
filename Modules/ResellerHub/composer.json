@@ -1,0 +1,34 @@
+{
+    "name": "crm-laravel/resellerhub",
+    "description": "Multi-tenant reseller layer: sub-accounts, tenant provisioning, packages, invoicing, SSO impersonation and quota enforcement.",
+    "type": "laravel-module",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "CRM Platform Team"
+        }
+    ],
+    "require": {
+        "php": "^8.2"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\ResellerHub\\App\\Providers\\ResellerHubServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\ResellerHub\\": "App/",
+            "Modules\\ResellerHub\\Database\\Factories\\": "Database/factories/",
+            "Modules\\ResellerHub\\Database\\Seeders\\": "Database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\ResellerHub\\Tests\\": "tests/"
+        }
+    }
+}

@@ -1,0 +1,58 @@
+<?php
+
+namespace Modules\Services\App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreServicePackageRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        $user = $this->user();
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->hasRole(['super-admin', 'admin']) || $user->can('services.manage')) {
+            return true;
+        }
+
+        if ($this->isMethod('POST')) {
+            return $user->can('services.create');
+        }
+
+        return $user->can('services.edit');
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:100',
+            'description' => 'nullable|string',
+            'status' => 'required|string|in:active,inactive',
+            'discount_type' => 'nullable|string|in:amount,percent',
+            'discount_value' => 'nullable|numeric|min:0',
+
+            'items' => 'required|array|min:1',
+            'items.*.mode' => 'nullable|string',
+            'items.*.service_id' => 'nullable',
+            'items.*.product_id' => 'nullable',
+            'items.*.product_variant_id' => 'nullable',
+            'items.*.custom_service_name' => 'nullable|string|max:255',
+            'items.*.description' => 'nullable|string',
+            'items.*.quantity' => 'nullable',
+            'items.*.unit' => 'nullable|string|max:50',
+            'items.*.unit_price' => 'nullable',
+            'items.*.discount_type' => 'nullable|string|in:amount,percent',
+            'items.*.discount_value' => 'nullable',
+            'items.*.discount' => 'nullable',
+            'items.*.billing_period' => 'nullable|string',
+            'items.*.custom_fields' => 'nullable',
+            'items.*.custom_fields_prices' => 'nullable',
+            'items.*.custom_fields_discounts' => 'nullable',
+            'items.*.custom_fields_quantities' => 'nullable',
+            'items.*.custom_fields_use_default_price' => 'nullable',
+        ];
+    }
+}

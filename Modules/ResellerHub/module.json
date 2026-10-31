@@ -1,0 +1,17 @@
+{
+    "name": "ResellerHub",
+    "alias": "resellerhub",
+    "description": "Multi-tenant reseller layer: sub-accounts, tenant provisioning, packages, invoicing, SSO impersonation and quota enforcement.",
+    "keywords": [
+        "reseller",
+        "multi-tenant",
+        "provisioning",
+        "invoicing",
+        "subscription"
+    ],
+    "priority": -1,
+    "providers": [
+        "Modules\\ResellerHub\\App\\Providers\\ResellerHubServiceProvider"
+    ],
+    "files": []
+}

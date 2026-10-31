@@ -1,0 +1,204 @@
+<?php
+
+namespace Modules\Booking\Http\Controllers\User;
+
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Validation\Rule;
+use Modules\Booking\Entities\BookingForm;
+use Modules\Booking\Services\FormService;
+
+class FormController extends Controller
+{
+    public function __construct(protected FormService $forms) {}
+
+    public function index(Request $request)
+    {
+        $forms = $this->forms->paginate($request->user(), 20);
+
+        return view('booking::user.forms.index', compact('forms'));
+    }
+
+    public function create()
+    {
+        $this->ensureFormCreateAllowed();
+        $rolesQuery = \Spatie\Permission\Models\Role::orderBy('name');
+        if (!auth()->user() || !auth()->user()->hasRole('super-admin')) {
+            $rolesQuery->where('name', '!=', 'super-admin');
+        }
+        $roles = $rolesQuery->get();
+
+        return view('booking::user.forms.create', compact('roles'));
+    }
+
+    public function store(Request $request)
+    {
+        $this->ensureFormCreateAllowed();
+
+        $data = $this->validateFormInput($request);
+
+        $this->forms->create($request->user(), $data);
+
+        return redirect()
+            ->route('user.booking.forms.index')
+            ->with('success', 'فرم با موفقیت ایجاد شد.');
+    }
+
+    public function edit(BookingForm $form)
+    {
+        $this->ensureFormEditAllowed();
+        $this->ensureFormAccess($form);
+        $rolesQuery = \Spatie\Permission\Models\Role::orderBy('name');
+        if (!auth()->user() || !auth()->user()->hasRole('super-admin')) {
+            $rolesQuery->where('name', '!=', 'super-admin');
+        }
+        $roles = $rolesQuery->get();
+
+        return view('booking::user.forms.edit', compact('form', 'roles'));
+    }
+
+    public function update(Request $request, BookingForm $form)
+    {
+        $this->ensureFormEditAllowed();
+
+        $data = $this->validateFormInput($request);
+
+        $this->forms->update($request->user(), $form, $data);
+
+        return redirect()
+            ->route('user.booking.forms.index')
+            ->with('success', 'فرم با موفقیت بروزرسانی شد.');
+    }
+
+    public function destroy(Request $request, BookingForm $form)
+    {
+        $this->ensureFormDeleteAllowed();
+
+        $this->forms->delete($request->user(), $form);
+
+        return redirect()
+            ->route('user.booking.forms.index')
+            ->with('success', 'فرم با موفقیت حذف شد.');
+    }
+
+    protected function ensureFormCreateAllowed(): void
+    {
+        $user = auth()->user();
+        if (! $user || ! $user->can('booking.forms.create')) {
+            abort(403);
+        }
+    }
+
+    protected function ensureFormEditAllowed(): void
+    {
+        $user = auth()->user();
+        if (! $user || ! ($user->can('booking.forms.edit') || $user->can('booking.forms.manage'))) {
+            abort(403);
+        }
+    }
+
+    protected function ensureFormDeleteAllowed(): void
+    {
+        $user = auth()->user();
+        if (! $user || ! ($user->can('booking.forms.delete') || $user->can('booking.forms.manage'))) {
+            abort(403);
+        }
+    }
+
+    protected function ensureFormAccess(BookingForm $form): void
+    {
+        $user = auth()->user();
+        $settings = \Modules\Booking\Entities\BookingSetting::current();
+
+        if ($settings->form_management_scope === 'OWN' && $user && ! $user->can('booking.forms.manage') && ! $user->hasRole('super-admin')) {
+            if ((int) $form->creator_id !== (int) $user->id) {
+                abort(403);
+            }
+        }
+    }
+
+    protected function validateFormInput(Request $request): array
+    {
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+            'form_type' => ['nullable', Rule::in([BookingForm::TYPE_CUSTOM, BookingForm::TYPE_TOOTH_NUMBER])],
+            'status' => ['nullable', Rule::in([BookingForm::STATUS_ACTIVE, BookingForm::STATUS_INACTIVE])],
+        ];
+
+        if ($request->input('form_type') === BookingForm::TYPE_TOOTH_NUMBER) {
+            $data = $request->validate($rules);
+            $data['schema_json'] = [
+                'fields' => [
+                    [
+                        'name' => 'tooth_numbers',
+                        'label' => 'شماره دندان',
+                        'type' => 'tooth_number',
+                        'required' => false,
+                        'collect_from_online' => false,
+                        'placeholder' => null,
+                        'options' => [],
+                        'icon' => null,
+                    ]
+                ]
+            ];
+        } else {
+            $rules['schema_json'] = ['required', 'array'];
+            $rules['schema_json.fields'] = ['required', 'array', 'min:1'];
+            $rules['schema_json.fields.*.name'] = ['required', 'string', 'max:100'];
+            $rules['schema_json.fields.*.label'] = ['required', 'string', 'max:255'];
+            $rules['schema_json.fields.*.type'] = ['required', 'string', 'max:50'];
+            $rules['schema_json.fields.*.required'] = ['nullable'];
+            $rules['schema_json.fields.*.collect_from_online'] = ['nullable'];
+            $rules['schema_json.fields.*.placeholder'] = ['nullable', 'string', 'max:255'];
+            $rules['schema_json.fields.*.options'] = ['nullable', 'string'];
+            $rules['schema_json.fields.*.icon'] = ['nullable', 'string'];
+            $rules['schema_json.fields.*.role'] = ['nullable', 'string', 'max:100'];
+            $rules['schema_json.fields.*.multiple'] = ['nullable'];
+            $rules['schema_json.fields.*.lock_current_if_role'] = ['nullable'];
+
+            $data = $request->validate($rules);
+
+            $fields = array_values($data['schema_json']['fields'] ?? []);
+            $normalized = [];
+
+            foreach ($fields as $field) {
+                $name = trim((string) ($field['name'] ?? ''));
+                $label = trim((string) ($field['label'] ?? ''));
+                $type = trim((string) ($field['type'] ?? 'text'));
+                $placeholder = trim((string) ($field['placeholder'] ?? ''));
+                $icon = trim((string) ($field['icon'] ?? ''));
+                $role = trim((string) ($field['role'] ?? ''));
+                $multiple = ! empty($field['multiple']);
+                $lockCurrentIfRole = ! empty($field['lock_current_if_role']);
+
+                $optionsRaw = trim((string) ($field['options'] ?? ''));
+                $options = $optionsRaw === ''
+                    ? []
+                    : array_values(array_filter(array_map('trim', explode(',', $optionsRaw)), fn($v) => $v !== ''));
+
+                $normalized[] = [
+                    'name' => $name,
+                    'label' => $label,
+                    'type' => $type ?: 'text',
+                    'required' => ! empty($field['required']),
+                    'collect_from_online' => ! empty($field['collect_from_online']),
+                    'placeholder' => $placeholder ?: null,
+                    'options' => $options,
+                    'icon' => $icon ?: null,
+                    'role' => $role ?: null,
+                    'multiple' => $multiple,
+                    'lock_current_if_role' => $lockCurrentIfRole,
+                ];
+            }
+
+            $data['schema_json'] = [
+                'fields' => $normalized,
+            ];
+        }
+
+        // Ensure form_type is set, default to CUSTOM if not present
+        $data['form_type'] = $data['form_type'] ?? BookingForm::TYPE_CUSTOM;
+
+        return $data;
+    }
+}

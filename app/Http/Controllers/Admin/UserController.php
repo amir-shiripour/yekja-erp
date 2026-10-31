@@ -1,0 +1,409 @@
+<?php
+// app/Http/Controllers/Admin/UserController.php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\CustomUserField;
+use App\Models\User;
+use App\Models\UserCustomValue;
+use App\Tenancy\TenantManager;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Collection;
+
+class UserController extends Controller
+{
+    public function index(Request $request)
+    {
+        $tenantManager = app(TenantManager::class);
+        $query = User::with('roles');
+
+        if ($tenantManager->hasTenant()) {
+            $query->where('tenant_id', $tenantManager->getTenantId());
+        } else {
+            $query->whereNull('tenant_id');
+        }
+
+        // اگر کاربر لاگین شده super-admin نیست، کاربران super-admin را از لیست حذف کن
+        if (!auth()->user()->hasRole('super-admin')) {
+            $query->whereDoesntHave('roles', function ($q) {
+                $q->where('name', 'super-admin');
+            });
+        }
+
+        $users = $query->orderByDesc('id')->paginate(20);
+        return view('admin.users.index', compact('users'));
+    }
+
+    public function create()
+    {
+        $tenantManager = app(TenantManager::class);
+        $user  = new User();
+        $allRoles = Role::orderBy('name')->pluck('display_name', 'name');
+
+        // اگر کاربر ادمین است (نه سوپر ادمین)، نقش super-admin را از لیست حذف کن
+        $roles = $allRoles;
+        if (!auth()->user()->hasRole('super-admin')) {
+            $roles = $allRoles->except('super-admin');
+        }
+
+        $allUsers = User::where('id', '!=', $user->id)
+            ->when($tenantManager->hasTenant(), fn($q) => $q->where('tenant_id', $tenantManager->getTenantId()))
+            ->when(!$tenantManager->hasTenant(), fn($q) => $q->whereNull('tenant_id'))
+            ->get(['id', 'name']);
+
+        $selectedRoles = []; // جلوگیری از null
+        $customFieldsByRole = CustomUserField::orderBy('role_name')->get()->groupBy('role_name');
+
+        return view('admin.users.edit', compact('user', 'roles', 'selectedRoles', 'customFieldsByRole', 'allUsers'));
+    }
+
+    public function store(Request $request)
+    {
+        $tenantManager = app(TenantManager::class);
+        $tenantId = $tenantManager->hasTenant() ? $tenantManager->getTenantId() : null;
+
+        $validated = $request->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => [
+                'required', 'email', 'max:255',
+                Rule::unique('users', 'email')->where(fn($q) => $tenantId ? $q->where('tenant_id', $tenantId) : $q->whereNull('tenant_id'))
+            ],
+            'mobile'   => [
+                'nullable', 'string', 'max:30',
+                Rule::unique('users', 'mobile')->where(fn($q) => $tenantId ? $q->where('tenant_id', $tenantId) : $q->whereNull('tenant_id'))
+            ],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'roles'    => ['required', 'array'],
+            'roles.*'  => ['string', 'exists:roles,name'],
+            'superior_ids'   => ['nullable', 'array'],
+            'superior_ids.*' => ['exists:users,id'],
+        ]);
+
+        // جلوگیری از ایجاد کاربر با نقش super-admin توسط ادمین عادی
+        if (!auth()->user()->hasRole('super-admin') && in_array('super-admin', $validated['roles'])) {
+            return back()->withErrors(['roles' => 'شما نمی‌توانید کاربر با نقش super-admin ایجاد کنید.'])->withInput();
+        }
+
+        $roleNames = $validated['roles'];
+        $fields   = $this->fieldsForRoles($roleNames);
+
+        $request->validate($this->dynamicRules($fields)); // ولیدیشن داینامیک
+
+        DB::transaction(function () use ($validated, $request, $fields, $roleNames, $tenantId, &$user) {
+            $user = User::create([
+                'tenant_id' => $tenantId,
+                'name'     => $validated['name'],
+                'email'    => $validated['email'],
+                'mobile'   => $validated['mobile'] ?? null,
+                'password' => Hash::make($validated['password']),
+            ]);
+
+            $user->syncRoles($roleNames);
+
+            if (isset($validated['superior_ids'])) {
+                $user->superiors()->sync($validated['superior_ids']);
+            }
+
+            // مقادیر سفارشی (با پشتیبانی فایل)
+            $this->persistCustomValues($user, $fields, $request);
+        });
+
+        return redirect()->route('admin.users.index')->with('success', 'کاربر با موفقیت ایجاد شد.');
+    }
+
+    public function edit(User $user)
+    {
+        $tenantManager = app(TenantManager::class);
+        if ($tenantManager->hasTenant()) {
+            if ((int)$user->tenant_id !== (int)$tenantManager->getTenantId()) {
+                abort(404);
+            }
+        } else {
+            if (!is_null($user->tenant_id)) {
+                abort(404);
+            }
+        }
+
+        $user->loadMissing(['roles', 'customValues', 'superiors']);
+
+        // جلوگیری از ویرایش کاربر super-admin توسط ادمین عادی
+        if (!auth()->user()->hasRole('super-admin') && $user->hasRole('super-admin')) {
+            abort(403, 'شما نمی‌توانید کاربر super-admin را ویرایش کنید.');
+        }
+
+        $allRoles = Role::orderBy('name')->pluck('display_name', 'name');
+
+        // اگر کاربر ادمین است (نه سوپر ادمین)، نقش super-admin را از لیست حذف کن
+        $roles = $allRoles;
+        if (!auth()->user()->hasRole('super-admin')) {
+            $roles = $allRoles->except('super-admin');
+        }
+
+        $allUsers = User::where('id', '!=', $user->id)
+            ->when($tenantManager->hasTenant(), fn($q) => $q->where('tenant_id', $tenantManager->getTenantId()))
+            ->when(!$tenantManager->hasTenant(), fn($q) => $q->whereNull('tenant_id'))
+            ->get(['id', 'name']);
+
+        $selectedRoles = $user->roles->pluck('name')->toArray();
+        $customFieldsByRole = CustomUserField::orderBy('role_name')->get()->groupBy('role_name');
+
+        return view('admin.users.edit', compact('user', 'roles', 'customFieldsByRole', 'selectedRoles', 'allUsers'));
+    }
+
+
+    public function update(Request $request, User $user)
+    {
+        $tenantManager = app(TenantManager::class);
+        if ($tenantManager->hasTenant()) {
+            if ((int)$user->tenant_id !== (int)$tenantManager->getTenantId()) {
+                abort(404);
+            }
+        } else {
+            if (!is_null($user->tenant_id)) {
+                abort(404);
+            }
+        }
+        $tenantId = $user->tenant_id;
+
+        // جلوگیری از ویرایش کاربر super-admin توسط ادمین عادی
+        if (!auth()->user()->hasRole('super-admin') && $user->hasRole('super-admin')) {
+            abort(403, 'شما نمی‌توانید کاربر super-admin را ویرایش کنید.');
+        }
+
+        $validated = $request->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => [
+                'required', 'email', 'max:255',
+                Rule::unique('users', 'email')->ignore($user->id)->where(fn($q) => $tenantId ? $q->where('tenant_id', $tenantId) : $q->whereNull('tenant_id'))
+            ],
+            'mobile'   => [
+                'nullable', 'string', 'max:30',
+                Rule::unique('users', 'mobile')->ignore($user->id)->where(fn($q) => $tenantId ? $q->where('tenant_id', $tenantId) : $q->whereNull('tenant_id'))
+            ],
+            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+            'roles'    => ['required', 'array'],
+            'roles.*'  => ['string', 'exists:roles,name'],
+            'superior_ids'   => ['nullable', 'array'],
+            'superior_ids.*' => ['exists:users,id'],
+        ]);
+
+        // جلوگیری از اختصاص نقش super-admin به کاربر توسط ادمین عادی
+        if (!auth()->user()->hasRole('super-admin') && in_array('super-admin', $validated['roles'])) {
+            return back()->withErrors(['roles' => 'شما نمی‌توانید نقش super-admin را به کاربر اختصاص دهید.'])->withInput();
+        }
+
+        // جلوگیری از حذف آخرین سوپرادمین
+        if ($user->hasRole('super-admin') && !in_array('super-admin', $validated['roles'])) {
+            $superCount = DB::table('model_has_roles')
+                ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+                ->where('roles.name', 'super-admin')
+                ->count();
+            if ($superCount <= 1) {
+                return back()->withErrors(['roles' => 'نمی‌توان نقش super-admin آخر را حذف کرد.'])->withInput();
+            }
+        }
+
+        $roleNames = $validated['roles'];
+        $fields   = $this->fieldsForRoles($roleNames);
+
+        $request->validate($this->dynamicRules($fields)); // ولیدیشن داینامیک
+
+        DB::transaction(function () use ($user, $validated, $fields, $request, $roleNames) {
+            $user->update([
+                'name'   => $validated['name'],
+                'email'  => $validated['email'],
+                'mobile' => $validated['mobile'] ?? null,
+            ]);
+
+            if (!empty($validated['password'])) {
+                $user->update(['password' => Hash::make($validated['password'])]);
+            }
+
+            $user->syncRoles($roleNames);
+
+            if (isset($validated['superior_ids'])) {
+                $user->superiors()->sync($validated['superior_ids']);
+            } else {
+                $user->superiors()->detach();
+            }
+
+            // upsert مقادیر سفارشی (با فایل)
+            $this->persistCustomValues($user, $fields, $request);
+        });
+
+        return redirect()->route('admin.users.index')->with('success', 'کاربر با موفقیت به‌روزرسانی شد.');
+    }
+
+    public function destroy(User $user)
+    {
+        $tenantManager = app(TenantManager::class);
+        if ($tenantManager->hasTenant()) {
+            if ((int)$user->tenant_id !== (int)$tenantManager->getTenantId()) {
+                abort(404);
+            }
+        } else {
+            if (!is_null($user->tenant_id)) {
+                abort(404);
+            }
+        }
+
+        if ($user->id === auth()->id()) {
+            return back()->withErrors(['user' => 'نمی‌توانید حساب کاربری خودتان را حذف کنید.']);
+        }
+
+        // جلوگیری از حذف کاربر super-admin توسط ادمین عادی
+        if (!auth()->user()->hasRole('super-admin') && $user->hasRole('super-admin')) {
+            return back()->withErrors(['user' => 'شما نمی‌توانید کاربر super-admin را حذف کنید.']);
+        }
+
+        if ($user->hasRole('super-admin')) {
+            $superCount = DB::table('model_has_roles')
+                ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+                ->where('roles.name', 'super-admin')
+                ->count();
+
+            if ($superCount <= 1) {
+                return back()->withErrors(['user' => 'نمی‌توان آخرین سوپرادمین را حذف کرد.']);
+            }
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index')->with('success', 'کاربر حذف شد.');
+    }
+
+    /* ===================== Private helpers ===================== */
+
+    private function fieldsForRoles(array $roleNames): Collection
+    {
+        return CustomUserField::whereIn('role_name', $roleNames)->orderBy('id')->get()->unique('field_name');
+    }
+
+    private function dynamicRules(Collection $fields): array
+    {
+        $rules = [];
+
+        foreach ($fields as $f) {
+            $key  = 'custom.' . $f->field_name;
+            $type = strtolower($f->field_type ?? 'text');
+            $meta = is_array($f->meta ?? null) ? $f->meta : (is_string($f->meta ?? null) ? json_decode($f->meta, true) : []);
+            $meta = $meta ?: [];
+
+            $base = ($f->is_required ?? false) ? ['required'] : ['nullable'];
+
+            // چرا: ولیدیشن نوع‌ها
+            switch ($type) {
+                case 'number':
+                    $base[] = 'numeric';
+                    break;
+                case 'date':
+                    $base[] = 'date';
+                    break;
+                case 'email':
+                    $base[] = 'email';
+                    break;
+                case 'file':
+                    $fileRules = ['file'];
+                    if (!empty($meta['mimes']) && is_array($meta['mimes'])) {
+                        $fileRules[] = 'mimes:' . implode(',', $meta['mimes']);
+                    } elseif (!empty($meta['mimes']) && is_string($meta['mimes'])) {
+                        $fileRules[] = 'mimes:' . $meta['mimes'];
+                    }
+                    if (!empty($meta['max'])) {
+                        // max بر حسب کیلوبایت
+                        $fileRules[] = 'max:' . intval($meta['max']);
+                    }
+                    $base = array_merge($base, $fileRules);
+                    break;
+                case 'checkbox':
+                    // checkbox چندانتخابی
+                    $base[] = 'array';
+                    if (!empty($meta['options']) && is_array($meta['options'])) {
+                        $base['custom.' . $f->field_name . '.*'] = ['in:' . implode(',', array_values($meta['options']))];
+                    }
+                    break;
+                case 'select':
+                case 'radio':
+                    if (!empty($meta['options']) && is_array($meta['options'])) {
+                        $base[] = 'in:' . implode(',', array_values($meta['options']));
+                    } else {
+                        $base[] = 'string';
+                    }
+                    break;
+                default:
+                    $base[] = 'string';
+            }
+
+            $rules[$key] = $base;
+
+            // اگر ruleهای اضافه به‌صورت آرایه در DB ذخیره شده
+            if (!empty($f->rules) && is_array($f->rules)) {
+                $rules[$key] = array_merge($rules[$key], $f->rules);
+            }
+        }
+
+        return $rules;
+    }
+
+    private function persistCustomValues(User $user, Collection $fields, Request $request): void
+    {
+        foreach ($fields as $f) {
+            $type = strtolower($f->field_type ?? 'text');
+
+            if ($type === 'file') {
+                // چرا: فایل از input با نام custom[field_name]
+                $file = $request->file('custom.' . $f->field_name);
+                if ($file) {
+                    // حذف فایل قبلی اگر وجود داشت
+                    $prev = UserCustomValue::where('user_id', $user->id)
+                        ->where('field_name', $f->field_name)
+                        ->first();
+
+                    if ($prev && $prev->value && Storage::disk('public')->exists($prev->value)) {
+                        Storage::disk('public')->delete($prev->value);
+                    }
+
+                    // ذخیره فایل جدید
+                    $path = $file->store('user-custom', 'public');
+
+                    UserCustomValue::updateOrCreate(
+                        ['user_id' => $user->id, 'field_name' => $f->field_name],
+                        ['value' => $path],
+                    );
+                } else {
+                    // اگر فایل جدید نیامده، مقدار قبلی را دست‌نخورده بگذار
+                    if (!UserCustomValue::where('user_id', $user->id)->where('field_name', $f->field_name)->exists()) {
+                        UserCustomValue::create([
+                            'user_id'    => $user->id,
+                            'field_name' => $f->field_name,
+                            'value'      => null,
+                        ]);
+                    }
+                }
+                continue;
+            }
+
+            // سایر انواع
+            $raw = $request->input('custom.' . $f->field_name);
+
+            if ($type === 'checkbox' && is_array($raw)) {
+                // ذخیره آرایه به صورت JSON
+                $value = json_encode(array_values($raw), JSON_UNESCAPED_UNICODE);
+            } else {
+                $value = $raw;
+            }
+
+            UserCustomValue::updateOrCreate(
+                ['user_id' => $user->id, 'field_name' => $f->field_name],
+                ['value' => $value],
+            );
+        }
+    }
+}
