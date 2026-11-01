@@ -1,5 +1,5 @@
 <div
-    class="rounded-3xl p-6 sm:p-7 bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/70 shadow-xs space-y-5">
+    class="rounded-3xl p-6 sm:p-7 bg-white dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/70 shadow-xs space-y-5">
     <div
         class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-700/60">
         <div class="flex items-center gap-3">
@@ -85,13 +85,13 @@
         @else
             @foreach($quotasSummary['features'] as $fKey => $fItem)
                 <div
-                    class="p-4 rounded-2xl border transition-all duration-200 {{ $fItem['is_enabled'] ? 'bg-emerald-50/30 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-800/40' : 'bg-gray-50/50 dark:bg-gray-900/30 border-gray-100 dark:border-gray-800/80 opacity-60' }}">
+                    class="p-4 rounded-2xl border transition-all duration-200 {{ $fItem['is_enabled'] ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-800/50' : 'bg-gray-50 dark:bg-gray-900/40 border-gray-200/70 dark:border-gray-800/80 opacity-75' }}">
                     <div class="flex items-start justify-between gap-2 mb-2">
                             <span
                                 class="text-xs font-black text-gray-900 dark:text-white leading-snug">{{ $fItem['title'] }}</span>
                         @if($fItem['is_enabled'])
                             <span
-                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100/80 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 shrink-0">
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100/90 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0">
                                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path
                                             fill-rule="evenodd"
                                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -100,7 +100,7 @@
                                 </span>
                         @else
                             <span
-                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 shrink-0">
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700 shrink-0">
                                     <span>غیرفعال</span>
                                 </span>
                         @endif
