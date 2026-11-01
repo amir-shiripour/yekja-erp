@@ -49,7 +49,9 @@
             'installment_rounding_factor' => $roundingFactor
         ];
     }
-    $allWorkflows = \Modules\Workflows\Entities\Workflow::where('is_active', true)->get(['id', 'name']);
+    $allWorkflows = class_exists(\Modules\Workflows\Entities\Workflow::class)
+        ? \Modules\Workflows\Entities\Workflow::where('is_active', true)->get(['id', 'name'])
+        : collect();
 @endphp
 @section('content')
     <style>
@@ -565,7 +567,7 @@
                 </a>
                 @endif
 
-                <a href="{{ route('user.booking.cure.list') }}"
+                <a href="{{ \Illuminate\Support\Facades\Route::has('user.booking.cure.list') ? route('user.booking.cure.list') : '#' }}"
                    class="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600
                           bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm font-medium
                           hover:bg-gray-50 dark:hover:bg-gray-600 transition-all">
@@ -576,7 +578,7 @@
                 </a>
 
                 <template x-if="clientId">
-                    <a :href="'{{ route('user.booking.laboratory.index') }}?client_id=' + clientId + '&action=create&teeth=' + (selectedTeeth ? selectedTeeth.join(',') : '')"
+                    <a :href="'{{ \Illuminate\Support\Facades\Route::has('user.booking.laboratory.index') ? route('user.booking.laboratory.index') : '#' }}?client_id=' + clientId + '&action=create&teeth=' + (selectedTeeth ? selectedTeeth.join(',') : '')"
                        target="_blank"
                        title="ثبت سفارش ساخت پروتز یا قطعات لابراتواری برای این بیمار و دندان‌ها"
                        class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-indigo-200 dark:border-indigo-800

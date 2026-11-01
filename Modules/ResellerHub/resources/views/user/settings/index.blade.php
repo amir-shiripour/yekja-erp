@@ -72,7 +72,7 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <a href="{{ route('reseller.dashboard') }}"
+                <a href="{{ \Illuminate\Support\Facades\Route::has('reseller.dashboard') ? route('reseller.dashboard') : url('/') }}"
                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-bold rounded-xl transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -225,7 +225,7 @@
                         </template>
                     </button>
 
-                    <a href="{{ route('reseller.dashboard') }}"
+                    <a href="{{ \Illuminate\Support\Facades\Route::has('reseller.dashboard') ? route('reseller.dashboard') : url('/') }}"
                        class="px-6 py-3.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
                         بازگشت به پیشخوان
                     </a>

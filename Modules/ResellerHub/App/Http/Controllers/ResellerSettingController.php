@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Modules\ResellerHub\App\Actions\Settings\UpdateResellerSettingsAction;
 use Modules\ResellerHub\App\Enums\ResellerSettingKey;
@@ -39,7 +40,9 @@ class ResellerSettingController extends Controller
         $currency = $settings['currency'] ?? 'toman';
         $currencyLabel = ResellerHelper::currencyLabel($currency);
         $resellerPackages = ResellerPackage::where('reseller_id', $reseller->id)->orderBy('sort_order')->get();
-        $subAccountCustomFields = CustomUserField::where('entity_type', CustomUserField::ENTITY_SUB_ACCOUNT)->get();
+        $subAccountCustomFields = (Schema::hasTable('custom_user_fields') && Schema::hasColumn('custom_user_fields', 'entity_type'))
+            ? CustomUserField::where('entity_type', CustomUserField::ENTITY_SUB_ACCOUNT)->get()
+            : collect();
         $tenancyHealth = TenancyModelRegistry::getHealthReport();
         $discoveredModels = TenancyModelRegistry::discoverAvailableModels();
 

@@ -195,10 +195,14 @@
                                          <div class="flex flex-col">
                                              <span class="text-[10px] text-gray-400 dark:text-gray-500">گردش کار</span>
                                              @can('workflows.view')
-                                                 <a href="{{ route('user.workflows.edit', $sender['id']) }}" class="text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-bold dark:text-indigo-400 dark:hover:text-indigo-300">
-                                                     {{ $sender['label'] }}
-                                                 </a>
-                                             @else
+                                                @if(\Illuminate\Support\Facades\Route::has('user.workflows.edit'))
+                                                    <a href="{{ route('user.workflows.edit', $sender['id']) }}" class="text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-bold dark:text-indigo-400 dark:hover:text-indigo-300">
+                                                        {{ $sender['label'] }}
+                                                    </a>
+                                                @else
+                                                    <span class="text-xs text-gray-700 dark:text-gray-300 font-bold">{{ $sender['label'] }}</span>
+                                                @endif
+                                            @else
                                                  <span class="text-xs text-gray-700 dark:text-gray-300 font-bold">{{ $sender['label'] }}</span>
                                              @endcan
                                          </div>

@@ -1,7 +1,10 @@
 <?php
 namespace Modules\Clients\Entities;
 
+use App\Tenancy\TenantManager;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class ClientStatus extends Model
 {
@@ -20,10 +23,19 @@ class ClientStatus extends Model
     protected static function booted(): void
     {
         static::addGlobalScope('tenant_or_system', function ($builder) {
-            $tm = app(\App\Tenancy\TenantManager::class);
+            $tm = app(TenantManager::class);
             if ($tm->isBypassed()) {
                 return;
             }
+
+            try {
+                if (!Schema::hasColumn('client_statuses', 'tenant_id')) {
+                    return;
+                }
+            } catch (Throwable) {
+                return;
+            }
+
             if ($tm->hasTenant()) {
                 $tenantId = $tm->getTenantId();
                 $builder->where(function ($q) use ($tenantId) {
@@ -40,7 +52,7 @@ class ClientStatus extends Model
         });
 
         static::creating(function ($model) {
-            $tm = app(\App\Tenancy\TenantManager::class);
+            $tm = app(TenantManager::class);
             if (empty($model->tenant_id) && $tm->hasTenant()) {
                 $model->tenant_id = $tm->getTenantId();
             }

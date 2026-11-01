@@ -64,9 +64,11 @@
     $globalWorkflowIndex = 0;
 @endphp
 
-<div role="tabpanel" id="tabpanel-automation" aria-labelledby="tab-automation" x-show="activeTab === 'automation'" x-cloak class="space-y-6">
+<div role="tabpanel" id="tabpanel-automation" aria-labelledby="tab-automation" x-show="activeTab === 'automation'"
+     x-cloak class="space-y-6">
     <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
+        <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
             <div class="flex items-center gap-3">
                 <span class="p-2.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -76,13 +78,14 @@
                 <div>
                     <h2 class="text-base font-black text-gray-900 dark:text-white">اتوماسیون و گردش کارهای نمایندگی</h2>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        مدیریت @fa($totalWorkflowsCount) گردش کار استاندارد برای پردازش خودکار فاکتورها، پیامک‌های یادآوری، تعلیق و تایید پرداخت مشتریان
+                        مدیریت @fa($totalWorkflowsCount) گردش کار استاندارد برای پردازش خودکار فاکتورها، پیامک‌های
+                        یادآوری، تعلیق و تایید پرداخت مشتریان
                     </p>
                 </div>
             </div>
 
             <div class="flex items-center gap-2.5 shrink-0">
-                <a href="{{ route('user.workflows.index') }}"
+                <a href="{{ \Illuminate\Support\Facades\Route::has('user.workflows.index') ? route('user.workflows.index') : '#' }}"
                    target="_blank"
                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700/60 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-bold transition-all cursor-pointer">
                     <span>مدیریت پیشرفته در گردش کارها</span>
