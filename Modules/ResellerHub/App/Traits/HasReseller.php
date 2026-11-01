@@ -7,7 +7,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Modules\ResellerHub\App\Models\Reseller;
-
+use Throwable;
 
 trait HasReseller
 {
@@ -28,25 +28,54 @@ trait HasReseller
 
         $user = Auth::user();
 
+        // 1. If SuperAdmin, never block: pick first active reseller or auto-create a master reseller
         if ($this->isSuperAdmin($user)) {
-            $message = 'برای دسترسی به این بخش، ابتدا از داشبورد نماینده مورد نظر را انتخاب کنید.';
+            $fallback = Reseller::where('status', Reseller::STATUS_ACTIVE)->orderBy('id')->first()
+                ?: Reseller::orderBy('id')->first();
 
-            if (request()->expectsJson() || request()->ajax()) {
-                abort(403, $message);
+            if ($fallback) {
+                return $fallback;
             }
 
-            if (Route::has('reseller.dashboard')) {
-                throw new HttpResponseException(
-                    redirect()->route('reseller.dashboard')->with('error', $message)
+            try {
+                return Reseller::firstOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'company_name' => $user->name ?: 'مدیریت کل سیستم',
+                        'brand_title' => config('app.name', 'CRM'),
+                        'status' => Reseller::STATUS_ACTIVE,
+                    ]
                 );
+            } catch (Throwable $e) {
+                $lastResort = Reseller::first();
+                if ($lastResort) {
+                    return $lastResort;
+                }
             }
+        }
 
-            abort(403, $message);
+        // 2. If user has reseller role, auto-provision initial Reseller row if missing
+        if ($user && method_exists($user, 'hasRole') && ($user->hasRole('reseller') || $user->hasRole('reseller-owner') || $user->hasRole('reseller-super-admin'))) {
+            try {
+                $name = !empty($user->name) ? $user->name : ('نمایندگی ' . $user->id);
+                return Reseller::firstOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'company_name' => $name,
+                        'brand_title' => $name,
+                        'status' => Reseller::STATUS_ACTIVE,
+                    ]
+                );
+            } catch (Throwable $e) {
+                $fallback = Reseller::where('user_id', $user->id)->first();
+                if ($fallback) {
+                    return $fallback;
+                }
+            }
         }
 
         abort(403, 'حساب کاربری شما دسترسی به پنل نمایندگی فروش ندارد.');
     }
-
 
     protected function getResellerOrNull(): ?Reseller
     {
@@ -89,10 +118,32 @@ trait HasReseller
         return $reseller;
     }
 
-
     private function ownedReseller(mixed $user): ?Reseller
     {
-        return Reseller::where('user_id', $user->id)->orderBy('id')->first();
+        if (!$user) {
+            return null;
+        }
+
+        $reseller = Reseller::where('user_id', $user->id)->orderBy('id')->first();
+
+        // If no reseller record exists yet, but the user has a reseller or super-admin role, auto-provision
+        if (!$reseller && method_exists($user, 'hasRole') && ($user->hasRole('reseller') || $user->hasRole('reseller-owner') || $user->hasRole('reseller-super-admin') || $user->hasRole('super-admin'))) {
+            try {
+                $name = !empty($user->name) ? $user->name : ('نمایندگی ' . $user->id);
+                $reseller = Reseller::firstOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'company_name' => $name,
+                        'brand_title' => $name,
+                        'status' => Reseller::STATUS_ACTIVE,
+                    ]
+                );
+            } catch (Throwable $e) {
+                $reseller = Reseller::where('user_id', $user->id)->first();
+            }
+        }
+
+        return $reseller;
     }
 
     private function isSuperAdmin(mixed $user): bool
@@ -103,7 +154,7 @@ trait HasReseller
     }
 
     /**
-     * Operational guard: acting as a suspended reseller is never allowed.
+     * Operational guard: acting as a suspended reseller is never allowed (except for super-admin).
      */
     private function assertResellerOperable(Reseller $reseller): void
     {
@@ -112,7 +163,7 @@ trait HasReseller
         }
 
         if ($this->isSuperAdmin(Auth::user())) {
-            abort(403, 'این نمایندگی در وضعیت معلق است؛ برای انجام عملیات ابتدا وضعیت آن را فعال کنید.');
+            return;
         }
 
         abort(403, 'حساب نمایندگی شما در وضعیت معلق قرار دارد و دسترسی به پنل امکان‌پذیر نیست.');
