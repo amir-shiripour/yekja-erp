@@ -118,13 +118,26 @@ class TenancyModelRegistry
     }
 
     /**
-     * Persist model list into config/tenancy.php.
+     * Persist model list into config/tenancy.php with strict validation.
      *
      * @param array<string> $models
      */
     public static function saveToConfig(array $models): bool
     {
-        $uniqueModels = array_values(array_unique(array_filter($models)));
+        $validModels = [];
+        foreach ($models as $model) {
+            $trimmed = trim((string)$model, "\\ \t\n\r\0\x0B");
+            if (empty($trimmed)) {
+                continue;
+            }
+            if (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff\\\\]*$/', $trimmed) && class_exists($trimmed)) {
+                $validModels[] = $trimmed;
+            }
+        }
+
+        $uniqueModels = array_values(array_unique($validModels));
+        sort($uniqueModels);
+
         $modelsCode = '';
         foreach ($uniqueModels as $model) {
             $escaped = addslashes($model);
@@ -139,12 +152,11 @@ declare(strict_types=1);
 return [
     /*
     |--------------------------------------------------------------------------
-    | Dynamically Scoped Tenant Models (Zero-Touch Tenancy)
+    | Dynamically Scoped Tenant Models (Enterprise Multi-Tenancy)
     |--------------------------------------------------------------------------
     |
     | Models listed here will have TenantScope, automatic tenant_id injection,
     | and anti-tampering guards applied dynamically at runtime.
-    | They do NOT need `use BelongsToTenant;` in their source files.
     |
     */
     'models' => [

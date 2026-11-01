@@ -90,10 +90,21 @@ class ResellerInvoiceController extends Controller
     public function index(Request $request): View
     {
         $reseller = $this->getReseller();
+        $user = Auth::user();
+        $isSuperAdmin = method_exists($user, 'hasRole') && $user->hasRole('super-admin');
         [$settings, $currency, $currencyLabel] = $this->getResellerSettings($reseller->id);
 
-        $query = ResellerInvoice::where('reseller_id', $reseller->id)
-            ->with(['tenant.subAccount', 'package', 'items', 'order', 'payments']);
+        $query = ResellerInvoice::query();
+        if ($isSuperAdmin) {
+            $selectedResellerId = $request->input('reseller_id') ?: session('active_reseller_id');
+            if ($selectedResellerId && $selectedResellerId !== 'all') {
+                $query->where('reseller_invoices.reseller_id', $selectedResellerId);
+            }
+        } else {
+            $query->where('reseller_invoices.reseller_id', $reseller->id);
+        }
+
+        $query->with(['tenant.subAccount', 'package', 'items', 'order', 'payments']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->input('status'));
@@ -128,8 +139,16 @@ class ResellerInvoiceController extends Controller
 
         $invoices = $query->paginate($perPage)
             ->withQueryString();
-        $totalsQuery = ResellerInvoice::where('reseller_id', $reseller->id)
-            ->when($request->filled('status'), fn($q) => $q->where('status', $request->input('status')))
+        $totalsQuery = ResellerInvoice::query();
+        if ($isSuperAdmin) {
+            $selectedResellerId = $request->input('reseller_id') ?: session('active_reseller_id');
+            if ($selectedResellerId && $selectedResellerId !== 'all') {
+                $totalsQuery->where('reseller_id', $selectedResellerId);
+            }
+        } else {
+            $totalsQuery->where('reseller_id', $reseller->id);
+        }
+        $totalsQuery->when($request->filled('status'), fn($q) => $q->where('status', $request->input('status')))
             ->when($request->filled('type'), fn($q) => $q->where('type', $request->input('type')));
 
         $this->applySourceFilter($totalsQuery, $request->input('source'));

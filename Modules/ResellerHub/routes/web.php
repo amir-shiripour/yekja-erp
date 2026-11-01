@@ -118,9 +118,12 @@ Route::middleware(['web', 'auth', 'role_or_permission:super-admin|resellerhub.vi
         Route::get('/settings', [ResellerSettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [ResellerSettingController::class, 'update'])->name('settings.update');
         Route::post('/settings/seed-workflows', [ResellerSettingController::class, 'seedWorkflows'])->name('settings.seed-workflows');
-        Route::post('/settings/tenancy/sync', [ResellerSettingController::class, 'syncTenancy'])->name('settings.tenancy.sync');
-        Route::post('/settings/tenancy/add-model', [ResellerSettingController::class, 'addTenancyModel'])->name('settings.tenancy.add-model');
-        Route::post('/settings/tenancy/remove-model', [ResellerSettingController::class, 'removeTenancyModel'])->name('settings.tenancy.remove-model');
+
+        Route::middleware('role:super-admin')->group(function () {
+            Route::post('/settings/tenancy/sync', [ResellerSettingController::class, 'syncTenancy'])->name('settings.tenancy.sync');
+            Route::post('/settings/tenancy/add-model', [ResellerSettingController::class, 'addTenancyModel'])->name('settings.tenancy.add-model');
+            Route::post('/settings/tenancy/remove-model', [ResellerSettingController::class, 'removeTenancyModel'])->name('settings.tenancy.remove-model');
+        });
     });
 
     // Sub-accounts management

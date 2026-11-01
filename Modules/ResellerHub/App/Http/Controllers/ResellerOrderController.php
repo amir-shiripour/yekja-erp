@@ -47,9 +47,20 @@ class ResellerOrderController extends Controller
     public function index(Request $request): View
     {
         $reseller = $this->getReseller();
-        $query = ResellerOrder::query()
-            ->where('reseller_id', $reseller->id)
-            ->with(['tenant.subAccount', 'tenant.package', 'invoice.package']);
+        $user = Auth::user();
+        $isSuperAdmin = method_exists($user, 'hasRole') && $user->hasRole('super-admin');
+
+        $query = ResellerOrder::query();
+        if ($isSuperAdmin) {
+            $selectedResellerId = $request->input('reseller_id') ?: session('active_reseller_id');
+            if ($selectedResellerId && $selectedResellerId !== 'all') {
+                $query->where('reseller_orders.reseller_id', $selectedResellerId);
+            }
+        } else {
+            $query->where('reseller_orders.reseller_id', $reseller->id);
+        }
+
+        $query->with(['tenant.subAccount', 'tenant.package', 'invoice.package']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->input('status'));
@@ -95,7 +106,15 @@ class ResellerOrderController extends Controller
         $statuses = OrderStatus::allForSelect();
 
         // Clean stats query across all matching orders without pagination/sorting
-        $statsQuery = ResellerOrder::where('reseller_id', $reseller->id);
+        $statsQuery = ResellerOrder::query();
+        if ($isSuperAdmin) {
+            $selectedResellerId = $request->input('reseller_id') ?: session('active_reseller_id');
+            if ($selectedResellerId && $selectedResellerId !== 'all') {
+                $statsQuery->where('reseller_id', $selectedResellerId);
+            }
+        } else {
+            $statsQuery->where('reseller_id', $reseller->id);
+        }
 
         if ($request->filled('status')) {
             $statsQuery->where('status', $request->input('status'));

@@ -128,8 +128,18 @@ class ResellerPackageController extends Controller
     public function index(Request $request): View
     {
         $reseller = $this->getReseller();
+        $user = Auth::user();
+        $isSuperAdmin = method_exists($user, 'hasRole') && $user->hasRole('super-admin');
 
-        $packageQuery = ResellerPackage::forReseller($reseller->id)->withCount('tenants');
+        $packageQuery = ResellerPackage::query()->withCount('tenants');
+        if ($isSuperAdmin) {
+            $selectedResellerId = $request->input('reseller_id') ?: session('active_reseller_id');
+            if ($selectedResellerId && $selectedResellerId !== 'all') {
+                $packageQuery->forReseller($selectedResellerId);
+            }
+        } else {
+            $packageQuery->forReseller($reseller->id);
+        }
 
         if ($search = trim((string)$request->input('search', ''))) {
             $packageQuery->where(static function ($q) use ($search) {
