@@ -5,6 +5,7 @@ namespace Modules\Booking\App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Log;
 use Modules\Booking\Entities\BookingCategory;
 use Modules\Booking\Entities\BookingService;
 use Modules\Booking\Entities\BookingSetting;
@@ -14,13 +15,14 @@ use Modules\Clients\Entities\Client;
 class CureController extends Controller
 {
 
-    private function getInstallmentTypes(BookingSetting $settings = null): array
+    private function getInstallmentTypes(?BookingSetting $settings = null): array
     {
         $installmentTypes = [];
 
         // 1. Try via BookingSetting model first (if it has the property)
-        if ($settings && !empty($settings->installment_types)) {
-            $decoded = json_decode($settings->installment_types, true);
+        $modelValue = $settings?->installment_types;
+        if (!empty($modelValue)) {
+            $decoded = json_decode($modelValue, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                 return $decoded;
             }
@@ -28,24 +30,24 @@ class CureController extends Controller
 
         // 2. Direct query from 'settings' table (reliable method)
         try {
-            $settingRow = DB::table('settings')
+            $rawValue = DB::table('settings')
                 ->where('key', 'installment_types')
-                ->first();
+                ->value('value');
 
-            if ($settingRow && !empty($settingRow->value)) {
-                $decoded = json_decode($settingRow->value, true);
+            if (!empty($rawValue) && is_string($rawValue)) {
+                $decoded = json_decode($rawValue, true);
 
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                     return $decoded;
-                } else {
-                    \Log::error('Installment Types JSON Decode Error', [
-                        'error' => json_last_error_msg(),
-                        'raw_value' => $settingRow->value
-                    ]);
                 }
+
+                Log::error('Installment Types JSON Decode Error', [
+                    'error' => json_last_error_msg(),
+                    'raw_value' => $rawValue,
+                ]);
             }
-        } catch (\Exception $e) {
-            \Log::error('Failed to load installment_types setting', [
+        } catch (\Throwable $e) {
+            Log::error('Failed to load installment_types setting', [
                 'error' => $e->getMessage()
             ]);
         }
@@ -286,7 +288,7 @@ class CureController extends Controller
         $settings = $this->applyRoundingSettings($settings);
         $installmentTypes = $this->getInstallmentTypes($settings);
 
-        $allowedCategories = $settings->cure_allowed_categories ?? [];
+        $allowedCategories = is_array($settings->cure_allowed_categories) ? $settings->cure_allowed_categories : [];
         $servicesQuery = BookingService::with(['category', 'categories'])->orderBy('name');
         if (!empty($allowedCategories)) {
             $servicesQuery->where(function ($q) use ($allowedCategories) {
@@ -304,7 +306,7 @@ class CureController extends Controller
                     $cp = ['tabs' => []];
                 }
 
-                $categoryIds = $s->categories->pluck('id')->toArray();
+                $categoryIds = $s->categories ? $s->categories->pluck('id')->toArray() : [];
                 if ($s->category_id && !in_array((int)$s->category_id, $categoryIds)) {
                     $categoryIds[] = (int)$s->category_id;
                 }
@@ -314,7 +316,7 @@ class CureController extends Controller
                     'name' => $s->name,
                     'base_price' => (float)$s->base_price,
                     'base_price_mode' => $s->base_price_mode ?? 'per_unit',
-                    'requires_tooth_selection' => $s->requires_tooth_selection !== false,
+                    'requires_tooth_selection' => ($s->requires_tooth_selection ?? true) !== false,
                     'category_id' => $s->category_id,
                     'category_ids' => $categoryIds,
                     'category_name' => $s->category?->name,
@@ -341,7 +343,7 @@ class CureController extends Controller
             'settings' => $settings,
             'installmentTypes' => $installmentTypes,
             'assignableRolesWithUsers' => $assignableRolesWithUsers,
-            'cureStatuses' => $settings->cure_statuses ?? [],
+            'cureStatuses' => is_array($settings->cure_statuses) ? $settings->cure_statuses : [],
         ]);
     }
 
@@ -534,7 +536,7 @@ class CureController extends Controller
             try {
                 app(\Modules\Booking\App\Observers\TreatmentPlanObserver::class)->triggerBindings($plan, null);
             } catch (\Exception $e) {
-                \Log::error("[CureController] Failed to manually trigger bindings: " . $e->getMessage());
+                Log::error("[CureController] Failed to manually trigger bindings: " . $e->getMessage());
             }
 
             // Create initial snapshot of the plan state upon creation
@@ -1238,17 +1240,22 @@ class CureController extends Controller
         ];
     }
 
-    private function getAssignableRolesWithUsers(BookingSetting $settings): array
+    private function getAssignableRolesWithUsers(?BookingSetting $settings): array
     {
-        $assignableRoleIds = $settings->cure_assignable_roles ?? [];
+        if (!$settings) {
+            return [];
+        }
+
+        $assignableRoleIds = is_array($settings->cure_assignable_roles) ? $settings->cure_assignable_roles : [];
         $assignableRolesWithUsers = [];
         if (!empty($assignableRoleIds)) {
             $roles = \Spatie\Permission\Models\Role::whereIn('id', $assignableRoleIds)->get();
             foreach ($roles as $role) {
-                $users = \App\Models\User::role($role->name)->get()->map(fn($u) => [
+                $users = $role->users()->get()->map(fn($u) => [
                     'id' => $u->id,
                     'name' => $u->name ?? $u->full_name ?? $u->username ?? 'کاربر ' . $u->id,
                 ]);
+
                 $assignableRolesWithUsers[] = [
                     'role_id' => $role->id,
                     'role_name' => $role->name,

@@ -573,6 +573,7 @@
                                         }
                                         $planTeethStr = implode(',', array_unique($allPlanTeeth));
                                     @endphp
+                                    @if(\Illuminate\Support\Facades\Route::has('user.booking.laboratory.index'))
                                     <a href="{{ route('user.booking.laboratory.index', [
                                             'client_id' => $plan->client_id,
                                             'action' => 'create',
@@ -586,22 +587,25 @@
                                         </svg>
                                         ارسال به لابراتوار
                                     </a>
+                                    @endif
 
                                     @if(class_exists(\Modules\ContractForge\App\Models\Contract::class))
                                         @php
                                             $firstContract = \Modules\ContractForge\App\Models\Contract::where('contractable_type', get_class($plan))->where('contractable_id', $plan->id)->first();
                                         @endphp
                                         @if($firstContract)
+                                            @if(\Illuminate\Support\Facades\Route::has('user.contracts.show'))
                                             <a href="{{ route('user.contracts.show', $firstContract->id) }}"
                                                class="flex items-center gap-1.5 px-4 py-2 text-xs rounded-xl bg-teal-50 text-teal-600 hover:bg-teal-100 dark:bg-teal-900/25 dark:text-teal-400 dark:hover:bg-teal-900/40 transition font-medium">
                                                 مشاهده قرارداد
                                             </a>
+                                        @endif
                                         @else
                                             @if(auth()->user()->can('contractforge.manage'))
                                                 @php
                                                     $matchingTemplate = \Modules\ContractForge\Services\ContractEngine::findMatchingTemplate('treatment_plan', $plan);
                                                 @endphp
-                                                @if($matchingTemplate)
+                                                @if($matchingTemplate && \Illuminate\Support\Facades\Route::has('user.contracts.generate_manual'))
                                                     <form action="{{ route('user.contracts.generate_manual') }}" method="POST" class="inline">
                                                         @csrf
                                                         <input type="hidden" name="template_id" value="{{ $matchingTemplate->id }}">
