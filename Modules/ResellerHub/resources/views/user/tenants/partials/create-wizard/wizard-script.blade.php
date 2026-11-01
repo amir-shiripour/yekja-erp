@@ -731,6 +731,23 @@
                 return this.form.expires_in_months ? (this.faNum(this.form.expires_in_months) + ' ماهه') : 'انتخاب نشده';
             },
 
+            get invoiceToggleLabel() {
+                const pkg = this.getActivePackage();
+                const isFree = pkg && (pkg.price_type === 'free' || Boolean(pkg.is_free));
+
+                if (this.issueInvoice) {
+                    if (isFree) {
+                        return 'صدور فاکتور رسمی (پکیج رایگان)';
+                    }
+                    return '{{ __('resellerhub::messages.wizard.step3.issue_invoice_toggle') }} (فعال)';
+                }
+
+                if (isFree) {
+                    return 'عدم صدور فاکتور مالی (پکیج رایگان)';
+                }
+                return 'عدم صدور فاکتور مالی (ثبت مستقیم سامانه)';
+            },
+
             formatPriceInput(value) {
                 if (!value && value !== 0) return '';
                 const num = parseInt(String(value).replace(/[^0-9]/g, ''), 10);
@@ -1283,6 +1300,7 @@
             togglePackage(pkg) {
                 if (this.activePackageId === pkg.id) {
                     this.activePackageId = null;
+                    this.issueInvoice = true;
                     if (!this.invoiceDiscountUserModified) {
                         this.invoiceDiscountAmount = 0;
                         this.invoiceDiscountDisplay = '';
@@ -1336,7 +1354,10 @@
 
                 this.$nextTick(() => {
                     const priceType = pkg.price_type || 'subscription';
-                    if (priceType === 'one_time' || priceType === 'free') {
+                    const isFree = (priceType === 'free' || Boolean(pkg.is_free));
+                    // Automatically turn off toggle for free package; default to true for paid
+                    this.issueInvoice = !isFree;
+                    if (priceType === 'one_time' || isFree) {
                         this.form.expires_in_months = null;
                     } else {
                         const available = this.availableDurationOptions;
