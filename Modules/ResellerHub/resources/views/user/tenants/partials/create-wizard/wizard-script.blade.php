@@ -85,7 +85,7 @@
                     const res = await axios.post("{{ route('reseller.sub-accounts.quick-store') }}", this.quickSubForm);
                     if (res.data && res.data.success) {
                         const newSub = res.data.sub_account;
-                        this.subAccounts.unshift(newSub);
+                        this.subAccounts = [newSub, ...(this.subAccounts || [])];
                         this.selectSubAccount(newSub);
                         this.quickSubModalOpen = false;
                         this.showToast('حساب زیرمجموعه جدید با موفقیت ایجاد و انتخاب گردید.', 'success');
