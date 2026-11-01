@@ -51,7 +51,7 @@
                 toast: {show: false, message: '', type: 'success'},
                 pricingModules: config.catalog || [],
                 pricingSearch: '',
-                pricingFilter: 'all', // 'all', 'active', 'inactive', 'unpriced'
+                pricingFilter: 'all',
                 pricingFilters: [
                     {key: 'all', label: 'همه'},
                     {key: 'active', label: 'فعال'},
@@ -124,12 +124,11 @@
                     if (!m) return {quarterly: 0, semiAnnual: 0, yearly: 0};
                     return {
                         quarterly: m * 3,
-                        semiAnnual: Math.round(m * 6 * 0.95),
-                        yearly: Math.round(m * 12 * 0.85),
+                        semiAnnual: m * 6,
+                        yearly: m * 12,
                     };
                 },
 
-                // --- Filters ---
                 hasModulePrice(m) {
                     return ['base_monthly_price', 'base_quarterly_price', 'base_semi_annual_price', 'base_yearly_price', 'base_setup_fee']
                         .some(k => (parseInt(m[k] || 0) || 0) > 0);
@@ -387,7 +386,7 @@
                 class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold text-gray-500 dark:text-gray-400">
                 <span
                     x-text="faNum(pricingModules.filter(x => x.is_active).length) + ' ماژول فعال از مجموع ' + faNum(pricingModules.length) + ' ماژول سیستمی'"></span>
-                <span class="text-xs text-gray-400">نکته: با تغییر مبلغ ماهانه، می‌توانید از دکمه «محاسبه خودکار» برای اعمال تخفیف‌های دوره‌ای استفاده نمایید.</span>
+                <span class="text-xs text-gray-400">نکته: با تغییر مبلغ ماهانه، می‌توانید از دکمه «محاسبه خودکار» برای محاسبه تعرفه‌های دوره‌ای استفاده نمایید.</span>
             </div>
         </x-resellerhub::card>
 
@@ -441,9 +440,9 @@
             </div>
         </x-resellerhub::card>
 
-        {{-- Master-Detail Workbench (12-Column CSS Grid - mathematically constrained) --}}
+        {{-- Master-Detail Workbench--}}
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full max-w-full min-w-0">
-            {{-- SIDEBAR: Master Modules List (4 cols on lg, 3 cols on xl) --}}
+            {{-- SIDEBAR: Master Modules List--}}
             <x-resellerhub::card class="p-4 sm:p-5 space-y-4 lg:col-span-4 xl:col-span-3 w-full min-w-0">
                 {{-- Search & Filter Bar --}}
                 <div class="space-y-2.5">
@@ -463,7 +462,7 @@
                         </button>
                     </div>
 
-                    {{-- Filter chips (با شمارنده زنده) --}}
+                    {{-- Filter chips--}}
                     <div
                         class="grid grid-cols-2 gap-1 p-1 rounded-xl bg-gray-100 dark:bg-gray-900/60 text-xs font-bold">
                         <template x-for="f in pricingFilters" :key="f.key">

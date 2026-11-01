@@ -22,7 +22,7 @@
     $currency = $currency ?? ResellerSetting::getCurrencyForReseller($resellerId);
     $currencyLabel = $currencyLabel ?? ResellerSetting::getCurrencyLabelForReseller($resellerId);
 
-    $defaultActivePeriods = is_array($package->active_periods ?? null) && !empty($package->active_periods)
+    $defaultActivePeriods = is_array($package->active_periods ?? null)
         ? $package->active_periods
         : ['monthly_price', 'quarterly_price', 'semi_annual_price', 'yearly_price'];
 
@@ -65,7 +65,8 @@
 
     @include('resellerhub::user.packages.partials.edit.script')
 
-    <div x-data="packageEditManager()" class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative">
+    <div x-data="packageEditManager(window.packageEditConfig)"
+         class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative">
         @include('resellerhub::user.packages.partials.edit.header')
 
         <form action="{{ route('reseller.packages.update', $package->id) }}" method="POST" @submit="submitting = true"
@@ -126,6 +127,6 @@
             @include('resellerhub::user.packages.partials.edit.card-modules')
             @include('resellerhub::user.packages.partials.edit.card-pricing')
             @include('resellerhub::user.packages.partials.edit.actions')
-    </form>
-</div>
+        </form>
+    </div>
 @endsection

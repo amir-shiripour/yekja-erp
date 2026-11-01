@@ -186,7 +186,13 @@
 
         <div class="flex justify-between items-center">
             <span class="text-gray-500 dark:text-gray-400">تاریخ انقضای اشتراک:</span>
-            <span class="font-bold text-amber-600 dark:text-amber-400" x-text="faNum(expiresAt)"></span>
+            @if($tenant->package && !$tenant->package->getPriceTypeEnum()->hasRenewal())
+                <span class="font-bold text-xs {{ $tenant->package->getPriceTypeEnum()->textClass() }}">
+                    {{ $tenant->package->getPriceTypeEnum()->licenseBadgeLabel() }}
+                </span>
+            @else
+                <span class="font-bold text-amber-600 dark:text-amber-400" x-text="faNum(expiresAt)"></span>
+            @endif
         </div>
     </div>
     <div class="pt-6 border-t border-gray-100 dark:border-gray-700/60 mt-auto">
@@ -195,6 +201,14 @@
                 class="w-full h-12 px-5 bg-amber-50 dark:bg-amber-950/60 border border-amber-200/60 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-xl flex items-center justify-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                 <span>سامانه در انتظار پرداخت و تسویه فاکتور است</span>
+            </div>
+        @elseif($tenant->package && !$tenant->package->getPriceTypeEnum()->hasRenewal())
+            <div
+                class="w-full h-12 px-5 {{ $tenant->package->getPriceTypeEnum()->badgeClass() }} text-xs font-bold rounded-xl flex items-center justify-center gap-2">
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>{{ $tenant->package->getPriceTypeEnum()->licenseSubtitle() }}</span>
             </div>
         @else
             <button type="button"

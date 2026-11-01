@@ -63,8 +63,10 @@ class TenantProvisioningService
             /** @var TenantManager $tenantManager */
             $tenantManager = app(TenantManager::class);
 
-            $months = !empty($data['expires_in_months']) ? (int)$data['expires_in_months'] : 12;
-            $expiresAt = Carbon::now()->addMonths($months);
+            $months = array_key_exists('expires_in_months', $data)
+                ? ($data['expires_in_months'] !== null ? (int)$data['expires_in_months'] : null)
+                : 12;
+            $expiresAt = ($months && $months > 0 && $months < 1200) ? Carbon::now()->addMonths($months) : null;
 
             $isCustomBranding = !empty($data['white_label_type']) && $data['white_label_type'] === 'custom';
             $customBrandingData = $data['branding'] ?? [];

@@ -3,8 +3,10 @@
 @endphp
 
 <section class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
-    <div class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-sm backdrop-blur-xl overflow-hidden flex flex-col justify-between">
-        <div class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-700/70 flex items-center justify-between gap-3">
+    <div
+        class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-sm backdrop-blur-xl overflow-hidden flex flex-col justify-between">
+        <div
+            class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-700/70 flex items-center justify-between gap-3">
             <div class="flex items-center gap-2.5">
                 <span
                     class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/50 flex items-center justify-center shrink-0">
@@ -49,7 +51,8 @@
                                 $daysLeft = reseller_days_remaining($expiring->plan_expires_at);
                                 $isCritical = ($daysLeft !== null && $daysLeft <= 7);
                                 $expPackage = $expiring->package;
-                                $expPeriods = reseller_tenant_renewal_periods($expiring);
+                                $canExpRenew = $expPackage ? $expPackage->getPriceTypeEnum()->hasRenewal() : true;
+                                $expPeriods = $canExpRenew ? reseller_tenant_renewal_periods($expiring) : [];
                             @endphp
                             <li class="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50/70 dark:hover:bg-gray-900/20 transition-colors">
                                 <div class="min-w-0">
@@ -83,22 +86,24 @@
                                         </span>
                                     @endif
 
-                                    <button type="button"
-                                            @click="openRenewModalByElement($el)"
-                                            data-id="{{ $expiring->id }}"
-                                            data-name="{{ e($expiring->name) }}"
-                                            data-subdomain="{{ e($expiring->subdomain) }}"
-                                            data-package="{{ e($expPackage?->name ?? '') }}"
-                                            data-expires="{{ e(reseller_format_jalali($expiring->plan_expires_at)) }}"
-                                            data-periods="{{ e(json_encode($expPeriods)) }}"
-                                            data-url="{{ route('reseller.tenants.renew', $expiring->id) }}"
-                                            class="p-2 rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors cursor-pointer"
-                                            title="تمدید آنی لایسنس">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                        </svg>
-                                    </button>
+                                    @if($canExpRenew)
+                                        <button type="button"
+                                                @click="openRenewModalByElement($el)"
+                                                data-id="{{ $expiring->id }}"
+                                                data-name="{{ e($expiring->name) }}"
+                                                data-subdomain="{{ e($expiring->subdomain) }}"
+                                                data-package="{{ e($expPackage?->name ?? '') }}"
+                                                data-expires="{{ e(reseller_format_jalali($expiring->plan_expires_at)) }}"
+                                                data-periods="{{ e(json_encode($expPeriods)) }}"
+                                                data-url="{{ route('reseller.tenants.renew', $expiring->id) }}"
+                                                class="p-2 rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors cursor-pointer"
+                                                title="تمدید آنی لایسنس">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                        </button>
+                                    @endif
                                 </div>
                             </li>
                         @endforeach
@@ -123,10 +128,13 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-sm backdrop-blur-xl overflow-hidden flex flex-col justify-between">
-        <div class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-700/70 flex items-center justify-between gap-3">
+    <div
+        class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-sm backdrop-blur-xl overflow-hidden flex flex-col justify-between">
+        <div
+            class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-700/70 flex items-center justify-between gap-3">
             <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/50 flex items-center justify-center shrink-0">
+                <span
+                    class="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/50 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -177,7 +185,8 @@
                                            class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors truncate">
                                             {{ $inv->invoice_number }}
                                         </a>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold border {{ $inv->status_badge_classes ?? $tone['badge_classes'] }}">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold border {{ $inv->status_badge_classes ?? $tone['badge_classes'] }}">
                                             {{ $inv->status_label ?? $tone['status_label'] }}
                                         </span>
                                     </div>

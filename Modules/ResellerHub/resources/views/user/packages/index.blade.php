@@ -416,6 +416,15 @@
                 },
 
                 get durationLabel() {
+                    if (this.selectedPackage && this.selectedPackage.price_type === 'free') {
+                        return 'رایگان';
+                    }
+                    if (this.selectedPackage && this.selectedPackage.price_type === 'one_time') {
+                        return 'مادام‌العمر (یک‌بار پرداخت)';
+                    }
+                    if (!this.form.expires_in_months || String(this.form.expires_in_months) === '1200' || String(this.form.expires_in_months) === '0') {
+                        return 'مادام‌العمر (یک‌بار پرداخت)';
+                    }
                     const opt = this.durationOptions.find(o => String(o.value) === String(this.form.expires_in_months));
                     return opt ? opt.label : (this.faNum(this.form.expires_in_months) + ' ماهه');
                 },
@@ -663,11 +672,11 @@
                     if (priceType === 'free') {
                         this.form.issue_invoice = false;
                         this.form.invoice_status = 'unpaid';
-                        this.form.expires_in_months = '12';
+                        this.form.expires_in_months = null;
                     } else if (priceType === 'one_time') {
                         this.form.issue_invoice = true;
                         this.form.invoice_status = 'unpaid';
-                        this.form.expires_in_months = '1200';
+                        this.form.expires_in_months = null;
                     } else {
                         this.form.issue_invoice = true;
                         this.form.invoice_status = 'unpaid';
@@ -955,18 +964,18 @@
                         return yearly > 0 ? Math.round((yearly / 12) * 3) : 0;
                     } else if (months === 6) {
                         if (semiAnnual > 0) return semiAnnual;
-                        if (monthly > 0) return Math.round(monthly * 6 * 0.95);
+                        if (monthly > 0) return monthly * 6;
                         return yearly > 0 ? Math.round(yearly / 2) : 0;
                     } else if (months === 12) {
                         if (yearly > 0) return yearly;
-                        if (monthly > 0) return Math.round(monthly * 12 * 0.85);
+                        if (monthly > 0) return monthly * 12;
                         return 0;
                     } else if (months === 24) {
                         const y = yearly > 0 ? yearly : (monthly * 12);
-                        return Math.round(y * 2 * 0.9);
+                        return y * 2;
                     } else if (months === 36) {
                         const y = yearly > 0 ? yearly : (monthly * 12);
-                        return Math.round(y * 3 * 0.85);
+                        return y * 3;
                     } else {
                         if (monthly > 0) return monthly * months;
                         if (yearly > 0) return Math.round((yearly / 12) * months);

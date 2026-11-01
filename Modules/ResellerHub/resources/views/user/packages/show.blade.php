@@ -470,11 +470,11 @@
                     if (priceType === '{{ PackagePriceType::FREE->value }}') {
                         this.form.issue_invoice = false;
                         this.form.invoice_status = '{{ InvoiceStatus::UNPAID->value }}';
-                        this.form.expires_in_months = '12';
+                        this.form.expires_in_months = null;
                     } else if (priceType === '{{ PackagePriceType::ONE_TIME->value }}') {
                         this.form.issue_invoice = true;
                         this.form.invoice_status = '{{ InvoiceStatus::UNPAID->value }}';
-                        this.form.expires_in_months = '1200';
+                        this.form.expires_in_months = null;
                     } else {
                         this.form.issue_invoice = true;
                         this.form.invoice_status = '{{ InvoiceStatus::UNPAID->value }}';

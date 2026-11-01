@@ -141,15 +141,10 @@ class DashboardMetricsService
         $unpaidInvoicesCount = (int)($invoiceStats->unpaid_count ?? 0);
         $unpaidInvoicesTotal = (int)($invoiceStats->unpaid_total ?? 0);
         $overdueInvoicesCount = (int)($invoiceStats->overdue_count ?? 0);
-
-        // 3. Operational counters
         $packagesCount = (clone $packageQuery)->count();
         $activePackagesCount = (clone $packageQuery)->where('is_active', true)->count();
         $subAccountsCount = (clone $subAccountQuery)->count();
         $activeOrdersCount = (clone $orderQuery)->where('status', ResellerOrder::STATUS_ACTIVE)->count();
-
-        // 4. Order channel breakdown
-        // 4. Order channel breakdown
         $totalOrdersCount = (clone $orderQuery)->count();
         $onlineOrdersCount = (clone $orderQuery)->online()->count();
         $manualOrdersCount = (clone $orderQuery)->manual()->count();
@@ -293,7 +288,6 @@ class DashboardMetricsService
         $activeRatio = $totalTenants > 0 ? round(($activeTenants / $totalTenants) * 100, 1) : 0;
         $arpu = $totalTenants > 0 ? round($totalRevenue / $totalTenants) : 0;
 
-        //Renewal Pipeline (30d, 60d, 90d)
         $calcExpectedTenantRevenue = function ($t) use ($arpu) {
             if ($t->package) {
                 $p = $t->package;
@@ -381,9 +375,16 @@ class DashboardMetricsService
         $expiringTenants = (clone $tenantQuery)
             ->whereNotNull('plan_expires_at')
             ->whereBetween('plan_expires_at', [now()->format('Y-m-d'), now()->addDays(30)->format('Y-m-d')])
+            ->where(function ($q) {
+                $q->whereNull('package_id')
+                    ->orWhereHas('package', function ($pq) {
+                        $pq->where('price_type', ResellerPackage::PRICE_TYPE_SUBSCRIPTION);
+                    });
+            })
+            ->with('package')
             ->orderBy('plan_expires_at')
             ->limit(6)
-            ->get(['id', 'name', 'subdomain', 'status', 'plan_expires_at']);
+            ->get(['id', 'name', 'subdomain', 'status', 'plan_expires_at', 'package_id']);
 
         $unpaidInvoices = (clone $invoiceQuery)
             ->whereIn('status', [ResellerInvoice::STATUS_UNPAID, ResellerInvoice::STATUS_OVERDUE])
@@ -426,7 +427,7 @@ class DashboardMetricsService
         $totalActiveModulesCount = (int)$rawModuleCounts->sum('tenant_count');
         $avgModulesPerTenant = $totalResellerTenants > 0 ? round($totalActiveModulesCount / $totalResellerTenants, 1) : 0;
 
-        // OPTIMIZED Entitlements, Features and Quotas Statistics (NO N×M loop)
+        // OPTIMIZED Entitlements, Features and Quotas Statistics
         // Group tenants by package and status to calculate in O(Packages) instead of O(Tenants x Definitions)
         $allDefinitions = TenantQuotaService::getDefinitions();
         $entitlements = $this->computeEntitlementsStats($tenantQuery, $allDefinitions, $totalResellerTenants);
@@ -436,7 +437,7 @@ class DashboardMetricsService
         $avgFeaturesPerTenant = $totalResellerTenants > 0 ? round($totalFeaturesActiveCount / $totalResellerTenants, 1) : 0;
         $limitedTenantsRatio = $limitsStats->first() ? $limitsStats->first()['limitedRatio'] : 0;
 
-        // 9. Package Distribution
+        //Package Distribution
         $packageRaw = (clone $tenantQuery)
             ->with('package:id,name,monthly_price,yearly_price,color')
             ->get(['id', 'package_id'])

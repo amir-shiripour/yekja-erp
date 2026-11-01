@@ -307,7 +307,7 @@
                         <template x-if="item.item_type !== 'custom'">
                                             <span
                                                 class="text-xs font-bold text-gray-600 dark:text-gray-300 tabular-nums"
-                                                x-text="item.duration_months > 0 ? (item.duration_months === 12 ? '۱ ساله' : (item.duration_months === 1 ? '۱ ماهه' : (item.duration_months === 3 ? '۳ ماهه' : (item.duration_months === 6 ? '۶ ماهه' : faNum(item.duration_months) + ' ماهه')))) : (faNum(item.quantity || 1) + ' عدد')"></span>
+                                                x-text="(item.duration_months > 0) ? (item.duration_months >= 1200 ? 'مادام‌العمر (دائمی)' : (item.duration_months === 12 ? '۱ ساله' : (item.duration_months === 1 ? '۱ ماهه' : (item.duration_months === 3 ? '۳ ماهه' : (item.duration_months === 6 ? '۶ ماهه' : faNum(item.duration_months) + ' ماهه'))))) : (item.item_type === 'package' ? 'مادام‌العمر (دائمی)' : (faNum(item.quantity || 1) + ' عدد'))"></span>
                         </template>
                     </td>
 

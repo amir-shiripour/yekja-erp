@@ -223,7 +223,21 @@ class ResellerPackage extends Model
 
     public function getPriceTypeEnum(): PackagePriceType
     {
+        if ($this->isFree()) {
+            return PackagePriceType::FREE;
+        }
+
         return PackagePriceType::fromOrDefault($this->price_type);
+    }
+
+    public function hasRenewal(): bool
+    {
+        return $this->getPriceTypeEnum()->hasRenewal();
+    }
+
+    public function hasPeriods(): bool
+    {
+        return $this->getPriceTypeEnum()->hasPeriods();
     }
 
     public function getDiscountTypeEnum(): PackageDiscountType

@@ -201,6 +201,16 @@ if (!function_exists('reseller_tenant_renewal_periods')) {
     }
 }
 
+if (!function_exists('reseller_can_tenant_renew')) {
+    /**
+     * Check if a tenant's license can be renewed.
+     */
+    function reseller_can_tenant_renew(Tenant $tenant): bool
+    {
+        return ResellerHelper::canTenantRenew($tenant);
+    }
+}
+
 if (!function_exists('reseller_package_color_presets')) {
     /**
      * Standard color presets for reseller packages.

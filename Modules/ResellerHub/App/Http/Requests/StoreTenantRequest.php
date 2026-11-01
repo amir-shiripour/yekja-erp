@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Modules\ResellerHub\App\Helpers\ResellerHelper;
 use Modules\ResellerHub\App\Models\Reseller;
+use Modules\ResellerHub\App\Models\ResellerPackage;
 use Modules\ResellerHub\App\Models\ResellerSubAccount;
 
 class StoreTenantRequest extends FormRequest
@@ -78,9 +79,19 @@ class StoreTenantRequest extends FormRequest
             $this->merge(['invoice_number' => trim((string)$this->input('invoice_number'))]);
         }
 
-        if ($this->input('expires_in_months') === 'lifetime') {
-            $isSuperAdmin = auth()->user() && method_exists(auth()->user(), 'hasRole') && auth()->user()->hasRole('super-admin');
-            $this->merge(['expires_in_months' => $isSuperAdmin ? 1200 : 12]);
+        $packageId = $this->input('package_id');
+        $isPermanentPackage = false;
+        if ($packageId) {
+            $pkg = ResellerPackage::find($packageId);
+            if ($pkg && !$pkg->getPriceTypeEnum()->hasRenewal()) {
+                $isPermanentPackage = true;
+                $this->merge(['expires_in_months' => null]);
+            }
+        }
+
+        $rawExpiry = $this->input('expires_in_months');
+        if ($rawExpiry === 'lifetime' || $rawExpiry === '0' || (int)$rawExpiry === 0 || (int)$rawExpiry >= 1200) {
+            $this->merge(['expires_in_months' => null]);
         }
 
         $domainType = $this->input('domain_type');
@@ -126,7 +137,7 @@ class StoreTenantRequest extends FormRequest
             }
             $fallbackName = $subName
                 ?: ($this->input('branding.brand_title')
-                ?: ($this->input('subdomain') ?: 'سامانه اختصاصی'));
+                    ?: ($this->input('subdomain') ?: 'سامانه اختصاصی'));
             $this->merge(['name' => $fallbackName]);
         }
     }
@@ -143,9 +154,6 @@ class StoreTenantRequest extends FormRequest
         $hasSubAccount = $this->filled('sub_account_id');
         $subAccount = $hasSubAccount ? ResellerSubAccount::find($this->input('sub_account_id')) : null;
         $existingUserId = $subAccount?->user_id;
-
-        // The tenant admin credentials are only collected when a brand-new admin
-        // account is being provisioned (not for existing tenants or sub-accounts).
         $adminFieldsOptional = $skipTenantFields || $hasSubAccount;
 
         $adminEmailRules = array_values(array_filter([
