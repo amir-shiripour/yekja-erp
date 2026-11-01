@@ -64,7 +64,9 @@
                     <div x-data="{
                     open: false,
                     search: '',
-                    options: @js($subAccounts ?? []),
+                    get options() {
+                        return (typeof subAccounts !== 'undefined' && Array.isArray(subAccounts)) ? subAccounts : [];
+                    },
                     get filteredOptions() {
                         if (!this.search.trim()) return this.options;
                         const q = this.search.toLowerCase();
@@ -75,17 +77,23 @@
                         );
                     },
                     select(opt) {
-                        form.sub_account_id = opt ? String(opt.id) : '';
-                        form.admin_name = opt ? opt.name : '';
-                        form.admin_email = opt ? opt.email : '';
-                        form.admin_mobile = opt ? opt.mobile : '';
+                        if (typeof selectSubAccount === 'function') {
+                            selectSubAccount(opt);
+                        } else {
+                            form.sub_account_id = opt ? String(opt.id) : '';
+                            form.admin_name = opt ? opt.name : '';
+                            form.admin_email = opt ? opt.email : '';
+                            form.admin_mobile = opt ? opt.mobile : '';
+                        }
                         this.open = false;
                         this.search = '';
-                        // clear error
-                        if (errors.sub_account_id) { delete errors.sub_account_id; }
+                        if (typeof errors !== 'undefined' && errors.sub_account_id) { delete errors.sub_account_id; }
                     },
                     getSelectedTitle() {
                         let found = this.options.find(o => String(o.id) === String(form.sub_account_id));
+                        if (!found && typeof selectedSubAccount !== 'undefined' && selectedSubAccount) {
+                            found = selectedSubAccount;
+                        }
                         if (!found) return 'انتخاب خریدار...';
                         let title = found.name;
                         if (found.company_name) title += ' (' + found.company_name + ')';
