@@ -503,6 +503,58 @@ class TenantProvisioningService
                         TenantModule::where('tenant_id', $tenant->id)->update(['is_active' => false]);
                     }
                 }
+            } else {
+                // Provision an active order directly without an invoice
+                $maxDuration = (int)($tenantData['expires_in_months'] ?? 12);
+                $billingCycle = match (true) {
+                    $maxDuration <= 0 => 'lifetime',
+                    $maxDuration <= 1 => 'monthly',
+                    $maxDuration <= 3 => 'quarterly',
+                    $maxDuration <= 6 => 'semi_annual',
+                    default => 'yearly',
+                };
+
+                $modulesSnapshot = [];
+                $packageId = $tenant->package_id;
+                $pkg = $packageId ? ResellerPackage::find($packageId) : null;
+                $contractValue = 0;
+                if ($pkg) {
+                    $contractValue = (int)$pkg->getPriceForMonths($maxDuration);
+                }
+
+                $installedModules = TenantModule::where('tenant_id', $tenant->id)->get();
+                foreach ($installedModules as $tm) {
+                    $modulesSnapshot[] = [
+                        'type' => 'module',
+                        'slug' => $tm->module_slug,
+                        'title' => ResellerHelper::getModuleTitle($tm->module_slug) ?: $tm->module_slug,
+                        'duration_months' => $maxDuration,
+                        'unit_price' => 0,
+                    ];
+                }
+
+                $order = ResellerOrder::create([
+                    'reseller_id' => $reseller->id,
+                    'tenant_id' => $tenant->id,
+                    'invoice_id' => null,
+                    'order_number' => ResellerOrder::generateNextNumber($reseller->id),
+                    'sub_account_name' => $tenant->subAccount?->name ?: $tenant->name,
+                    'sub_account_mobile' => $tenant->subAccount?->mobile ?: ($tenantData['admin_mobile'] ?? null),
+                    'sub_account_email' => $tenant->subAccount?->email ?: ($tenantData['admin_email'] ?? null),
+                    'status' => ResellerOrder::STATUS_ACTIVE,
+                    'billing_cycle' => $billingCycle,
+                    'start_date' => now(),
+                    'end_date' => $tenant->plan_expires_at,
+                    'renewal_date' => $tenant->plan_expires_at,
+                    'total_amount' => 0,
+                    'contract_value' => $contractValue,
+                    'renewal_price' => $contractValue,
+                    'renewal_price_type' => 'auto',
+                    'modules_snapshot' => $modulesSnapshot,
+                    'provisioning_status' => ResellerOrder::PROVISION_DONE,
+                    'notes' => $financialData['invoice_notes'] ?? 'سفارش مستقیم بدون صدور فاکتور مالی',
+                    'created_by' => $actor?->id ?? auth()->id(),
+                ]);
             }
 
             return [

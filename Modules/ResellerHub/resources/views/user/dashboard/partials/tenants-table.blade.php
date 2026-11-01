@@ -388,10 +388,10 @@
                                     </a>
                                 @else
                                     <form method="POST" action="{{ $tenantUrl }}" target="_blank"
-                                          class="inline m-0 p-0">
+                                          class="inline-flex items-center m-0 p-0 shrink-0">
                                         @csrf
                                         <button type="submit"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white dark:bg-indigo-950/60 dark:hover:bg-indigo-600 dark:text-indigo-300 dark:hover:text-white text-xs font-bold transition-all shadow-2xs active:scale-95 cursor-pointer"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white dark:bg-indigo-950/60 dark:hover:bg-indigo-600 dark:text-indigo-300 dark:hover:text-white text-xs font-bold transition-all shadow-2xs active:scale-95 cursor-pointer shrink-0"
                                                 title="ورود مستقیم به پنل مدیریت سامانه (SSO)">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                  viewBox="0 0 24 24">
@@ -412,7 +412,7 @@
                                                 data-expires="{{ e($tenant->jalali_plan_expires_at ?? 'نامحدود') }}"
                                                 data-periods="{{ e(json_encode($tPeriods)) }}"
                                                 data-url="{{ route('reseller.tenants.renew', $tenant->id) }}"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white dark:bg-emerald-950/60 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white dark:bg-emerald-950/60 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
                                                 title="تمدید لایسنس و اشتراک">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                  viewBox="0 0 24 24">
@@ -424,12 +424,27 @@
                                     @endif
                                 @endif
 
-                                <div class="relative inline-block text-start shrink-0" x-data="{ open: false }"
-                                     :class="{ 'z-50': open }">
+                                <div class="relative inline-flex items-center text-start shrink-0"
+                                     x-data="{
+                                         open: false,
+                                         coords: { top: 0, left: 0 },
+                                         toggle(el) {
+                                             if (this.open) {
+                                                 this.open = false;
+                                                 return;
+                                             }
+                                             const rect = el.getBoundingClientRect();
+                                             const opensUp = (window.innerHeight - rect.bottom) < 170;
+                                             this.coords = {
+                                                 top: opensUp ? Math.max(10, rect.top - 145) : (rect.bottom + 6),
+                                                 left: Math.max(10, rect.left)
+                                             };
+                                             this.open = true;
+                                         }
+                                     }">
                                     <button type="button"
-                                            @click.stop="open = !open"
-                                            @click.outside="open = false"
-                                            class="p-1.5 rounded-xl text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors cursor-pointer"
+                                            @click.stop="toggle($el)"
+                                            class="p-1.5 rounded-xl text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors cursor-pointer shrink-0"
                                             title="عملیات تکمیلی">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -437,71 +452,78 @@
                                         </svg>
                                     </button>
 
-                                    <div x-show="open"
-                                         x-transition:enter="transition ease-out duration-100"
-                                         x-transition:enter-start="transform opacity-0 scale-95"
-                                         x-transition:enter-end="transform opacity-100 scale-100"
-                                         x-transition:leave="transition ease-in duration-75"
-                                         x-transition:leave-start="transform opacity-100 scale-100"
-                                         x-transition:leave-end="transform opacity-0 scale-95"
-                                         style="display: none;"
-                                         class="absolute left-0 rtl:left-0 rtl:right-auto top-full mt-1.5 w-48 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/80 shadow-2xl py-1.5 z-50 text-xs font-bold divide-y divide-gray-100 dark:divide-gray-700/60">
+                                    <template x-teleport="body">
+                                        <div x-show="open"
+                                             data-tenant-dropdown="true"
+                                             @click.outside="open = false"
+                                             @scroll.window="open = false"
+                                             x-transition:enter="transition ease-out duration-100"
+                                             x-transition:enter-start="transform opacity-0 scale-95"
+                                             x-transition:enter-end="transform opacity-100 scale-100"
+                                             x-transition:leave="transition ease-in duration-75"
+                                             x-transition:leave-start="transform opacity-100 scale-100"
+                                             x-transition:leave-end="transform opacity-0 scale-95"
+                                             :style="'top: ' + coords.top + 'px; left: ' + coords.left + 'px;'"
+                                             style="display: none;"
+                                             dir="rtl"
+                                             class="fixed w-48 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/80 shadow-2xl py-1.5 z-[99999] text-xs font-bold divide-y divide-gray-100 dark:divide-gray-700/60">
 
-                                        <div class="py-1">
-                                            <a href="{{ route('reseller.tenants.show', $tenant->id) }}"
-                                               class="flex items-center gap-2 px-3.5 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors">
-                                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
-                                                     viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2"
-                                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                </svg>
-                                                <span>مشاهده جزئیات</span>
-                                            </a>
-                                            <a href="{{ route('reseller.tenants.edit', $tenant->id) }}"
-                                               class="flex items-center gap-2 px-3.5 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors">
-                                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
-                                                     viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2"
-                                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                </svg>
-                                                <span>ویرایش اطلاعات</span>
-                                            </a>
-                                        </div>
-                                        @if(!$tenant->isPendingPayment())
                                             <div class="py-1">
-                                                <button type="button"
-                                                        id="btn-toggle-{{ $tenant->id }}"
-                                                        @click="open = false; openSuspendModalByElement($el)"
-                                                        data-id="{{ $tenant->id }}"
-                                                        data-name="{{ e($tenant->name) }}"
-                                                        data-subdomain="{{ e($displayUrl) }}"
-                                                        data-owner="{{ e($tenant->subAccount?->name ?? '—') }}"
-                                                        data-suspended="{{ $tenant->status === 'suspended' ? 'true' : 'false' }}"
-                                                        data-url="{{ route('reseller.tenants.toggle-status', $tenant->id) }}"
-                                                        class="w-full flex items-center gap-2 px-3.5 py-2 text-start transition-colors cursor-pointer {{ $tenant->status === 'suspended' ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' : 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40' }}">
-                                                    @if($tenant->status === 'suspended')
-                                                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24"
-                                                             stroke="currentColor" stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                  d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
-                                                        </svg>
-                                                        <span>رفع مسدودیت</span>
-                                                    @else
-                                                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24"
-                                                             stroke="currentColor" stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM10 7a2 2 0 114 0v4h-4V7z"/>
-                                                        </svg>
-                                                        <span>مسدودسازی موقت</span>
-                                                    @endif
-                                                </button>
+                                                <a href="{{ route('reseller.tenants.show', $tenant->id) }}"
+                                                   class="flex items-center gap-2 px-3.5 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors">
+                                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                                         viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              stroke-width="2"
+                                                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                    </svg>
+                                                    <span>مشاهده جزئیات</span>
+                                                </a>
+                                                <a href="{{ route('reseller.tenants.edit', $tenant->id) }}"
+                                                   class="flex items-center gap-2 px-3.5 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors">
+                                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                                         viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              stroke-width="2"
+                                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
+                                                    <span>ویرایش اطلاعات</span>
+                                                </a>
                                             </div>
-                                        @endif
-                                    </div>
+                                            @if(!$tenant->isPendingPayment())
+                                                <div class="py-1">
+                                                    <button type="button"
+                                                            id="btn-toggle-{{ $tenant->id }}"
+                                                            @click="open = false; openSuspendModalByElement($el)"
+                                                            data-id="{{ $tenant->id }}"
+                                                            data-name="{{ e($tenant->name) }}"
+                                                            data-subdomain="{{ e($displayUrl) }}"
+                                                            data-owner="{{ e($tenant->subAccount?->name ?? '—') }}"
+                                                            data-suspended="{{ $tenant->status === 'suspended' ? 'true' : 'false' }}"
+                                                            data-url="{{ route('reseller.tenants.toggle-status', $tenant->id) }}"
+                                                            class="w-full flex items-center gap-2 px-3.5 py-2 text-start transition-colors cursor-pointer {{ $tenant->status === 'suspended' ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' : 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40' }}">
+                                                        @if($tenant->status === 'suspended')
+                                                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24"
+                                                                 stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                      d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                                                            </svg>
+                                                            <span>رفع مسدودیت</span>
+                                                        @else
+                                                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24"
+                                                                 stroke="currentColor" stroke-width="2">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM10 7a2 2 0 114 0v4h-4V7z"/>
+                                                            </svg>
+                                                            <span>مسدودسازی موقت</span>
+                                                        @endif
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         </td>

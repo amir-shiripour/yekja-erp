@@ -87,6 +87,9 @@ class StoreTenantRequest extends FormRequest
                 $isPermanentPackage = true;
                 $this->merge(['expires_in_months' => null]);
             }
+            if ($pkg && $pkg->getPriceTypeEnum()->isFree() && !$this->has('issue_invoice')) {
+                $this->merge(['issue_invoice' => 0]);
+            }
         }
 
         $rawExpiry = $this->input('expires_in_months');

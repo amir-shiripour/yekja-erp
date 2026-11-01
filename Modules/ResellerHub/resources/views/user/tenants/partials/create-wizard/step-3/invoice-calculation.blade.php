@@ -20,11 +20,12 @@
             </div>
         </div>
         <label class="flex items-center gap-3 cursor-pointer select-none shrink-0 group">
-                            <span class="text-xs sm:text-sm font-bold transition-colors"
-                                  :class="issueInvoice ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'"
-                                  x-text="issueInvoice ? '{{ __('resellerhub::messages.wizard.step3.issue_invoice_toggle') }}' : '{{ __('resellerhub::messages.wizard.step3.free_package_notice') }}'"></span>
+            <span class="text-xs sm:text-sm font-bold transition-colors"
+                  :class="issueInvoice ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'"
+                  x-text="invoiceToggleLabel"></span>
             <div class="relative inline-flex items-center">
-                <input type="checkbox" x-model="issueInvoice" class="sr-only peer">
+                <input type="checkbox" x-model="issueInvoice"
+                       class="sr-only peer">
                 <div
                     class="w-13 h-7 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-300 shadow-inner"></div>
                 <div
@@ -37,6 +38,42 @@
                 </div>
             </div>
         </label>
+    </div>
+
+    {{-- Info banner when invoice is disabled --}}
+    <div x-show="!issueInvoice" x-transition
+         class="p-4 sm:p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/50 flex items-start gap-3.5">
+        <span
+            class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </span>
+        <div class="space-y-1">
+            <template
+                x-if="getActivePackage() && (getActivePackage().price_type === 'free' || getActivePackage().is_free)">
+                <div>
+                    <h4 class="text-xs sm:text-sm font-black text-emerald-900 dark:text-emerald-100">پکیج رایگان — بدون
+                        نیاز به صورت‌حساب مالی</h4>
+                    <p class="text-xs text-emerald-700/90 dark:text-emerald-300/90 mt-1 leading-relaxed">
+                        این پکیج رایگان است و سامانه به صورت مستقیم و بدون ثبت فاکتور بدهکاری در سیستم، ایجاد و فعال
+                        خواهد گردید. در صورت تمایل می‌توانید تاگل بالا را فعال کنید تا فاکتور رسمی ثبت گردد.
+                    </p>
+                </div>
+            </template>
+            <template
+                x-if="!getActivePackage() || (getActivePackage().price_type !== 'free' && !getActivePackage().is_free)">
+                <div>
+                    <h4 class="text-xs sm:text-sm font-black text-amber-900 dark:text-amber-100">عدم صدور فاکتور مالی
+                        برای این سامانه</h4>
+                    <p class="text-xs text-amber-700/90 dark:text-amber-300/90 mt-1 leading-relaxed">
+                        گزینه صدور فاکتور مالی غیرفعال شده است. سامانه بدون ثبت صورت‌حساب مالی در سیستم ایجاد شده و
+                        بلافاصله به عنوان یک سامانه فعال ثبت می‌گردد (مناسب برای تسویه‌های نقدی یا آزمایشی).
+                    </p>
+                </div>
+            </template>
+        </div>
     </div>
 
     <div x-show="issueInvoice" x-transition class="space-y-6">

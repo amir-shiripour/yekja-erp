@@ -45,10 +45,11 @@ class TenantProvisioningController extends Controller
     protected ModuleTitleResolver $titleResolver;
 
     public function __construct(
-        ResellerBillingService $billingService,
+        ResellerBillingService         $billingService,
         ModuleCapabilityCatalogService $catalogService,
-        ?ModuleTitleResolver $titleResolver = null,
-    ) {
+        ?ModuleTitleResolver           $titleResolver = null,
+    )
+    {
         $this->billingService = $billingService;
         $this->catalogService = $catalogService;
         $this->titleResolver = $titleResolver ?: app(ModuleTitleResolver::class);
@@ -81,8 +82,8 @@ class TenantProvisioningController extends Controller
         if ($search = $request->input('search', $request->input('q'))) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('subdomain', 'like', "%{$search}%")
-                  ->orWhere('custom_domain', 'like', "%{$search}%");
+                    ->orWhere('subdomain', 'like', "%{$search}%")
+                    ->orWhere('custom_domain', 'like', "%{$search}%");
             });
         }
 
@@ -326,9 +327,15 @@ class TenantProvisioningController extends Controller
                 $validatedData['uploaded_brand_favicon'] = $request->file('tenant_brand_favicon')->store('branding/tenants/favicons', 'public');
             }
 
-            $shouldIssueInvoice = $request->boolean('issue_invoice')
-                || $request->filled('invoice_items')
-                || ($request->filled('package_id') && $request->input('issue_invoice', '1') !== '0');
+            $packageId = $request->input('package_id');
+            $requestedPkg = $packageId ? ResellerPackage::find($packageId) : null;
+            $isFreePackage = $requestedPkg && $requestedPkg->getPriceTypeEnum()->isFree();
+
+            if ($request->has('issue_invoice')) {
+                $shouldIssueInvoice = $request->boolean('issue_invoice');
+            } else {
+                $shouldIssueInvoice = $isFreePackage ? false : ($request->filled('package_id') || $request->filled('invoice_items'));
+            }
 
             $financialData = [
                 'should_issue_invoice' => $shouldIssueInvoice,
@@ -872,10 +879,10 @@ class TenantProvisioningController extends Controller
 
         Log::error('resellerhub.provisioning.unexpected_exception', [
             'exception' => $e::class,
-            'message'   => $e->getMessage(),
-            'file'      => $e->getFile(),
-            'line'      => $e->getLine(),
-            'reseller'  => auth()->user()?->id,
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'reseller' => auth()->user()?->id,
         ]);
 
         return __('resellerhub::messages.common.unexpected_error');
