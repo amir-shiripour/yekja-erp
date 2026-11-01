@@ -128,7 +128,8 @@
                 </div>
             </div>
         </div>
-        <div class="p-6 sm:p-8 bg-white dark:bg-gray-800">
+        <div class="p-6 sm:p-8 bg-white dark:bg-gray-800"
+             :class="(activeTab === 'subscription' || activeTab === 'domain_branding') ? 'bg-gray-50/50 dark:bg-gray-900/40 rounded-3xl' : ''">
 
             {{-- اطلاعات کاربری --}}
             <div x-show="activeTab === 'profile'" x-cloak>

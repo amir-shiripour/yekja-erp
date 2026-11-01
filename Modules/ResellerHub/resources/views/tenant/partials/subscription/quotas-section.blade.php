@@ -89,13 +89,13 @@
         @else
             @foreach($quotasSummary['quotas'] as $qKey => $qItem)
                 <div
-                    class="rounded-2xl p-5 bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/70 shadow-2xs hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700/60 transition-all duration-300 flex flex-col justify-between gap-4 group">
+                    class="rounded-2xl p-5 bg-white dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/70 shadow-xs hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700/60 transition-all duration-300 flex flex-col justify-between gap-4 group">
                     <div>
                         {{-- Card Header --}}
                         <div class="flex items-center justify-between gap-2">
                             <div class="flex items-center gap-2.5">
                                 <span
-                                    class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 {{ $qItem['icon_bg_class'] }}">
+                                    class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-current/15 {{ $qItem['icon_bg_class'] }}">
                                     @if(($qItem['icon'] ?? '') === 'users')
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path
                                                 stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

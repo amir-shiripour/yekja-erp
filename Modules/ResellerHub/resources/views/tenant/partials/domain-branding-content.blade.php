@@ -93,11 +93,11 @@
             <div class="lg:col-span-5 space-y-6">
                 {{-- Active Subdomain Card --}}
                 <div
-                    class="rounded-3xl p-6 bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/80 shadow-xs space-y-4">
+                    class="rounded-3xl p-6 bg-white dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-4">
                     <div class="flex items-center justify-between gap-3">
                         <div class="flex items-center gap-2.5">
                             <span
-                                class="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
+                                class="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100/80 dark:border-indigo-800/60">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                      stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -115,18 +115,18 @@
                         </span>
                     </div>
 
-                    <div class="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800 flex items-center justify-between gap-3">
+                    <div class="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-800 flex items-center justify-between gap-3">
                         <div class="min-w-0">
                             <span
                                 class="text-xs font-bold text-gray-400 block">{{ __('resellerhub::messages.domain_branding.direct_login_url') }}</span>
                             <span
                                 class="text-xs sm:text-sm font-mono font-bold text-indigo-600 dark:text-indigo-400 dir-ltr block truncate">
-                                {{ $currentSubdomain ? $currentSubdomain . '.' . (parse_url(url('/'), PHP_URL_HOST) ?: 'crm.test') : $tenantUrl }}
+                                {{ $tenantUrl }}
                             </span>
                         </div>
                         <a href="{{ $tenantUrl }}" target="_blank"
                            title="{{ __('resellerhub::messages.domain_branding.view_url') }}"
-                           class="w-9 h-9 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all shadow-2xs shrink-0">
+                           class="w-9 h-9 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all shadow-2xs shrink-0">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -137,10 +137,10 @@
 
                 {{-- Custom Domain Card (Conditional: Active vs Locked) --}}
                 <div
-                    class="rounded-3xl p-6 bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/80 shadow-xs space-y-5 relative overflow-hidden">
+                    class="rounded-3xl p-6 bg-white dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5 relative overflow-hidden">
                     <div class="flex items-center gap-2.5">
                         <span
-                            class="p-2 rounded-xl {{ $allowsCustomDomain ? 'bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-400' }}">
+                            class="p-2 rounded-xl {{ $allowsCustomDomain ? 'bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-100 dark:border-sky-800/60' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/80 dark:border-gray-700' }}">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -172,7 +172,7 @@
 
                             {{-- CNAME Instructions Box --}}
                             <div
-                                class="p-3.5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/50 space-y-2 text-xs leading-relaxed text-amber-900 dark:text-amber-200">
+                                class="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 space-y-2 text-xs leading-relaxed text-amber-900 dark:text-amber-200">
                                 <div class="font-bold flex items-center gap-1.5">
                                     <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none"
                                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -185,7 +185,7 @@
                                     {{ __('resellerhub::messages.domain_branding.cname_box_desc') }}
                                 </p>
                                 <div
-                                    class="p-2 rounded-xl bg-white dark:bg-gray-900/80 border border-amber-200/60 dark:border-amber-900/60 font-mono text-center text-xs font-black text-indigo-600 dark:text-indigo-400 dir-ltr select-all">
+                                    class="p-2.5 rounded-xl bg-white dark:bg-gray-900/80 border border-amber-300/80 dark:border-amber-900/60 font-mono text-center text-xs font-black text-indigo-600 dark:text-indigo-400 dir-ltr select-all shadow-2xs">
                                     {{ $cnameTarget }}
                                 </div>
                             </div>
@@ -220,9 +220,9 @@
                     @else
                         {{-- Locked State Banner --}}
                         <div
-                            class="p-5 rounded-2xl bg-gray-50/80 dark:bg-gray-900/40 border border-dashed border-gray-200 dark:border-gray-700 text-center space-y-3">
+                            class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/40 border border-dashed border-gray-200 dark:border-gray-700 text-center space-y-3">
                             <div
-                                class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 mx-auto flex items-center justify-center">
+                                class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/80 dark:border-gray-700 mx-auto flex items-center justify-center">
                                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                      stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -246,12 +246,18 @@
             {{-- 2. WHITE-LABEL BRANDING SECTION (7 cols on lg) --}}
             <div class="lg:col-span-7">
                 <div
-                    class="rounded-3xl p-6 sm:p-7 bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/80 shadow-xs space-y-6 relative overflow-hidden">
+                    class="rounded-3xl p-6 sm:p-7 bg-white dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-6 relative overflow-hidden">
                     <div
                         class="flex items-center justify-between gap-3 pb-4 border-b border-gray-100 dark:border-gray-800">
                         <div class="flex items-center gap-3">
                             <span
-                                class="p-2.5 rounded-2xl {{ $allowsWhiteLabel ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60' : 'bg-gray-100 dark:bg-gray-800 text-gray-400' }}">
+                                class="p-2.5 rounded-2xl {{ $allowsWhiteLabel ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/80 dark:border-gray-700' }}">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                                </svg>
+                            </span>
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                      stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -327,7 +333,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                                 {{-- Brand Logo --}}
                                 <div
-                                    class="p-4 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 space-y-3">
+                                    class="p-4 rounded-2xl bg-gray-50/90 dark:bg-gray-900/50 border border-gray-200/80 dark:border-gray-800 space-y-3">
                                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                                         {{ __('resellerhub::messages.domain_branding.logo_label') }}
                                     </label>
@@ -341,7 +347,7 @@
                                             </template>
                                             <template x-if="!logoPreviewUrl">
                                                 <span
-                                                    class="text-xs text-gray-400 font-bold">{{ __('resellerhub::messages.domain_branding.no_logo') }}</span>
+                                                    class="text-xs text-gray-500 dark:text-gray-400 font-bold">{{ __('resellerhub::messages.domain_branding.no_logo') }}</span>
                                             </template>
                                         </div>
 
@@ -365,7 +371,7 @@
 
                                 {{-- Brand Favicon --}}
                                 <div
-                                    class="p-4 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 space-y-3">
+                                    class="p-4 rounded-2xl bg-gray-50/90 dark:bg-gray-900/50 border border-gray-200/80 dark:border-gray-800 space-y-3">
                                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                                         {{ __('resellerhub::messages.domain_branding.favicon_label') }}
                                     </label>
@@ -379,7 +385,7 @@
                                             </template>
                                             <template x-if="!faviconPreviewUrl">
                                                 <span
-                                                    class="text-xs text-gray-400 font-bold">{{ __('resellerhub::messages.domain_branding.no_favicon') }}</span>
+                                                    class="text-xs text-gray-500 dark:text-gray-400 font-bold">{{ __('resellerhub::messages.domain_branding.no_favicon') }}</span>
                                             </template>
                                         </div>
 
@@ -458,9 +464,9 @@
                     @else
                         {{-- Locked White-Label State --}}
                         <div
-                            class="p-8 rounded-2xl bg-gray-50/80 dark:bg-gray-900/40 border border-dashed border-gray-200 dark:border-gray-700 text-center space-y-4">
+                            class="p-8 rounded-2xl bg-gray-50/90 dark:bg-gray-900/40 border border-dashed border-gray-300 dark:border-gray-700 text-center space-y-4">
                             <div
-                                class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 mx-auto flex items-center justify-center">
+                                class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60 mx-auto flex items-center justify-center">
                                 <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                      stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"

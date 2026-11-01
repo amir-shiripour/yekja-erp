@@ -434,11 +434,25 @@
                                                  return;
                                              }
                                              const rect = el.getBoundingClientRect();
-                                             const opensUp = (window.innerHeight - rect.bottom) < 170;
-                                             this.coords = {
-                                                 top: opensUp ? Math.max(10, rect.top - 145) : (rect.bottom + 6),
-                                                 left: Math.max(10, rect.left)
-                                             };
+                                             const menuWidth = 192;
+                                             const menuHeight = 135;
+                                             const margin = 6;
+                                             const spaceBelow = window.innerHeight - rect.bottom;
+                                             const spaceAbove = rect.top;
+
+                                             let top = (spaceBelow >= menuHeight + margin || spaceBelow >= spaceAbove)
+                                                 ? (rect.bottom + margin)
+                                                 : (rect.top - menuHeight - margin);
+
+                                             let left = rect.left;
+                                             if (left + menuWidth > window.innerWidth - 12) {
+                                                 left = window.innerWidth - menuWidth - 12;
+                                             }
+                                             if (left < 12) {
+                                                 left = 12;
+                                             }
+
+                                             this.coords = { top: Math.round(top), left: Math.round(left) };
                                              this.open = true;
                                          }
                                      }">
@@ -456,7 +470,9 @@
                                         <div x-show="open"
                                              data-tenant-dropdown="true"
                                              @click.outside="open = false"
-                                             @scroll.window="open = false"
+                                             @scroll.window.capture="open = false"
+                                             @resize.window="open = false"
+                                             @keydown.escape.window="open = false"
                                              x-transition:enter="transition ease-out duration-100"
                                              x-transition:enter-start="transform opacity-0 scale-95"
                                              x-transition:enter-end="transform opacity-100 scale-100"
@@ -466,7 +482,7 @@
                                              :style="'top: ' + coords.top + 'px; left: ' + coords.left + 'px;'"
                                              style="display: none;"
                                              dir="rtl"
-                                             class="fixed w-48 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/80 shadow-2xl py-1.5 z-[99999] text-xs font-bold divide-y divide-gray-100 dark:divide-gray-700/60">
+                                             class="fixed w-48 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200/90 dark:border-gray-700/80 shadow-2xl py-1.5 z-[99999] text-xs font-bold divide-y divide-gray-100 dark:divide-gray-700/60">
 
                                             <div class="py-1">
                                                 <a href="{{ route('reseller.tenants.show', $tenant->id) }}"

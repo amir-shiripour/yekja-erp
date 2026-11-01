@@ -64,7 +64,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 {{-- Expiry Date --}}
                 <div
-                    class="p-4 rounded-2xl bg-white/90 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/60 backdrop-blur-md">
+                    class="p-4 rounded-2xl bg-white/95 dark:bg-gray-900/60 border border-indigo-100/90 dark:border-gray-700/60 shadow-xs backdrop-blur-md">
                     <div class="flex items-center justify-between">
                         <span
                             class="text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('resellerhub::messages.subscription.views.expiry_date_label') }}</span>
@@ -77,7 +77,7 @@
 
                 {{-- Days Remaining --}}
                 <div
-                    class="p-4 rounded-2xl bg-white/90 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/60 backdrop-blur-md">
+                    class="p-4 rounded-2xl bg-white/95 dark:bg-gray-900/60 border border-indigo-100/90 dark:border-gray-700/60 shadow-xs backdrop-blur-md">
                     <div class="flex items-center justify-between">
                             <span
                                 class="text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('resellerhub::messages.subscription.views.license_remaining_term') }}</span>
@@ -105,7 +105,7 @@
 
     {{-- 2. Verified Reseller & Support Concierge--}}
     <div
-        class="lg:col-span-5 xl:col-span-4 rounded-3xl p-6 sm:p-7 bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/80 shadow-xs flex flex-col justify-between relative overflow-hidden">
+        class="lg:col-span-5 xl:col-span-4 rounded-3xl p-6 sm:p-7 bg-white dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/80 shadow-xs flex flex-col justify-between relative overflow-hidden">
         <div class="space-y-5">
             {{-- Header --}}
             <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700/60">
@@ -126,7 +126,7 @@
             <div class="flex items-center gap-4">
                 @if(!empty($resellerInfo['brand_logo']))
                     <img src="{{ asset('storage/' . $resellerInfo['brand_logo']) }}" alt="لوگوی نماینده"
-                         class="w-14 h-14 rounded-2xl object-contain bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 p-1.5 shadow-2xs">
+                         class="w-14 h-14 rounded-2xl object-contain bg-gray-50 dark:bg-gray-900 border border-gray-200/80 dark:border-gray-700 p-1.5 shadow-2xs">
                 @else
                     <div
                         class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
@@ -143,7 +143,7 @@
             <div class="space-y-2.5 pt-1">
                 @if(!empty($resellerInfo['support_phone']))
                     <a href="tel:{{ $resellerInfo['support_phone'] }}"
-                       class="flex items-center justify-between p-3 rounded-xl bg-gray-50/80 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/60 text-gray-700 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-white dark:hover:bg-gray-900 transition group">
+                       class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700/60 text-gray-700 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-white dark:hover:bg-gray-900 transition group">
                             <span
                                 class="flex items-center gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
                                 <span
@@ -162,7 +162,7 @@
 
                 @if(!empty($resellerInfo['support_email']))
                     <a href="mailto:{{ $resellerInfo['support_email'] }}"
-                       class="flex items-center justify-between p-3 rounded-xl bg-gray-50/80 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/60 text-gray-700 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-white dark:hover:bg-gray-900 transition group">
+                       class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700/60 text-gray-700 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-white dark:hover:bg-gray-900 transition group">
                             <span
                                 class="flex items-center gap-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
                                 <span

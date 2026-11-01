@@ -63,7 +63,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {{-- 1. Total Invoices --}}
                 <div
-                    class="p-4 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/60 flex items-center gap-3 shadow-2xs">
+                    class="p-4 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/60 flex items-center gap-3 shadow-xs">
                     <span
                         class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-100/80 dark:border-indigo-800/40">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -84,7 +84,7 @@
 
                 {{-- 2. Total Paid --}}
                 <div
-                    class="p-4 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/60 flex items-center gap-3 shadow-2xs">
+                    class="p-4 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/60 flex items-center gap-3 shadow-xs">
                     <span
                         class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-100/80 dark:border-emerald-800/40">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -105,9 +105,9 @@
 
                 {{-- 3. Outstanding Balance --}}
                 <div
-                    class="p-4 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/60 flex items-center gap-3 shadow-2xs">
+                    class="p-4 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/60 flex items-center gap-3 shadow-xs">
                     <span
-                        class="w-10 h-10 rounded-xl {{ $invoicesUnpaidSum > 0 ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200/80 dark:border-amber-800/40' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-200 dark:border-gray-700' }} flex items-center justify-center shrink-0">
+                        class="w-10 h-10 rounded-xl {{ $invoicesUnpaidSum > 0 ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200/80 dark:border-amber-800/40' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/80 dark:border-gray-700' }} flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -153,7 +153,7 @@
                 @endphp
 
                 <div
-                    class="group relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/60 hover:border-indigo-300 dark:hover:border-indigo-700/70 transition-all duration-200 shadow-2xs">
+                    class="group relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/60 hover:border-indigo-300 dark:hover:border-indigo-700/70 transition-all duration-200 shadow-xs">
                     {{-- Edge Status Indicator --}}
                     <span class="absolute inset-y-0 start-0 w-1 {{ $barColor }}"></span>
 
@@ -324,7 +324,7 @@
                             <a href="{{ route('reseller.invoices.print', $inv->id) }}"
                                target="_blank"
                                title="صفحه پرداخت / چاپ فاکتور"
-                               class="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300 transition-all">
+                               class="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300 transition-all shadow-2xs">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                      stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
