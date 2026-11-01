@@ -174,7 +174,21 @@
 
                             <div class="mt-3.5 pt-3 border-t flex items-center justify-between gap-2"
                                  :class="activePackageId === pkg.id ? 'border-indigo-200/70 dark:border-indigo-800/50' : 'border-gray-200/70 dark:border-gray-700/60'">
-                                <template x-if="pkg.yearly_price && parseInt(pkg.yearly_price) > 0">
+                                <template x-if="pkg.price_type === 'free' || pkg.is_free">
+                                    <span
+                                        class="text-xs font-black text-emerald-600 dark:text-emerald-400">رایگان</span>
+                                </template>
+                                <template x-if="pkg.price_type === 'one_time'">
+                                    <div class="flex items-baseline gap-1 min-w-0">
+                                        <span
+                                            class="text-sm font-black tabular-nums truncate text-purple-600 dark:text-purple-400"
+                                            x-text="formatAmount(pkg.one_time_price || 0)"></span>
+                                        <span class="text-xs font-bold shrink-0 text-gray-400 dark:text-gray-500"
+                                              x-text="currencyLabel + ' (دائمی)'"></span>
+                                    </div>
+                                </template>
+                                <template
+                                    x-if="pkg.price_type !== 'free' && !pkg.is_free && pkg.price_type !== 'one_time' && pkg.yearly_price && parseInt(pkg.yearly_price) > 0">
                                     <div class="flex items-baseline gap-1 min-w-0">
                                         <span
                                             class="text-sm font-black tabular-nums truncate text-emerald-600 dark:text-emerald-400"
@@ -185,18 +199,18 @@
                                     </div>
                                 </template>
                                 <template
-                                    x-if="(!pkg.yearly_price || parseInt(pkg.yearly_price) === 0) && pkg.monthly_price && parseInt(pkg.monthly_price) > 0">
+                                    x-if="pkg.price_type !== 'free' && !pkg.is_free && pkg.price_type !== 'one_time' && (!pkg.yearly_price || parseInt(pkg.yearly_price) === 0) && pkg.monthly_price && parseInt(pkg.monthly_price) > 0">
                                     <div class="flex items-baseline gap-1 min-w-0">
-                                                        <span
-                                                            class="text-sm font-black tabular-nums truncate text-emerald-600 dark:text-emerald-400"
-                                                            x-text="formatAmount(pkg.monthly_price)"></span>
+                                        <span
+                                            class="text-sm font-black tabular-nums truncate text-emerald-600 dark:text-emerald-400"
+                                            x-text="formatAmount(pkg.monthly_price)"></span>
                                         <span
                                             class="text-xs font-bold shrink-0 text-gray-400 dark:text-gray-500"
                                             x-text="currencyLabel + ' / ماه'"></span>
                                     </div>
                                 </template>
                                 <template
-                                    x-if="(!pkg.yearly_price || parseInt(pkg.yearly_price) === 0) && (!pkg.monthly_price || parseInt(pkg.monthly_price) === 0)">
+                                    x-if="pkg.price_type !== 'free' && !pkg.is_free && pkg.price_type !== 'one_time' && (!pkg.yearly_price || parseInt(pkg.yearly_price) === 0) && (!pkg.monthly_price || parseInt(pkg.monthly_price) === 0)">
                                     <span
                                         class="text-xs font-bold text-gray-400 dark:text-gray-500">بدون تعرفه ثابت</span>
                                 </template>
@@ -284,78 +298,171 @@
     <div
         class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-gray-100 dark:border-gray-700/60">
         <div class="flex items-center gap-2.5">
-                        <span
-                            class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path
-                                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </span>
+            <span
+                class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path
+                        stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </span>
             <div>
-                <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">مدت زمان لایسنس
-                    اولیه سامانه</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">قیمت و بازه زمانی لایسنس
-                    به
-                    صورت مستقیم از تعرفه پکیج انتخابی استخراج و در فاکتور نهایی اعمال می‌گردد.</p>
+                <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">مدت زمان لایسنس اولیه
+                    سامانه</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">قیمت و بازه زمانی لایسنس به صورت مستقیم از
+                    تعرفه پکیج انتخابی استخراج و در فاکتور نهایی اعمال می‌گردد.</p>
             </div>
         </div>
         <template x-if="getActivePackage()">
+            <span
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-black border border-emerald-200/60">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>تعرفه فعال: <span x-text="getActivePackage().name"></span></span>
+            </span>
+        </template>
+    </div>
+
+    {{-- State 1: Package is One-Time (Lifetime) --}}
+    <template x-if="getActivePackage() && getActivePackage().price_type === 'one_time'">
+        <div
+            class="p-4 rounded-xl bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <span
+                    class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-300 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </span>
+                <div>
+                    <h4 class="text-xs sm:text-sm font-black text-purple-900 dark:text-purple-100">لایسنس دائمی (یک‌بار
+                        پرداخت - مادام‌العمر)</h4>
+                    <p class="text-xs text-purple-700/80 dark:text-purple-300/80 mt-0.5">این سامانه به صورت نامحدود و
+                        بدون نیاز به تمدید سالانه یا ماهانه فعال می‌گردد.</p>
+                </div>
+            </div>
+            <div class="text-left sm:text-right shrink-0">
+                <div class="text-sm font-black tabular-nums text-purple-700 dark:text-purple-300">
+                    <span x-text="formatAmount(getActivePackage().one_time_price || 0)"></span>
+                    <span class="text-xs font-normal" x-text="currencyLabel"></span>
+                </div>
+                <span class="text-[10px] text-purple-600/70 dark:text-purple-400/70 block">پرداخت یک‌باره</span>
+            </div>
+        </div>
+    </template>
+
+    {{-- State 2: Package is Free --}}
+    <template x-if="getActivePackage() && getActivePackage().price_type === 'free'">
+        <div
+            class="p-4 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/50 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <span
+                    class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </span>
+                <div>
+                    <h4 class="text-xs sm:text-sm font-black text-emerald-900 dark:text-emerald-100">لایسنس رایگان
+                        (دائمی)</h4>
+                    <p class="text-xs text-emerald-700/80 dark:text-emerald-300/80 mt-0.5">این پکیج به صورت رایگان و
+                        بدون نیاز به تمدید برای استفاده در نظر گرفته شده است.</p>
+                </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-black">رایگان (همیشگی)</span>
+        </div>
+    </template>
+
+    {{-- State 3: Active Subscription Package with NO active periods defined --}}
+    <template
+        x-if="getActivePackage() && getActivePackage().price_type !== 'one_time' && getActivePackage().price_type !== 'free' && availableDurationOptions.length === 0">
+        <div
+            class="p-4 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-start sm:items-center gap-3">
+                <span
+                    class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </span>
+                <div>
+                    <h4 class="text-xs sm:text-sm font-black text-amber-900 dark:text-amber-100">عدم تعریف دوره زمانی
+                        برای این پکیج</h4>
+                    <p class="text-xs text-amber-700/90 dark:text-amber-300/90 mt-0.5">برای پکیج «<span
+                            class="font-bold" x-text="getActivePackage().name"></span>» هیچ دوره زمانی فعالی (ماهانه،
+                        سالانه و...) تنظیم نشده است. لطفاً پکیج را ویرایش کرده یا پکیج دیگری انتخاب کنید.</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <a :href="'{{ route('reseller.packages.index') }}/' + getActivePackage().id + '/edit'" target="_blank"
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-xs">
+                    <span>ویرایش پکیج</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                </a>
+                <button type="button"
+                        @click="activePackageId = null; if (!form.expires_in_months) form.expires_in_months = '12'; syncInvoiceItemsFromModules(); showToast('انتخاب پکیج لغو شد.');"
+                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 hover:bg-amber-100/50 text-xs font-bold transition-all">
+                    انصراف
+                </button>
+            </div>
+        </div>
+    </template>
+
+    {{-- State 4: Subscription options grid --}}
+    <template
+        x-if="availableDurationOptions.length > 0 && (!getActivePackage() || (getActivePackage().price_type !== 'one_time' && getActivePackage().price_type !== 'free'))">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-1">
+            <template x-for="opt in availableDurationOptions" :key="opt.value">
+                <label @click="selectPackageDuration(opt.value)"
+                       class="relative flex flex-col justify-between p-3.5 rounded-2xl border cursor-pointer transition-all select-none text-center group"
+                       :class="String(form.expires_in_months) === String(opt.value)
+                                          ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20 shadow-sm'
+                                          : 'bg-gray-50/60 dark:bg-gray-900/40 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-white'">
+                    <input type="radio" name="plan_duration_months" :value="opt.value"
+                           :checked="String(form.expires_in_months) === String(opt.value)" class="sr-only">
+
+                    <template x-if="opt.value === '12'">
                         <span
-                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-black border border-emerald-200/60">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            <span>تعرفه فعال: <span x-text="getActivePackage().name"></span></span>
+                            class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[9px] font-black shadow-xs">
+                            توصیه شده
                         </span>
-        </template>
-    </div>
-
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-1">
-        <template x-for="opt in availableDurationOptions" :key="opt.value">
-            <label @click="selectPackageDuration(opt.value)"
-                   class="relative flex flex-col justify-between p-3.5 rounded-2xl border cursor-pointer transition-all select-none text-center group"
-                   :class="String(form.expires_in_months) === String(opt.value)
-                                      ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20 shadow-sm'
-                                      : 'bg-gray-50/60 dark:bg-gray-900/40 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-indigo-300 dark:hover:border-indigo-700 hover:bg-white'">
-                <input type="radio" name="plan_duration_months" :value="opt.value"
-                       :checked="String(form.expires_in_months) === String(opt.value)" class="sr-only">
-
-                <template x-if="opt.value === '12'">
-                                <span
-                                    class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[9px] font-black shadow-xs">
-                                    توصیه شده
-                                </span>
-                </template>
-
-                <div class="space-y-1">
-                    <span class="text-xs font-black block" x-text="opt.label"></span>
-                    <template x-if="getActivePackage()">
-                        <div class="pt-1">
-                            <template x-if="getPackageDurationPrice(getActivePackage(), opt.value) > 0">
-                                <div
-                                    class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
-                                                <span
-                                                    x-text="formatAmount(getPackageDurationPrice(getActivePackage(), opt.value))"></span>
-                                    <span class="text-[9px] font-normal" x-text="currencyLabel"></span>
-                                </div>
-                            </template>
-                            <template
-                                x-if="getPackageDurationPrice(getActivePackage(), opt.value) === 0">
-                                                <span
-                                                    class="text-xs font-bold text-gray-400">رایگان / بدون هزینه</span>
-                            </template>
-                        </div>
                     </template>
-                </div>
 
-                <div
-                    class="mt-2 pt-2 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center">
-                                <span class="w-3.5 h-3.5 rounded-full border flex items-center justify-center"
-                                      :class="String(form.expires_in_months) === String(opt.value) ? 'border-indigo-600 bg-indigo-600' : 'border-gray-300 dark:border-gray-600'">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-white"
-                                          x-show="String(form.expires_in_months) === String(opt.value)"></span>
-                                </span>
-                </div>
-            </label>
-        </template>
-    </div>
+                    <div class="space-y-1">
+                        <span class="text-xs font-black block" x-text="opt.label"></span>
+                        <template x-if="getActivePackage()">
+                            <div class="pt-1">
+                                <template x-if="getPackageDurationPrice(getActivePackage(), opt.value) > 0">
+                                    <div
+                                        class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
+                                        <span
+                                            x-text="formatAmount(getPackageDurationPrice(getActivePackage(), opt.value))"></span>
+                                        <span class="text-[9px] font-normal" x-text="currencyLabel"></span>
+                                    </div>
+                                </template>
+                                <template
+                                    x-if="getPackageDurationPrice(getActivePackage(), opt.value) === 0">
+                                    <span
+                                        class="text-xs font-bold text-gray-400">رایگان / بدون هزینه</span>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div
+                        class="mt-2 pt-2 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center">
+                        <span class="w-3.5 h-3.5 rounded-full border flex items-center justify-center"
+                              :class="String(form.expires_in_months) === String(opt.value) ? 'border-indigo-600 bg-indigo-600' : 'border-gray-300 dark:border-gray-600'">
+                            <span class="w-1.5 h-1.5 rounded-full bg-white"
+                                  x-show="String(form.expires_in_months) === String(opt.value)"></span>
+                        </span>
+                    </div>
+                </label>
+            </template>
+        </div>
+    </template>
 </div>
 
 {{-- Modules & Capabilities Section Header with Toggle --}}

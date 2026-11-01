@@ -8,9 +8,7 @@
     $packagesJson = ($packages ?? collect())->map(function ($p) use ($modulesMap) {
         $pMods = $p->modules ?? [];
         $pFeats = $p->features ?? [];
-        $activePeriods = (is_array($p->active_periods) && !empty($p->active_periods))
-            ? $p->active_periods
-            : ['monthly_price', 'quarterly_price', 'semi_annual_price', 'yearly_price'];
+        $activePeriods = is_array($p->active_periods) ? array_values($p->active_periods) : [];
 
         return [
             'id' => $p->id,
@@ -784,19 +782,24 @@
                                 class="min-w-full text-xs text-start divide-y divide-gray-100 dark:divide-gray-700/50">
                                 <thead class="bg-gray-50/70 dark:bg-gray-900/40">
                                 <tr>
-                                    <th scope="col" class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-start">شماره
+                                    <th scope="col"
+                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-start">شماره
                                         فاکتور
                                     </th>
-                                    <th scope="col" class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    <th scope="col"
+                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
                                         مبلغ
                                     </th>
-                                    <th scope="col" class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    <th scope="col"
+                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
                                         وضعیت
                                     </th>
-                                    <th scope="col" class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    <th scope="col"
+                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
                                         تاریخ
                                     </th>
-                                    <th scope="col" class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-end">عملیات
+                                    <th scope="col"
+                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-end">عملیات
                                     </th>
                                 </tr>
                                 </thead>
@@ -873,19 +876,24 @@
                                 class="min-w-full text-xs text-start divide-y divide-gray-100 dark:divide-gray-700/50">
                                 <thead class="bg-gray-50/70 dark:bg-gray-900/40">
                                 <tr>
-                                    <th scope="col" class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-start">
+                                    <th scope="col"
+                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-start">
                                         سفارش
                                     </th>
-                                    <th scope="col" class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    <th scope="col"
+                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
                                         دوره
                                     </th>
-                                    <th scope="col" class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    <th scope="col"
+                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
                                         مبلغ
                                     </th>
-                                    <th scope="col" class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    <th scope="col"
+                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
                                         وضعیت
                                     </th>
-                                    <th scope="col" class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-end">عملیات
+                                    <th scope="col"
+                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-end">عملیات
                                     </th>
                                 </tr>
                                 </thead>
@@ -1336,10 +1344,10 @@
                     const priceType = pkg.price_type || 'subscription';
                     if (priceType === 'free') {
                         this.form.issue_invoice = false;
-                        this.form.expires_in_months = '12';
+                        this.form.expires_in_months = null;
                     } else if (priceType === 'one_time') {
                         this.form.issue_invoice = true;
-                        this.form.expires_in_months = '1200';
+                        this.form.expires_in_months = null;
                     } else {
                         this.form.issue_invoice = true;
                         const availableDurations = this.durationOptions;

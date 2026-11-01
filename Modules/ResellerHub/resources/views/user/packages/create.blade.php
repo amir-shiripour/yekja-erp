@@ -77,7 +77,8 @@
 
     @include('resellerhub::user.packages.partials.create.script')
 
-    <div x-data="packageCreateManager()" class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative">
+    <div x-data="packageCreateManager(window.packageCreateConfig)"
+         class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative">
         @include('resellerhub::user.packages.partials.create.header')
 
         <form action="{{ route('reseller.packages.store') }}" method="POST" @submit="submitting = true"
@@ -138,6 +139,6 @@
             @include('resellerhub::user.packages.partials.create.card-modules')
             @include('resellerhub::user.packages.partials.create.card-pricing')
             @include('resellerhub::user.packages.partials.create.actions')
-    </form>
-</div>
+        </form>
+    </div>
 @endsection

@@ -1,6 +1,5 @@
 <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
     <div class="flex items-center gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
-        {{-- Live Badge Preview --}}
         <span
             class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md shadow-indigo-500/20 transition-all duration-300 shrink-0"
             :style="`background-color: ${getColorHex(selectedColor)}; color: #ffffff;`"
@@ -13,12 +12,12 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {{-- Package Name --}}
         <div class="md:col-span-2">
             <x-resellerhub::label>
                 {{ __('resellerhub::messages.packages.form.name_label') }} <span class="text-red-500 font-bold">*</span>
             </x-resellerhub::label>
-            <x-resellerhub::input type="text" name="name" x-model="packageName" required
+            <x-resellerhub::input type="text" name="name" x-model="packageName"
+                                  value="{{ old('name', $package->name) }}" required
                                   placeholder="{{ __('resellerhub::messages.packages.form.name_placeholder') }}"
             />
             <p class="text-xs text-gray-400 mt-1 ms-1">{{ __('resellerhub::messages.packages.form.name_hint') }}</p>
@@ -59,7 +58,8 @@
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer shrink-0">
                     <input type="hidden" name="is_active" :value="isActive ? 1 : 0">
-                    <input type="checkbox" x-model="isActive" class="sr-only peer">
+                    <input type="checkbox" x-model="isActive"
+                           {{ old('is_active', $package->isActive()) ? 'checked' : '' }} class="sr-only peer">
                     <div
                         class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
                 </label>

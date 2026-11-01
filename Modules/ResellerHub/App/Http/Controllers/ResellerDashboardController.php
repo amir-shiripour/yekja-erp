@@ -282,6 +282,14 @@ class ResellerDashboardController extends Controller
         $notes = $validated['notes'] ?? null;
 
         $tenant->loadMissing(['package', 'orders.invoice', 'subAccount', 'owner']);
+
+        if ($tenant->package && !$tenant->package->getPriceTypeEnum()->hasRenewal()) {
+            $msg = 'این سامانه دارای پکیج ' . $tenant->package->getPriceTypeEnum()->label() . ' بوده و نیازی به تمدید ندارد.';
+            return $request->expectsJson() || $request->ajax()
+                ? response()->json(['success' => false, 'message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
         $latestOrder = $tenant->orders()->latest('id')->first();
 
         $billingService = app(ResellerBillingService::class);

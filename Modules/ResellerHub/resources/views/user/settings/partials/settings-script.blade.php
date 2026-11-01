@@ -743,8 +743,8 @@
                 if (!m) return {quarterly: 0, semiAnnual: 0, yearly: 0};
                 return {
                     quarterly: m * 3,
-                    semiAnnual: Math.round(m * 6 * 0.95),
-                    yearly: Math.round(m * 12 * 0.85),
+                    semiAnnual: m * 6,
+                    yearly: m * 12,
                 };
             },
 

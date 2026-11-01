@@ -145,6 +145,16 @@ class Tenant extends Model
 
     public function isExpired(): bool
     {
+        // Null expiration date means permanent / unlimited access
+        if (is_null($this->plan_expires_at)) {
+            return false;
+        }
+
+        // One-time and Free packages never expire
+        if ($this->package && !$this->package->getPriceTypeEnum()->hasRenewal()) {
+            return false;
+        }
+
         if ($this->status === self::STATUS_EXPIRED) {
             return true;
         }
@@ -154,6 +164,15 @@ class Tenant extends Model
         }
 
         return false;
+    }
+
+    public function isRenewable(): bool
+    {
+        if ($this->package && !$this->package->getPriceTypeEnum()->hasRenewal()) {
+            return false;
+        }
+
+        return true;
     }
 
     public function isPendingPayment(): bool

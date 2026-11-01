@@ -48,7 +48,9 @@
         </div>
     </div>
     <div class="px-5 sm:px-6 py-4 bg-gray-50/75 dark:bg-gray-900/40 border-b border-gray-100 dark:border-gray-700/60">
-        <form method="GET" action="{{ (request()->routeIs('reseller.tenants.*') && \Illuminate\Support\Facades\Route::has('reseller.tenants.index')) ? route('reseller.tenants.index') : route('reseller.dashboard') }}" class="m-0">
+        <form method="GET"
+              action="{{ (request()->routeIs('reseller.tenants.*') && \Illuminate\Support\Facades\Route::has('reseller.tenants.index')) ? route('reseller.tenants.index') : route('reseller.dashboard') }}"
+              class="m-0">
             @if(request('period'))
                 <input type="hidden" name="period" value="{{ request('period') }}">
             @endif
@@ -91,7 +93,7 @@
                             onchange="this.form.submit()"
                             class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
                         <option value="" @selected(!request('status'))>
-                            همه وضعیت‌ها ({{ reseller_fa_num($totalTenants) }})
+                            همه وضعیت‌ها
                         </option>
                         <option value="active" @selected(request('status') === 'active')>
                             فعال ({{ reseller_fa_num($activeTenants) }})
@@ -189,7 +191,7 @@
             </div>
         </div>
     @else
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto min-h-[260px]">
             <table class="w-full text-right text-sm">
                 <thead>
                 <tr class="border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/75 dark:bg-gray-900/40 text-gray-500 dark:text-gray-400 text-xs">
@@ -206,7 +208,7 @@
                     <th scope="col" class="py-3.5 px-4 sm:px-5 font-bold text-start">
                         <x-resellerhub::sort-header col="expires_at" label="اعتبار لایسنس"/>
                     </th>
-                    <th scope="col" class="py-3.5 px-4 sm:px-5 font-bold text-left">عملیات مدیریت</th>
+                    <th scope="col" class="py-3.5 px-4 sm:px-5 font-bold text-end">عملیات مدیریت</th>
                 </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60 text-gray-700 dark:text-gray-300">
@@ -216,7 +218,9 @@
                         $displayUrl = $tenantManager->getTenantDisplayUrl($tenant);
                         $fullTenantUrl = $tenantManager->getTenantUrl($tenant);
                         $tPackage = $tenant->package;
-                        $tPeriods = reseller_tenant_renewal_periods($tenant);
+                        $tPriceType = $tPackage?->getPriceTypeEnum();
+                        $canRenew = $tPackage ? $tPriceType->hasRenewal() : true;
+                        $tPeriods = $canRenew ? reseller_tenant_renewal_periods($tenant) : [];
                         $daysLeft = reseller_days_remaining($tenant->plan_expires_at);
                         $totalSubscriptionDays = 365;
                         if ($tenant->created_at && $tenant->plan_expires_at) {
@@ -229,7 +233,7 @@
                             ? 'bg-rose-500'
                             : (($daysLeft !== null && $daysLeft <= 30) ? 'bg-amber-500' : 'bg-emerald-500');
                     @endphp
-                    <tr class="group hover:bg-indigo-50/25 dark:hover:bg-indigo-950/20 transition-all duration-200 relative"
+                    <tr class="group hover:bg-indigo-50/25 dark:hover:bg-indigo-950/20 transition-all duration-200"
                         id="row-tenant-{{ $tenant->id }}">
                         <td class="py-4 px-4 sm:px-5 relative">
                             <div
@@ -302,13 +306,20 @@
                         </td>
                         <td class="py-4 px-4 sm:px-5 text-xs hidden lg:table-cell">
                             @if($tPackage)
-                                <span
-                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors"
-                                    style="{{ $tPackage->light_bg_style }}">
-                                    <span class="w-1.5 h-1.5 rounded-full shrink-0"
-                                          style="background-color: {{ $tPackage->color_hex }};"></span>
-                                    <span>{{ $tPackage->name }}</span>
-                                </span>
+                                <div class="space-y-1">
+                                    <span
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors"
+                                        style="{{ $tPackage->light_bg_style }}">
+                                        <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                                              style="background-color: {{ $tPackage->color_hex }};"></span>
+                                        <span>{{ $tPackage->name }}</span>
+                                    </span>
+                                    <div class="text-[11px] font-bold">
+                                        <span class="{{ $tPriceType->textClass() }}">
+                                            {{ $tPriceType->label() }}
+                                        </span>
+                                    </div>
+                                </div>
                             @else
                                 <span
                                     class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/50">
@@ -325,27 +336,44 @@
                             </span>
                         </td>
                         <td class="py-4 px-4 sm:px-5 text-xs" id="tenant-expires-{{ $tenant->id }}">
-                            <div class="font-bold text-gray-800 dark:text-gray-200">
-                                {{ $tenant->jalali_plan_expires_at ?? 'نامحدود' }}
-                            </div>
-                            @if($tenant->plan_expires_at && $tenant->status === Tenant::STATUS_ACTIVE)
+                            @if($tPackage && !$canRenew)
+                                {{-- Lifetime or Free: Permanent access without renewal or expiration --}}
                                 <div
-                                    class="text-xs font-bold mt-1 flex items-center justify-between gap-1.5 {{ ($daysLeft !== null && $daysLeft <= 7) ? 'text-rose-600 dark:text-rose-400' : (($daysLeft !== null && $daysLeft <= 30) ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400') }}">
-                                    <span>{{ reseller_human_remaining($tenant->plan_expires_at) }}</span>
-                                    <span class="text-[9px] opacity-75 dir-ltr">{{ reseller_fa_num($percentDaysRemaining) }}٪</span>
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl font-bold {{ $tPriceType->licenseBadgeClass() }}">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24"
+                                         stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span>{{ $tPriceType->licenseBadgeLabel() }}</span>
                                 </div>
-                                {{-- Micro Progress Bar that smoothly expands and tracks lifecycle --}}
-                                <div
-                                    class="w-full bg-gray-100 dark:bg-gray-700/60 rounded-full h-1 mt-1.5 overflow-hidden"
-                                    title="اعتبار باقیمانده: {{ $percentDaysRemaining }}٪">
+                                <span class="block text-[11px] text-gray-400 mt-1">
+                                    {{ $tPriceType->licenseSubtitle() }}
+                                </span>
+                            @else
+                                {{-- Subscription Package --}}
+                                <div class="font-bold text-gray-800 dark:text-gray-200">
+                                    {{ $tenant->jalali_plan_expires_at ?? 'نامحدود' }}
+                                </div>
+                                @if($tenant->plan_expires_at && $tenant->status === Tenant::STATUS_ACTIVE)
                                     <div
-                                        class="h-full rounded-full {{ $barColorClass }} transition-all duration-700 ease-out"
-                                        style="width: {{ $percentDaysRemaining }}%"></div>
-                                </div>
+                                        class="text-xs font-bold mt-1 flex items-center justify-between gap-1.5 {{ ($daysLeft !== null && $daysLeft <= 7) ? 'text-rose-600 dark:text-rose-400' : (($daysLeft !== null && $daysLeft <= 30) ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400') }}">
+                                        <span>{{ reseller_human_remaining($tenant->plan_expires_at) }}</span>
+                                        <span class="text-[9px] opacity-75 dir-ltr">{{ reseller_fa_num($percentDaysRemaining) }}٪</span>
+                                    </div>
+                                    {{-- Micro Progress Bar that smoothly expands and tracks lifecycle --}}
+                                    <div
+                                        class="w-full bg-gray-100 dark:bg-gray-700/60 rounded-full h-1 mt-1.5 overflow-hidden"
+                                        title="اعتبار باقیمانده: {{ $percentDaysRemaining }}٪">
+                                        <div
+                                            class="h-full rounded-full {{ $barColorClass }} transition-all duration-700 ease-out"
+                                            style="width: {{ $percentDaysRemaining }}%"></div>
+                                    </div>
+                                @endif
                             @endif
                         </td>
-                        <td class="py-4 px-4 sm:px-5 text-left">
-                            <div class="flex items-center justify-end gap-1.5">
+                        <td class="py-4 px-4 sm:px-5 text-end whitespace-nowrap">
+                            <div class="inline-flex items-center justify-end gap-1.5 flex-nowrap shrink-0">
                                 @if($tenant->isPendingPayment())
                                     <span
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 text-xs font-bold"
@@ -359,10 +387,11 @@
                                         <span>جزئیات</span>
                                     </a>
                                 @else
-                                    <form method="POST" action="{{ $tenantUrl }}" target="_blank" class="inline">
+                                    <form method="POST" action="{{ $tenantUrl }}" target="_blank"
+                                          class="inline m-0 p-0">
                                         @csrf
                                         <button type="submit"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white dark:bg-indigo-950/60 dark:hover:bg-indigo-600 dark:text-indigo-300 dark:hover:text-white text-xs font-bold transition-all shadow-2xs active:scale-95"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white dark:bg-indigo-950/60 dark:hover:bg-indigo-600 dark:text-indigo-300 dark:hover:text-white text-xs font-bold transition-all shadow-2xs active:scale-95 cursor-pointer"
                                                 title="ورود مستقیم به پنل مدیریت سامانه (SSO)">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                  viewBox="0 0 24 24">
@@ -372,29 +401,33 @@
                                             <span>ورود</span>
                                         </button>
                                     </form>
-                                    <button type="button"
-                                            id="btn-renew-{{ $tenant->id }}"
-                                            @click="openRenewModalByElement($el)"
-                                            data-id="{{ $tenant->id }}"
-                                            data-name="{{ e($tenant->name) }}"
-                                            data-subdomain="{{ e($displayUrl) }}"
-                                            data-package="{{ e($tPackage?->name ?? '') }}"
-                                            data-expires="{{ e($tenant->jalali_plan_expires_at ?? 'نامحدود') }}"
-                                            data-periods="{{ e(json_encode($tPeriods)) }}"
-                                            data-url="{{ route('reseller.tenants.renew', $tenant->id) }}"
-                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white dark:bg-emerald-950/60 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
-                                            title="تمدید لایسنس و اشتراک">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        <span>تمدید</span>
-                                    </button>
+                                    @if($canRenew)
+                                        <button type="button"
+                                                id="btn-renew-{{ $tenant->id }}"
+                                                @click="openRenewModalByElement($el)"
+                                                data-id="{{ $tenant->id }}"
+                                                data-name="{{ e($tenant->name) }}"
+                                                data-subdomain="{{ e($displayUrl) }}"
+                                                data-package="{{ e($tPackage?->name ?? '') }}"
+                                                data-expires="{{ e($tenant->jalali_plan_expires_at ?? 'نامحدود') }}"
+                                                data-periods="{{ e(json_encode($tPeriods)) }}"
+                                                data-url="{{ route('reseller.tenants.renew', $tenant->id) }}"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white dark:bg-emerald-950/60 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
+                                                title="تمدید لایسنس و اشتراک">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                 viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            <span>تمدید</span>
+                                        </button>
+                                    @endif
                                 @endif
 
-                                <div class="relative" x-data="{ open: false }">
+                                <div class="relative inline-block text-start shrink-0" x-data="{ open: false }"
+                                     :class="{ 'z-50': open }">
                                     <button type="button"
-                                            @click="open = !open"
+                                            @click.stop="open = !open"
                                             @click.outside="open = false"
                                             class="p-1.5 rounded-xl text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors cursor-pointer"
                                             title="عملیات تکمیلی">
@@ -412,7 +445,7 @@
                                          x-transition:leave-start="transform opacity-100 scale-100"
                                          x-transition:leave-end="transform opacity-0 scale-95"
                                          style="display: none;"
-                                         class="absolute left-0 mt-1.5 w-44 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/80 shadow-xl py-1.5 z-30 text-xs font-bold divide-y divide-gray-100 dark:divide-gray-700/60">
+                                         class="absolute left-0 rtl:left-0 rtl:right-auto top-full mt-1.5 w-48 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/80 shadow-2xl py-1.5 z-50 text-xs font-bold divide-y divide-gray-100 dark:divide-gray-700/60">
 
                                         <div class="py-1">
                                             <a href="{{ route('reseller.tenants.show', $tenant->id) }}"

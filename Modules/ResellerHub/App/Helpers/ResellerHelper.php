@@ -496,6 +496,11 @@ class ResellerHelper
         $tenantPackage = $tenant->package;
         $availablePeriods = [];
 
+        // One-time (Lifetime) and Free packages have permanent access without renewal
+        if ($tenantPackage && !$tenantPackage->getPriceTypeEnum()->hasRenewal()) {
+            return [];
+        }
+
         if ($tenantPackage && $tenantPackage->isSubscription()) {
             $activeMonths = $tenantPackage->getActiveMonths();
             if (empty($activeMonths)) {
@@ -526,18 +531,23 @@ class ResellerHelper
                 ];
             }
         } else {
-            $defaultMonths = [1, 3, 6, 12, 24];
             $latestOrder = $tenant->orders ? $tenant->orders->sortByDesc('id')->first() : null;
             $baseOrderPrice = (int)($latestOrder?->renewal_price ?: ($latestOrder?->total_amount ?: 0));
+
+            if ($baseOrderPrice <= 0) {
+                return [];
+            }
+
+            $defaultMonths = [1, 3, 6, 12, 24];
             $orderMonths = 12;
 
             foreach ($defaultMonths as $m) {
-                $calcPrice = $baseOrderPrice > 0 ? (int)round(($baseOrderPrice / $orderMonths) * $m) : 0;
+                $calcPrice = (int)round(($baseOrderPrice / $orderMonths) * $m);
                 $availablePeriods[] = [
                     'months' => $m,
                     'label' => self::durationLabel($m),
                     'price' => $calcPrice,
-                    'price_formatted' => $calcPrice > 0 ? self::toPersianDigits(number_format($calcPrice)) : 'رایگان',
+                    'price_formatted' => self::toPersianDigits(number_format($calcPrice)),
                     'badge' => ($m === 12 ? 'پیشنهادی' : ''),
                     'is_recommended' => ($m === 12),
                 ];
@@ -545,6 +555,19 @@ class ResellerHelper
         }
 
         return $availablePeriods;
+    }
+
+    /**
+     * Check if a tenant's license can be renewed.
+     */
+    public static function canTenantRenew(Tenant $tenant): bool
+    {
+        $tenantPackage = $tenant->package;
+        if ($tenantPackage && !$tenantPackage->getPriceTypeEnum()->hasRenewal()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

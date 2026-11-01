@@ -27,8 +27,20 @@ enum PackagePriceType: string
     {
         return match ($this) {
             self::SUBSCRIPTION => 'دوره‌ای',
-            self::ONE_TIME => 'یک‌باره',
+            self::ONE_TIME => 'مادام‌العمر',
             self::FREE => 'رایگان',
+        };
+    }
+
+    /**
+     * Primary theme color name.
+     */
+    public function color(): string
+    {
+        return match ($this) {
+            self::SUBSCRIPTION => 'indigo',
+            self::ONE_TIME => 'purple',
+            self::FREE => 'emerald',
         };
     }
 
@@ -38,10 +50,82 @@ enum PackagePriceType: string
     public function badgeClass(): string
     {
         return match ($this) {
-            self::SUBSCRIPTION => 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60',
-            self::ONE_TIME => 'bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 border border-purple-200/60 dark:border-purple-800/60',
-            self::FREE => 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60',
+            self::SUBSCRIPTION => 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800/60',
+            self::ONE_TIME => 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/70 dark:border-purple-800/60',
+            self::FREE => 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800/60',
         };
+    }
+
+    /**
+     * Text color CSS classes for typography.
+     */
+    public function textClass(): string
+    {
+        return match ($this) {
+            self::SUBSCRIPTION => 'text-indigo-600 dark:text-indigo-400',
+            self::ONE_TIME => 'text-purple-600 dark:text-purple-400',
+            self::FREE => 'text-emerald-600 dark:text-emerald-400',
+        };
+    }
+
+    /**
+     * Tailwind CSS classes for license validity badge in tables.
+     */
+    public function licenseBadgeClass(): string
+    {
+        return match ($this) {
+            self::SUBSCRIPTION => 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800/60',
+            self::ONE_TIME => 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/70 dark:border-purple-800/60',
+            self::FREE => 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800/60',
+        };
+    }
+
+    /**
+     * Persian label displayed for license validity in tables and detail cards.
+     */
+    public function licenseBadgeLabel(): string
+    {
+        return match ($this) {
+            self::SUBSCRIPTION => 'اشتراک دوره‌ای',
+            self::ONE_TIME => 'مادام‌العمر (دائمی)',
+            self::FREE => 'رایگان (همیشگی)',
+        };
+    }
+
+    /**
+     * Persian subtitle text displayed under license validity badge.
+     */
+    public function licenseSubtitle(): string
+    {
+        return match ($this) {
+            self::SUBSCRIPTION => 'نیازمند تمدید دوره‌ای',
+            self::ONE_TIME => 'دسترسی همیشگی - بدون انقضا',
+            self::FREE => 'دسترسی رایگان - بدون نیاز به تمدید',
+        };
+    }
+
+    /**
+     * Whether this pricing model has recurring renewals.
+     */
+    public function hasRenewal(): bool
+    {
+        return $this === self::SUBSCRIPTION;
+    }
+
+    /**
+     * Whether this pricing model supports duration/billing periods.
+     */
+    public function hasPeriods(): bool
+    {
+        return $this === self::SUBSCRIPTION;
+    }
+
+    /**
+     * Whether this pricing model requires monetary payment.
+     */
+    public function requiresPayment(): bool
+    {
+        return $this !== self::FREE;
     }
 
     /**
@@ -51,7 +135,25 @@ enum PackagePriceType: string
     {
         return [
             'label' => $this->shortLabel(),
+            'full_label' => $this->label(),
             'class' => $this->badgeClass(),
+            'color' => $this->color(),
+            'text_class' => $this->textClass(),
+            'has_renewal' => $this->hasRenewal(),
+        ];
+    }
+
+    /**
+     * Full license metadata array for views.
+     */
+    public function licenseMeta(): array
+    {
+        return [
+            'badge_label' => $this->licenseBadgeLabel(),
+            'badge_class' => $this->licenseBadgeClass(),
+            'subtitle' => $this->licenseSubtitle(),
+            'text_class' => $this->textClass(),
+            'has_renewal' => $this->hasRenewal(),
         ];
     }
 

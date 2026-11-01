@@ -78,20 +78,20 @@
 
         const priceType = pkg.price_type || 'subscription';
         if (priceType === 'free') {
-            return [{value: '12', months: 12, label: 'رایگان (اعتبار ۱۲ ماهه)'}];
+            return [];
         }
         if (priceType === 'one_time') {
-            const val = options.oneTimeValue !== undefined ? String(options.oneTimeValue) : '0';
+            const val = options.oneTimeValue !== undefined ? String(options.oneTimeValue) : '1200';
             const lbl = options.oneTimeLabel || 'مادام‌العمر (یک‌بار پرداخت)';
-            return [{value: val, months: 0, label: lbl}];
+            return [{value: val, months: 1200, label: lbl}];
         }
 
-        const subYearOptions = (window.resellerDurationOptions || []).filter(item => item.months && item.months <= 12);
+        const standardOptions = window.resellerDurationOptions || [];
         const active = Array.isArray(pkg.active_periods) ? pkg.active_periods : [];
         const periodPrices = (pkg.period_prices && typeof pkg.period_prices === 'object') ? pkg.period_prices : {};
         const opts = [];
 
-        subYearOptions.forEach(item => {
+        standardOptions.forEach(item => {
             const mStr = String(item.months);
             const isAct = active.includes(item.key)
                 || active.includes(mStr)
@@ -129,23 +129,12 @@
             }
         });
 
-        if ((active.includes('yearly_price') || active.includes('12')) && !handled.has('24')) {
-            const opt24 = (window.resellerDurationOptions || []).find(o => o.months === 24);
-            opts.push({value: '24', months: 24, label: opt24 ? opt24.label : '۲ ساله (۲۴ ماهه)'});
-            handled.add('24');
-        }
-        if ((active.includes('yearly_price') || active.includes('12')) && !handled.has('36')) {
-            const opt36 = (window.resellerDurationOptions || []).find(o => o.months === 36);
-            opts.push({value: '36', months: 36, label: opt36 ? opt36.label : '۳ ساله (۳۶ ماهه)'});
-            handled.add('36');
-        }
-
         opts.sort((a, b) => parseInt(a.value) - parseInt(b.value));
-        return opts.length > 0 ? opts : fallback;
+        return opts;
     };
 
     window.getDurationLabel = function (months) {
-        if (String(months) === '1200' || String(months) === '0') {
+        if (!months || String(months) === 'null' || String(months) === 'undefined' || String(months) === '1200' || String(months) === '0') {
             return 'دائمی (خرید یک‌باره - بدون انقضا)';
         }
         const opt = (window.resellerDurationOptions || []).find(o => String(o.months) === String(months) || String(o.value) === String(months));
@@ -153,7 +142,7 @@
     };
 
     window.getDurationSubtitle = function (months) {
-        if (String(months) === '1200' || String(months) === '0') {
+        if (!months || String(months) === 'null' || String(months) === 'undefined' || String(months) === '1200' || String(months) === '0') {
             return 'دسترسی همیشگی و بدون نیاز به تمدید';
         }
         if (String(months) === '12') {
@@ -185,8 +174,15 @@
         if (typeof key === 'number') return key;
         const str = String(key);
         const map = {
-            'monthly_price': 1, 'quarterly_price': 3, 'semi_annual_price': 6, 'yearly_price': 12,
-            'period_18_price': 18, 'biennial_price': 24, 'period_24_price': 24, 'triennial_price': 36, 'period_36_price': 36
+            'monthly_price': 1,
+            'quarterly_price': 3,
+            'semi_annual_price': 6,
+            'yearly_price': 12,
+            'period_18_price': 18,
+            'biennial_price': 24,
+            'period_24_price': 24,
+            'triennial_price': 36,
+            'period_36_price': 36
         };
         if (map[str]) return map[str];
         const match = str.match(/\d+/);

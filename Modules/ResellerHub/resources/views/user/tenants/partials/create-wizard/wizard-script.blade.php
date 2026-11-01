@@ -123,6 +123,17 @@
                     }
                 }
 
+                const active = Array.isArray(pkg.active_periods) ? pkg.active_periods : [];
+                if (active.length > 0) {
+                    const isAct = active.includes(String(months))
+                        || active.includes(months)
+                        || (months === 1 && active.includes('monthly_price'))
+                        || (months === 3 && active.includes('quarterly_price'))
+                        || (months === 6 && active.includes('semi_annual_price'))
+                        || (months === 12 && active.includes('yearly_price'));
+                    if (!isAct) return 0;
+                }
+
                 const yearlyBase = (parseInt(pkg.yearly_price) || 0) > 0
                     ? parseInt(pkg.yearly_price)
                     : ((parseInt(pkg.monthly_price) || 0) * 12);
@@ -331,12 +342,12 @@
                 const fn = window.resolvePackageDurationOptions || this.resolvePackageDurationOptions;
                 if (fn) {
                     return fn(pkg, {
-                        fallback: this.durationOptions,
-                        oneTimeValue: '1200',
+                        fallback: [],
+                        oneTimeValue: '',
                         oneTimeLabel: 'مادام‌العمر (یک‌باره)',
                     });
                 }
-                return this.durationOptions;
+                return [];
             },
 
             form: {
@@ -705,8 +716,19 @@
             },
 
             get durationLabel() {
+                const pkg = this.getActivePackage();
+                if (pkg && pkg.price_type === 'one_time') {
+                    return 'مادام‌العمر (یک‌بار پرداخت)';
+                }
+                if (pkg && pkg.price_type === 'free') {
+                    return 'رایگان';
+                }
                 const opt = this.availableDurationOptions.find(o => String(o.value) === String(this.form.expires_in_months));
-                return opt ? opt.label : (this.faNum(this.form.expires_in_months) + ' ماهه');
+                if (opt) return opt.label;
+                if (!this.form.expires_in_months || String(this.form.expires_in_months) === '1200' || String(this.form.expires_in_months) === '0') {
+                    return (pkg && pkg.price_type === 'free') ? 'رایگان' : 'مادام‌العمر (یک‌بار پرداخت)';
+                }
+                return this.form.expires_in_months ? (this.faNum(this.form.expires_in_months) + ' ماهه') : 'انتخاب نشده';
             },
 
             formatPriceInput(value) {
@@ -721,18 +743,21 @@
             },
 
             syncInvoiceItemsFromModules() {
-                const months = parseInt(this.form.expires_in_months, 10) || 12;
-                const durationTitle = months === 12 ? 'یک ساله' : (months === 1 ? 'یک ماهه' : (months === 3 ? 'سه ماهه (فصلی)' : (months === 6 ? 'شش ماهه' : (this.faNum(months) + ' ماهه'))));
-                const items = [];
-
                 let activePkg = null;
                 if (this.activePackageId) {
                     activePkg = this.packages.find(p => p.id === this.activePackageId) || null;
                 }
 
+                const isOneTime = activePkg && activePkg.price_type === 'one_time';
+                const isInherentlyFree = activePkg && activePkg.price_type === 'free';
+                const isPermanent = isOneTime || isInherentlyFree;
+                const months = isPermanent ? null : (parseInt(this.form.expires_in_months, 10) || 12);
+                const durationTitle = isOneTime ? 'مادام‌العمر (یک‌بار پرداخت)' : (isInherentlyFree ? 'رایگان' : (months === 12 ? 'یک ساله' : (months === 1 ? 'یک ماهه' : (months === 3 ? 'سه ماهه (فصلی)' : (months === 6 ? 'شش ماهه' : (this.faNum(months) + ' ماهه'))))));
+                const items = [];
+
                 if (activePkg) {
-                    const packageUnitPrice = this.getPackageDurationPrice(activePkg, months);
-                    const packageDiscount = this.getPackageDurationDiscount(activePkg, months);
+                    const packageUnitPrice = this.getPackageDurationPrice(activePkg, months || 12);
+                    const packageDiscount = this.getPackageDurationDiscount(activePkg, months || 12);
                     const pkgSetupFee = parseInt(activePkg.setup_fee) || 0;
                     const pkgModules = Array.isArray(activePkg.modules) ? activePkg.modules : [];
                     const extraModules = this.selectedModules.filter(slug => !pkgModules.includes(slug));
@@ -757,11 +782,12 @@
                             this.invoiceDiscountDisplay = '';
                         }
 
+                        const prefix = isOneTime ? 'لایسنس مادام‌العمر ' : (isInherentlyFree ? 'لایسنس رایگان ' : ('اشتراک ' + durationTitle + ' '));
                         items.push({
-                            description: 'اشتراک ' + durationTitle + ' ' + pkgTitle + ' (شامل ' + this.faNum(this.selectedModules.length) + ' ماژول و ' + this.faNum(totalFeats) + ' قابلیت)',
+                            description: prefix + pkgTitle + ' (شامل ' + this.faNum(this.selectedModules.length) + ' ماژول و ' + this.faNum(totalFeats) + ' قابلیت)',
                             item_type: 'package',
                             item_id: 'package_' + activePkg.id,
-                            duration_months: months,
+                            duration_months: isPermanent ? 0 : months,
                             unit_price: packageUnitPrice,
                             quantity: 1,
                             discount_amount: 0,
@@ -1309,12 +1335,19 @@
                 });
 
                 this.$nextTick(() => {
-                    const available = this.availableDurationOptions;
-                    if (available && available.length > 0) {
-                        const hasCurrent = available.some(o => String(o.value) === String(this.form.expires_in_months));
-                        if (!hasCurrent) {
-                            const preferYearly = available.find(o => String(o.value) === '12');
-                            this.form.expires_in_months = preferYearly ? '12' : String(available[0].value);
+                    const priceType = pkg.price_type || 'subscription';
+                    if (priceType === 'one_time' || priceType === 'free') {
+                        this.form.expires_in_months = null;
+                    } else {
+                        const available = this.availableDurationOptions;
+                        if (available && available.length > 0) {
+                            const hasCurrent = available.some(o => String(o.value) === String(this.form.expires_in_months));
+                            if (!hasCurrent) {
+                                const preferYearly = available.find(o => String(o.value) === '12');
+                                this.form.expires_in_months = preferYearly ? '12' : String(available[0].value);
+                            }
+                        } else {
+                            this.form.expires_in_months = '';
                         }
                     }
                     this.syncInvoiceItemsFromModules();
@@ -1545,6 +1578,17 @@
                 if (this.selectedModules.length === 0) {
                     this.showToast('لطفاً حداقل یک ماژول مجاز را برای فعال‌سازی در سامانه انتخاب فرمایید.', 'error');
                     return false;
+                }
+                const pkg = this.getActivePackage();
+                if (pkg && pkg.price_type !== 'one_time' && pkg.price_type !== 'free') {
+                    if (this.availableDurationOptions.length === 0) {
+                        this.showToast('پکیج انتخابی فاقد هرگونه دوره زمانی فعال است. لطفاً دوره دیگری انتخاب فرمایید یا پکیج را در بخش پکیج‌ها ویرایش کنید.', 'error');
+                        return false;
+                    }
+                    if (!this.form.expires_in_months) {
+                        this.showToast('لطفاً مدت زمان اعتبار اولیه لایسنس را انتخاب فرمایید.', 'error');
+                        return false;
+                    }
                 }
                 return true;
             },

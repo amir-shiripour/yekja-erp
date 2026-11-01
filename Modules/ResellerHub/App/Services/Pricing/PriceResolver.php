@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Modules\ResellerHub\App\Enums\BillingCycle;
 use Modules\ResellerHub\App\Helpers\ResellerHelper;
 use Modules\ResellerHub\App\Models\ResellerPackage;
+use Modules\ResellerHub\App\Support\CurrencyContext;
 use Modules\ResellerHub\App\Support\Money;
 
 /**
@@ -54,10 +55,6 @@ final class PriceResolver
                     $months[] = $anchor;
                 }
             }
-        }
-
-        if ($months === [] && $package->isSubscription()) {
-            $months = [1, 3, 6, 12];
         }
 
         $months = array_values(array_unique(array_filter(
@@ -342,7 +339,7 @@ final class PriceResolver
      */
     public function money(ResellerPackage $package, int $amount, ?string $currency = null): Money
     {
-        return Money::of($amount, $currency ?? \Modules\ResellerHub\App\Support\CurrencyContext::forReseller(
+        return Money::of($amount, $currency ?? CurrencyContext::forReseller(
             $package->reseller_id ? (int)$package->reseller_id : null,
         ));
     }

@@ -24,8 +24,8 @@
         oldLimits: @json(old('limits', []))
     };
 
-    function packageCreateManager() {
-        const config = window.packageCreateConfig;
+    function packageCreateManager(config) {
+        config = config || window.packageCreateConfig || {};
 
         const rawActive = Array.isArray(config.oldActivePeriods) && config.oldActivePeriods.length
             ? config.oldActivePeriods
@@ -286,11 +286,6 @@
                 const baseMonthly = parseInt(this.getPeriodPrice(1) || this.pricing.monthly_price || 0);
                 if (baseMonthly > 0 && !this.getPeriodPrice(nextMonth)) {
                     let calcPrice = baseMonthly * nextMonth;
-                    if (nextMonth >= 6 && nextMonth < 12) {
-                        calcPrice = Math.round(calcPrice * 0.95);
-                    } else if (nextMonth >= 12) {
-                        calcPrice = Math.round(calcPrice * 0.85);
-                    }
                     this.setPeriodPrice(nextMonth, calcPrice);
                 }
 
@@ -390,15 +385,7 @@
                 if (!baseMonthly) return;
                 this.periodRows.forEach(r => {
                     const m = r.months;
-                    if (m === 1) {
-                        this.setPeriodPrice(1, baseMonthly);
-                    } else if (m < 6) {
-                        this.setPeriodPrice(m, baseMonthly * m);
-                    } else if (m < 12) {
-                        this.setPeriodPrice(m, Math.round(baseMonthly * m * 0.95));
-                    } else {
-                        this.setPeriodPrice(m, Math.round(baseMonthly * m * 0.85));
-                    }
+                    this.setPeriodPrice(m, baseMonthly * m);
                 });
             },
 
@@ -466,5 +453,14 @@
                 return Math.max(0, Math.round(rawPrice - eff.value));
             },
         };
+    }
+
+    window.packageCreateManager = packageCreateManager;
+    if (window.Alpine) {
+        window.Alpine.data('packageCreateManager', packageCreateManager);
+    } else {
+        document.addEventListener('alpine:init', () => {
+            window.Alpine.data('packageCreateManager', packageCreateManager);
+        });
     }
 </script>
