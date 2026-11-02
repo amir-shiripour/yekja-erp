@@ -143,4 +143,20 @@ class UiRegressionGuardTest extends TestCase
             'These subscription keys render as raw keys in the UI: ' . implode(', ', $missing)
         );
     }
+
+    public function test_reseller_dashboard_does_not_contain_fleet_tab(): void
+    {
+        $blade = $this->moduleView('user/dashboard/index.blade.php');
+
+        $this->assertStringNotContainsString('id="tab-fleet"', $blade);
+        $this->assertStringNotContainsString('id="tabpanel-fleet"', $blade);
+        $this->assertStringNotContainsString('سامانه‌ها و مشترکین', $blade);
+
+        $this->assertStringContainsString('id="tab-operations"', $blade);
+        $this->assertStringContainsString('id="tab-analytics"', $blade);
+        $this->assertStringContainsString('id="tab-intelligence"', $blade);
+
+        $scripts = $this->moduleView('user/dashboard/partials/scripts.blade.php');
+        $this->assertStringContainsString("activeTab: (window.location.hash && ['operations', 'analytics', 'intelligence'].includes(window.location.hash.substring(1))) ? window.location.hash.substring(1) : 'operations'", $scripts);
+    }
 }
