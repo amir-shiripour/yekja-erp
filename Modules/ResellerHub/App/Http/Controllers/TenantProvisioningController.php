@@ -114,7 +114,48 @@ class TenantProvisioningController extends Controller
         $perPage = $this->resolvePerPage();
 
         $tenants = $query->with(['modules', 'subAccount', 'reseller', 'package'])
-            ->paginate($perPage)
+            ->paginate($perPage, ['*'], 'page')
+            ->withQueryString();
+
+        $activeTab = $request->input('tab', 'tenants');
+        if (!in_array($activeTab, ['tenants', 'subaccounts'], true)) {
+            $activeTab = 'tenants';
+        }
+
+        // Sub-Accounts query & counts for unified hub
+        $subAccountBaseQuery = ResellerSubAccount::query()->when($scopedResellerId, function ($q) use ($scopedResellerId) {
+            $q->where('reseller_id', $scopedResellerId);
+        });
+
+        $totalSubAccounts = (clone $subAccountBaseQuery)->count();
+        $activeSubAccounts = (clone $subAccountBaseQuery)->where('status', ResellerSubAccount::STATUS_ACTIVE)->count();
+        $suspendedSubAccounts = (clone $subAccountBaseQuery)->where('status', ResellerSubAccount::STATUS_SUSPENDED)->count();
+
+        $subQuery = clone $subAccountBaseQuery;
+        $subSearch = $request->input('sub_search');
+        if (!$subSearch && $activeTab === 'subaccounts') {
+            $subSearch = $request->input('search');
+        }
+        if ($subSearch) {
+            $this->applySubAccountSearch($subQuery, $subSearch);
+        }
+
+        $subStatus = $request->input('sub_status');
+        if (!$subStatus && $activeTab === 'subaccounts') {
+            $subStatus = $request->input('status');
+        }
+        if ($subStatus && in_array($subStatus, [ResellerSubAccount::STATUS_ACTIVE, ResellerSubAccount::STATUS_SUSPENDED], true)) {
+            $subQuery->where('status', $subStatus);
+        }
+
+        $subAccounts = $subQuery->with([
+            'tenant' => static fn($q) => $q->with('modules'),
+            'tenants',
+            'user',
+            'reseller.user'
+        ])
+            ->orderByDesc('id')
+            ->paginate($perPage, ['*'], 'sub_page')
             ->withQueryString();
 
         $allResellers = $isSuperAdmin ? Reseller::select('id', 'company_name')->get() : collect();
@@ -123,6 +164,8 @@ class TenantProvisioningController extends Controller
         return view('resellerhub::user.tenants.index', compact(
             'reseller',
             'tenants',
+            'subAccounts',
+            'activeTab',
             'isSuperAdmin',
             'allResellers',
             'currencyLabel',
@@ -130,7 +173,10 @@ class TenantProvisioningController extends Controller
             'activeTenants',
             'pendingPaymentTenants',
             'suspendedTenants',
-            'expiredTenants'
+            'expiredTenants',
+            'totalSubAccounts',
+            'activeSubAccounts',
+            'suspendedSubAccounts'
         ));
     }
 

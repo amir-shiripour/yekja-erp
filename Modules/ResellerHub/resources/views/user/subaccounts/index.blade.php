@@ -275,15 +275,6 @@
                                     {!! reseller_sort_icon('tenant') !!}
                                 </a>
                             </th>
-                            @if($isSuperAdmin)
-                                <th scope="col" class="py-3.5 px-4 text-start">
-                                    <a href="{{ reseller_sort_url('reseller') }}"
-                                       class="group inline-flex items-center gap-1.5 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                                        <span>نماینده مجری</span>
-                                        {!! reseller_sort_icon('reseller') !!}
-                                    </a>
-                                </th>
-                            @endif
                             <th scope="col" class="py-3.5 px-4 text-start">
                                 <a href="{{ reseller_sort_url('date') }}"
                                    class="group inline-flex items-center gap-1.5 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
@@ -382,14 +373,6 @@
                                         <span class="text-xs text-gray-400">فاقد سامانه متصل</span>
                                     @endif
                                 </td>
-
-                                @if($isSuperAdmin)
-                                    <td class="py-4 px-4">
-                                        <span class="font-bold text-gray-700 dark:text-gray-300">
-                                            {{ $sub->reseller?->company_name ?: ($sub->reseller?->user?->name ?? 'نماینده #' . reseller_fa_num($sub->reseller_id)) }}
-                                        </span>
-                                    </td>
-                                @endif
 
                                 <td class="py-4 px-4 text-gray-500 dark:text-gray-400">
                                     <div
