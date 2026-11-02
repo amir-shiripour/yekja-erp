@@ -224,34 +224,10 @@
 
         <div class="space-y-3 pt-1">
             <div
-                role="tablist" aria-label="بخش‌های داشبورد نماینده" class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 p-1.5 sm:p-2 bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/70 dark:border-gray-800/80 rounded-3xl backdrop-blur-xl shadow-xs">
-                <button type="button" role="tab" id="tab-fleet" aria-controls="tabpanel-fleet" :aria-selected="activeTab === 'fleet' ? 'true' : 'false'"
-                        @click="setTab('fleet')"
-                        :class="activeTab === 'fleet' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-gray-700/30'"
-                        class="px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl transition-all duration-200 flex items-center justify-between gap-2.5 text-start cursor-pointer group">
-                    <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                        <span
-                            class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-                            :class="activeTab === 'fleet' ? 'bg-emerald-500 text-white shadow-xs shadow-emerald-500/20' : 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 border border-gray-200/60 dark:border-gray-700/60'">
-                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                            </svg>
-                        </span>
-                        <div class="min-w-0">
-                            <div class="text-xs sm:text-sm font-black tracking-tight truncate">سامانه‌ها و مشترکین</div>
-                            <div
-                                class="text-xs text-gray-400 dark:text-gray-500 font-medium truncate hidden md:block">
-                                پایش و جدول پایگاه‌ها
-                            </div>
-                        </div>
-                    </div>
-                    <span class="px-2 py-0.5 rounded-lg text-xs font-black tabular-nums shrink-0"
-                          :class="activeTab === 'fleet' ? 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40' : 'bg-gray-200/70 dark:bg-gray-800 text-gray-600 dark:text-gray-400'">
-                        {{ reseller_fa_num($totalTenants) }}
-                    </span>
-                </button>
-                <button type="button" role="tab" id="tab-operations" aria-controls="tabpanel-operations" :aria-selected="activeTab === 'operations' ? 'true' : 'false'"
+                role="tablist" aria-label="بخش‌های داشبورد نماینده"
+                class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 p-1.5 sm:p-2 bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/70 dark:border-gray-800/80 rounded-3xl backdrop-blur-xl shadow-xs">
+                <button type="button" role="tab" id="tab-operations" aria-controls="tabpanel-operations"
+                        :aria-selected="activeTab === 'operations' ? 'true' : 'false'"
                         @click="setTab('operations')"
                         :class="activeTab === 'operations' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-gray-700/30'"
                         class="px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl transition-all duration-200 flex items-center justify-between gap-2.5 text-start cursor-pointer group">
@@ -277,7 +253,8 @@
                         {{ reseller_fa_num($expiringSoonTenants + $unpaidInvoicesCount) }} اقدام
                     </span>
                 </button>
-                <button type="button" role="tab" id="tab-analytics" aria-controls="tabpanel-analytics" :aria-selected="activeTab === 'analytics' ? 'true' : 'false'"
+                <button type="button" role="tab" id="tab-analytics" aria-controls="tabpanel-analytics"
+                        :aria-selected="activeTab === 'analytics' ? 'true' : 'false'"
                         @click="setTab('analytics')"
                         :class="activeTab === 'analytics' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-gray-700/30'"
                         class="px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl transition-all duration-200 flex items-center justify-between gap-2.5 text-start cursor-pointer group">
@@ -304,7 +281,8 @@
                         {{ reseller_fa_num($activeRatio) }}٪
                     </span>
                 </button>
-                <button type="button" role="tab" id="tab-intelligence" aria-controls="tabpanel-intelligence" :aria-selected="activeTab === 'intelligence' ? 'true' : 'false'"
+                <button type="button" role="tab" id="tab-intelligence" aria-controls="tabpanel-intelligence"
+                        :aria-selected="activeTab === 'intelligence' ? 'true' : 'false'"
                         @click="setTab('intelligence')"
                         :class="activeTab === 'intelligence' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-black/5 dark:ring-white/10' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-gray-700/30'"
                         class="px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl transition-all duration-200 flex items-center justify-between gap-2.5 text-start cursor-pointer group">
@@ -332,18 +310,8 @@
                     </span>
                 </button>
             </div>
-            <div role="tabpanel" id="tabpanel-fleet" aria-labelledby="tab-fleet" x-show="activeTab === 'fleet'"
-                 x-transition:enter="transition-opacity duration-200"
-                 x-transition:enter-start="opacity-0"
-                 x-transition:enter-end="opacity-100"
-                 class="space-y-6 sm:space-y-8">
-
-                <div id="tenants-table-section">
-                    @include('resellerhub::user.dashboard.partials.tenants-table')
-                </div>
-            </div>
-
-            <div role="tabpanel" id="tabpanel-operations" aria-labelledby="tab-operations" x-show="activeTab === 'operations'"
+            <div role="tabpanel" id="tabpanel-operations" aria-labelledby="tab-operations"
+                 x-show="activeTab === 'operations'"
                  x-transition:enter="transition-opacity duration-200"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
@@ -354,7 +322,8 @@
                 @include('resellerhub::user.dashboard.partials.shortcuts')
             </div>
 
-            <div role="tabpanel" id="tabpanel-analytics" aria-labelledby="tab-analytics" x-show="activeTab === 'analytics'"
+            <div role="tabpanel" id="tabpanel-analytics" aria-labelledby="tab-analytics"
+                 x-show="activeTab === 'analytics'"
                  x-transition:enter="transition-opacity duration-200"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
@@ -364,7 +333,8 @@
                 @include('resellerhub::user.dashboard.partials.charts')
             </div>
 
-            <div role="tabpanel" id="tabpanel-intelligence" aria-labelledby="tab-intelligence" x-show="activeTab === 'intelligence'"
+            <div role="tabpanel" id="tabpanel-intelligence" aria-labelledby="tab-intelligence"
+                 x-show="activeTab === 'intelligence'"
                  x-transition:enter="transition-opacity duration-200"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"

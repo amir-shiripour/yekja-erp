@@ -204,13 +204,13 @@
                     </strong>
                     میانگین هر سامانه
                 </span>
-                <button type="button" @click="setTab('fleet')"
-                        class="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer">
+                <a href="{{ route('reseller.tenants.index') }}"
+                   class="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer">
                     <span>مشاهده لیست سامانه‌ها</span>
                     <svg class="w-3.5 h-3.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
-                </button>
+                </a>
             </div>
         </div>
         <div

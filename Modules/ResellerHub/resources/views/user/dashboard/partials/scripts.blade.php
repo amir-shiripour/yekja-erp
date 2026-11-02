@@ -26,7 +26,7 @@
             currencyLabel: config.currencyLabel || '{{ $currencyLabel }}',
             todayJalali: config.todayJalali || '{{ reseller_format_jalali(now(), 'Y/m/d', false) }}',
             dashboardUrl: config.dashboardUrl || '{{ route('reseller.dashboard') }}',
-            activeTab: (window.location.hash && ['fleet', 'analytics', 'intelligence'].includes(window.location.hash.substring(1))) ? window.location.hash.substring(1) : 'fleet',
+            activeTab: (window.location.hash && ['operations', 'analytics', 'intelligence'].includes(window.location.hash.substring(1))) ? window.location.hash.substring(1) : 'operations',
 
             get activeRatio() {
                 return this.totalTenants > 0 ? Math.round((this.activeTenants / this.totalTenants) * 100) : 0;
@@ -75,7 +75,7 @@
                 window.resellerDashboardInstance = this;
                 window.addEventListener('hashchange', () => {
                     const hash = window.location.hash.substring(1);
-                    if (['fleet', 'operations', 'analytics', 'intelligence'].includes(hash)) {
+                    if (['operations', 'analytics', 'intelligence'].includes(hash)) {
                         this.setTab(hash, false);
                     }
                 });
@@ -131,7 +131,7 @@
             },
 
             setTab(tab, updateHash = true) {
-                if (!['fleet', 'operations', 'analytics', 'intelligence'].includes(tab)) return;
+                if (!['operations', 'analytics', 'intelligence'].includes(tab)) return;
                 this.activeTab = tab;
                 if (updateHash && history.replaceState) {
                     history.replaceState(null, null, '#' + tab);
