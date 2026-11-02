@@ -247,8 +247,8 @@ enum BillingCycle: string
                 'months' => 6,
                 'key' => 'semi_annual_price',
                 'label' => '۶ ماهه (نیم‌سال)',
-                'badge' => '۵٪ تخفیف',
-                'badgeClass' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50',
+                'badge' => 'نیم‌سال',
+                'badgeClass' => 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800/50',
             ],
             [
                 'value' => '7',

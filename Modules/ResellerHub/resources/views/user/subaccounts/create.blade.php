@@ -5,7 +5,7 @@
 
 
 @section('content')
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8" x-data="subAccountCreator()">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8" x-data="subAccountCreator()">
         {{-- Header --}}
         <div
             class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-200/60 dark:border-gray-800">
@@ -143,99 +143,6 @@
                                     @enderror
                                 </div>
 
-                                {{-- Company / Brand Name (Optional) --}}
-                                <div>
-                                    <x-resellerhub::label>
-                                        {{ __('نام کلینیک، مرکز یا نام تجاری') }} <span
-                                            class="text-xs text-gray-400 font-normal">({{ __('اختیاری') }})</span>
-                                    </x-resellerhub::label>
-                                    <div class="relative">
-                                        <x-resellerhub::input class="pl-10" type="text"
-                                                              name="company_name"
-                                                              x-model="form.company_name"
-
-                                                              placeholder="{{ __('مثلاً: کلینیک تخصصی دندانپزشکی رازی') }}"/>
-                                        <div
-                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-gray-400 mt-1.5">{{ __('در صورت تمایل به نمایش عنوان مرکز در فاکتورها و لیست‌ها.') }}</p>
-                                    <template x-if="errors.company_name">
-                                    <span class="text-xs text-rose-500 font-bold mt-1.5 flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor"
-                                             viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
-                                                                       stroke-width="2"
-                                                                       d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        <span x-text="errors.company_name[0]"></span>
-                                    </span>
-                                    </template>
-                                    @error('company_name')
-                                    <span x-show="!errors.company_name"
-                                          class="text-xs text-rose-500 font-bold mt-1.5 block">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Module Usage Limits & Quotas Section --}}
-                        <div
-                            class="rounded-2xl border border-gray-100 dark:border-gray-700/80 bg-gray-50/50 dark:bg-gray-900/30 p-5 space-y-4">
-                            <div
-                                class="flex items-center justify-between pb-3 border-b border-gray-200/60 dark:border-gray-700/80">
-                                <div class="flex items-center gap-2">
-                                <span
-                                    class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                                    </svg>
-                                </span>
-                                    <div>
-                                        <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">{{ __('سقف مصرف و لیمیت‌های ماژول‌ها (اختیاری)') }}</h4>
-                                        <p class="text-xs text-gray-400">{{ __('حداکثر سقف مجاز برای این زیرمجموعه را تعیین کنید (خالی گذاشتن فیلدها به معنی نامحدود است).') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {{-- Invoices Limit --}}
-                                <div
-                                    class="p-3.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200/70 dark:border-gray-700/70 space-y-1.5">
-                                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                                        {{ __('حداکثر تعداد فاکتور مجاز') }}
-                                    </label>
-                                    <x-resellerhub::input class="text-center font-bold" type="number"
-                                                          min="1"
-                                                          name="limits[invoices]"
-                                                          value="{{ old('limits.invoices', '') }}"
-                                                          placeholder="{{ __('مثلاً: ۲۰ (خالی = نامحدود)') }}"
-                                    />
-                                    <p class="text-xs text-gray-400">{{ __('سقف صدور فاکتور توسط یا برای این زیرمجموعه') }}</p>
-                                </div>
-                                @if(!empty($availableModules))
-                                    @foreach($availableModules as $mod)
-                                        @if(!in_array($mod->slug, ['invoices', 'resellerhub', 'settings', 'admin', 'core']))
-                                            <div
-                                                class="p-3.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200/70 dark:border-gray-700/70 space-y-1.5">
-                                                <label
-                                                    class="block text-xs font-bold text-gray-700 dark:text-gray-300 truncate">
-                                                    {{ __('سقف ماژول') }} {{ $mod->title }}
-                                                </label>
-                                                <input type="number"
-                                                       min="1"
-                                                       name="limits[{{ $mod->slug }}]"
-                                                       value="{{ old('limits.' . $mod->slug, '') }}"
-                                                       placeholder="{{ __('نامحدود') }}"
-                                                       class="w-full rounded-xl border border-gray-200 bg-gray-50/70 dark:bg-gray-900/50 dark:border-gray-700 px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 transition-all shadow-2xs dark:text-white dark:placeholder-gray-500 text-center font-bold">
-                                                <p class="text-xs text-gray-400 truncate">{{ __('محدودیت تعداد رکورد یا سقف استفاده') }}</p>
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                @endif
                             </div>
                         </div>
 
@@ -353,8 +260,7 @@
             return {
                 form: {
                     name: '{{ old('name', '') }}',
-                    mobile: '{{ old('mobile', '') }}',
-                    company_name: '{{ old('company_name', '') }}'
+                    mobile: '{{ old('mobile', '') }}'
                 },
                 submitting: false,
                 errors: {},

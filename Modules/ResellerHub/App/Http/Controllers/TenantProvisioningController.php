@@ -33,12 +33,15 @@ use Modules\ResellerHub\App\Services\ResellerBillingService;
 use Modules\ResellerHub\App\Services\Support\ModuleTitleResolver;
 use Modules\ResellerHub\App\Services\TenantProvisioningService;
 use Modules\ResellerHub\App\Traits\HasReseller;
+use Modules\ResellerHub\App\Traits\HasSubAccountSearch;
+use Modules\ResellerHub\App\Traits\HasResellerSorting;
+use Modules\ResellerHub\App\Traits\HasResellerPagination;
 use Morilog\Jalali\Jalalian;
 use Throwable;
 
 class TenantProvisioningController extends Controller
 {
-    use HasReseller;
+    use HasReseller, HasSubAccountSearch, HasResellerSorting, HasResellerPagination;
 
     protected ResellerBillingService $billingService;
     protected ModuleCapabilityCatalogService $catalogService;
@@ -74,18 +77,19 @@ class TenantProvisioningController extends Controller
             $scopedResellerId = (int)$reseller->id;
         }
 
-        $query = Tenant::query()->when($scopedResellerId, function ($q) use ($scopedResellerId) {
+        $tenantQuery = Tenant::query()->when($scopedResellerId, function ($q) use ($scopedResellerId) {
             $q->where('reseller_id', $scopedResellerId);
         });
 
-        // Filter by Search
-        if ($search = $request->input('search', $request->input('q'))) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('subdomain', 'like', "%{$search}%")
-                    ->orWhere('custom_domain', 'like', "%{$search}%");
-            });
-        }
+        // Quick status counts for filters and header stat cards
+        $totalTenants = (clone $tenantQuery)->count();
+        $activeTenants = (clone $tenantQuery)->where('status', Tenant::STATUS_ACTIVE)->count();
+        $pendingPaymentTenants = (clone $tenantQuery)->where('status', Tenant::STATUS_PENDING_PAYMENT)->count();
+        $suspendedTenants = (clone $tenantQuery)->where('status', Tenant::STATUS_SUSPENDED)->count();
+        $expiredTenants = (clone $tenantQuery)->whereNotNull('plan_expires_at')->where('plan_expires_at', '<', now())->count();
+
+        $query = clone $tenantQuery;
+        $this->applyTenantSearch($query, $request->input('search', $request->input('q')));
 
         // Filter by Status
         if ($status = $request->input('status')) {
@@ -96,9 +100,20 @@ class TenantProvisioningController extends Controller
             }
         }
 
+        $this->applySorting($query, $request, [
+            'name' => 'tenants.name',
+            'subdomain' => 'tenants.subdomain',
+            'status' => 'tenants.status',
+            'expires_at' => fn($q, $dir) => $q->orderByRaw("tenants.plan_expires_at IS NULL, tenants.plan_expires_at {$dir}"),
+            'plan_expires_at' => fn($q, $dir) => $q->orderByRaw("tenants.plan_expires_at IS NULL, tenants.plan_expires_at {$dir}"),
+            'date' => 'tenants.created_at',
+            'created_at' => 'tenants.created_at',
+        ], defaultColumn: 'tenants.id');
+
+        $perPage = $this->resolvePerPage();
+
         $tenants = $query->with(['modules', 'subAccount', 'reseller', 'package'])
-            ->latest('id')
-            ->paginate(15)
+            ->paginate($perPage)
             ->withQueryString();
 
         $allResellers = $isSuperAdmin ? Reseller::select('id', 'company_name')->get() : collect();
@@ -109,7 +124,12 @@ class TenantProvisioningController extends Controller
             'tenants',
             'isSuperAdmin',
             'allResellers',
-            'currencyLabel'
+            'currencyLabel',
+            'totalTenants',
+            'activeTenants',
+            'pendingPaymentTenants',
+            'suspendedTenants',
+            'expiredTenants'
         ));
     }
 
