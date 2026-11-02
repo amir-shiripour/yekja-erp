@@ -40,86 +40,11 @@ class ResellerSubAccountController extends Controller
     use HasReseller, HasSubAccountSearch, HasResellerSorting, HasResellerPagination;
 
     /**
-     * Display a listing of sub-accounts.
+     * Display a listing of sub-accounts (Unified Fleet & Clients Hub).
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
-        $reseller = $this->getReseller();
-        $user = Auth::user();
-        $isSuperAdmin = method_exists($user, 'hasRole') && $user->hasRole('super-admin');
-
-        $baseQuery = ResellerSubAccount::query();
-
-        if ($isSuperAdmin) {
-            $selectedResellerId = $request->input('reseller_id');
-            if ($selectedResellerId && $selectedResellerId !== 'all') {
-                $baseQuery->where('reseller_id', $selectedResellerId);
-            }
-        } else {
-            $baseQuery->where('reseller_id', $reseller->id);
-        }
-
-        // Calculate summary counters before applying search and status filters
-        $totalSubAccounts = (clone $baseQuery)->count();
-        $activeSubAccounts = (clone $baseQuery)->where('status', ResellerSubAccount::STATUS_ACTIVE)->count();
-        $suspendedSubAccounts = (clone $baseQuery)->where('status', ResellerSubAccount::STATUS_SUSPENDED)->count();
-        $connectedTenants = (clone $baseQuery)->whereNotNull('tenant_id')->distinct('tenant_id')->count('tenant_id');
-
-        // Apply Search
-        $this->applySubAccountSearch($baseQuery, $request->input('search'));
-
-        // Apply Status filter
-        $statusFilter = $request->input('status');
-        if ($statusFilter && in_array($statusFilter, [ResellerSubAccount::STATUS_ACTIVE, ResellerSubAccount::STATUS_SUSPENDED], true)) {
-            $baseQuery->where('status', $statusFilter);
-        }
-
-        // Apply Source filter (online vs manual)
-        $this->applySourceFilter($baseQuery, $request->input('source'));
-
-        $this->applySorting($baseQuery, $request, [
-            'name' => 'reseller_sub_accounts.name',
-            'subaccount' => 'reseller_sub_accounts.name',
-            'subaccount_name' => 'reseller_sub_accounts.name',
-            'company' => 'reseller_sub_accounts.company_name',
-            'company_name' => 'reseller_sub_accounts.company_name',
-            'tenant' => fn($q, $dir) => $q->orderByRaw("reseller_sub_accounts.tenant_id IS NULL, reseller_sub_accounts.tenant_id {$dir}"),
-            'tenant_id' => fn($q, $dir) => $q->orderByRaw("reseller_sub_accounts.tenant_id IS NULL, reseller_sub_accounts.tenant_id {$dir}"),
-            'reseller' => 'reseller_sub_accounts.reseller_id',
-            'reseller_id' => 'reseller_sub_accounts.reseller_id',
-            'status' => 'reseller_sub_accounts.status',
-            'date' => 'reseller_sub_accounts.created_at',
-            'created_at' => 'reseller_sub_accounts.created_at',
-        ], defaultColumn: 'reseller_sub_accounts.id');
-
-        $perPage = $this->resolvePerPage($request, default: 10);
-
-        $subAccounts = $baseQuery->with([
-            'reseller.user',
-            'tenant' => static function ($q) {
-                $q->with('modules');
-            },
-            'user',
-            'tenants'
-        ])
-            ->paginate($perPage)
-            ->withQueryString();
-
-        $resellersList = collect([]);
-        if ($isSuperAdmin) {
-            $resellersList = Reseller::with('user')->orderBy('company_name')->get();
-        }
-
-        return view('resellerhub::user.subaccounts.index', compact(
-            'reseller',
-            'subAccounts',
-            'totalSubAccounts',
-            'activeSubAccounts',
-            'suspendedSubAccounts',
-            'connectedTenants',
-            'isSuperAdmin',
-            'resellersList'
-        ));
+        return app(TenantProvisioningController::class)->index($request->merge(['tab' => 'subaccounts']));
     }
 
     protected function getAvailableModules(Reseller $reseller): Collection

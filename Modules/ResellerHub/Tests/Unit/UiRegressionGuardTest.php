@@ -9,21 +9,7 @@ use Modules\ResellerHub\Tests\TestCase;
 
 /**
  * Regression guards for the ResellerHub admin UI.
- *
- * These are source-level assertions on purpose: each one encodes a real defect
- * that shipped and was invisible to the runtime test suite.
- *
- *  1. The settings form used to nest `<form>` elements (the tenancy tab).
- *     Browsers auto-close the outer form at the first nested one, which left
- *     the "ذخیره تنظیمات" button OUTSIDE the form — the click did nothing and
- *     no request was ever sent.
- *  2. The sub-accounts table used to show both the business name and the
- *     "owner / manager" name, duplicating a concept that no longer exists
- *     after the owner-id logic was removed.
- *  3. Sub-accounts used to allocate a "max CRMs" sales quota per buyer.
- *     That allocation logic was removed and must not creep back in.
- *  4. The global notice modal must stay minimal: no coloured accent bar and no
- *     bordered message box.
+
  */
 class UiRegressionGuardTest extends TestCase
 {
@@ -78,6 +64,29 @@ class UiRegressionGuardTest extends TestCase
             substr_count($blade, '</form>'),
             'Every <form> in the tenancy tab must be closed.'
         );
+    }
+
+    public function test_views_have_no_executor_reseller_column(): void
+    {
+        $subIndex = $this->moduleView('user/subaccounts/index.blade.php');
+        $subPartial = $this->moduleView('user/subaccounts/partials/subaccounts-table.blade.php');
+        $tenantsIndex = $this->moduleView('user/tenants/index.blade.php');
+
+        $this->assertStringNotContainsString('نماینده مجری', $subIndex, 'Subaccounts index view must not contain "نماینده مجری"');
+        $this->assertStringNotContainsString('نماینده مجری', $subPartial, 'Subaccounts partial table must not contain "نماینده مجری"');
+        $this->assertStringNotContainsString('نماینده مجری', $tenantsIndex, 'Tenants index view must not contain "نماینده مجری"');
+    }
+
+    public function test_tenants_index_has_unified_hub_elements(): void
+    {
+        $blade = $this->moduleView('user/tenants/index.blade.php');
+
+        $this->assertStringContainsString('tab-btn-tenants', $blade);
+        $this->assertStringContainsString('tab-btn-subaccounts', $blade);
+        $this->assertStringContainsString('tabpanel-tenants', $blade);
+        $this->assertStringContainsString('tabpanel-subaccounts', $blade);
+        $this->assertStringContainsString('totalTenants', $blade);
+        $this->assertStringContainsString('totalSubAccounts', $blade);
     }
 
     public function test_sub_accounts_table_has_no_owner_or_manager_column(): void

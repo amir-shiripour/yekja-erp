@@ -27,6 +27,7 @@
             todayJalali: config.todayJalali || '{{ reseller_format_jalali(now(), 'Y/m/d', false) }}',
             dashboardUrl: config.dashboardUrl || '{{ route('reseller.dashboard') }}',
             activeTab: (window.location.hash && ['operations', 'analytics', 'intelligence'].includes(window.location.hash.substring(1))) ? window.location.hash.substring(1) : 'operations',
+            hubTab: config.hubTab || (new URLSearchParams(window.location.search).get('tab')) || 'tenants',
 
             get activeRatio() {
                 return this.totalTenants > 0 ? Math.round((this.activeTenants / this.totalTenants) * 100) : 0;
