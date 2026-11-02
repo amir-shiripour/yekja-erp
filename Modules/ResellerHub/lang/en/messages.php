@@ -179,6 +179,9 @@ return [
         'delete_error' => 'An error occurred while deleting tenant: :error',
         'delete_tooltip' => 'Hard delete this tenant',
         'delete_action' => 'Hard Delete Tenant',
+        'undo' => 'Undo',
+        'undo_notice' => 'Permanently deleting in :seconds seconds...',
+        'undo_cancelled' => 'Deletion was cancelled.',
     ],
 
     'packages' => [
@@ -342,6 +345,9 @@ return [
         'delete_conflict_has_tenants' => 'This sub-account has :count connected tenant(s) and requires cascade confirmation to delete.',
         'delete_error' => 'An error occurred while deleting sub-account: :error',
         'delete_tooltip' => 'Hard delete sub-account',
+        'undo' => 'Undo',
+        'undo_notice' => 'Permanently deleting in :seconds seconds...',
+        'undo_cancelled' => 'Deletion was cancelled.',
     ],
 
     'portal' => [

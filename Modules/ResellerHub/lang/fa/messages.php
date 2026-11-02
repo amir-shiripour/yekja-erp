@@ -180,6 +180,9 @@ return array(
             'delete_error' => 'خطایی در حذف سامانه رخ داد: :error',
             'delete_tooltip' => 'حذف کامل و دائمی این سامانه',
             'delete_action' => 'حذف کامل سامانه',
+            'undo' => 'بازگردانی',
+            'undo_notice' => 'در حال حذف نهایی (:seconds ثانیه)...',
+            'undo_cancelled' => 'عملیات حذف لغو گردید.',
         ),
     'packages' =>
         array(
@@ -344,6 +347,9 @@ return array(
             'delete_conflict_has_tenants' => 'این زیرمجموعه دارای :count سامانه متصل است و حذف آن نیازمند تایید حذف آبشاری است.',
             'delete_error' => 'خطایی در حذف زیرمجموعه رخ داد: :error',
             'delete_tooltip' => 'حذف کامل حساب زیرمجموعه',
+            'undo' => 'بازگردانی',
+            'undo_notice' => 'در حال حذف نهایی (:seconds ثانیه)...',
+            'undo_cancelled' => 'عملیات حذف لغو گردید.',
         ),
     'portal' =>
         array(
