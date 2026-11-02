@@ -46,7 +46,7 @@
                              stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
-                        <span class="text-indigo-600 dark:text-indigo-400 font-black">مرکز عملیات Reseller Hub</span>
+                        <span class="text-indigo-600 dark:text-indigo-400 font-black">مرکز عملیات نمایندگی فروش</span>
                     </nav>
 
                     <div class="flex items-start sm:items-center gap-3.5">

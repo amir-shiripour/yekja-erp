@@ -770,9 +770,9 @@ class PermissionCatalog
             'smsreseller.settings.manage' => 'مدیریت تنظیمات و سرفصل‌های ریسیلر پیامک',
 
             // Status Builder
-            'status-builder.manage' => 'مدیریت وضعیت‌ساز (Status Builder)',
+            'status-builder.manage' => 'مدیریت وضعیت‌ ساز (Status Builder)',
 
-            // ResellerHub (سامانه نمایندگی فروش)
+            // ResellerHub
             'menu.see.resellerhub' => 'نمایش منوی نمایندگی فروش در سایدبار',
             'resellerhub.view' => 'مشاهده پیشخوان و پنل نمایندگی فروش',
             'resellerhub.manage' => 'مدیریت کامل ماژول نمایندگی فروش',
@@ -790,12 +790,14 @@ class PermissionCatalog
             'resellerhub.tenants.login-as' => 'ورود مستقیم به سامانه مشتری (SSO)',
             'resellerhub.tenants.export' => 'استخراج دیتابیس و بکاپ سامانه (SQL / JSON)',
             'resellerhub.tenants.export_sql' => 'دریافت خروجی دیتابیس (SQL) سامانه مشتری',
+            'resellerhub.tenants.delete' => 'حذف کامل و همیشگی سامانه CRM',
 
             // ResellerHub: Sub-Accounts
-            'resellerhub.sub-accounts.view' => 'مشاهده فهرست زیرحساب‌های نمایندگی',
-            'resellerhub.sub-accounts.create' => 'ایجاد و ثبت زیرحساب جدید',
-            'resellerhub.sub-accounts.edit' => 'ویرایش مشخصات زیرحساب',
-            'resellerhub.sub-accounts.toggle-status' => 'تغییر وضعیت و فعال‌سازی زیرحساب',
+            'resellerhub.sub-accounts.view' => 'مشاهده فهرست زیرمجموعه های نمایندگی',
+            'resellerhub.sub-accounts.create' => 'ایجاد و ثبت زیرمجموعه',
+            'resellerhub.sub-accounts.edit' => 'ویرایش مشخصات زیرمجموعه',
+            'resellerhub.sub-accounts.toggle-status' => 'تغییر وضعیت و فعال‌سازی زیرمجموعه',
+            'resellerhub.sub-accounts.delete' => 'حذف کامل و همیشگی زیرمجموعه',
 
             // ResellerHub: Packages & Pricing
             'resellerhub.packages.view' => 'مشاهده فهرست پکیج‌های اختصاصی',

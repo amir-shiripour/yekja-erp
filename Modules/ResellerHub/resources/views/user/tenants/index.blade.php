@@ -153,6 +153,7 @@
         {{-- Modal Partials --}}
         @include('resellerhub::partials.suspend-modal')
         @include('resellerhub::partials.renew-modal')
+        @include('resellerhub::partials.tenant-delete-modal')
 
         {{-- Scripts --}}
         @include('resellerhub::user.dashboard.partials.scripts')

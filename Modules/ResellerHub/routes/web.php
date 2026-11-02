@@ -80,9 +80,10 @@ Route::middleware(['web', 'auth', 'role_or_permission:super-admin|resellerhub.vi
         ->middleware('role_or_permission:super-admin|resellerhub.tenants.login-as')
         ->name('tenants.login-as');
 
-    Route::middleware('role_or_permission:super-admin|resellerhub.tenants.edit')->group(function () {
+    Route::middleware('role_or_permission:super-admin|resellerhub.tenants.edit|resellerhub.tenants.delete|resellerhub.manage')->group(function () {
         Route::get('/tenants/{tenant}/edit', [TenantProvisioningController::class, 'edit'])->name('tenants.edit');
         Route::put('/tenants/{tenant}', [TenantProvisioningController::class, 'update'])->name('tenants.update');
+        Route::delete('/tenants/{tenant}', [TenantProvisioningController::class, 'destroy'])->name('tenants.destroy');
     });
 
     Route::post('/tenants/{tenant}/toggle-status', [ResellerDashboardController::class, 'toggleStatus'])
@@ -133,9 +134,10 @@ Route::middleware(['web', 'auth', 'role_or_permission:super-admin|resellerhub.vi
         Route::post('/sub-accounts/quick-store', [ResellerSubAccountController::class, 'quickStore'])->name('sub-accounts.quick-store');
     });
 
-    Route::middleware('role_or_permission:super-admin|resellerhub.sub-accounts.edit')->group(function () {
+    Route::middleware('role_or_permission:super-admin|resellerhub.sub-accounts.edit|resellerhub.sub-accounts.delete|resellerhub.manage')->group(function () {
         Route::get('/sub-accounts/{subAccount}/edit', [ResellerSubAccountController::class, 'edit'])->name('sub-accounts.edit');
         Route::put('/sub-accounts/{subAccount}', [ResellerSubAccountController::class, 'update'])->name('sub-accounts.update');
+        Route::delete('/sub-accounts/{subAccount}', [ResellerSubAccountController::class, 'destroy'])->name('sub-accounts.destroy');
     });
 
     Route::middleware('role_or_permission:super-admin|resellerhub.sub-accounts.view')->group(function () {

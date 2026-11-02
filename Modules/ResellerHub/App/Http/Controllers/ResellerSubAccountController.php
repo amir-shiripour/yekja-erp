@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\ResellerHub\App\Enums\QuotaKey;
@@ -30,6 +31,8 @@ use Modules\ResellerHub\App\Traits\HasReseller;
 use Modules\ResellerHub\App\Traits\HasResellerPagination;
 use Modules\ResellerHub\App\Traits\HasResellerSorting;
 use Modules\ResellerHub\App\Traits\HasSubAccountSearch;
+use Modules\ResellerHub\App\Services\TenantDeletionService;
+use Throwable;
 
 
 class ResellerSubAccountController extends Controller
@@ -96,7 +99,8 @@ class ResellerSubAccountController extends Controller
             'tenant' => static function ($q) {
                 $q->with('modules');
             },
-            'user'
+            'user',
+            'tenants'
         ])
             ->paginate($perPage)
             ->withQueryString();
@@ -156,7 +160,7 @@ class ResellerSubAccountController extends Controller
     }
 
     /**
-     * Auto-generate a unique system email for the sub-account.
+     * Auto-generate a unique system email for the subaccount.
      */
     protected function generateUniqueEmail(string $mobile): string
     {
@@ -196,7 +200,6 @@ class ResellerSubAccountController extends Controller
         if (is_array($limits)) {
             $limits = array_filter($limits, static fn($v) => $v !== null && $v !== '');
             $limits = array_map(static fn($v) => max(0, (int)$v), $limits);
-            // سقف تعداد سامانه/فروش برای زیرمجموعه حذف شده است؛ کلید قدیمی هرگز ذخیره نشود.
             unset($limits['tenants']);
         } else {
             $limits = null;
@@ -235,10 +238,8 @@ class ResellerSubAccountController extends Controller
     {
         $reseller = $this->getReseller();
         $validated = $request->validated();
-
         $generatedEmail = $this->generateUniqueEmail($validated['mobile']);
         $rawPassword = Str::random(10);
-
         $subAccount = new ResellerSubAccount();
         $subAccount->reseller_id = $reseller->id;
         $subAccount->name = $validated['name'];
@@ -269,7 +270,7 @@ class ResellerSubAccountController extends Controller
     }
 
     /**
-     * Show the form for editing a sub-account.
+     * Show the form for editing a subaccount.
      */
     public function edit(ResellerSubAccount $subAccount): View
     {
@@ -291,7 +292,6 @@ class ResellerSubAccountController extends Controller
         if (is_array($limits)) {
             $limits = array_filter($limits, static fn($v) => $v !== null && $v !== '');
             $limits = array_map(static fn($v) => max(0, (int)$v), $limits);
-            // سقف تعداد سامانه/فروش برای زیرمجموعه حذف شده است؛ کلید قدیمی هرگز ذخیره نشود.
             unset($limits['tenants']);
         } else {
             $limits = null;
@@ -361,7 +361,8 @@ class ResellerSubAccountController extends Controller
             'reseller.user',
             'tenants.modules',
             'tenant.modules',
-            'user'
+            'user',
+            'tenants'
         ]);
 
         $allTenants = $subAccount->tenants->isNotEmpty()
@@ -569,6 +570,82 @@ class ResellerSubAccountController extends Controller
 
         if (!$isSuperAdmin && (int)$subAccount->reseller_id !== (int)$reseller->id) {
             abort(403, __('resellerhub::messages.common.unauthorized'));
+        }
+    }
+
+    /**
+     * Completely and permanently hard-delete a SubAccount.
+     */
+    public function destroy(Request $request, ResellerSubAccount $subAccount, TenantDeletionService $deletionService): JsonResponse|RedirectResponse
+    {
+        $this->authorizeSubAccountAccess($subAccount);
+
+        $currentUser = Auth::user();
+        $isSuperAdmin = method_exists($currentUser, 'hasRole') && $currentUser->hasRole('super-admin');
+
+        if (!$isSuperAdmin && !$currentUser->can('resellerhub.sub-accounts.delete') && !$currentUser->can('resellerhub.manage') && !$currentUser->can('resellerhub.sub-accounts.edit')) {
+            abort(403, __('resellerhub::messages.common.unauthorized'));
+        }
+
+        $connectedTenants = $deletionService->getConnectedTenants($subAccount);
+        $force = $request->boolean('force_delete_tenants') || $request->boolean('cascade_tenants');
+
+        if ($connectedTenants->isNotEmpty() && !$force) {
+            return response()->json([
+                'success' => false,
+                'has_connected_tenants' => true,
+                'connected_tenants_count' => $connectedTenants->count(),
+                'connected_tenants' => $connectedTenants->map(fn($t) => [
+                    'id' => $t->id,
+                    'name' => $t->name ?: $t->subdomain,
+                    'subdomain' => $t->subdomain,
+                    'status' => $t->status,
+                ]),
+                'message' => __('resellerhub::messages.subaccounts.delete_conflict_has_tenants', [
+                    'count' => ResellerHelper::toPersianDigits($connectedTenants->count())
+                ]),
+            ], 409);
+        }
+
+        $subAccountName = $subAccount->name;
+        $subAccountId = (int)$subAccount->id;
+
+        try {
+            $result = $deletionService->hardDeleteSubAccount($subAccount, $force);
+
+            $msg = $result['deleted_tenants_count'] > 0
+                ? __('resellerhub::messages.subaccounts.deleted_with_tenants_success', [
+                    'name' => $subAccountName,
+                    'count' => ResellerHelper::toPersianDigits($result['deleted_tenants_count']),
+                ])
+                : __('resellerhub::messages.subaccounts.deleted_success', [
+                    'name' => $subAccountName,
+                ]);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $msg,
+                    'deleted_sub_account_id' => $subAccountId,
+                    'deleted_tenants_count' => $result['deleted_tenants_count'],
+                ]);
+            }
+
+            return redirect()->route('reseller.sub-accounts.index')->with('success', $msg);
+        } catch (Throwable $e) {
+            Log::error('resellerhub.sub_accounts.destroy_failed', [
+                'sub_account_id' => $subAccountId,
+                'error' => $e->getMessage(),
+            ]);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('resellerhub::messages.subaccounts.delete_error', ['error' => $e->getMessage()]),
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', __('resellerhub::messages.subaccounts.delete_error', ['error' => $e->getMessage()]));
         }
     }
 }

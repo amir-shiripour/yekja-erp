@@ -74,6 +74,9 @@
 
         {{-- Custom Domain DNS Instructions Modal --}}
         @include('resellerhub::user.tenants.partials.show.dns-guide-modal')
+
+        {{-- Hard Delete Tenant Modal --}}
+        @include('resellerhub::partials.tenant-delete-modal')
     </div>
 
     @push('scripts')

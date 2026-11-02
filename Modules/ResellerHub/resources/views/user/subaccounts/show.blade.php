@@ -150,6 +150,28 @@
                         <span>مدیریت در پنل CRM</span>
                     </a>
                 @endif
+                <button type="button"
+                        @click="openSubAccountDeleteModal({
+                            id: {{ $subAccount->id }},
+                            name: '{{ addslashes($subAccount->name) }}',
+                            company: '{{ addslashes($subAccount->company_name ?? '') }}',
+                            tenants_count: {{ $subAccount->getConnectedTenants()->count() }},
+                            tenants: {{ json_encode($subAccount->getConnectedTenants()->map(fn($t) => [
+                                'id' => $t->id,
+                                'name' => $t->name ?: $t->subdomain,
+                                'subdomain' => $t->subdomain,
+                                'status' => $t->status,
+                            ])->values()) }},
+                            delete_url: '{{ route('reseller.sub-accounts.destroy', $subAccount->id) }}'
+                        })"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 text-xs sm:text-sm font-bold transition-all cursor-pointer"
+                        title="{{ __('resellerhub::messages.subaccounts.delete_tooltip') }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    <span>{{ __('resellerhub::messages.subaccounts.delete_title') }}</span>
+                </button>
             </div>
         </div>
 
@@ -1785,4 +1807,5 @@
             };
         }
     </script>
+    @include('resellerhub::partials.subaccount-delete-modal')
 @endsection

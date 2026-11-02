@@ -70,6 +70,22 @@
             <span>ویرایش سامانه</span>
         </a>
 
+        <button type="button"
+                @click="openTenantDeleteModal({
+                    id: {{ $tenant->id }},
+                    name: '{{ addslashes($tenant->name ?: $tenant->subdomain) }}',
+                    subdomain: '{{ addslashes($displayUrl) }}',
+                    delete_url: '{{ route('reseller.tenants.destroy', $tenant->id) }}'
+                })"
+                class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900 text-rose-600 dark:text-rose-400 text-sm font-bold rounded-xl transition-colors border border-rose-200 dark:border-rose-800 cursor-pointer"
+                title="{{ __('resellerhub::messages.tenants.delete_tooltip') }}">
+            <svg class="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            <span>{{ __('resellerhub::messages.tenants.delete_action') }}</span>
+        </button>
+
         <template x-if="status === 'pending_payment'">
             <span
                 class="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-sm font-bold rounded-xl border border-amber-200/60"
