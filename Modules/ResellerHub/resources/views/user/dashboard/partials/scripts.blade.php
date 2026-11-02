@@ -1,6 +1,6 @@
 <script>
     // Universal Persian digits formatter
-    window.toFaDigits = function(n) {
+    window.toFaDigits = function (n) {
         if (n === null || n === undefined) return '';
         const fa = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         return String(n).replace(/[0-9]/g, d => fa[d]);
@@ -723,32 +723,32 @@
         window.resellerStatusChartInstance = null;
         window.resellerPipelineChartInstance = null;
         window.resellerRevenueCompChartInstance = null;
-        window.currentResellerGrowthLabels = {!! json_encode($chartLabels) !!};
-        window.currentResellerTenantsSeries = {!! json_encode($tenantsCreatedSeries->values()) !!};
-        window.currentResellerRevenueSeries = {!! json_encode($revenueSeries->values()) !!};
+        window.currentResellerGrowthLabels = {!! json_encode($chartLabels ?? []) !!};
+        window.currentResellerTenantsSeries = {!! json_encode(isset($tenantsCreatedSeries) ? $tenantsCreatedSeries->values() : []) !!};
+        window.currentResellerRevenueSeries = {!! json_encode(isset($revenueSeries) ? $revenueSeries->values() : []) !!};
         window.currentResellerStatusData = {
-            active: {{ (int)$activeTenants }},
-            suspended: {{ (int)$suspendedTenants }},
-            other: {{ (int)max(0, $totalTenants - $activeTenants - $suspendedTenants) }}
+            active: {{ (int)($activeTenants ?? 0) }},
+            suspended: {{ (int)($suspendedTenants ?? 0) }},
+            other: {{ (int)max(0, ($totalTenants ?? 0) - ($activeTenants ?? 0) - ($suspendedTenants ?? 0)) }}
         };
         window.currentResellerOrderSourceData = {
-            online: {{ (int)$onlineOrdersCount }},
-            manual: {{ (int)$manualOrdersCount }},
-            onlineRevenue: {{ (int)$onlineOrdersRevenue }},
-            manualRevenue: {{ (int)$manualOrdersRevenue }},
-            total: {{ (int)$totalOrdersCount }}
+            online: {{ (int)($onlineOrdersCount ?? 0) }},
+            manual: {{ (int)($manualOrdersCount ?? 0) }},
+            onlineRevenue: {{ (int)($onlineOrdersRevenue ?? 0) }},
+            manualRevenue: {{ (int)($manualOrdersRevenue ?? 0) }},
+            total: {{ (int)($totalOrdersCount ?? 0) }}
         };
-        window.currentResellerPipelineData = {!! json_encode($pipelineData) !!};
-        window.currentResellerRevenueComposition = {!! json_encode($revenueComposition) !!};
-        window.currentResellerTotalFinancialVolume = {{ (int)$totalFinancialVolume }};
+        window.currentResellerPipelineData = {!! json_encode($pipelineData ?? []) !!};
+        window.currentResellerRevenueComposition = {!! json_encode($revenueComposition ?? []) !!};
+        window.currentResellerTotalFinancialVolume = {{ (int)($totalFinancialVolume ?? 0) }};
         window.resellerCapabilitiesChartInstance = null;
         window.resellerPackagesChartInstance = null;
         window.resellerRetentionChartInstance = null;
-        window.currentResellerFeaturesStats = {!! json_encode($featuresStats) !!};
-        window.currentResellerLimitsStats = {!! json_encode($limitsStats) !!};
-        window.currentResellerPackageDistribution = {!! json_encode($packageDistribution) !!};
-        window.currentResellerRetentionCohorts = {!! json_encode($retentionCohorts) !!};
-        window.currentResellerTotalTenants = {{ (int)$totalTenants }};
+        window.currentResellerFeaturesStats = {!! json_encode($featuresStats ?? []) !!};
+        window.currentResellerLimitsStats = {!! json_encode($limitsStats ?? []) !!};
+        window.currentResellerPackageDistribution = {!! json_encode($packageDistribution ?? []) !!};
+        window.currentResellerRetentionCohorts = {!! json_encode($retentionCohorts ?? []) !!};
+        window.currentResellerTotalTenants = {{ (int)($totalTenants ?? 0) }};
 
         function initResellerCharts() {
             if (!window.Chart) {
@@ -793,141 +793,386 @@
                                 backgroundColor: revenueGradient,
                                 borderWidth: 2.5,
                                 fill: true,
-                            tension: 0.35,
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            pointBackgroundColor: '#10b981',
-                            pointBorderColor: isDark ? '#064e3b' : '#ffffff',
-                            pointBorderWidth: isDark ? 1.5 : 2,
-                            pointHoverBackgroundColor: isDark ? '#34d399' : '#ffffff',
-                            pointHoverBorderColor: '#10b981',
-                            yAxisID: 'yRevenue',
-                            order: 0,
-                        },
-                        {
-                            type: 'bar',
-                            label: 'سامانه جدید',
-                            data: window.currentResellerTenantsSeries,
-                            backgroundColor: 'rgba(99, 102, 241, 0.85)',
-                            hoverBackgroundColor: '#4f46e5',
-                            borderRadius: 6,
-                            borderSkipped: false,
-                            maxBarThickness: 28,
-                            yAxisID: 'yTenants',
-                            order: 1,
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {mode: 'index', intersect: false},
-                    animation: {duration: 500, easing: 'easeOutQuart'},
-                    plugins: {
-                        legend: {display: false},
-                        tooltip: {
-                            rtl: true,
-                            textDirection: 'rtl',
-                            titleAlign: 'left',
-                            bodyAlign: 'right',
-                            footerAlign: 'left',
-                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.98)',
-                            titleColor: isDark ? '#f9fafb' : '#111827',
-                            bodyColor: isDark ? '#d1d5db' : '#374151',
-                            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb',
-                            borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 12,
-                            displayColors: true,
-                            boxPadding: 4,
-                            callbacks: {
-                                label: function (c) {
-                                    if (c.dataset.yAxisID === 'yRevenue') {
-                                        return ' درآمد وصولی: ' + window.toFaDigits(Number(c.parsed.y).toLocaleString('en-US')) + ' {{ $currencyLabel }}';
-                                    }
-                                    return ' سامانه جدید: ' + window.toFaDigits(c.parsed.y) + ' CRM';
-                                }
+                                tension: 0.35,
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                                pointBackgroundColor: '#10b981',
+                                pointBorderColor: isDark ? '#064e3b' : '#ffffff',
+                                pointBorderWidth: isDark ? 1.5 : 2,
+                                pointHoverBackgroundColor: isDark ? '#34d399' : '#ffffff',
+                                pointHoverBorderColor: '#10b981',
+                                yAxisID: 'yRevenue',
+                                order: 0,
+                            },
+                            {
+                                type: 'bar',
+                                label: 'سامانه جدید',
+                                data: window.currentResellerTenantsSeries,
+                                backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                                hoverBackgroundColor: '#4f46e5',
+                                borderRadius: 6,
+                                borderSkipped: false,
+                                maxBarThickness: 28,
+                                yAxisID: 'yTenants',
+                                order: 1,
                             }
-                        }
+                        ]
                     },
-                    scales: {
-                        x: {
-                            reverse: true,
-                            grid: {display: false},
-                            border: {display: false},
-                            ticks: {
-                                font: {family: chartFontFamily, size: 11},
-                                color: textColor
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {mode: 'index', intersect: false},
+                        animation: {duration: 500, easing: 'easeOutQuart'},
+                        plugins: {
+                            legend: {display: false},
+                            tooltip: {
+                                rtl: true,
+                                textDirection: 'rtl',
+                                titleAlign: 'left',
+                                bodyAlign: 'right',
+                                footerAlign: 'left',
+                                backgroundColor: isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+                                titleColor: isDark ? '#f9fafb' : '#111827',
+                                bodyColor: isDark ? '#d1d5db' : '#374151',
+                                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 12,
+                                displayColors: true,
+                                boxPadding: 4,
+                                callbacks: {
+                                    label: function (c) {
+                                        if (c.dataset.yAxisID === 'yRevenue') {
+                                            return ' درآمد وصولی: ' + window.toFaDigits(Number(c.parsed.y).toLocaleString('en-US')) + ' {{ $currencyLabel }}';
+                                        }
+                                        return ' سامانه جدید: ' + window.toFaDigits(c.parsed.y) + ' CRM';
+                                    }
+                                }
                             }
                         },
-                        yTenants: {
-                            type: 'linear',
-                            position: 'left',
-                            beginAtZero: true,
-                            ticks: {
-                                color: textColor,
-                                precision: 0,
-                                font: {family: chartFontFamily, size: 11},
-                                callback: function (v) {
-                                    return window.toFaDigits(v);
+                        scales: {
+                            x: {
+                                reverse: true,
+                                grid: {display: false},
+                                border: {display: false},
+                                ticks: {
+                                    font: {family: chartFontFamily, size: 11},
+                                    color: textColor
                                 }
                             },
-                            grid: {color: isDark ? 'rgba(255, 255, 255, 0.04)' : gridColor},
-                            border: {display: false}
-                        },
-                        yRevenue: {
-                            type: 'linear',
-                            position: 'right',
-                            beginAtZero: true,
-                            ticks: {
-                                color: textColor,
-                                font: {family: chartFontFamily, size: 11},
-                                callback: function (v) {
-                                    if (v === 0) return '۰';
-                                    return window.toFaDigits(Math.round(v).toLocaleString('en-US')) + ' {{ $currencyLabel }}';
-                                }
+                            yTenants: {
+                                type: 'linear',
+                                position: 'left',
+                                beginAtZero: true,
+                                ticks: {
+                                    color: textColor,
+                                    precision: 0,
+                                    font: {family: chartFontFamily, size: 11},
+                                    callback: function (v) {
+                                        return window.toFaDigits(v);
+                                    }
+                                },
+                                grid: {color: isDark ? 'rgba(255, 255, 255, 0.04)' : gridColor},
+                                border: {display: false}
                             },
-                            grid: {display: false},
-                            border: {display: false}
+                            yRevenue: {
+                                type: 'linear',
+                                position: 'right',
+                                beginAtZero: true,
+                                ticks: {
+                                    color: textColor,
+                                    font: {family: chartFontFamily, size: 11},
+                                    callback: function (v) {
+                                        if (v === 0) return '۰';
+                                        return window.toFaDigits(Math.round(v).toLocaleString('en-US')) + ' {{ $currencyLabel }}';
+                                    }
+                                },
+                                grid: {display: false},
+                                border: {display: false}
+                            }
                         }
                     }
+                });
+            }
+
+            const ctxOrderSource = document.getElementById('resellerStatusChart');
+            if (ctxOrderSource && window.currentResellerOrderSourceData) {
+                if (window.resellerStatusChartInstance) {
+                    window.resellerStatusChartInstance.destroy();
                 }
-            });
-        }
 
-        const ctxOrderSource = document.getElementById('resellerStatusChart');
-        if (ctxOrderSource && window.currentResellerOrderSourceData) {
-            if (window.resellerStatusChartInstance) {
-                window.resellerStatusChartInstance.destroy();
+                const oData = window.currentResellerOrderSourceData;
+                const sourceLabels = [];
+                const sourceCounts = [];
+                const sourceColors = [];
+                const sourceRevenues = [];
+
+                if ((oData.online || 0) > 0) {
+                    sourceLabels.push('خرید آنلاین از سایت');
+                    sourceCounts.push(oData.online);
+                    sourceColors.push('#8b5cf6');
+                    sourceRevenues.push(oData.onlineRevenue || 0);
+                }
+                if ((oData.manual || 0) > 0) {
+                    sourceLabels.push('ثبت دستی نماینده');
+                    sourceCounts.push(oData.manual);
+                    sourceColors.push('#3b82f6');
+                    sourceRevenues.push(oData.manualRevenue || 0);
+                }
+
+                if (sourceCounts.length > 0) {
+                    window.resellerStatusChartInstance = new window.Chart(ctxOrderSource, {
+                        type: 'doughnut',
+                        data: {
+                            labels: sourceLabels,
+                            datasets: [{
+                                data: sourceCounts,
+                                backgroundColor: sourceColors,
+                                hoverOffset: 6,
+                                borderWidth: isDark ? 0 : 2,
+                                borderColor: isDark ? 'transparent' : '#ffffff',
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '74%',
+                            animation: {duration: 500, easing: 'easeOutQuart'},
+                            plugins: {
+                                legend: {display: false},
+                                tooltip: {
+                                    rtl: true,
+                                    textDirection: 'rtl',
+                                    titleAlign: 'left',
+                                    bodyAlign: 'right',
+                                    backgroundColor: isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+                                    titleColor: isDark ? '#f9fafb' : '#111827',
+                                    bodyColor: isDark ? '#d1d5db' : '#374151',
+                                    borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    cornerRadius: 10,
+                                    callbacks: {
+                                        label: function (ctx) {
+                                            const count = ctx.parsed;
+                                            const rev = sourceRevenues[ctx.dataIndex];
+                                            const revStr = rev ? ' (' + window.toFaDigits(Number(rev).toLocaleString('en-US')) + ' {{ $currencyLabel }})' : '';
+                                            return ' ' + ctx.label + ': ' + window.toFaDigits(count) + ' سفارش' + revStr;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
             }
 
-            const oData = window.currentResellerOrderSourceData;
-            const sourceLabels = [];
-            const sourceCounts = [];
-            const sourceColors = [];
-            const sourceRevenues = [];
+            const ctxPipeline = document.getElementById('resellerPipelineChart');
+            if (ctxPipeline && window.currentResellerPipelineData) {
+                if (window.resellerPipelineChartInstance) {
+                    window.resellerPipelineChartInstance.destroy();
+                }
 
-            if ((oData.online || 0) > 0) {
-                sourceLabels.push('خرید آنلاین از سایت');
-                sourceCounts.push(oData.online);
-                sourceColors.push('#8b5cf6');
-                sourceRevenues.push(oData.onlineRevenue || 0);
-            }
-            if ((oData.manual || 0) > 0) {
-                sourceLabels.push('ثبت دستی نماینده');
-                sourceCounts.push(oData.manual);
-                sourceColors.push('#3b82f6');
-                sourceRevenues.push(oData.manualRevenue || 0);
+                const pData = window.currentResellerPipelineData;
+                const pLabels = [
+                    '۳۰ روز آینده',
+                    '۳۱ تا ۶۰ روز',
+                    '۶۱ تا ۹۰ روز'
+                ];
+                const pRevenues = [
+                    (pData['30d'] && pData['30d'].revenue) ? pData['30d'].revenue : 0,
+                    (pData['60d'] && pData['60d'].revenue) ? pData['60d'].revenue : 0,
+                    (pData['90d'] && pData['90d'].revenue) ? pData['90d'].revenue : 0
+                ];
+                const pCounts = [
+                    (pData['30d'] && pData['30d'].count) ? pData['30d'].count : 0,
+                    (pData['60d'] && pData['60d'].count) ? pData['60d'].count : 0,
+                    (pData['90d'] && pData['90d'].count) ? pData['90d'].count : 0
+                ];
+
+                const pCtx = ctxPipeline.getContext('2d');
+                const revenueGradient = pCtx.createLinearGradient(0, 0, 0, 240);
+                revenueGradient.addColorStop(0, 'rgba(6, 182, 212, 0.95)');
+                revenueGradient.addColorStop(1, 'rgba(8, 145, 178, 0.25)');
+
+                const countGradient = pCtx.createLinearGradient(0, 0, 0, 240);
+                countGradient.addColorStop(0, 'rgba(99, 102, 241, 0.92)');
+                countGradient.addColorStop(1, 'rgba(79, 70, 229, 0.28)');
+
+                window.resellerPipelineChartInstance = new window.Chart(ctxPipeline, {
+                    type: 'bar',
+                    data: {
+                        labels: pLabels,
+                        datasets: [
+                            {
+                                label: 'گردش پیش‌بینی‌شده',
+                                data: pRevenues,
+                                backgroundColor: revenueGradient,
+                                hoverBackgroundColor: '#0891b2',
+                                borderColor: 'transparent',
+                                borderWidth: 0,
+                                borderRadius: 8,
+                                borderSkipped: false,
+                                maxBarThickness: 32,
+                                categoryPercentage: 0.65,
+                                barPercentage: 0.85,
+                                yAxisID: 'yRevenue',
+                                order: 1
+                            },
+                            {
+                                label: 'سامانه‌های سررسید',
+                                data: pCounts,
+                                backgroundColor: countGradient,
+                                hoverBackgroundColor: '#4f46e5',
+                                borderColor: 'transparent',
+                                borderWidth: 0,
+                                borderRadius: 8,
+                                borderSkipped: false,
+                                maxBarThickness: 32,
+                                categoryPercentage: 0.65,
+                                barPercentage: 0.85,
+                                yAxisID: 'yCount',
+                                order: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {mode: 'index', intersect: false},
+                        animation: {duration: 550, easing: 'easeOutQuart'},
+                        layout: {
+                            padding: {
+                                top: 14,
+                                right: 16,
+                                bottom: 8,
+                                left: 16
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                align: 'center',
+                                rtl: true,
+                                textDirection: 'rtl',
+                                labels: {
+                                    boxWidth: 12,
+                                    boxHeight: 12,
+                                    borderRadius: 4,
+                                    useBorderRadius: true,
+                                    padding: 16,
+                                    color: textColor,
+                                    font: {family: chartFontFamily, size: 11, weight: 'bold'}
+                                }
+                            },
+                            tooltip: {
+                                rtl: true,
+                                textDirection: 'rtl',
+                                titleAlign: 'right',
+                                bodyAlign: 'right',
+                                footerAlign: 'right',
+                                backgroundColor: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.98)',
+                                titleColor: isDark ? '#f9fafb' : '#111827',
+                                bodyColor: isDark ? '#d1d5db' : '#374151',
+                                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 12,
+                                boxPadding: 4,
+                                callbacks: {
+                                    label: function (c) {
+                                        if (c.dataset.yAxisID === 'yRevenue') {
+                                            return ' گردش پیش‌بینی‌شده: ' + window.toFaDigits(Number(c.parsed.y).toLocaleString('en-US')) + ' {{ $currencyLabel }}';
+                                        }
+                                        return ' سامانه‌های سررسید: ' + window.toFaDigits(c.parsed.y) + ' سامانه';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                reverse: true,
+                                grid: {display: false},
+                                border: {display: false},
+                                ticks: {
+                                    font: {family: chartFontFamily, size: 11, weight: 'bold'},
+                                    color: textHeadColor,
+                                    padding: 6
+                                }
+                            },
+                            yCount: {
+                                type: 'linear',
+                                position: 'left',
+                                beginAtZero: true,
+                                ticks: {
+                                    color: textColor,
+                                    precision: 0,
+                                    font: {family: chartFontFamily, size: 11},
+                                    padding: 8,
+                                    callback: function (v) {
+                                        return window.toFaDigits(v) + ' CRM';
+                                    }
+                                },
+                                grid: {color: isDark ? 'rgba(255, 255, 255, 0.04)' : gridColor},
+                                border: {display: false}
+                            },
+                            yRevenue: {
+                                type: 'linear',
+                                position: 'right',
+                                beginAtZero: true,
+                                ticks: {
+                                    color: textColor,
+                                    font: {family: chartFontFamily, size: 11},
+                                    padding: 8,
+                                    callback: function (v) {
+                                        if (v === 0) return '۰';
+                                        return window.toFaDigits(Math.round(v).toLocaleString('en-US')) + ' {{ $currencyLabel }}';
+                                    }
+                                },
+                                grid: {display: false},
+                                border: {display: false}
+                            }
+                        }
+                    }
+                });
             }
 
-            if (sourceCounts.length > 0) {
-                window.resellerStatusChartInstance = new window.Chart(ctxOrderSource, {
+            const ctxComp = document.getElementById('resellerRevenueCompChart');
+            if (ctxComp && window.currentResellerRevenueComposition && window.currentResellerTotalFinancialVolume > 0) {
+                if (window.resellerRevenueCompChartInstance) {
+                    window.resellerRevenueCompChartInstance.destroy();
+                }
+
+                const comp = window.currentResellerRevenueComposition;
+                const compLabels = [
+                    comp.collected?.label || 'درآمد وصول‌شده',
+                    comp.receivables?.label || 'مطالبات معوق و جاری',
+                    comp.forecasted?.label || 'پیش‌بینی تمدیدها'
+                ];
+                const compData = [
+                    Number(comp.collected?.amount || 0),
+                    Number(comp.receivables?.amount || 0),
+                    Number(comp.forecasted?.amount || 0)
+                ];
+                const compColors = [
+                    comp.collected?.color || '#10b981',
+                    comp.receivables?.color || '#f59e0b',
+                    comp.forecasted?.color || '#6366f1'
+                ];
+                const compCounts = [
+                    comp.collected?.count || 0,
+                    comp.receivables?.count || 0,
+                    comp.forecasted?.count || 0
+                ];
+
+                window.resellerRevenueCompChartInstance = new window.Chart(ctxComp, {
                     type: 'doughnut',
                     data: {
-                        labels: sourceLabels,
+                        labels: compLabels,
                         datasets: [{
-                            data: sourceCounts,
-                            backgroundColor: sourceColors,
+                            data: compData,
+                            backgroundColor: compColors,
                             hoverOffset: 6,
                             borderWidth: isDark ? 0 : 2,
                             borderColor: isDark ? 'transparent' : '#ffffff',
@@ -943,22 +1188,348 @@
                             tooltip: {
                                 rtl: true,
                                 textDirection: 'rtl',
-                                titleAlign: 'left',
+                                titleAlign: 'right',
                                 bodyAlign: 'right',
-                                backgroundColor: isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+                                backgroundColor: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.98)',
                                 titleColor: isDark ? '#f9fafb' : '#111827',
                                 bodyColor: isDark ? '#d1d5db' : '#374151',
                                 borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb',
                                 borderWidth: 1,
                                 padding: 12,
-                                cornerRadius: 10,
+                                cornerRadius: 12,
                                 callbacks: {
                                     label: function (ctx) {
-                                        const count = ctx.parsed;
-                                        const rev = sourceRevenues[ctx.dataIndex];
-                                        const revStr = rev ? ' (' + window.toFaDigits(Number(rev).toLocaleString('en-US')) + ' {{ $currencyLabel }})' : '';
-                                        return ' ' + ctx.label + ': ' + window.toFaDigits(count) + ' سفارش' + revStr;
+                                        const idx = ctx.dataIndex;
+                                        const count = compCounts[idx];
+                                        const countStr = count ? ' (' + window.toFaDigits(count) + ' مورد)' : '';
+                                        const total = window.currentResellerTotalFinancialVolume || 1;
+                                        const pct = ((Number(ctx.parsed) / total) * 100).toFixed(1);
+                                        return ' ' + ctx.label + ': ' + window.toFaDigits(Number(ctx.parsed).toLocaleString('en-US')) + ' {{ $currencyLabel }} (' + window.toFaDigits(pct) + '٪)' + countStr;
                                     }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            // Initialize Phase 4 Intelligence charts as well if canvas elements are present
+            initResellerIntelligenceCharts();
+        }
+
+        function updateResellerStatusChart() {
+            const ctxStatus = document.getElementById('resellerStatusChart');
+            if (!ctxStatus || !window.currentResellerOrderSourceData || !window.Chart) return;
+            const isDark = document.documentElement.classList.contains('dark');
+            const oData = window.currentResellerOrderSourceData;
+            const sourceLabels = [];
+            const sourceCounts = [];
+            const sourceColors = [];
+
+            if ((oData.online || 0) > 0) {
+                sourceLabels.push('خرید آنلاین از سایت');
+                sourceCounts.push(oData.online);
+                sourceColors.push('#8b5cf6');
+            }
+            if ((oData.manual || 0) > 0) {
+                sourceLabels.push('ثبت دستی نماینده');
+                sourceCounts.push(oData.manual);
+                sourceColors.push('#3b82f6');
+            }
+
+            if (window.resellerStatusChartInstance) {
+                window.resellerStatusChartInstance.data.labels = sourceLabels;
+                window.resellerStatusChartInstance.data.datasets[0].data = sourceCounts;
+                window.resellerStatusChartInstance.data.datasets[0].backgroundColor = sourceColors;
+                window.resellerStatusChartInstance.data.datasets[0].borderColor = isDark ? 'transparent' : '#ffffff';
+                window.resellerStatusChartInstance.data.datasets[0].borderWidth = isDark ? 0 : 2;
+                window.resellerStatusChartInstance.update();
+            } else {
+                initResellerCharts();
+            }
+        }
+
+        window.updateResellerStatusChart = updateResellerStatusChart;
+
+        function initResellerIntelligenceCharts() {
+            if (!window.Chart) return;
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#9ca3af' : '#4b5563';
+            const textHeadColor = isDark ? '#e5e7eb' : '#1f2937';
+            const gridColor = isDark ? '#374151' : '#f3f4f6';
+            const radarGridColor = isDark ? 'rgba(75, 85, 99, 0.45)' : 'rgba(229, 231, 235, 0.85)';
+            const chartFontFamily = "'IRANYekanX', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+
+            window.currentCapabilitiesMode = window.currentCapabilitiesMode || 'features';
+
+            function renderCapabilitiesChart(mode) {
+                window.currentCapabilitiesMode = mode;
+                const ctxCap = document.getElementById('resellerCapabilitiesChart');
+                if (!ctxCap || !window.Chart) return;
+
+                if (window.resellerCapabilitiesChartInstance) {
+                    window.resellerCapabilitiesChartInstance.destroy();
+                }
+
+                const totalT = window.currentResellerTotalTenants || 1;
+                let chartLabels = [];
+                let chartDatasets = [];
+
+                if (mode === 'features') {
+                    const feats = window.currentResellerFeaturesStats || [];
+                    chartLabels = feats.map(f => f.name);
+                    const ratios = feats.map(f => Number(f.ratio) || 0);
+                    const counts = feats.map(f => Number(f.count) || 0);
+                    const colors = feats.map(f => f.color || '#6366f1');
+
+                    chartDatasets = [{
+                        label: 'ضریب نفوذ در مشترکین (٪)',
+                        data: ratios,
+                        backgroundColor: colors,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        maxBarThickness: 18,
+                        _counts: counts,
+                    }];
+                } else {
+                    const limits = window.currentResellerLimitsStats || [];
+                    chartLabels = limits.map(l => l.name);
+                    const limitedRatios = limits.map(l => Number(l.limitedRatio) || 0);
+                    const unlimitedRatios = limits.map(l => Number(l.unlimitedRatio) || 0);
+                    const limitedCounts = limits.map(l => Number(l.limitedCount) || 0);
+                    const unlimitedCounts = limits.map(l => Number(l.unlimitedCount) || 0);
+
+                    chartDatasets = [
+                        {
+                            label: 'دارای سقف مشخص (محدود)',
+                            data: limitedRatios,
+                            backgroundColor: '#10b981',
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            maxBarThickness: 15,
+                            _counts: limitedCounts,
+                        },
+                        {
+                            label: 'لایسنس نامحدود',
+                            data: unlimitedRatios,
+                            backgroundColor: '#6366f1',
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            maxBarThickness: 15,
+                            _counts: unlimitedCounts,
+                        }
+                    ];
+                }
+
+                window.resellerCapabilitiesChartInstance = new window.Chart(ctxCap, {
+                    type: 'bar',
+                    data: {
+                        labels: chartLabels,
+                        datasets: chartDatasets
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {duration: 500, easing: 'easeOutQuart'},
+                        plugins: {
+                            legend: {
+                                display: mode === 'limits',
+                                position: 'top',
+                                align: 'center',
+                                rtl: true,
+                                textDirection: 'rtl',
+                                labels: {
+                                    boxWidth: 10,
+                                    boxHeight: 10,
+                                    borderRadius: 3,
+                                    useBorderRadius: true,
+                                    padding: 12,
+                                    color: textColor,
+                                    font: {family: chartFontFamily, size: 11, weight: 'bold'}
+                                }
+                            },
+                            tooltip: {
+                                rtl: true,
+                                textDirection: 'rtl',
+                                titleAlign: 'right',
+                                bodyAlign: 'right',
+                                backgroundColor: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.98)',
+                                titleColor: isDark ? '#f9fafb' : '#111827',
+                                bodyColor: isDark ? '#d1d5db' : '#374151',
+                                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 12,
+                                callbacks: {
+                                    label: function (ctx) {
+                                        const val = Number(ctx.parsed.x).toFixed(1);
+                                        const count = ctx.dataset._counts ? ctx.dataset._counts[ctx.dataIndex] : 0;
+                                        return ' ' + ctx.dataset.label + ': ' + window.toFaDigits(val) + '٪ (' + window.toFaDigits(count) + ' سامانه)';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {color: isDark ? 'rgba(255, 255, 255, 0.04)' : gridColor},
+                                ticks: {
+                                    color: textColor,
+                                    font: {family: chartFontFamily, size: 11},
+                                    callback: function (v) {
+                                        return window.toFaDigits(v) + '٪';
+                                    }
+                                }
+                            },
+                            y: {
+                                grid: {display: false},
+                                ticks: {
+                                    color: textHeadColor,
+                                    font: {family: chartFontFamily, size: 11, weight: 'bold'}
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            window.renderCapabilitiesChart = renderCapabilitiesChart;
+            window.switchCapabilitiesView = function (mode) {
+                renderCapabilitiesChart(mode);
+            };
+
+            renderCapabilitiesChart(window.currentCapabilitiesMode || 'features');
+
+
+            const ctxPkg = document.getElementById('resellerPackagesChart');
+            if (ctxPkg && window.currentResellerPackageDistribution && window.currentResellerPackageDistribution.length > 0) {
+                if (window.resellerPackagesChartInstance) {
+                    window.resellerPackagesChartInstance.destroy();
+                }
+
+                const pkgs = window.currentResellerPackageDistribution;
+                const pLabels = pkgs.map(p => p.name);
+                const pCounts = pkgs.map(p => Number(p.count) || 0);
+                const pColors = pkgs.map(p => p.color);
+                const totalT = window.currentResellerTotalTenants || 1;
+
+                window.resellerPackagesChartInstance = new window.Chart(ctxPkg, {
+                    type: 'doughnut',
+                    data: {
+                        labels: pLabels,
+                        datasets: [{
+                            data: pCounts,
+                            backgroundColor: pColors,
+                            hoverOffset: 6,
+                            borderWidth: isDark ? 0 : 2,
+                            borderColor: isDark ? 'transparent' : '#ffffff',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '72%',
+                        animation: {duration: 550, easing: 'easeOutQuart'},
+                        plugins: {
+                            legend: {display: false},
+                            tooltip: {
+                                rtl: true,
+                                textDirection: 'rtl',
+                                titleAlign: 'right',
+                                bodyAlign: 'right',
+                                backgroundColor: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.98)',
+                                titleColor: isDark ? '#f9fafb' : '#111827',
+                                bodyColor: isDark ? '#d1d5db' : '#374151',
+                                borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 12,
+                                callbacks: {
+                                    label: function (ctx) {
+                                        const val = Number(ctx.parsed);
+                                        const pct = ((val / totalT) * 100).toFixed(1);
+                                        return ' ' + ctx.label + ': ' + window.toFaDigits(val) + ' سامانه (' + window.toFaDigits(pct) + '٪)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const ctxRetention = document.getElementById('resellerRetentionChart');
+            if (ctxRetention && window.currentResellerRetentionCohorts) {
+                if (window.resellerRetentionChartInstance) {
+                    window.resellerRetentionChartInstance.destroy();
+                }
+
+                const cohortEntries = Object.values(window.currentResellerRetentionCohorts);
+                const cLabels = cohortEntries.map(c => c.label);
+                const cCounts = cohortEntries.map(c => Number(c.count) || 0);
+                const cColors = cohortEntries.map(c => c.color);
+                const totalT = window.currentResellerTotalTenants || 1;
+
+                window.resellerRetentionChartInstance = new window.Chart(ctxRetention, {
+                    type: 'bar',
+                    data: {
+                        labels: cLabels,
+                        datasets: [{
+                            label: 'سامانه‌های مستقر',
+                            data: cCounts,
+                            backgroundColor: cColors,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                            maxBarThickness: 24,
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {duration: 600, easing: 'easeOutQuart'},
+                        plugins: {
+                            legend: {display: false},
+                            tooltip: {
+                                rtl: true,
+                                textDirection: 'rtl',
+                                titleAlign: 'right',
+                                bodyAlign: 'right',
+                                backgroundColor: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.98)',
+                                titleColor: isDark ? '#f9fafb' : '#111827',
+                                bodyColor: isDark ? '#d1d5db' : '#374151',
+                                borderColor: isDark ? '#374151' : '#e5e7eb',
+                                borderWidth: 1,
+                                padding: 12,
+                                cornerRadius: 12,
+                                callbacks: {
+                                    label: function (ctx) {
+                                        const val = Number(ctx.parsed.x);
+                                        const pct = ((val / totalT) * 100).toFixed(1);
+                                        return ' ' + ctx.dataset.label + ': ' + window.toFaDigits(val) + ' سامانه (' + window.toFaDigits(pct) + '٪)';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {color: gridColor},
+                                ticks: {
+                                    color: textColor,
+                                    font: {family: chartFontFamily, size: 11},
+                                    precision: 0,
+                                    callback: function (v) {
+                                        return window.toFaDigits(v) + ' سامانه';
+                                    }
+                                }
+                            },
+                            y: {
+                                grid: {display: false},
+                                ticks: {
+                                    color: textHeadColor,
+                                    font: {family: chartFontFamily, size: 11, weight: 'bold'}
                                 }
                             }
                         }
@@ -967,614 +1538,43 @@
             }
         }
 
-        const ctxPipeline = document.getElementById('resellerPipelineChart');
-        if (ctxPipeline && window.currentResellerPipelineData) {
-            if (window.resellerPipelineChartInstance) {
-                window.resellerPipelineChartInstance.destroy();
-            }
+        window.initResellerIntelligenceCharts = initResellerIntelligenceCharts;
 
-            const pData = window.currentResellerPipelineData;
-            const pLabels = [
-                '۳۰ روز آینده',
-                '۳۱ تا ۶۰ روز',
-                '۶۱ تا ۹۰ روز'
-            ];
-            const pRevenues = [
-                (pData['30d'] && pData['30d'].revenue) ? pData['30d'].revenue : 0,
-                (pData['60d'] && pData['60d'].revenue) ? pData['60d'].revenue : 0,
-                (pData['90d'] && pData['90d'].revenue) ? pData['90d'].revenue : 0
-            ];
-            const pCounts = [
-                (pData['30d'] && pData['30d'].count) ? pData['30d'].count : 0,
-                (pData['60d'] && pData['60d'].count) ? pData['60d'].count : 0,
-                (pData['90d'] && pData['90d'].count) ? pData['90d'].count : 0
-            ];
-
-            const pCtx = ctxPipeline.getContext('2d');
-            const revenueGradient = pCtx.createLinearGradient(0, 0, 0, 240);
-            revenueGradient.addColorStop(0, 'rgba(6, 182, 212, 0.95)');
-            revenueGradient.addColorStop(1, 'rgba(8, 145, 178, 0.25)');
-
-            const countGradient = pCtx.createLinearGradient(0, 0, 0, 240);
-            countGradient.addColorStop(0, 'rgba(99, 102, 241, 0.92)');
-            countGradient.addColorStop(1, 'rgba(79, 70, 229, 0.28)');
-
-            window.resellerPipelineChartInstance = new window.Chart(ctxPipeline, {
-                type: 'bar',
-                data: {
-                    labels: pLabels,
-                    datasets: [
-                        {
-                            label: 'گردش پیش‌بینی‌شده',
-                            data: pRevenues,
-                            backgroundColor: revenueGradient,
-                            hoverBackgroundColor: '#0891b2',
-                            borderColor: 'transparent',
-                            borderWidth: 0,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                            maxBarThickness: 32,
-                            categoryPercentage: 0.65,
-                            barPercentage: 0.85,
-                            yAxisID: 'yRevenue',
-                            order: 1
-                        },
-                        {
-                            label: 'سامانه‌های سررسید',
-                            data: pCounts,
-                            backgroundColor: countGradient,
-                            hoverBackgroundColor: '#4f46e5',
-                            borderColor: 'transparent',
-                            borderWidth: 0,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                            maxBarThickness: 32,
-                            categoryPercentage: 0.65,
-                            barPercentage: 0.85,
-                            yAxisID: 'yCount',
-                            order: 2
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {mode: 'index', intersect: false},
-                    animation: {duration: 550, easing: 'easeOutQuart'},
-                    layout: {
-                        padding: {
-                            top: 14,
-                            right: 16,
-                            bottom: 8,
-                            left: 16
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            align: 'center',
-                            rtl: true,
-                            textDirection: 'rtl',
-                            labels: {
-                                boxWidth: 12,
-                                boxHeight: 12,
-                                borderRadius: 4,
-                                useBorderRadius: true,
-                                padding: 16,
-                                color: textColor,
-                                font: {family: chartFontFamily, size: 11, weight: 'bold'}
-                            }
-                        },
-                        tooltip: {
-                            rtl: true,
-                            textDirection: 'rtl',
-                            titleAlign: 'right',
-                            bodyAlign: 'right',
-                            footerAlign: 'right',
-                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.98)',
-                            titleColor: isDark ? '#f9fafb' : '#111827',
-                            bodyColor: isDark ? '#d1d5db' : '#374151',
-                            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb',
-                            borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 12,
-                            boxPadding: 4,
-                            callbacks: {
-                                label: function (c) {
-                                    if (c.dataset.yAxisID === 'yRevenue') {
-                                        return ' گردش پیش‌بینی‌شده: ' + window.toFaDigits(Number(c.parsed.y).toLocaleString('en-US')) + ' {{ $currencyLabel }}';
-                                    }
-                                    return ' سامانه‌های سررسید: ' + window.toFaDigits(c.parsed.y) + ' سامانه';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            reverse: true,
-                            grid: {display: false},
-                            border: {display: false},
-                            ticks: {
-                                font: {family: chartFontFamily, size: 11, weight: 'bold'},
-                                color: textHeadColor,
-                                padding: 6
-                            }
-                        },
-                        yCount: {
-                            type: 'linear',
-                            position: 'left',
-                            beginAtZero: true,
-                            ticks: {
-                                color: textColor,
-                                precision: 0,
-                                font: {family: chartFontFamily, size: 11},
-                                padding: 8,
-                                callback: function (v) {
-                                    return window.toFaDigits(v) + ' CRM';
-                                }
-                            },
-                            grid: {color: isDark ? 'rgba(255, 255, 255, 0.04)' : gridColor},
-                            border: {display: false}
-                        },
-                        yRevenue: {
-                            type: 'linear',
-                            position: 'right',
-                            beginAtZero: true,
-                            ticks: {
-                                color: textColor,
-                                font: {family: chartFontFamily, size: 11},
-                                padding: 8,
-                                callback: function (v) {
-                                    if (v === 0) return '۰';
-                                    return window.toFaDigits(Math.round(v).toLocaleString('en-US')) + ' {{ $currencyLabel }}';
-                                }
-                            },
-                            grid: {display: false},
-                            border: {display: false}
-                        }
-                    }
-                }
-            });
-        }
-
-        const ctxComp = document.getElementById('resellerRevenueCompChart');
-        if (ctxComp && window.currentResellerRevenueComposition && window.currentResellerTotalFinancialVolume > 0) {
-            if (window.resellerRevenueCompChartInstance) {
-                window.resellerRevenueCompChartInstance.destroy();
-            }
-
-            const comp = window.currentResellerRevenueComposition;
-            const compLabels = [
-                comp.collected?.label || 'درآمد وصول‌شده',
-                comp.receivables?.label || 'مطالبات معوق و جاری',
-                comp.forecasted?.label || 'پیش‌بینی تمدیدها'
-            ];
-            const compData = [
-                Number(comp.collected?.amount || 0),
-                Number(comp.receivables?.amount || 0),
-                Number(comp.forecasted?.amount || 0)
-            ];
-            const compColors = [
-                comp.collected?.color || '#10b981',
-                comp.receivables?.color || '#f59e0b',
-                comp.forecasted?.color || '#6366f1'
-            ];
-            const compCounts = [
-                comp.collected?.count || 0,
-                comp.receivables?.count || 0,
-                comp.forecasted?.count || 0
-            ];
-
-            window.resellerRevenueCompChartInstance = new window.Chart(ctxComp, {
-                type: 'doughnut',
-                data: {
-                    labels: compLabels,
-                    datasets: [{
-                        data: compData,
-                        backgroundColor: compColors,
-                        hoverOffset: 6,
-                        borderWidth: isDark ? 0 : 2,
-                        borderColor: isDark ? 'transparent' : '#ffffff',
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '74%',
-                    animation: {duration: 500, easing: 'easeOutQuart'},
-                    plugins: {
-                        legend: {display: false},
-                        tooltip: {
-                            rtl: true,
-                            textDirection: 'rtl',
-                            titleAlign: 'right',
-                            bodyAlign: 'right',
-                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.98)',
-                            titleColor: isDark ? '#f9fafb' : '#111827',
-                            bodyColor: isDark ? '#d1d5db' : '#374151',
-                            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb',
-                            borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 12,
-                            callbacks: {
-                                label: function (ctx) {
-                                    const idx = ctx.dataIndex;
-                                    const count = compCounts[idx];
-                                    const countStr = count ? ' (' + window.toFaDigits(count) + ' مورد)' : '';
-                                    const total = window.currentResellerTotalFinancialVolume || 1;
-                                    const pct = ((Number(ctx.parsed) / total) * 100).toFixed(1);
-                                    return ' ' + ctx.label + ': ' + window.toFaDigits(Number(ctx.parsed).toLocaleString('en-US')) + ' {{ $currencyLabel }} (' + window.toFaDigits(pct) + '٪)' + countStr;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        // Initialize Phase 4 Intelligence charts as well if canvas elements are present
-        initResellerIntelligenceCharts();
-    }
-
-    function updateResellerStatusChart() {
-        const ctxStatus = document.getElementById('resellerStatusChart');
-        if (!ctxStatus || !window.currentResellerOrderSourceData || !window.Chart) return;
-        const isDark = document.documentElement.classList.contains('dark');
-        const oData = window.currentResellerOrderSourceData;
-        const sourceLabels = [];
-        const sourceCounts = [];
-        const sourceColors = [];
-
-        if ((oData.online || 0) > 0) {
-            sourceLabels.push('خرید آنلاین از سایت');
-            sourceCounts.push(oData.online);
-            sourceColors.push('#8b5cf6');
-        }
-        if ((oData.manual || 0) > 0) {
-            sourceLabels.push('ثبت دستی نماینده');
-            sourceCounts.push(oData.manual);
-            sourceColors.push('#3b82f6');
-        }
-
-        if (window.resellerStatusChartInstance) {
-            window.resellerStatusChartInstance.data.labels = sourceLabels;
-            window.resellerStatusChartInstance.data.datasets[0].data = sourceCounts;
-            window.resellerStatusChartInstance.data.datasets[0].backgroundColor = sourceColors;
-            window.resellerStatusChartInstance.data.datasets[0].borderColor = isDark ? 'transparent' : '#ffffff';
-            window.resellerStatusChartInstance.data.datasets[0].borderWidth = isDark ? 0 : 2;
-            window.resellerStatusChartInstance.update();
-        } else {
+        // Lifecycle triggers identical to Modules/Projects
+        document.addEventListener('DOMContentLoaded', function () {
             initResellerCharts();
+        });
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(initResellerCharts, 100);
         }
-    }
+        // Safety retry in case deferred Vite module script loads slightly after HTML parse
+        setTimeout(initResellerCharts, 400);
+        setTimeout(initResellerCharts, 1200);
 
-    window.updateResellerStatusChart = updateResellerStatusChart;
-
-    function initResellerIntelligenceCharts() {
-        if (!window.Chart) return;
-
-        const isDark = document.documentElement.classList.contains('dark');
-        const textColor = isDark ? '#9ca3af' : '#4b5563';
-        const textHeadColor = isDark ? '#e5e7eb' : '#1f2937';
-        const gridColor = isDark ? '#374151' : '#f3f4f6';
-        const radarGridColor = isDark ? 'rgba(75, 85, 99, 0.45)' : 'rgba(229, 231, 235, 0.85)';
-        const chartFontFamily = "'IRANYekanX', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-
-        window.currentCapabilitiesMode = window.currentCapabilitiesMode || 'features';
-
-        function renderCapabilitiesChart(mode) {
-            window.currentCapabilitiesMode = mode;
-            const ctxCap = document.getElementById('resellerCapabilitiesChart');
-            if (!ctxCap || !window.Chart) return;
-
-            if (window.resellerCapabilitiesChartInstance) {
-                window.resellerCapabilitiesChartInstance.destroy();
+        // Dynamic Dark/Light Theme Reactivity: Re-render charts when class on <html> changes
+        let lastThemeIsDark = document.documentElement.classList.contains('dark');
+        const themeObserver = new MutationObserver(function () {
+            const currentIsDark = document.documentElement.classList.contains('dark');
+            if (currentIsDark !== lastThemeIsDark) {
+                lastThemeIsDark = currentIsDark;
+                initResellerCharts();
             }
+        });
+        themeObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['class']});
 
-            const totalT = window.currentResellerTotalTenants || 1;
-            let chartLabels = [];
-            let chartDatasets = [];
-
-            if (mode === 'features') {
-                const feats = window.currentResellerFeaturesStats || [];
-                chartLabels = feats.map(f => f.name);
-                const ratios = feats.map(f => Number(f.ratio) || 0);
-                const counts = feats.map(f => Number(f.count) || 0);
-                const colors = feats.map(f => f.color || '#6366f1');
-
-                chartDatasets = [{
-                    label: 'ضریب نفوذ در مشترکین (٪)',
-                    data: ratios,
-                    backgroundColor: colors,
-                    borderRadius: 6,
-                    borderSkipped: false,
-                    maxBarThickness: 18,
-                    _counts: counts,
-                }];
-            } else {
-                const limits = window.currentResellerLimitsStats || [];
-                chartLabels = limits.map(l => l.name);
-                const limitedRatios = limits.map(l => Number(l.limitedRatio) || 0);
-                const unlimitedRatios = limits.map(l => Number(l.unlimitedRatio) || 0);
-                const limitedCounts = limits.map(l => Number(l.limitedCount) || 0);
-                const unlimitedCounts = limits.map(l => Number(l.unlimitedCount) || 0);
-
-                chartDatasets = [
-                    {
-                        label: 'دارای سقف مشخص (محدود)',
-                        data: limitedRatios,
-                        backgroundColor: '#10b981',
-                        borderRadius: 6,
-                        borderSkipped: false,
-                        maxBarThickness: 15,
-                        _counts: limitedCounts,
-                    },
-                    {
-                        label: 'لایسنس نامحدود',
-                        data: unlimitedRatios,
-                        backgroundColor: '#6366f1',
-                        borderRadius: 6,
-                        borderSkipped: false,
-                        maxBarThickness: 15,
-                        _counts: unlimitedCounts,
-                    }
-                ];
-            }
-
-            window.resellerCapabilitiesChartInstance = new window.Chart(ctxCap, {
-                type: 'bar',
-                data: {
-                    labels: chartLabels,
-                    datasets: chartDatasets
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {duration: 500, easing: 'easeOutQuart'},
-                    plugins: {
-                        legend: {
-                            display: mode === 'limits',
-                            position: 'top',
-                            align: 'center',
-                            rtl: true,
-                            textDirection: 'rtl',
-                            labels: {
-                                boxWidth: 10,
-                                boxHeight: 10,
-                                borderRadius: 3,
-                                useBorderRadius: true,
-                                padding: 12,
-                                color: textColor,
-                                font: {family: chartFontFamily, size: 11, weight: 'bold'}
-                            }
-                        },
-                        tooltip: {
-                            rtl: true,
-                            textDirection: 'rtl',
-                            titleAlign: 'right',
-                            bodyAlign: 'right',
-                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.98)',
-                            titleColor: isDark ? '#f9fafb' : '#111827',
-                            bodyColor: isDark ? '#d1d5db' : '#374151',
-                            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb',
-                            borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 12,
-                            callbacks: {
-                                label: function (ctx) {
-                                    const val = Number(ctx.parsed.x).toFixed(1);
-                                    const count = ctx.dataset._counts ? ctx.dataset._counts[ctx.dataIndex] : 0;
-                                    return ' ' + ctx.dataset.label + ': ' + window.toFaDigits(val) + '٪ (' + window.toFaDigits(count) + ' سامانه)';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: {color: isDark ? 'rgba(255, 255, 255, 0.04)' : gridColor},
-                            ticks: {
-                                color: textColor,
-                                font: {family: chartFontFamily, size: 11},
-                                callback: function (v) {
-                                    return window.toFaDigits(v) + '٪';
-                                }
-                            }
-                        },
-                        y: {
-                            grid: {display: false},
-                            ticks: {
-                                color: textHeadColor,
-                                font: {family: chartFontFamily, size: 11, weight: 'bold'}
-                            }
-                        }
-                    }
+        // Ambient Spotlight Mouse Tracker (Linear Style)
+        document.addEventListener('mousemove', function (e) {
+            const cards = document.querySelectorAll('.spotlight-card');
+            for (let i = 0; i < cards.length; i++) {
+                const card = cards[i];
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                if (x >= -50 && x <= rect.width + 50 && y >= -50 && y <= rect.height + 50) {
+                    card.style.setProperty('--mouse-x', x + 'px');
+                    card.style.setProperty('--mouse-y', y + 'px');
                 }
-            });
-        }
-
-        window.renderCapabilitiesChart = renderCapabilitiesChart;
-        window.switchCapabilitiesView = function (mode) {
-            renderCapabilitiesChart(mode);
-        };
-
-        renderCapabilitiesChart(window.currentCapabilitiesMode || 'features');
-
-
-        const ctxPkg = document.getElementById('resellerPackagesChart');
-        if (ctxPkg && window.currentResellerPackageDistribution && window.currentResellerPackageDistribution.length > 0) {
-            if (window.resellerPackagesChartInstance) {
-                window.resellerPackagesChartInstance.destroy();
             }
-
-            const pkgs = window.currentResellerPackageDistribution;
-            const pLabels = pkgs.map(p => p.name);
-            const pCounts = pkgs.map(p => Number(p.count) || 0);
-            const pColors = pkgs.map(p => p.color);
-            const totalT = window.currentResellerTotalTenants || 1;
-
-            window.resellerPackagesChartInstance = new window.Chart(ctxPkg, {
-                type: 'doughnut',
-                data: {
-                    labels: pLabels,
-                    datasets: [{
-                        data: pCounts,
-                        backgroundColor: pColors,
-                        hoverOffset: 6,
-                        borderWidth: isDark ? 0 : 2,
-                        borderColor: isDark ? 'transparent' : '#ffffff',
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '72%',
-                    animation: {duration: 550, easing: 'easeOutQuart'},
-                    plugins: {
-                        legend: {display: false},
-                        tooltip: {
-                            rtl: true,
-                            textDirection: 'rtl',
-                            titleAlign: 'right',
-                            bodyAlign: 'right',
-                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.98)',
-                            titleColor: isDark ? '#f9fafb' : '#111827',
-                            bodyColor: isDark ? '#d1d5db' : '#374151',
-                            borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#e5e7eb',
-                            borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 12,
-                            callbacks: {
-                                label: function (ctx) {
-                                    const val = Number(ctx.parsed);
-                                    const pct = ((val / totalT) * 100).toFixed(1);
-                                    return ' ' + ctx.label + ': ' + window.toFaDigits(val) + ' سامانه (' + window.toFaDigits(pct) + '٪)';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        const ctxRetention = document.getElementById('resellerRetentionChart');
-        if (ctxRetention && window.currentResellerRetentionCohorts) {
-            if (window.resellerRetentionChartInstance) {
-                window.resellerRetentionChartInstance.destroy();
-            }
-
-            const cohortEntries = Object.values(window.currentResellerRetentionCohorts);
-            const cLabels = cohortEntries.map(c => c.label);
-            const cCounts = cohortEntries.map(c => Number(c.count) || 0);
-            const cColors = cohortEntries.map(c => c.color);
-            const totalT = window.currentResellerTotalTenants || 1;
-
-            window.resellerRetentionChartInstance = new window.Chart(ctxRetention, {
-                type: 'bar',
-                data: {
-                    labels: cLabels,
-                    datasets: [{
-                        label: 'سامانه‌های مستقر',
-                        data: cCounts,
-                        backgroundColor: cColors,
-                        borderRadius: 8,
-                        borderSkipped: false,
-                        maxBarThickness: 24,
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {duration: 600, easing: 'easeOutQuart'},
-                    plugins: {
-                        legend: {display: false},
-                        tooltip: {
-                            rtl: true,
-                            textDirection: 'rtl',
-                            titleAlign: 'right',
-                            bodyAlign: 'right',
-                            backgroundColor: isDark ? 'rgba(17, 24, 39, 0.96)' : 'rgba(255, 255, 255, 0.98)',
-                            titleColor: isDark ? '#f9fafb' : '#111827',
-                            bodyColor: isDark ? '#d1d5db' : '#374151',
-                            borderColor: isDark ? '#374151' : '#e5e7eb',
-                            borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 12,
-                            callbacks: {
-                                label: function (ctx) {
-                                    const val = Number(ctx.parsed.x);
-                                    const pct = ((val / totalT) * 100).toFixed(1);
-                                    return ' ' + ctx.dataset.label + ': ' + window.toFaDigits(val) + ' سامانه (' + window.toFaDigits(pct) + '٪)';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            grid: {color: gridColor},
-                            ticks: {
-                                color: textColor,
-                                font: {family: chartFontFamily, size: 11},
-                                precision: 0,
-                                callback: function (v) {
-                                    return window.toFaDigits(v) + ' سامانه';
-                                }
-                            }
-                        },
-                        y: {
-                            grid: {display: false},
-                            ticks: {
-                                color: textHeadColor,
-                                font: {family: chartFontFamily, size: 11, weight: 'bold'}
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    window.initResellerIntelligenceCharts = initResellerIntelligenceCharts;
-
-    // Lifecycle triggers identical to Modules/Projects
-    document.addEventListener('DOMContentLoaded', function () {
-        initResellerCharts();
-    });
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setTimeout(initResellerCharts, 100);
-    }
-    // Safety retry in case deferred Vite module script loads slightly after HTML parse
-    setTimeout(initResellerCharts, 400);
-    setTimeout(initResellerCharts, 1200);
-
-    // Dynamic Dark/Light Theme Reactivity: Re-render charts when class on <html> changes
-    let lastThemeIsDark = document.documentElement.classList.contains('dark');
-    const themeObserver = new MutationObserver(function () {
-        const currentIsDark = document.documentElement.classList.contains('dark');
-        if (currentIsDark !== lastThemeIsDark) {
-            lastThemeIsDark = currentIsDark;
-            initResellerCharts();
-        }
-    });
-    themeObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['class']});
-
-    // Ambient Spotlight Mouse Tracker (Linear Style)
-    document.addEventListener('mousemove', function (e) {
-        const cards = document.querySelectorAll('.spotlight-card');
-        for (let i = 0; i < cards.length; i++) {
-            const card = cards[i];
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            if (x >= -50 && x <= rect.width + 50 && y >= -50 && y <= rect.height + 50) {
-                card.style.setProperty('--mouse-x', x + 'px');
-                card.style.setProperty('--mouse-y', y + 'px');
-            }
-        }
-    }, {passive: true});
-</script>
+        }, {passive: true});
+    </script>
 @endpush

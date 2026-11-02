@@ -651,8 +651,7 @@
                                         <div class="flex items-center justify-between">
                                             <span
                                                 class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ BillingCycle::SEMI_ANNUAL->label(true) }}</span>
-                                            <span
-                                                class="text-xs px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-bold">۵٪ تخفیف</span>
+                                            
                                         </div>
                                         <div
                                             class="flex items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 shadow-2xs transition">
@@ -673,7 +672,7 @@
                                             <span
                                                 class="text-xs font-black text-emerald-800 dark:text-emerald-300">{{ BillingCycle::ANNUAL->label(true) }}</span>
                                             <span
-                                                class="text-xs px-2 py-0.5 rounded-md bg-emerald-600 text-white font-bold shadow-xs">۱۵٪ تخفیف (اصلی)</span>
+                                                class="text-xs px-2 py-0.5 rounded-md bg-emerald-600 text-white font-bold shadow-xs">پیشنهادی</span>
                                         </div>
                                         <div
                                             class="flex items-center rounded-xl border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-gray-800 overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 shadow-2xs transition">
@@ -781,11 +780,11 @@
                                                 class="py-3 px-2 text-center w-28 sm:w-32">{{ BillingCycle::QUARTERLY->label() }}</th>
                                             <th scope="col"
                                                 class="py-3 px-2 text-center w-28 sm:w-32">{{ BillingCycle::SEMI_ANNUAL->label() }}
-                                                (۵٪-)
+                                                
                                             </th>
                                             <th scope="col"
                                                 class="py-3 px-2 text-center w-28 sm:w-32">{{ BillingCycle::ANNUAL->label() }}
-                                                (۱۵٪-)
+                                                
                                             </th>
                                             <th scope="col" class="py-3 px-2 text-center w-28 sm:w-30">راه‌اندازی</th>
                                             <th scope="col" class="py-3 px-2 text-center w-10 shrink-0"></th>

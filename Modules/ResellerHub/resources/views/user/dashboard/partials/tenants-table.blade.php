@@ -51,7 +51,7 @@
         <form method="GET"
               action="{{ (request()->routeIs('reseller.tenants.*') && \Illuminate\Support\Facades\Route::has('reseller.tenants.index')) ? route('reseller.tenants.index') : route('reseller.dashboard') }}"
               class="m-0">
-            @if(request('period'))
+            @if(request('period') && !request()->routeIs('reseller.tenants.*'))
                 <input type="hidden" name="period" value="{{ request('period') }}">
             @endif
 
@@ -521,14 +521,16 @@
                                                             data-url="{{ route('reseller.tenants.toggle-status', $tenant->id) }}"
                                                             class="w-full flex items-center gap-2 px-3.5 py-2 text-start transition-colors cursor-pointer {{ $tenant->status === 'suspended' ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' : 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40' }}">
                                                         @if($tenant->status === 'suspended')
-                                                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24"
+                                                            <svg class="w-4 h-4 shrink-0" fill="none"
+                                                                 viewBox="0 0 24 24"
                                                                  stroke="currentColor" stroke-width="2">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                       d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
                                                             </svg>
                                                             <span>رفع مسدودیت</span>
                                                         @else
-                                                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24"
+                                                            <svg class="w-4 h-4 shrink-0" fill="none"
+                                                                 viewBox="0 0 24 24"
                                                                  stroke="currentColor" stroke-width="2">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                       d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM10 7a2 2 0 114 0v4h-4V7z"/>
