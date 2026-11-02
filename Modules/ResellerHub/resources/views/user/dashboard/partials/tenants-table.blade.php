@@ -540,6 +540,23 @@
                                                     </button>
                                                 </div>
                                             @endif
+                                            <div class="py-1 border-t border-gray-100 dark:border-gray-700/60">
+                                                <button type="button"
+                                                        @click="open = false; openTenantDeleteModal({
+                                                            id: {{ $tenant->id }},
+                                                            name: '{{ addslashes($tenant->name ?: $tenant->subdomain) }}',
+                                                            subdomain: '{{ addslashes($displayUrl) }}',
+                                                            delete_url: '{{ route('reseller.tenants.destroy', $tenant->id) }}'
+                                                        })"
+                                                        class="w-full flex items-center gap-2 px-3.5 py-2 text-start text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer">
+                                                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24"
+                                                         stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    <span>{{ __('resellerhub::messages.tenants.delete_action') }}</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </template>
                                 </div>

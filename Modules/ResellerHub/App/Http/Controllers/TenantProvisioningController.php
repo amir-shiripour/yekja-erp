@@ -31,6 +31,7 @@ use Modules\ResellerHub\App\Services\DomainVerificationService;
 use Modules\ResellerHub\App\Services\ModuleCapabilityCatalogService;
 use Modules\ResellerHub\App\Services\ResellerBillingService;
 use Modules\ResellerHub\App\Services\Support\ModuleTitleResolver;
+use Modules\ResellerHub\App\Services\TenantDeletionService;
 use Modules\ResellerHub\App\Services\TenantProvisioningService;
 use Modules\ResellerHub\App\Traits\HasReseller;
 use Modules\ResellerHub\App\Traits\HasSubAccountSearch;
@@ -491,7 +492,6 @@ class TenantProvisioningController extends Controller
         $activeModuleSlugs = $tenant->modules->pluck('module_slug')->toArray();
 
         $availableModules = $systemModules->map(function ($mod) use ($reseller, $activeModuleSlugs) {
-            // Cached title resolution — see the note in create().
             $title = $this->titleResolver->resolve($mod->slug) ?: $mod->name;
 
             return (object)[
@@ -570,10 +570,6 @@ class TenantProvisioningController extends Controller
         $reseller = $tenant->reseller ?: $currentUserReseller;
 
         $data = $request->validated();
-
-        // A missing "modules" key means "leave modules untouched" — never a
-        // signal to wipe every module the tenant currently has. The form sends
-        // `modules_present` so an explicitly emptied selection still applies.
         $modulesProvided = $request->boolean('modules_present') || $request->has('modules');
         $selectedModules = $modulesProvided ? ($data['modules'] ?? []) : [];
         if (is_string($selectedModules)) {
@@ -591,7 +587,7 @@ class TenantProvisioningController extends Controller
                     'status' => $data['status'] ?? $tenant->status ?? Tenant::STATUS_ACTIVE,
                 ];
 
-                // A tenant's admin is resolved through its sub-account / users.
+                // A tenant's admin is resolved through its subaccount / users.
 
                 // Handle White-Label branding updates
                 $whiteLabelType = $request->input('white_label_type');
@@ -926,5 +922,58 @@ class TenantProvisioningController extends Controller
         $loginUrl = $service->createSsoLoginUrl($tenant, null, $currentUser);
 
         return redirect()->away($loginUrl);
+    }
+
+    /**
+     * Completely and permanently hard-delete a Tenant.
+     */
+    public function destroy(Request $request, Tenant $tenant, TenantDeletionService $deletionService): JsonResponse|RedirectResponse
+    {
+        $currentUser = Auth::user();
+        $isSuperAdmin = method_exists($currentUser, 'hasRole') && $currentUser->hasRole('super-admin');
+
+        if (!$isSuperAdmin) {
+            $reseller = $this->getReseller();
+            if ((int)$tenant->reseller_id !== (int)$reseller->id) {
+                abort(403, __('resellerhub::messages.common.unauthorized'));
+            }
+        }
+
+        if (!$isSuperAdmin && !$currentUser->can('resellerhub.tenants.delete') && !$currentUser->can('resellerhub.manage') && !$currentUser->can('resellerhub.tenants.edit')) {
+            abort(403, __('resellerhub::messages.common.unauthorized'));
+        }
+
+        $tenantName = $tenant->name ?: $tenant->subdomain;
+        $tenantId = (int)$tenant->id;
+
+        try {
+            $deletionService->hardDeleteTenant($tenant);
+
+            $msg = __('resellerhub::messages.tenants.deleted_success', ['name' => $tenantName]);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $msg,
+                    'deleted_tenant_id' => $tenantId,
+                ]);
+            }
+
+            return redirect()->route('reseller.tenants.index')->with('success', $msg);
+        } catch (Throwable $e) {
+            Log::error('resellerhub.tenants.destroy_failed', [
+                'tenant_id' => $tenantId,
+                'error' => $e->getMessage(),
+            ]);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('resellerhub::messages.tenants.delete_error', ['error' => $e->getMessage()]),
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', __('resellerhub::messages.tenants.delete_error', ['error' => $e->getMessage()]));
+        }
     }
 }

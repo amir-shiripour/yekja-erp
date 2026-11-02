@@ -6,6 +6,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -92,6 +93,23 @@ class ResellerSubAccount extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Retrieve all unique tenants connected to this subaccount.
+     *
+     * @return Collection<int, Tenant>
+     */
+    public function getConnectedTenants(): Collection
+    {
+        $tenants = $this->relationLoaded('tenants') ? $this->tenants : $this->tenants()->get();
+        if ($this->tenant_id) {
+            $direct = $this->relationLoaded('tenant') ? $this->tenant : $this->tenant()->first();
+            if ($direct && !$tenants->contains('id', $direct->id)) {
+                $tenants->push($direct);
+            }
+        }
+        return $tenants;
     }
 
     public function invoices(): HasManyThrough
@@ -229,15 +247,15 @@ class ResellerSubAccount extends Model
                 $sq->whereNull('settings->source')
                     ->orWhereNotIn('settings->source', ResellerHelper::ONLINE_SOURCES);
             })
-            ->where(function (Builder $sq) {
-                $sq->whereNull('settings->source')
-                    ->orWhere(function ($ssq) {
-                        $ssq->where('settings->source', 'not like', 'portal_%')
-                            ->where('settings->source', 'not like', 'online_%')
-                            ->where('settings->source', 'not like', 'dashboard_%')
-                            ->where('settings->source', 'not like', 'website_%');
-                    });
-            });
+                ->where(function (Builder $sq) {
+                    $sq->whereNull('settings->source')
+                        ->orWhere(function ($ssq) {
+                            $ssq->where('settings->source', 'not like', 'portal_%')
+                                ->where('settings->source', 'not like', 'online_%')
+                                ->where('settings->source', 'not like', 'dashboard_%')
+                                ->where('settings->source', 'not like', 'website_%');
+                        });
+                });
         });
     }
 
