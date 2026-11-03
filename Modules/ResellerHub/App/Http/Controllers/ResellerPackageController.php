@@ -111,6 +111,18 @@ class ResellerPackageController extends Controller
             }
             $pricing['period_prices'] = !empty($cleanPeriodPrices) ? $cleanPeriodPrices : null;
 
+            // Defense-in-depth: Cap each custom period discount to the period price
+            if (!empty($pricing['period_discounts']) && is_array($pricing['period_discounts'])) {
+                foreach ($pricing['period_discounts'] as $m => &$cfg) {
+                    $month = ResellerPackage::resolveMonthFromPeriodKey($m);
+                    $pPrice = (int)($cleanPeriodPrices[(string)$month] ?? ($cleanPeriodPrices[(string)$m] ?? 0));
+                    if (!empty($cfg['discount_value']) && (int)$cfg['discount_value'] > $pPrice) {
+                        $cfg['discount_value'] = $pPrice;
+                    }
+                }
+                unset($cfg);
+            }
+
             // Legacy backward-compatibility columns
             $pricing['monthly_price'] = $cleanPeriodPrices['1'] ?? 0;
             $pricing['quarterly_price'] = $cleanPeriodPrices['3'] ?? 0;
@@ -120,6 +132,9 @@ class ResellerPackageController extends Controller
 
         if ($priceType === 'one_time') {
             $pricing['one_time_price'] = max(0, (int)($validated['one_time_price'] ?? 0));
+            if ($pricing['discount_value'] > $pricing['one_time_price']) {
+                $pricing['discount_value'] = $pricing['one_time_price'];
+            }
         }
 
         return $pricing;

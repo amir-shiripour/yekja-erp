@@ -2,7 +2,8 @@
     <div
         class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl p-4 rounded-2xl border border-gray-200 dark:border-gray-700/50 shadow-[0_10px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex flex-row-reverse items-center justify-between gap-4">
         <button type="submit"
-                :disabled="submitting || selectedModules.length === 0"
+                :disabled="submitting || selectedModules.length === 0 || hasPricingErrors()"
+                :title="hasPricingErrors() ? 'لطفاً ابتدا خطاهای مربوط به مبالغ تخفیف را اصلاح نمایید' : ''"
                 class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 text-white font-black text-sm shadow-lg shadow-indigo-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
             <template x-if="submitting">
                         <span class="flex items-center gap-2">

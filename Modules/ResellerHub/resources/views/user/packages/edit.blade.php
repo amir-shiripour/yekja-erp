@@ -69,7 +69,8 @@
          class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative">
         @include('resellerhub::user.packages.partials.edit.header')
 
-        <form action="{{ route('reseller.packages.update', $package->id) }}" method="POST" @submit="submitting = true"
+        <form action="{{ route('reseller.packages.update', $package->id) }}" method="POST"
+              @submit="if (hasPricingErrors()) { $event.preventDefault(); submitting = false; if (window.showToast) { window.showToast('error', 'لطفاً ابتدا خطاهای مربوط به مبالغ تخفیف را اصلاح نمایید.'); } return false; } submitting = true"
               class="space-y-8">
             @csrf
             @method('PUT')

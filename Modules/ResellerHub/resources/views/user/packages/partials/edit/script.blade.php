@@ -394,7 +394,7 @@
                 const price = parseInt(rawPrice) || 0;
                 if (price <= 0) return 0;
                 const val = parseFloat(this.pricing.discount_value) || 0;
-                if (val <= 0) return price;
+                if (val <= 0 || val > price) return price;
                 return Math.max(0, Math.round(price - val));
             },
 
@@ -450,14 +450,14 @@
                 const rawPrice = this.getPeriodPrice(months);
                 if (rawPrice <= 0) return 0;
                 const eff = this.getEffectivePeriodDiscount(months);
-                if (!eff.has_discount || eff.value <= 0) return rawPrice;
+                if (!eff.has_discount || eff.value <= 0 || eff.value > rawPrice) return rawPrice;
                 return Math.max(0, Math.round(rawPrice - eff.value));
             },
 
             calcDiscountPercent(basePrice, discountValue) {
                 const p = parseFloat(basePrice) || 0;
                 const d = parseFloat(discountValue) || 0;
-                if (p <= 0 || d <= 0) return 0;
+                if (p <= 0 || d <= 0 || d > p) return 0;
                 const pct = Math.round((d / p) * 100);
                 return Math.min(100, Math.max(0, pct));
             },
@@ -465,12 +465,69 @@
             calcPeriodDiscountPercent(months) {
                 const rawPrice = this.getPeriodPrice(months);
                 const eff = this.getEffectivePeriodDiscount(months);
-                if (!eff || !eff.has_discount || !eff.value) return 0;
+                if (!eff || !eff.has_discount || !eff.value || eff.value > rawPrice) return 0;
                 return this.calcDiscountPercent(rawPrice, eff.value);
             },
 
             calcOneTimeDiscountPercent() {
-                return this.calcDiscountPercent(this.pricing.one_time_price, this.pricing.discount_value);
+                const price = parseFloat(this.pricing.one_time_price) || 0;
+                const dVal = parseFloat(this.pricing.discount_value) || 0;
+                if (price <= 0 || dVal <= 0 || dVal > price) return 0;
+                return this.calcDiscountPercent(price, dVal);
+            },
+
+            getPeriodDiscountError(months) {
+                const d = this.getPeriodDiscount(months);
+                if (!d || !d.has_custom) return null;
+                const dVal = parseFloat(d.discount_value) || 0;
+                if (dVal <= 0) return null;
+                const price = parseFloat(this.getPeriodPrice(months)) || 0;
+                if (price <= 0) {
+                    return 'ابتدا تعرفه قیمت این دوره را تعیین کنید.';
+                }
+                if (dVal > price) {
+                    return `مبلغ تخفیف نمی‌تواند بیشتر از تعرفه قیمت (${this.formatPriceNumber(price)} تومان) باشد.`;
+                }
+                return null;
+            },
+
+            getGlobalDiscountError() {
+                const dVal = parseFloat(this.pricing.discount_value) || 0;
+                if (dVal <= 0) return null;
+
+                if (this.pricing.price_type === 'one_time') {
+                    const price = parseFloat(this.pricing.one_time_price) || 0;
+                    if (price <= 0) {
+                        return 'ابتدا تعرفه خرید یک‌باره را تعیین کنید.';
+                    }
+                    if (dVal > price) {
+                        return `مبلغ تخفیف نمی‌تواند بیشتر از تعرفه یک‌باره (${this.formatPriceNumber(price)} تومان) باشد.`;
+                    }
+                } else if (this.pricing.price_type === 'subscription') {
+                    const activeWithoutCustom = this.periodRows.filter(r => {
+                        const d = this.getPeriodDiscount(r.months);
+                        return !d.has_custom;
+                    });
+                    for (const row of activeWithoutCustom) {
+                        const p = parseFloat(this.getPeriodPrice(row.months)) || 0;
+                        if (p > 0 && dVal > p) {
+                            return `مبلغ تخفیف عمومی از تعرفه دوره ${row.months} ماهه (${this.formatPriceNumber(p)} تومان) بیشتر است.`;
+                        }
+                    }
+                }
+                return null;
+            },
+
+            hasPricingErrors() {
+                if (this.pricing.price_type === 'subscription') {
+                    for (const row of this.periodRows) {
+                        if (this.getPeriodDiscountError(row.months)) return true;
+                    }
+                    if (this.getGlobalDiscountError()) return true;
+                } else if (this.pricing.price_type === 'one_time') {
+                    if (this.getGlobalDiscountError()) return true;
+                }
+                return false;
             },
         };
     }
