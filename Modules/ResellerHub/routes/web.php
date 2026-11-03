@@ -98,15 +98,17 @@ Route::middleware(['web', 'auth', 'role_or_permission:super-admin|resellerhub.vi
         ->middleware('role_or_permission:super-admin|resellerhub.tenants.domain')
         ->name('tenants.update-domain');
 
-    // Tenant Database & SQL Data Export
-    Route::middleware('role_or_permission:super-admin|resellerhub.tenants.export')->group(function () {
+    // Tenant Database & SQL Data Export (Super Admin Only)
+    Route::middleware('role:super-admin')->group(function () {
         Route::get('/tenants-export', [TenantDataExportController::class, 'index'])->name('tenants.export');
+
         Route::middleware('throttle:10,1')->group(function () {
             Route::get('/tenants/{tenant}/export-sql', [TenantDataExportController::class, 'exportSql'])
-                ->middleware('role_or_permission:super-admin|resellerhub.tenants.export_sql')
                 ->name('tenants.export-sql');
-            Route::get('/tenants/{tenant}/export-json', [TenantDataExportController::class, 'exportJson'])->name('tenants.export-json');
-            Route::post('/tenants/{tenant}/export-queue', [TenantDataExportController::class, 'queueExport'])->name('tenants.export-queue');
+            Route::get('/tenants/{tenant}/export-json', [TenantDataExportController::class, 'exportJson'])
+                ->name('tenants.export-json');
+            Route::post('/tenants/{tenant}/export-queue', [TenantDataExportController::class, 'queueExport'])
+                ->name('tenants.export-queue');
         });
     });
 

@@ -32,20 +32,6 @@ return [
         'position' => 31,
     ],
     [
-        'title' => 'استخراج دیتابیس (SQL Dump)',
-        'route' => 'reseller.tenants.export',
-        'permission' => 'resellerhub.tenants.export',
-        'show' => function () {
-            $user = auth()->user();
-            if (!$user) return false;
-            if (app(TenantManager::class)->hasTenant()) return false;
-            return method_exists($user, 'hasRole') && ($user->hasRole('reseller') || $user->hasRole('super-admin') || $user->can('resellerhub.tenants.export'));
-        },
-        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7M4 7c0-2 1.5-3 3.5-3h9c2 0 3.5 1 3.5 3M4 7c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3m0 5c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3"/></svg>',
-        'group' => 'resellerhub',
-        'position' => 33,
-    ],
-    [
         'title' => 'مدیریت پکیج‌ها',
         'route' => 'reseller.packages.index',
         'permission' => 'resellerhub.packages.view',

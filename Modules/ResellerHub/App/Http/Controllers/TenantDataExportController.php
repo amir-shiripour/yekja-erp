@@ -36,76 +36,11 @@ class TenantDataExportController extends Controller
     }
 
     /**
-     * Display the Tenant Data Export dashboard in Admin / ResellerHub.
+     * Redirect standalone Tenant Data Export route to settings tab.
      */
-    public function index(Request $request): View
+    public function index(Request $request): RedirectResponse
     {
-        $user = Auth::user();
-        $isSuperAdmin = method_exists($user, 'hasRole') && $user->hasRole('super-admin');
-        $reseller = null;
-
-        $baseQuery = Tenant::query();
-
-        if ($isSuperAdmin) {
-            $resellersList = Reseller::with('user')->orderBy('company_name')->get();
-            $selectedResellerId = $request->input('reseller_id');
-            if ($selectedResellerId && $selectedResellerId !== 'all') {
-                $baseQuery->where('reseller_id', $selectedResellerId);
-            }
-        } else {
-            $reseller = $this->getReseller();
-            $baseQuery->where('reseller_id', $reseller->id);
-            $resellersList = collect([]);
-        }
-
-        // Summary Counters before search/status filter
-        $totalTenants = (clone $baseQuery)->count();
-        $activeTenants = (clone $baseQuery)->where('status', Tenant::STATUS_ACTIVE)->count();
-        $customDomainCount = (clone $baseQuery)->whereNotNull('custom_domain')
-            ->where('custom_domain', '!=', '')->count();
-
-        // Search Filter
-        $search = trim((string)$request->query('search', ''));
-        $this->applyTenantSearch($baseQuery, $search);
-
-        // Status Filter
-        $status = $request->query('status');
-        if ($status && in_array($status, [Tenant::STATUS_ACTIVE, Tenant::STATUS_SUSPENDED, Tenant::STATUS_EXPIRED], true)) {
-            $baseQuery->where('status', $status);
-        }
-
-        $this->applySorting($baseQuery, $request, [
-            'name' => 'tenants.name',
-            'subdomain' => 'tenants.subdomain',
-            'status' => 'tenants.status',
-            'reseller' => 'tenants.reseller_id',
-            'reseller_id' => 'tenants.reseller_id',
-            'date' => 'tenants.created_at',
-            'created_at' => 'tenants.created_at',
-        ], defaultColumn: 'tenants.id');
-
-        // Per Page
-        $perPage = $this->resolvePerPage($request, default: 10);
-
-        $tenants = $baseQuery->with(['subAccount.user', 'reseller.user', 'package'])
-            ->paginate($perPage)
-            ->withQueryString();
-
-        // Attach statistics summary for all tenants on this page in batch (avoids N+1 query storm)
-        $tenantsData = $this->exporter->getStatisticsForMultipleTenants($tenants->items());
-
-        return view('resellerhub::user.tenants.export', compact(
-            'tenants',
-            'tenantsData',
-            'search',
-            'status',
-            'isSuperAdmin',
-            'resellersList',
-            'reseller',
-            'totalTenants',
-            'activeTenants',
-            'customDomainCount'
-        ));
+        return redirect()->route('reseller.settings.index', array_merge(['tab' => 'database'], $request->query()));
     }
 
     /**
@@ -117,8 +52,8 @@ class TenantDataExportController extends Controller
 
         $user = Auth::user();
         $isSuperAdmin = method_exists($user, 'hasRole') && $user->hasRole('super-admin');
-        if (!$isSuperAdmin && !$user->can('resellerhub.tenants.export_sql')) {
-            abort(403, 'شما دسترسی مجاز برای دریافت خروجی دیتابیس (SQL) را ندارید.');
+        if (!$isSuperAdmin) {
+            abort(403, 'شما دسترسی مجاز برای دریافت خروجی دیتابیس (SQL) را ندارید. این بخش منحصراً در اختیار مدیر ارشد سیستم می‌باشد.');
         }
 
         if (!$request->hasValidSignature()) {
@@ -204,13 +139,8 @@ class TenantDataExportController extends Controller
         }
 
         $isSuperAdmin = method_exists($user, 'hasRole') && $user->hasRole('super-admin');
-        if ($isSuperAdmin) {
-            return;
-        }
-
-        $reseller = $this->getReseller();
-        if ((int)$tenant->reseller_id !== (int)$reseller->id) {
-            abort(403, __('resellerhub::messages.tenants.unauthorized_export'));
+        if (!$isSuperAdmin) {
+            abort(403, 'دسترسی به استخراج دیتابیس منحصراً در اختیار مدیر ارشد سیستم می‌باشد.');
         }
     }
 }

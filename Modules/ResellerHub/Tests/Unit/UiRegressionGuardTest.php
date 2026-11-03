@@ -463,4 +463,76 @@ class UiRegressionGuardTest extends TestCase
         $this->assertStringContainsString('x-show="activeTab === \'modules\'"', $showBlade);
         $this->assertStringContainsString('x-show="activeTab === \'tenants\'"', $showBlade);
     }
+
+    public function test_database_export_is_integrated_into_settings_tab_and_super_admin_only(): void
+    {
+        // 1. Verify standalone menu item was removed
+        $menuPath = module_path('ResellerHub', 'resources/menu.php');
+        $menuContent = File::get($menuPath);
+        $this->assertStringNotContainsString("'route' => 'reseller.tenants.export'", $menuContent, 'Database export must no longer exist as a standalone menu item.');
+
+        // 2. Verify settings index tab definitions and super-admin protection
+        $settingsBlade = $this->moduleView('user/settings/index.blade.php');
+        $this->assertStringContainsString("if (\$isSuperAdmin)", $settingsBlade);
+        $this->assertStringContainsString("\$tabs['database'] = ['label' => 'استخراج دیتابیس', 'icon' => 'database'];", $settingsBlade);
+        $this->assertStringContainsString("if (\$initialTab === 'database' && !\$isSuperAdmin)", $settingsBlade);
+        $this->assertStringContainsString("activeTab !== 'database'", $settingsBlade);
+
+        // 3. Verify tab-database is rendered OUTSIDE the main settings form
+        $formClose = strpos($settingsBlade, '</form>');
+        $databaseInclude = strpos($settingsBlade, "user.settings.tabs.tab-database");
+        $this->assertNotFalse($databaseInclude, 'user.settings.tabs.tab-database is not included.');
+        $this->assertGreaterThan(
+            $formClose,
+            $databaseInclude,
+            'tab-database owns its own search/filter form and MUST be rendered OUTSIDE the main settings form.'
+        );
+
+        // 4. Verify tab-database.blade.php exists and closes its forms cleanly
+        $tabBlade = $this->moduleView('user/settings/tabs/tab-database.blade.php');
+        $this->assertStringContainsString('role="tabpanel"', $tabBlade);
+        $this->assertStringContainsString('id="tabpanel-database"', $tabBlade);
+        $this->assertStringContainsString('tenantExportTabManager()', $tabBlade);
+        $this->assertSame(
+            substr_count($tabBlade, '<form'),
+            substr_count($tabBlade, '</form>'),
+            'Every <form> in tab-database must be properly closed.'
+        );
+
+        // 5. Verify settings script validTabs includes database
+        $scriptBlade = $this->moduleView('user/settings/partials/settings-script.blade.php');
+        $this->assertStringContainsString("'database'", $scriptBlade);
+
+        // 6. Verify standalone view export.blade.php was completely removed
+        $this->assertFileDoesNotExist(
+            module_path('ResellerHub', 'resources/views/user/tenants/export.blade.php'),
+            'Standalone export.blade.php must be deleted since it was moved into user/settings/tabs/tab-database.blade.php'
+        );
+    }
+
+    public function test_database_export_access_control_via_http(): void
+    {
+        $superAdmin = \App\Models\User::role('super-admin')->first();
+        if ($superAdmin) {
+            $response = $this->actingAs($superAdmin)->get(route('reseller.settings.index', ['tab' => 'database']));
+            $response->assertOk();
+            $response->assertSee('استخراج دیتابیس');
+            $response->assertSee('SQL Dump', false);
+            $response->assertSee('tabpanel-database');
+
+            // Legacy route redirects to settings tab
+            $redirectResponse = $this->actingAs($superAdmin)->get(route('reseller.tenants.export'));
+            $redirectResponse->assertRedirect(route('reseller.settings.index', ['tab' => 'database']));
+        }
+
+        // Test non-superadmin user
+        $regularUser = \App\Models\User::whereDoesntHave('roles', function ($q) {
+            $q->where('name', 'super-admin');
+        })->first();
+
+        if ($regularUser) {
+            $response = $this->actingAs($regularUser)->get(route('reseller.tenants.export'));
+            $this->assertContains($response->status(), [403, 302], 'Non-superadmin must be denied or redirected away from tenants export.');
+        }
+    }
 }
