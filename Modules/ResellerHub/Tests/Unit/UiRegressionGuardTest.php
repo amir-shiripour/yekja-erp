@@ -241,10 +241,11 @@ class UiRegressionGuardTest extends TestCase
 
     public function test_tenant_overview_copy_button_and_translations_and_package_discount_badges(): void
     {
-        // 1. Check copy button in tenant subscription card
+        // 1. Check copy button in tenant subscription card (smooth checkmark + toast, no ugly black tooltip)
         $subCard = $this->moduleView('user/tenants/partials/show/subscription-card.blade.php');
         $this->assertStringContainsString('x-data="{ copied: false }"', $subCard);
-        $this->assertStringContainsString('کپی شد!', $subCard);
+        $this->assertStringNotContainsString('bg-gray-900 text-white', $subCard);
+        $this->assertStringContainsString(':title="copied ? \'کپی شد!\' : \'کپی آدرس اختصاصی سامانه\'"', $subCard);
 
         // 2. Check wizard step 3 translation keys
         app()->setLocale('fa');
@@ -256,6 +257,13 @@ class UiRegressionGuardTest extends TestCase
         $this->assertStringContainsString('عدد', __('validation.password.numbers', ['attribute' => 'رمز عبور']));
         $this->assertEquals('آدرس اختصاصی (ساب‌دامین)', __('validation.attributes.subdomain'));
         $this->assertEquals('پکیج انتخابی', __('validation.attributes.package_id'));
+
+        // 3.5 Check tenants table renders dynamic package icon and color
+        $tableBlade = $this->moduleView('user/dashboard/partials/tenants-table.blade.php');
+        $this->assertStringContainsString('PackageColor::fromOrDefault', $tableBlade);
+        $this->assertStringContainsString('PackageIcon::fromOrDefault', $tableBlade);
+        $this->assertStringContainsString('$pkgColor->lightClass()', $tableBlade);
+        $this->assertStringContainsString('$pkgIcon->svg(\'w-4 h-4\')', $tableBlade);
 
         // 4. Check dynamic discount percentage badge in package card-pricing
         $createPricing = $this->moduleView('user/packages/partials/create/card-pricing.blade.php');
