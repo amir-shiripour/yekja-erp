@@ -311,23 +311,6 @@
                                         class="block text-xs font-bold text-gray-500 dark:text-gray-400">
                                         {{ __('resellerhub::messages.packages.form.period_pricing_label') }}
                                     </label>
-                                    <template
-                                        x-if="getEffectivePeriodDiscount(row.months).has_discount && getPeriodPrice(row.months) > 0">
-                                        <div class="flex items-center gap-1.5 flex-wrap">
-                                            <template x-if="calcPeriodDiscountPercent(row.months) > 0">
-                                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-2xs">
-                                                    ٪<span x-text="faNum(calcPeriodDiscountPercent(row.months))"></span> تخفیف
-                                                </span>
-                                            </template>
-                                            <span
-                                                class="text-xs text-emerald-600 dark:text-emerald-400 font-bold truncate">
-                                                {{ __('resellerhub::messages.packages.form.discounted_label') }} <span
-                                                    x-text="formatPriceNumber(calcDiscountedPeriodPrice(row.months))"></span>
-                                                <span x-show="!getPeriodDiscount(row.months).has_custom"
-                                                      class="text-[9px] text-gray-400 font-normal">{{ __('resellerhub::messages.packages.form.global_discount_badge') }}</span>
-                                            </span>
-                                        </div>
-                                    </template>
                                 </div>
                                 <div
                                     class="relative flex items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition shadow-2xs">
@@ -348,11 +331,7 @@
                                         class="mt-1 text-xs text-gray-400 dark:text-gray-500 font-medium text-end">
                                         {{ __('resellerhub::messages.packages.form.monthly_equiv_label') }} <span
                                             class="font-bold text-gray-600 dark:text-gray-300"
-                                            x-text="formatPriceNumber(Math.round(calcDiscountedPeriodPrice(row.months) / row.months)) + ' ' + '{{ $currencyLabel }}'"></span>
-                                        <template
-                                            x-if="getEffectivePeriodDiscount(row.months).has_discount">
-                                            <span class="text-rose-500 text-[9px] ms-1 font-bold">(تخفیف‌دار)</span>
-                                        </template>
+                                            x-text="formatPriceNumber(Math.round(getPeriodPrice(row.months) / row.months)) + ' ' + '{{ $currencyLabel }}'"></span>
                                     </div>
                                 </template>
                             </div>
@@ -381,21 +360,6 @@
                                                             {{ __('resellerhub::messages.packages.form.follow_global_discount') }}
                                                         </span>
                                         </template>
-                                        <template
-                                            x-if="!getPeriodDiscount(row.months).has_custom && !hasGlobalDiscount()">
-                                                        <span
-                                                            class="text-[9px] text-gray-400 dark:text-gray-500 font-medium">
-                                                            {{ __('resellerhub::messages.packages.form.no_discount_label') }}
-                                                        </span>
-                                        </template>
-                                        <template
-                                            x-if="getPeriodDiscount(row.months).has_custom && getPeriodDiscount(row.months).discount_value > 0">
-                                                        <span
-                                                            class="text-[9px] font-black text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/60 px-1.5 py-0.5 rounded">
-                                                            {{ __('resellerhub::messages.packages.form.profit_label') }} <span
-                                                                x-text="formatPriceNumber(getPeriodDiscount(row.months).discount_value)"></span> {{ $currencyLabel }}
-                                                        </span>
-                                        </template>
                                     </div>
                                 </div>
 
@@ -410,24 +374,17 @@
                                      x-transition:leave-end="opacity-0 max-h-0 -translate-y-2 scale-98"
                                      class="overflow-hidden space-y-2 pt-1">
 
-                                    {{-- Discount Amount Input with Real-time Percentage Badge --}}
+                                    {{-- Discount Amount Input with Inline Error & Unified Status Bar --}}
                                     <div class="space-y-1.5">
-                                        <div class="flex items-center justify-between">
-                                            <label
-                                                class="block text-xs font-bold text-gray-600 dark:text-gray-300">
-                                                {{ __('resellerhub::messages.packages.form.custom_discount_amount_label') }}
-                                            </label>
-                                            <template x-if="calcPeriodDiscountPercent(row.months) > 0">
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-2xs transition-all duration-300 animate-pulse">
-                                                    <svg class="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-                                                    </svg>
-                                                    <span>٪<span x-text="faNum(calcPeriodDiscountPercent(row.months))"></span> تخفیف</span>
-                                                </span>
-                                            </template>
-                                        </div>
+                                        <label
+                                            class="block text-xs font-bold text-gray-600 dark:text-gray-300">
+                                            {{ __('resellerhub::messages.packages.form.custom_discount_amount_label') }}
+                                        </label>
                                         <div
-                                            class="relative flex items-center rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/20 dark:bg-rose-950/20 overflow-hidden focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-500/20 transition shadow-2xs">
+                                            class="relative flex items-center rounded-xl border overflow-hidden transition shadow-2xs"
+                                            :class="getPeriodDiscountError(row.months)
+                                                ? 'border-red-500 dark:border-red-500 bg-red-50/20 dark:bg-red-950/20 ring-2 ring-red-500/20'
+                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20'">
                                             <input type="text"
                                                    :value="formatPriceNumber(getPeriodDiscount(row.months).discount_value)"
                                                    @input="setPeriodDiscountValue(row.months, $event.target.value)"
@@ -435,24 +392,37 @@
                                                    dir="ltr"
                                                    class="w-full text-xs font-bold py-1.5 px-2.5 border-0 bg-transparent text-left tabular-nums focus:ring-0 text-gray-900 dark:text-white">
                                             <span
-                                                class="px-2 py-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-100/50 dark:bg-rose-950/50 border-r border-rose-200 dark:border-rose-800 select-none shrink-0">
-                                                            {{ $currencyLabel }}
-                                                        </span>
+                                                class="px-2 py-1.5 text-xs font-bold select-none shrink-0 border-r"
+                                                :class="getPeriodDiscountError(row.months)
+                                                    ? 'text-red-600 dark:text-red-400 bg-red-100/50 dark:bg-red-950/50 border-red-200 dark:border-red-800'
+                                                    : 'text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-700'">
+                                                {{ $currencyLabel }}
+                                            </span>
                                         </div>
 
-                                        {{-- Sleek Real-time Discount Summary Pill --}}
-                                        <template x-if="calcPeriodDiscountPercent(row.months) > 0">
-                                            <div class="mt-1.5 flex items-center justify-between text-xs px-2.5 py-1.5 rounded-xl bg-gradient-to-l from-emerald-500/15 via-emerald-500/5 to-transparent border border-emerald-500/20 text-emerald-800 dark:text-emerald-200 font-medium">
-                                                <span class="flex items-center gap-1.5">
-                                                    <span class="relative flex h-2 w-2">
-                                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        {{-- Inline Validation Error Feedback (Forms & Feedback / Accessibility) --}}
+                                        <template x-if="getPeriodDiscountError(row.months)">
+                                            <p class="mt-1 text-[11px] font-bold text-red-600 dark:text-red-400 flex items-center gap-1 leading-snug">
+                                                <svg class="w-3.5 h-3.5 shrink-0 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span x-text="getPeriodDiscountError(row.months)"></span>
+                                            </p>
+                                        </template>
+
+                                        {{-- Single Elegant, Unified Summary Bar When Valid (ui-ux-pro-max standard) --}}
+                                        <template x-if="!getPeriodDiscountError(row.months) && calcPeriodDiscountPercent(row.months) > 0">
+                                            <div class="mt-1.5 flex items-center justify-between gap-1 text-xs px-2 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200 font-medium select-none">
+                                                <div class="flex items-center gap-1">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                                                    <span class="text-[11px] text-gray-600 dark:text-gray-300 font-bold shrink-0">پرداختی:</span>
+                                                    <span class="font-black text-emerald-700 dark:text-emerald-300 tabular-nums text-xs whitespace-nowrap">
+                                                        <span x-text="formatPriceNumber(calcDiscountedPeriodPrice(row.months))"></span>
                                                     </span>
-                                                    <span class="font-bold">مبلغ نهایی دوره:</span>
-                                                </span>
-                                                <span class="font-black text-emerald-700 dark:text-emerald-300 tabular-nums">
-                                                    <span x-text="formatPriceNumber(calcDiscountedPeriodPrice(row.months))"></span> {{ $currencyLabel }}
-                                                    <span class="ms-1.5 px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[10px] font-black font-sans">٪<span x-text="faNum(calcPeriodDiscountPercent(row.months))"></span>-</span>
+                                                    <span class="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 font-medium">{{ $currencyLabel }}</span>
+                                                </div>
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-md bg-emerald-600 text-white text-[10px] font-black font-sans shadow-2xs shrink-0 whitespace-nowrap">
+                                                    ٪<span x-text="faNum(calcPeriodDiscountPercent(row.months))"></span> تخفیف
                                                 </span>
                                             </div>
                                         </template>
@@ -568,7 +538,7 @@
                     </div>
 
                     {{-- Live discounted preview --}}
-                    <template x-if="pricing.discount_value > 0 && pricing.one_time_price > 0">
+                    <template x-if="pricing.discount_value > 0 && pricing.one_time_price > 0 && !getGlobalDiscountError()">
                         <div class="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-black">
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                                 ٪<span x-text="faNum(calcOneTimeDiscountPercent())"></span> تخفیف
@@ -676,7 +646,7 @@
                                 class="block text-xs font-bold text-emerald-900 dark:text-emerald-200">
                                 {{ __('resellerhub::messages.packages.form.discount_amount_label') }}
                             </label>
-                            <template x-if="pricing.discount_value > 0 && (getPeriodPrice(1) > 0 || pricing.one_time_price > 0)">
+                            <template x-if="pricing.discount_value > 0 && !getGlobalDiscountError() && (getPeriodPrice(1) > 0 || pricing.one_time_price > 0)">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-600 text-white shadow-xs">
                                     <svg class="w-3 h-3 text-emerald-100" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
@@ -686,18 +656,32 @@
                             </template>
                         </div>
                         <div
-                            class="relative flex items-center rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-800 overflow-hidden focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition shadow-2xs">
+                            class="relative flex items-center rounded-xl border overflow-hidden transition shadow-2xs"
+                            :class="getGlobalDiscountError()
+                                ? 'border-red-500 dark:border-red-500 bg-red-50/20 dark:bg-red-950/20 ring-2 ring-red-500/20'
+                                : 'border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-800 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20'">
                             <input type="text"
                                    :value="formatPriceNumber(pricing.discount_value)"
                                    @input="setPricingField('discount_value', $event.target.value)"
                                    placeholder="۰"
                                    dir="ltr"
-                                   class="w-full text-base font-black py-2.5 px-3 border-0 bg-transparent text-left tabular-nums focus:ring-0 text-emerald-900 dark:text-emerald-200">
+                                   class="w-full text-base font-black py-2.5 px-3 border-0 bg-transparent text-left tabular-nums focus:ring-0 text-gray-900 dark:text-white">
                             <span
-                                class="px-3 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/50 dark:bg-emerald-950/60 border-r border-emerald-200 dark:border-emerald-800 select-none">
-                                            {{ $currencyLabel }}
-                                        </span>
+                                class="px-3 py-2 text-xs font-bold border-r select-none shrink-0"
+                                :class="getGlobalDiscountError()
+                                    ? 'text-red-600 dark:text-red-400 bg-red-100/50 dark:bg-red-950/50 border-red-200 dark:border-red-800'
+                                    : 'text-emerald-700 dark:text-emerald-300 bg-emerald-100/50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800'">
+                                {{ $currencyLabel }}
+                            </span>
                         </div>
+                        <template x-if="getGlobalDiscountError()">
+                            <p class="mt-1.5 text-[11px] font-bold text-red-600 dark:text-red-400 flex items-center gap-1 leading-snug">
+                                <svg class="w-3.5 h-3.5 shrink-0 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                <span x-text="getGlobalDiscountError()"></span>
+                            </p>
+                        </template>
                     </div>
 
                     {{-- Optional Jalali Date Pickers for Timed Discount (Start & End in one row) --}}

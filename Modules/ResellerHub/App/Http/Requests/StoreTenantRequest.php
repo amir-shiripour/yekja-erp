@@ -304,6 +304,29 @@ class StoreTenantRequest extends FormRequest
         ];
     }
 
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $items = (array)$this->input('invoice_items', []);
+            $subtotal = 0;
+            foreach ($items as $idx => $item) {
+                $unitPrice = (float)($item['unit_price'] ?? 0);
+                $qty = (float)($item['quantity'] ?? 1);
+                $rowDiscount = (float)($item['discount_amount'] ?? 0);
+                $rowTotal = $unitPrice * $qty;
+                if ($rowDiscount > $rowTotal && $rowTotal > 0) {
+                    $validator->errors()->add("invoice_items.{$idx}.discount_amount", 'مبلغ تخفیف ردیف نمی‌تواند بیشتر از مبلغ ردیف باشد.');
+                }
+                $subtotal += max(0, $rowTotal - $rowDiscount);
+            }
+
+            $invoiceDiscount = (float)$this->input('invoice_discount_amount', 0);
+            if ($invoiceDiscount > $subtotal && $subtotal > 0) {
+                $validator->errors()->add('invoice_discount_amount', 'مبلغ تخفیف فاکتور نمی‌تواند از جمع مبلغ فاکتور بیشتر باشد.');
+            }
+        });
+    }
+
     /**
      * Custom Persian validation attributes.
      */

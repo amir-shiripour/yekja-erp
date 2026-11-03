@@ -203,4 +203,88 @@ class StorePackageRequest extends FormRequest
             'price_type.in' => 'نوع پکیج انتخاب‌شده نامعتبر است.',
         ];
     }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $priceType = $this->input('price_type', 'subscription');
+
+            if ($priceType === 'subscription') {
+                $periodPrices = (array)$this->input('period_prices', []);
+                $periodDiscounts = (array)$this->input('period_discounts', []);
+                $globalDiscount = (int)$this->input('discount_value', 0);
+
+                $resolveBasePrice = function ($m) use ($periodPrices) {
+                    $m = (string)$m;
+                    if (isset($periodPrices[$m]) && (int)$periodPrices[$m] > 0) {
+                        return (int)$periodPrices[$m];
+                    }
+                    if ($m === '1' && (int)$this->input('monthly_price') > 0) return (int)$this->input('monthly_price');
+                    if ($m === '3' && (int)$this->input('quarterly_price') > 0) return (int)$this->input('quarterly_price');
+                    if ($m === '6' && (int)$this->input('semi_annual_price') > 0) return (int)$this->input('semi_annual_price');
+                    if ($m === '12' && (int)$this->input('yearly_price') > 0) return (int)$this->input('yearly_price');
+                    return (int)($this->input("period_{$m}_price") ?? 0);
+                };
+
+                foreach ($periodDiscounts as $m => $cfg) {
+                    if (!is_array($cfg) || empty($cfg['has_custom'])) {
+                        continue;
+                    }
+                    $month = ResellerPackage::resolveMonthFromPeriodKey($m);
+                    $discountVal = (int)($cfg['discount_value'] ?? 0);
+                    if ($discountVal <= 0) {
+                        continue;
+                    }
+
+                    $basePrice = $resolveBasePrice($month);
+                    if ($basePrice <= 0) {
+                        $validator->errors()->add(
+                            "period_discounts.{$month}.discount_value",
+                            "برای دوره {$month} ماهه، ابتدا باید تعرفه قیمت تعیین فرمایید."
+                        );
+                    } elseif ($discountVal > $basePrice) {
+                        $formattedPrice = number_format($basePrice);
+                        $validator->errors()->add(
+                            "period_discounts.{$month}.discount_value",
+                            "مبلغ تخفیف دوره {$month} ماهه نمی‌تواند بیشتر از تعرفه قیمت آن ({$formattedPrice} تومان) باشد."
+                        );
+                    }
+                }
+
+                if ($globalDiscount > 0) {
+                    foreach ($periodPrices as $m => $priceVal) {
+                        $month = ResellerPackage::resolveMonthFromPeriodKey($m);
+                        $basePrice = (int)$priceVal;
+                        $hasCustom = !empty($periodDiscounts[(string)$month]['has_custom']) || !empty($periodDiscounts[$m]['has_custom']);
+                        if (!$hasCustom && $basePrice > 0 && $globalDiscount > $basePrice) {
+                            $formattedPrice = number_format($basePrice);
+                            $validator->errors()->add(
+                                'discount_value',
+                                "مبلغ تخفیف عمومی پکیج نمی‌تواند بیشتر از تعرفه دوره {$month} ماهه ({$formattedPrice} تومان) باشد."
+                            );
+                            break;
+                        }
+                    }
+                }
+            } elseif ($priceType === 'one_time') {
+                $oneTimePrice = (int)$this->input('one_time_price', 0);
+                $globalDiscount = (int)$this->input('discount_value', 0);
+
+                if ($globalDiscount > 0) {
+                    if ($oneTimePrice <= 0) {
+                        $validator->errors()->add(
+                            'discount_value',
+                            'ابتدا تعرفه خرید یک‌باره را تعیین فرمایید.'
+                        );
+                    } elseif ($globalDiscount > $oneTimePrice) {
+                        $formattedPrice = number_format($oneTimePrice);
+                        $validator->errors()->add(
+                            'discount_value',
+                            "مبلغ تخفیف پکیج نمی‌تواند بیشتر از تعرفه خرید یک‌باره ({$formattedPrice} تومان) باشد."
+                        );
+                    }
+                }
+            }
+        });
+    }
 }

@@ -271,4 +271,102 @@ class UiRegressionGuardTest extends TestCase
         $this->assertStringContainsString('calcDiscountPercent(basePrice, discountValue)', $createScript);
         $this->assertStringContainsString('calcPeriodDiscountPercent(months)', $createScript);
     }
+
+    public function test_package_requests_validate_discount_cannot_exceed_base_price(): void
+    {
+        // 1. Subscription period discount > period base price (e.g. 20 quadrillion on 6 million)
+        $req = new \Modules\ResellerHub\App\Http\Requests\StorePackageRequest();
+        $payload = [
+            'name' => 'پکیج تست',
+            'modules' => ['clients'],
+            'price_type' => 'subscription',
+            'period_prices' => ['3' => '6000000'],
+            'period_discounts' => [
+                '3' => [
+                    'has_custom' => '1',
+                    'discount_value' => '20000000000000000',
+                ],
+            ],
+        ];
+
+        $req->merge($payload);
+        $req->setContainer(app());
+        $req->setRedirector(app('redirect'));
+
+        // Run validation
+        $validator = \Illuminate\Support\Facades\Validator::make($req->all(), $req->rules(), $req->messages());
+        $req->withValidator($validator);
+
+        $this->assertTrue($validator->fails(), 'Validation should fail when period discount > base price.');
+        $this->assertTrue(
+            $validator->errors()->has('period_discounts.3.discount_value'),
+            'Error should be present for period_discounts.3.discount_value'
+        );
+        $this->assertStringContainsString(
+            'نمی‌تواند بیشتر از تعرفه قیمت',
+            $validator->errors()->first('period_discounts.3.discount_value')
+        );
+
+        // 2. Subscription period discount with 0 base price
+        $reqZero = new \Modules\ResellerHub\App\Http\Requests\StorePackageRequest();
+        $reqZero->merge([
+            'name' => 'پکیج تست',
+            'modules' => ['clients'],
+            'price_type' => 'subscription',
+            'period_prices' => ['3' => '0'],
+            'period_discounts' => [
+                '3' => [
+                    'has_custom' => '1',
+                    'discount_value' => '500000',
+                ],
+            ],
+        ]);
+        $validatorZero = \Illuminate\Support\Facades\Validator::make($reqZero->all(), $reqZero->rules(), $reqZero->messages());
+        $reqZero->withValidator($validatorZero);
+        $this->assertTrue($validatorZero->fails());
+        $this->assertStringContainsString('تعرفه قیمت', $validatorZero->errors()->first('period_discounts.3.discount_value'));
+
+        // 3. One-time discount > one_time_price
+        $reqOneTime = new \Modules\ResellerHub\App\Http\Requests\StorePackageRequest();
+        $reqOneTime->merge([
+            'name' => 'پکیج تست',
+            'modules' => ['clients'],
+            'price_type' => 'one_time',
+            'one_time_price' => '1000000',
+            'discount_value' => '5000000',
+        ]);
+        $validatorOneTime = \Illuminate\Support\Facades\Validator::make($reqOneTime->all(), $reqOneTime->rules(), $reqOneTime->messages());
+        $reqOneTime->withValidator($validatorOneTime);
+        $this->assertTrue($validatorOneTime->fails());
+        $this->assertTrue($validatorOneTime->errors()->has('discount_value'));
+        $this->assertStringContainsString('تعرفه خرید یک‌باره', $validatorOneTime->errors()->first('discount_value'));
+    }
+
+    public function test_package_views_have_no_clutter_and_strict_ui_ux_controls(): void
+    {
+        $createPricing = $this->moduleView('user/packages/partials/create/card-pricing.blade.php');
+        $editPricing = $this->moduleView('user/packages/partials/edit/card-pricing.blade.php');
+
+        // Check that redundant clutter badge (profit_label / سود:) has been completely removed
+        $this->assertStringNotContainsString('profit_label', $createPricing);
+        $this->assertStringNotContainsString('profit_label', $editPricing);
+
+        // Check that inline validation error feedback is present
+        $this->assertStringContainsString('getPeriodDiscountError(row.months)', $createPricing);
+        $this->assertStringContainsString('getPeriodDiscountError(row.months)', $editPricing);
+        $this->assertStringContainsString('getGlobalDiscountError()', $createPricing);
+        $this->assertStringContainsString('getGlobalDiscountError()', $editPricing);
+
+        // Check that actions submit button disables when pricing has errors
+        $createActions = $this->moduleView('user/packages/partials/create/actions.blade.php');
+        $editActions = $this->moduleView('user/packages/partials/edit/actions.blade.php');
+        $this->assertStringContainsString('hasPricingErrors()', $createActions);
+        $this->assertStringContainsString('hasPricingErrors()', $editActions);
+
+        // Check script has error calculation logic
+        $createScript = $this->moduleView('user/packages/partials/create/script.blade.php');
+        $this->assertStringContainsString('getPeriodDiscountError(months)', $createScript);
+        $this->assertStringContainsString('getGlobalDiscountError()', $createScript);
+        $this->assertStringContainsString('hasPricingErrors()', $createScript);
+    }
 }
