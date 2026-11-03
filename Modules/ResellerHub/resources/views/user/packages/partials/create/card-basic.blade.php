@@ -137,17 +137,4 @@
             >{{ old('description') }}</x-resellerhub::textarea>
         </div>
     </div>
-
-    {{-- Step 1 In-Card Footer --}}
-    <div class="pt-6 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
-        <span class="text-xs text-gray-400">مرحله ۱ از ۳: مشخصات و هویت پکیج</span>
-        <button type="button" @click="nextStep()"
-                :disabled="!packageName.trim()"
-                class="inline-flex items-center gap-2 px-7 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-black rounded-xl transition shadow-lg shadow-indigo-600/25 cursor-pointer">
-            <span>مرحله بعدی: ماژول‌ها و دسترسی‌ها</span>
-            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-            </svg>
-        </button>
-    </div>
 </x-resellerhub::card>
