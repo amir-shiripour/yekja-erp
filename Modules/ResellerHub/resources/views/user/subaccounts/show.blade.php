@@ -212,7 +212,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                     </svg>
-                                    <span>ثبت دستی نماینده</span>
+                                    <span>ثبت مستقیم</span>
                                 </span>
                             @endif
                         </div>
@@ -346,9 +346,267 @@
             </x-resellerhub::card>
         </div>
 
-        {{-- 2-Column Main Detail Layout --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            <div class="space-y-8">
+        @php
+            $tenantList = $allTenants ?? collect($subAccount->tenant ? [$subAccount->tenant] : []);
+        @endphp
+
+        {{-- Tab Navigation Bar --}}
+        <div
+            class="bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-100 dark:border-gray-700/60 p-1.5 shadow-xs backdrop-blur-xl">
+            <nav class="flex items-center gap-1.5 overflow-x-auto scrollbar-none" aria-label="Tabs">
+                {{-- Tab 1: Connected Tenants --}}
+                <button type="button"
+                        @click="setTab('tenants')"
+                        :class="activeTab === 'tenants'
+                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    <span>سامانه‌های ابری CRM</span>
+                    <span
+                        :class="activeTab === 'tenants' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                        class="px-2 py-0.5 rounded-full text-xs font-bold">
+                        {{ reseller_fa_num($tenantList->count()) }}
+                    </span>
+                </button>
+
+                {{-- Tab 2: Profile & Quotas --}}
+                <button type="button"
+                        @click="setTab('profile')"
+                        :class="activeTab === 'profile'
+                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <span>اطلاعات خریدار و سهمیه‌ها</span>
+                </button>
+
+                {{-- Tab 3: Modules & Capabilities --}}
+                <button type="button"
+                        @click="setTab('modules')"
+                        :class="activeTab === 'modules'
+                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <span>ماژول‌ها و امکانات</span>
+                    <span
+                        :class="activeTab === 'modules' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                        class="px-2 py-0.5 rounded-full text-xs font-bold">
+                        {{ reseller_fa_num(count($tenantModules)) }}
+                    </span>
+                </button>
+
+                {{-- Tab 4: Invoices & Financial --}}
+                <button type="button"
+                        @click="setTab('invoices')"
+                        :class="activeTab === 'invoices'
+                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                    </svg>
+                    <span>سوابق مالی و فاکتورها</span>
+                    <span
+                        :class="activeTab === 'invoices' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                        class="px-2 py-0.5 rounded-full text-xs font-bold">
+                        {{ reseller_fa_num($invoices->count()) }}
+                    </span>
+                </button>
+
+                {{-- Tab 5: Orders --}}
+                <button type="button"
+                        @click="setTab('orders')"
+                        :class="activeTab === 'orders'
+                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    <span>سفارشات ثبت‌شده</span>
+                    <span
+                        :class="activeTab === 'orders' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                        class="px-2 py-0.5 rounded-full text-xs font-bold">
+                        {{ reseller_fa_num($orders->count()) }}
+                    </span>
+                </button>
+            </nav>
+        </div>
+
+        {{-- Tab 1 Content: Connected Tenants --}}
+        <div x-show="activeTab === 'tenants'" x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+             class="space-y-6">
+            <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+                <div
+                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-100 dark:border-gray-700/60">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
+                        <h2 class="text-base font-black text-gray-900 dark:text-white">
+                            سامانه‌های CRM متصل به این زیرمجموعه
+                        </h2>
+                        <span
+                            class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
+                                {{ reseller_fa_num($tenantList->count()) }} سامانه
+                            </span>
+                    </div>
+
+                    <button type="button" @click="openQuickProvisionForSub()"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-sm transition cursor-pointer active:scale-95">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span>افزودن CRM جدید</span>
+                    </button>
+                </div>
+
+                @if($tenantList->isNotEmpty())
+                    <div class="space-y-4">
+                        @foreach($tenantList as $t)
+                            @php
+                                $tLoginUrl = app(TenantManager::class)->getTenantUrl($t, 'login');
+                                $tDisplayUrl = app(TenantManager::class)->getTenantUrl($t);
+                                $tExpiresJalali = $t->plan_expires_at ? \Morilog\Jalali\Jalalian::fromDateTime($t->plan_expires_at)->format('Y/m/d') : null;
+                                $tDaysRemaining = $t->plan_expires_at ? now()->diffInDays($t->plan_expires_at, false) : null;
+                            @endphp
+                            <div
+                                class="p-4 sm:p-5 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 space-y-3.5">
+                                <div
+                                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-200/60 dark:border-gray-700/60">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-sm shrink-0">
+                                            <span>{{ mb_substr($t->name, 0, 1, 'UTF-8') }}</span>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-sm font-black text-gray-900 dark:text-white">{{ $t->name }}</h3>
+                                            <span
+                                                class="text-xs text-indigo-600 dark:text-indigo-400 dir-ltr text-start block mt-0.5">{{ $t->subdomain }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                            <span
+                                                class="text-xs font-bold px-2.5 py-1 rounded-full {{ $t->status === 'active' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/60' }}">
+                                                {{ $t->status === 'active' ? 'فعال و برخط' : ($t->status === 'suspended' ? 'معلق' : 'منقضی') }}
+                                            </span>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-400">اعتبار لایسنس:</span>
+                                        <span class="font-bold text-gray-800 dark:text-gray-200 dir-ltr">
+                                                {{ $tExpiresJalali ? reseller_fa_num($tExpiresJalali) : 'بدون انقضا' }}
+                                            </span>
+                                        @if(!is_null($tDaysRemaining))
+                                            <span
+                                                class="text-xs px-2 py-0.5 rounded font-bold {{ $tDaysRemaining > 7 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400' }}">
+                                                    {{ $tDaysRemaining > 0 ? (reseller_fa_num($tDaysRemaining) . ' روز مانده') : 'منقضی شده' }}
+                                                </span>
+                                        @endif
+                                    </div>
+
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <button type="button"
+                                                @click="copyText('{{ $tLoginUrl }}', 'لینک ورود خریدار به CRM', 'tlogin_{{ $t->id }}')"
+                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold transition cursor-pointer shadow-2xs"
+                                                :class="copiedKey === 'tlogin_{{ $t->id }}' ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-300' : 'bg-white dark:bg-gray-800 hover:bg-gray-50 text-gray-700 dark:text-gray-200'">
+                                            <template x-if="copiedKey === 'tlogin_{{ $t->id }}'">
+                                                <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
+                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </template>
+                                            <template x-if="copiedKey !== 'tlogin_{{ $t->id }}'">
+                                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none"
+                                                     stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2"
+                                                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                                </svg>
+                                            </template>
+                                            <span
+                                                x-text="copiedKey === 'tlogin_{{ $t->id }}' ? 'کپی شد!' : 'کپی لینک ورود'"></span>
+                                        </button>
+                                        <form method="POST"
+                                              action="{{ route('reseller.tenants.login-as', $t->id) }}"
+                                              target="_blank" class="inline">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 text-xs font-bold transition">
+                                                <span>ورود مستقیم</span>
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2"
+                                                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                        <a href="{{ route('reseller.tenants.show', $t->id) }}"
+                                           class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 text-xs font-bold transition">
+                                            <span>مدیریت در پنل</span>
+                                            <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none"
+                                                 stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      stroke-width="2" d="M9 5l7 7-7 7"/>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="py-10 text-center space-y-3">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 mx-auto flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-black text-gray-800 dark:text-gray-200">فاقد سامانه CRM فعال</h3>
+                        <p class="text-xs text-gray-400 max-w-xs mx-auto">
+                            برای این زیرمجموعه هنوز سامانه CRM متصلی ساخته نشده است.
+                        </p>
+                        <div class="pt-3">
+                            <button type="button" @click="openQuickProvisionForSub()"
+                                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-600/20 transition cursor-pointer active:scale-95">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 4v16m8-8H4"/>
+                                </svg>
+                                <span>ساخت اولین سامانه CRM برای این خریدار</span>
+                            </button>
+                        </div>
+                    </div>
+                @endif
+            </x-resellerhub::card>
+        </div>
+
+        {{-- Tab 2 Content: Profile & Quotas --}}
+        <div x-show="activeTab === 'profile'" x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+             class="space-y-6" style="display: none;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
                     <div
                         class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/60">
@@ -481,20 +739,8 @@
                                 <span class="text-xs text-gray-400 font-normal">({{ $subAccount->time_ago }})</span>
                             </div>
                         </div>
-                        @if($subAccount->reseller)
-                            <div
-                                class="flex justify-between items-center p-3.5 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40">
-                                <span
-                                    class="text-gray-500 dark:text-gray-400 font-medium">نماینده ارائه‌دهنده سامانه:</span>
-                                <span class="font-black text-indigo-600 dark:text-indigo-400">
-                                    {{ $subAccount->reseller->company_name ?: ($subAccount->reseller->user?->name ?? 'نماینده #' . $subAccount->reseller->id) }}
-                                </span>
-                            </div>
-                        @endif
                     </div>
                 </x-resellerhub::card>
-
-                {{-- LIMITS & QUOTAS SUMMARY CARD --}}
                 <x-resellerhub::card class="p-6 sm:p-8 space-y-4">
                     <div
                         class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-700/60">
@@ -580,398 +826,259 @@
                         @endif
                     </div>
                 </x-resellerhub::card>
-
-                @php
-                    $tenantList = $allTenants ?? collect($subAccount->tenant ? [$subAccount->tenant] : []);
-                @endphp
-                <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
-                    <div
-                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-100 dark:border-gray-700/60">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
-                            <h2 class="text-base font-black text-gray-900 dark:text-white">
-                                سامانه‌های CRM متصل به این زیرمجموعه
-                            </h2>
-                            <span
-                                class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
-                                {{ reseller_fa_num($tenantList->count()) }} سامانه
-                            </span>
-                        </div>
-
-                        <button type="button" @click="openQuickProvisionForSub()"
-                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-sm transition cursor-pointer active:scale-95">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M12 4v16m8-8H4"/>
-                            </svg>
-                            <span>افزودن CRM جدید</span>
-                        </button>
-                    </div>
-
-                    @if($tenantList->isNotEmpty())
-                        <div class="space-y-4">
-                            @foreach($tenantList as $t)
-                                @php
-                                    $tLoginUrl = app(TenantManager::class)->getTenantUrl($t, 'login');
-                                    $tDisplayUrl = app(TenantManager::class)->getTenantUrl($t);
-                                    $tExpiresJalali = $t->plan_expires_at ? \Morilog\Jalali\Jalalian::fromDateTime($t->plan_expires_at)->format('Y/m/d') : null;
-                                    $tDaysRemaining = $t->plan_expires_at ? now()->diffInDays($t->plan_expires_at, false) : null;
-                                @endphp
-                                <div
-                                    class="p-4 sm:p-5 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 space-y-3.5">
-                                    <div
-                                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-200/60 dark:border-gray-700/60">
-                                        <div class="flex items-center gap-3">
-                                            <div
-                                                class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-sm shrink-0">
-                                                <span>{{ mb_substr($t->name, 0, 1, 'UTF-8') }}</span>
-                                            </div>
-                                            <div>
-                                                <h3 class="text-sm font-black text-gray-900 dark:text-white">{{ $t->name }}</h3>
-                                                <span
-                                                    class="text-xs text-indigo-600 dark:text-indigo-400 dir-ltr text-start block mt-0.5">{{ $t->subdomain }}</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="flex items-center gap-2">
-                                            <span
-                                                class="text-xs font-bold px-2.5 py-1 rounded-full {{ $t->status === 'active' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/60' }}">
-                                                {{ $t->status === 'active' ? 'فعال و برخط' : ($t->status === 'suspended' ? 'معلق' : 'منقضی') }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-gray-400">اعتبار لایسنس:</span>
-                                            <span class="font-bold text-gray-800 dark:text-gray-200 dir-ltr">
-                                                {{ $tExpiresJalali ? reseller_fa_num($tExpiresJalali) : 'بدون انقضا' }}
-                                            </span>
-                                            @if(!is_null($tDaysRemaining))
-                                                <span
-                                                    class="text-xs px-2 py-0.5 rounded font-bold {{ $tDaysRemaining > 7 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400' }}">
-                                                    {{ $tDaysRemaining > 0 ? (reseller_fa_num($tDaysRemaining) . ' روز مانده') : 'منقضی شده' }}
-                                                </span>
-                                            @endif
-                                        </div>
-
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <button type="button"
-                                                    @click="copyText('{{ $tLoginUrl }}', 'لینک ورود خریدار به CRM', 'tlogin_{{ $t->id }}')"
-                                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold transition cursor-pointer shadow-2xs"
-                                                    :class="copiedKey === 'tlogin_{{ $t->id }}' ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-300' : 'bg-white dark:bg-gray-800 hover:bg-gray-50 text-gray-700 dark:text-gray-200'">
-                                                <template x-if="copiedKey === 'tlogin_{{ $t->id }}'">
-                                                    <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
-                                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                              stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                                                    </svg>
-                                                </template>
-                                                <template x-if="copiedKey !== 'tlogin_{{ $t->id }}'">
-                                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none"
-                                                         stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                              stroke-width="2"
-                                                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                                    </svg>
-                                                </template>
-                                                <span
-                                                    x-text="copiedKey === 'tlogin_{{ $t->id }}' ? 'کپی شد!' : 'کپی لینک ورود'"></span>
-                                            </button>
-                                            <form method="POST"
-                                                  action="{{ route('reseller.tenants.login-as', $t->id) }}"
-                                                  target="_blank" class="inline">
-                                                @csrf
-                                                <button type="submit"
-                                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 text-xs font-bold transition">
-                                                    <span>ورود مستقیم</span>
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                                         viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                              stroke-width="2"
-                                                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                            <a href="{{ route('reseller.tenants.show', $t->id) }}"
-                                               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 text-xs font-bold transition">
-                                                <span>مدیریت در پنل</span>
-                                                <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none"
-                                                     stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2" d="M9 5l7 7-7 7"/>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="py-10 text-center space-y-3">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 mx-auto flex items-center justify-center">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-sm font-black text-gray-800 dark:text-gray-200">فاقد سامانه CRM فعال</h3>
-                            <p class="text-xs text-gray-400 max-w-xs mx-auto">
-                                برای این زیرمجموعه هنوز سامانه CRM متصلی ساخته نشده است.
-                            </p>
-                            <div class="pt-3">
-                                <button type="button" @click="openQuickProvisionForSub()"
-                                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-600/20 transition cursor-pointer active:scale-95">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                    <span>ساخت اولین سامانه CRM برای این خریدار</span>
-                                </button>
-                            </div>
-                        </div>
-                    @endif
-                </x-resellerhub::card>
             </div>
+        </div>
 
-            <div class="space-y-8">
-                <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
-                    <div
-                        class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/60">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
-                            <h2 class="text-base font-black text-gray-900 dark:text-white">
-                                ماژول‌ها و امکانات فعال در سامانه
-                            </h2>
-                        </div>
-                        <span
-                            class="text-xs font-black px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
+        {{-- Tab 3 Content: Modules & Capabilities --}}
+        <div x-show="activeTab === 'modules'" x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+             class="space-y-6" style="display: none;">
+            <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+                <div
+                    class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/60">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
+                        <h2 class="text-base font-black text-gray-900 dark:text-white">
+                            ماژول‌ها و امکانات فعال در سامانه
+                        </h2>
+                    </div>
+                    <span
+                        class="text-xs font-black px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
                             {{ reseller_fa_num(count($tenantModules)) }} قابلیت فعال
                         </span>
-                    </div>
+                </div>
 
-                    @if(!empty($tenantModules))
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            @foreach($tenantModules as $mod)
-                                <div
-                                    class="p-3.5 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 flex items-center justify-between gap-3">
-                                    <div class="min-w-0">
+                @if(!empty($tenantModules))
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        @foreach($tenantModules as $mod)
+                            <div
+                                class="p-3.5 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 flex items-center justify-between gap-3">
+                                <div class="min-w-0">
                                         <span
                                             class="text-xs sm:text-sm font-black text-gray-900 dark:text-white block truncate">
                                             {{ $mod['title'] }}
                                         </span>
-                                        <span
-                                            class="text-xs text-gray-400 block dir-ltr text-start truncate mt-0.5">
+                                    <span
+                                        class="text-xs text-gray-400 block dir-ltr text-start truncate mt-0.5">
                                             {{ $mod['slug'] }}
                                         </span>
-                                    </div>
-                                    <span
-                                        class="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                                </div>
+                                <span
+                                    class="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                                   d="M5 13l4 4L19 7"/>
                                         </svg>
                                     </span>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="py-8 text-center text-gray-400 text-xs">
-                            <p>هیچ ماژول یا قابلیت جداگانه‌ای برای این سامانه ثبت نشده است.</p>
-                        </div>
-                    @endif
-                </x-resellerhub::card>
-                <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
-                    <div
-                        class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/60">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
-                            <h2 class="text-base font-black text-gray-900 dark:text-white">
-                                فاکتورهای ثبت‌شده خریدار
-                            </h2>
-                        </div>
-                        <a href="{{ route('reseller.invoices.index', ['search' => $subAccount->email ?: $subAccount->name]) }}"
-                           class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-                            مشاهده تمام فاکتورها
-                        </a>
+                            </div>
+                        @endforeach
                     </div>
+                @else
+                    <div class="py-8 text-center text-gray-400 text-xs">
+                        <p>هیچ ماژول یا قابلیت جداگانه‌ای برای این سامانه ثبت نشده است.</p>
+                    </div>
+                @endif
+            </x-resellerhub::card>
+        </div>
 
-                    @if($invoices->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table
-                                class="min-w-full text-xs text-start divide-y divide-gray-100 dark:divide-gray-700/50">
-                                <thead class="bg-gray-50/70 dark:bg-gray-900/40">
-                                <tr>
-                                    <th scope="col"
-                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-start">شماره
-                                        فاکتور
-                                    </th>
-                                    <th scope="col"
-                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
-                                        مبلغ
-                                    </th>
-                                    <th scope="col"
-                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
-                                        وضعیت
-                                    </th>
-                                    <th scope="col"
-                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
-                                        تاریخ
-                                    </th>
-                                    <th scope="col"
-                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-end">عملیات
-                                    </th>
-                                </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                                @foreach($invoices as $invoice)
-                                    @php
-                                        $badge = $invoice->status_badge;
-                                    @endphp
-                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40 transition">
-                                        <td class="py-3 px-3">
-                                            <a href="{{ route('reseller.invoices.show', $invoice->id) }}"
-                                               class="font-black text-indigo-600 dark:text-indigo-400 hover:underline">
-                                                {{ reseller_fa_num($invoice->invoice_number) }}
-                                            </a>
-                                        </td>
-                                        <td class="py-3 px-3 text-center font-bold text-gray-800 dark:text-gray-200">
-                                            {{ reseller_fa_num(number_format($invoice->total)) }}
-                                            <span class="text-xs text-gray-400">{{ $currencyLabel }}</span>
-                                        </td>
-                                        <td class="py-3 px-3 text-center">
+        {{-- Tab 4 Content: Invoices & Financial --}}
+        <div x-show="activeTab === 'invoices'" x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+             class="space-y-6" style="display: none;">
+            <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+                <div
+                    class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/60">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
+                        <h2 class="text-base font-black text-gray-900 dark:text-white">
+                            فاکتورهای ثبت‌شده خریدار
+                        </h2>
+                    </div>
+                    <a href="{{ route('reseller.invoices.index', ['search' => $subAccount->email ?: $subAccount->name]) }}"
+                       class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                        مشاهده تمام فاکتورها
+                    </a>
+                </div>
+
+                @if($invoices->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table
+                            class="min-w-full text-xs text-start divide-y divide-gray-100 dark:divide-gray-700/50">
+                            <thead class="bg-gray-50/70 dark:bg-gray-900/40">
+                            <tr>
+                                <th scope="col"
+                                    class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-start">شماره
+                                    فاکتور
+                                </th>
+                                <th scope="col"
+                                    class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    مبلغ
+                                </th>
+                                <th scope="col"
+                                    class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    وضعیت
+                                </th>
+                                <th scope="col"
+                                    class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    تاریخ
+                                </th>
+                                <th scope="col"
+                                    class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-end">عملیات
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                            @foreach($invoices as $invoice)
+                                @php
+                                    $badge = $invoice->status_badge;
+                                @endphp
+                                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40 transition">
+                                    <td class="py-3 px-3">
+                                        <a href="{{ route('reseller.invoices.show', $invoice->id) }}"
+                                           class="font-black text-indigo-600 dark:text-indigo-400 hover:underline">
+                                            {{ reseller_fa_num($invoice->invoice_number) }}
+                                        </a>
+                                    </td>
+                                    <td class="py-3 px-3 text-center font-bold text-gray-800 dark:text-gray-200">
+                                        {{ reseller_fa_num(number_format($invoice->total)) }}
+                                        <span class="text-xs text-gray-400">{{ $currencyLabel }}</span>
+                                    </td>
+                                    <td class="py-3 px-3 text-center">
                                             <span
                                                 class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border {{ $badge['bg'] ?? 'bg-gray-100 text-gray-600 border-gray-200' }}">
                                                 <span
                                                     class="w-1.5 h-1.5 rounded-full {{ $badge['dot'] ?? 'bg-gray-400' }}"></span>
                                                 <span>{{ $invoice->status_label }}</span>
                                             </span>
-                                        </td>
-                                        <td class="py-3 px-3 text-center text-gray-500 dark:text-gray-400">
-                                            {{ reseller_fa_num($invoice->jalali_issue_date ?? $invoice->issue_date?->format('Y/m/d')) }}
-                                        </td>
-                                        <td class="py-3 px-3 text-end">
-                                            <a href="{{ route('reseller.invoices.show', $invoice->id) }}"
-                                               class="p-1.5 rounded-lg bg-gray-100 hover:bg-indigo-50 dark:bg-gray-700 dark:hover:bg-indigo-950/60 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 inline-flex items-center transition"
-                                               title="مشاهده فاکتور">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                                     viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2"
-                                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="py-6 text-center text-gray-400 text-xs">
-                            <p>هنوز فاکتوری برای این خریدار ثبت نشده است.</p>
-                        </div>
-                    @endif
-                </x-resellerhub::card>
-                <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
-                    <div
-                        class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/60">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
-                            <h2 class="text-base font-black text-gray-900 dark:text-white">
-                                سفارشات ثبت‌شده خریدار
-                            </h2>
-                        </div>
-                        <a href="{{ route('reseller.orders.index', ['search' => $subAccount->email ?: $subAccount->name]) }}"
-                           class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-                            مشاهده تمام سفارشات
-                        </a>
-                    </div>
-
-                    @if($orders->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table
-                                class="min-w-full text-xs text-start divide-y divide-gray-100 dark:divide-gray-700/50">
-                                <thead class="bg-gray-50/70 dark:bg-gray-900/40">
-                                <tr>
-                                    <th scope="col"
-                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-start">
-                                        سفارش
-                                    </th>
-                                    <th scope="col"
-                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
-                                        دوره
-                                    </th>
-                                    <th scope="col"
-                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
-                                        مبلغ
-                                    </th>
-                                    <th scope="col"
-                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
-                                        وضعیت
-                                    </th>
-                                    <th scope="col"
-                                        class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-end">عملیات
-                                    </th>
+                                    </td>
+                                    <td class="py-3 px-3 text-center text-gray-500 dark:text-gray-400">
+                                        {{ reseller_fa_num($invoice->jalali_issue_date ?? $invoice->issue_date?->format('Y/m/d')) }}
+                                    </td>
+                                    <td class="py-3 px-3 text-end">
+                                        <a href="{{ route('reseller.invoices.show', $invoice->id) }}"
+                                           class="p-1.5 rounded-lg bg-gray-100 hover:bg-indigo-50 dark:bg-gray-700 dark:hover:bg-indigo-950/60 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 inline-flex items-center transition"
+                                           title="مشاهده فاکتور">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                 viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      stroke-width="2"
+                                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </a>
+                                    </td>
                                 </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                                @foreach($orders as $order)
-                                    @php
-                                        $oBadge = $order->status_badge;
-                                    @endphp
-                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40 transition">
-                                        <td class="py-3 px-3">
-                                            <a href="{{ route('reseller.orders.show', $order->id) }}"
-                                               class="font-black text-indigo-600 dark:text-indigo-400 hover:underline">
-                                                #{{ reseller_fa_num($order->order_number ?: $order->id) }}
-                                            </a>
-                                        </td>
-                                        <td class="py-3 px-3 text-center text-gray-600 dark:text-gray-300 font-medium">
-                                            {{ reseller_duration_label($order->billing_cycle) }}
-                                        </td>
-                                        <td class="py-3 px-3 text-center font-bold text-gray-800 dark:text-gray-200">
-                                            {{ reseller_fa_num(number_format($order->total_amount)) }}
-                                            <span class="text-xs text-gray-400">{{ $currencyLabel }}</span>
-                                        </td>
-                                        <td class="py-3 px-3 text-center">
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="py-6 text-center text-gray-400 text-xs">
+                        <p>هنوز فاکتوری برای این خریدار ثبت نشده است.</p>
+                    </div>
+                @endif
+            </x-resellerhub::card>
+        </div>
+
+        {{-- Tab 5 Content: Orders --}}
+        <div x-show="activeTab === 'orders'" x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+             class="space-y-6" style="display: none;">
+            <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+                <div
+                    class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/60">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
+                        <h2 class="text-base font-black text-gray-900 dark:text-white">
+                            سفارشات ثبت‌شده خریدار
+                        </h2>
+                    </div>
+                    <a href="{{ route('reseller.orders.index', ['search' => $subAccount->email ?: $subAccount->name]) }}"
+                       class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                        مشاهده تمام سفارشات
+                    </a>
+                </div>
+
+                @if($orders->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table
+                            class="min-w-full text-xs text-start divide-y divide-gray-100 dark:divide-gray-700/50">
+                            <thead class="bg-gray-50/70 dark:bg-gray-900/40">
+                            <tr>
+                                <th scope="col"
+                                    class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-start">
+                                    سفارش
+                                </th>
+                                <th scope="col"
+                                    class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    دوره
+                                </th>
+                                <th scope="col"
+                                    class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    مبلغ
+                                </th>
+                                <th scope="col"
+                                    class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-center">
+                                    وضعیت
+                                </th>
+                                <th scope="col"
+                                    class="py-2.5 px-3 font-bold text-gray-500 dark:text-gray-400 text-end">عملیات
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                            @foreach($orders as $order)
+                                @php
+                                    $oBadge = $order->status_badge;
+                                @endphp
+                                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/40 transition">
+                                    <td class="py-3 px-3">
+                                        <a href="{{ route('reseller.orders.show', $order->id) }}"
+                                           class="font-black text-indigo-600 dark:text-indigo-400 hover:underline">
+                                            #{{ reseller_fa_num($order->order_number ?: $order->id) }}
+                                        </a>
+                                    </td>
+                                    <td class="py-3 px-3 text-center text-gray-600 dark:text-gray-300 font-medium">
+                                        {{ reseller_duration_label($order->billing_cycle) }}
+                                    </td>
+                                    <td class="py-3 px-3 text-center font-bold text-gray-800 dark:text-gray-200">
+                                        {{ reseller_fa_num(number_format($order->total_amount)) }}
+                                        <span class="text-xs text-gray-400">{{ $currencyLabel }}</span>
+                                    </td>
+                                    <td class="py-3 px-3 text-center">
                                             <span
                                                 class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border {{ $oBadge['bg'] ?? 'bg-gray-100 text-gray-600 border-gray-200' }}">
                                                 <span
                                                     class="w-1.5 h-1.5 rounded-full {{ $oBadge['dot'] ?? 'bg-gray-400' }}"></span>
                                                 <span>{{ $order->status_label }}</span>
                                             </span>
-                                        </td>
-                                        <td class="py-3 px-3 text-end">
-                                            <a href="{{ route('reseller.orders.show', $order->id) }}"
-                                               class="p-1.5 rounded-lg bg-gray-100 hover:bg-indigo-50 dark:bg-gray-700 dark:hover:bg-indigo-950/60 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 inline-flex items-center transition"
-                                               title="مشاهده سفارش">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                                     viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2"
-                                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                </svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="py-6 text-center text-gray-400 text-xs">
-                            <p>هنوز سفارشی برای این خریدار ثبت نشده است.</p>
-                        </div>
-                    @endif
-                </x-resellerhub::card>
-            </div>
+                                    </td>
+                                    <td class="py-3 px-3 text-end">
+                                        <a href="{{ route('reseller.orders.show', $order->id) }}"
+                                           class="p-1.5 rounded-lg bg-gray-100 hover:bg-indigo-50 dark:bg-gray-700 dark:hover:bg-indigo-950/60 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 inline-flex items-center transition"
+                                           title="مشاهده سفارش">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                 viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      stroke-width="2"
+                                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="py-6 text-center text-gray-400 text-xs">
+                        <p>هنوز سفارشی برای این خریدار ثبت نشده است.</p>
+                    </div>
+                @endif
+            </x-resellerhub::card>
         </div>
 
         {{-- Toggle Status Confirmation Modal --}}
@@ -1086,6 +1193,18 @@
                 email: config.email || '',
                 status: config.status,
 
+                activeTab: (window.location.hash && ['tenants', 'profile', 'modules', 'invoices', 'orders'].includes(window.location.hash.substring(1)))
+                    ? window.location.hash.substring(1)
+                    : 'tenants',
+                setTab(tab) {
+                    this.activeTab = tab;
+                    if (window.history && window.history.replaceState) {
+                        window.history.replaceState(null, null, '#' + tab);
+                    } else {
+                        window.location.hash = '#' + tab;
+                    }
+                },
+
                 showToggleModal: false,
                 isToggling: false,
                 copiedKey: null,
@@ -1192,7 +1311,6 @@
                     }
                 },
 
-                // ==================== Quick Provision Modal State & Methods ====================
                 quickProvisionModalOpen: false,
                 packagesList: config.packages || [],
                 selectedPackage: null,
