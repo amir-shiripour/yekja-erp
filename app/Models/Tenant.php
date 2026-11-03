@@ -17,6 +17,7 @@ use Modules\ResellerHub\App\Models\Reseller;
 use Modules\ResellerHub\App\Models\ResellerInvoice;
 use Modules\ResellerHub\App\Models\ResellerOrder;
 use Modules\ResellerHub\App\Models\ResellerPackage;
+use Modules\ResellerHub\App\Models\ResellerSetting;
 use Modules\ResellerHub\App\Models\ResellerSubAccount;
 use Morilog\Jalali\Jalalian;
 use Throwable;
@@ -95,7 +96,7 @@ class Tenant extends Model
 
     public function modules(): HasMany
     {
-        return $this->hasMany(TenantModule::class, 'tenant_id');
+        return $this->hasMany(TenantModule::class, 'tenant_id')->withoutGlobalScope(\App\Tenancy\Scopes\TenantScope::class);
     }
 
     public function subAccount(): BelongsTo
@@ -103,13 +104,6 @@ class Tenant extends Model
         return $this->belongsTo(ResellerSubAccount::class, 'sub_account_id');
     }
 
-    /**
-     * The tenant's primary administrator: the user behind its sub-account.
-     *
-     * Resolved through `reseller_sub_accounts.tenant_id` rather than
-     * `tenants.sub_account_id` so it also works for tenants whose back-link was
-     * never written. Null when the tenant has no sub-account yet.
-     */
     public function owner(): HasOneThrough
     {
         return $this->hasOneThrough(
@@ -278,7 +272,7 @@ class Tenant extends Model
             return [];
         }
 
-        return $this->modules()
+        $slugs = $this->modules()
             ->where('is_active', true)
             ->where(function ($q) {
                 $q->whereNull('expires_at')
@@ -287,6 +281,12 @@ class Tenant extends Model
             ->pluck('module_slug')
             ->map(fn($s) => strtolower($s))
             ->toArray();
+
+        if (empty($slugs) && $this->package && is_array($this->package->modules)) {
+            $slugs = array_values(array_map('strtolower', array_map('trim', $this->package->modules)));
+        }
+
+        return array_values(array_unique($slugs));
     }
 
     public function getBranding(string $key, $default = null)
@@ -299,7 +299,7 @@ class Tenant extends Model
         // Fallback to reseller branding if available
         if ($this->reseller) {
             if ($key === 'brand_primary_color') {
-                $resellerSettings = \Modules\ResellerHub\App\Models\ResellerSetting::allForReseller($this->reseller_id);
+                $resellerSettings = ResellerSetting::allForReseller($this->reseller_id);
                 $rColor = $resellerSettings['brand_primary_color'] ?? null;
                 if (!empty($rColor)) {
                     return $rColor;
@@ -315,11 +315,7 @@ class Tenant extends Model
         return $default;
     }
 
-    /**
-     * Get configured limit for a module or specific capability.
-     * Checks tenant settings first, then falls back to package limit.
-     * Null means unlimited.
-     */
+
     public function getLimit(string $key, $default = null): ?int
     {
         $limits = data_get($this->settings, 'limits');
@@ -455,8 +451,8 @@ class Tenant extends Model
 
         // 6. Check if reseller offers custom domain for free
         if ($this->reseller_id) {
-            $yearly = (int)\Modules\ResellerHub\App\Models\ResellerSetting::get($this->reseller_id, 'custom_domain_yearly_price', 0);
-            $monthly = (int)\Modules\ResellerHub\App\Models\ResellerSetting::get($this->reseller_id, 'custom_domain_monthly_price', 0);
+            $yearly = (int)ResellerSetting::get($this->reseller_id, 'custom_domain_yearly_price', 0);
+            $monthly = (int)ResellerSetting::get($this->reseller_id, 'custom_domain_monthly_price', 0);
             if ($yearly === 0 && $monthly === 0) {
                 return true;
             }
@@ -500,8 +496,8 @@ class Tenant extends Model
 
         // 5. Check if reseller offers white-label for free
         if ($this->reseller_id) {
-            $yearly = (int)\Modules\ResellerHub\App\Models\ResellerSetting::get($this->reseller_id, 'white_label_yearly_price', 0);
-            $monthly = (int)\Modules\ResellerHub\App\Models\ResellerSetting::get($this->reseller_id, 'white_label_monthly_price', 0);
+            $yearly = (int)ResellerSetting::get($this->reseller_id, 'white_label_yearly_price', 0);
+            $monthly = (int)ResellerSetting::get($this->reseller_id, 'white_label_monthly_price', 0);
             if ($yearly === 0 && $monthly === 0) {
                 return true;
             }

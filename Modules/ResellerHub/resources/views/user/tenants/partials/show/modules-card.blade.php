@@ -1,8 +1,27 @@
 @php
-    use Modules\ResellerHub\App\Enums\QuotaKey;use Modules\ResellerHub\App\Services\TenantProvisioningService;
+    use App\Models\TenantModule;
+    use Modules\ResellerHub\App\Enums\QuotaKey;
+    use Modules\ResellerHub\App\Services\TenantProvisioningService;
 
     $features = $quotasSummary['features'] ?? [];
-    $activeModules = $tenant->modules->where('is_active', true);
+
+    // Resolve active modules from DB, or fallback to package modules
+    $displayModules = $tenant->modules;
+    if ($displayModules->isEmpty() && $tenant->package && is_array($tenant->package->modules)) {
+        $packageSlugs = array_values(array_map('strtolower', array_map('trim', $tenant->package->modules)));
+        $synthesized = [];
+        foreach ($packageSlugs as $slug) {
+            $synthesized[] = new TenantModule([
+                'tenant_id' => $tenant->id,
+                'module_slug' => $slug,
+                'is_active' => true,
+                'expires_at' => $tenant->plan_expires_at,
+            ]);
+        }
+        $displayModules = collect($synthesized);
+    }
+
+    $activeModules = $displayModules->where('is_active', true);
     $activeModuleSlugs = $activeModules->pluck('module_slug')->toArray();
     $totalActiveFeaturesCount = collect($features)->where('is_enabled', true)->count();
 
@@ -33,11 +52,9 @@
     $inactiveSystemModules = array_diff_key($allKnownModules, array_flip($activeModuleSlugs));
 @endphp
 
-{{-- Active Modules & Capabilities Card --}}
 <div
     class="bg-white dark:bg-gray-800/80 p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700/60 space-y-6 backdrop-blur-xl">
 
-    {{-- Section Header --}}
     <div
         class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
         <div class="flex items-center gap-3">
@@ -80,9 +97,8 @@
         </div>
     </div>
 
-    {{-- Active Modules Showcase --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        @forelse($tenant->modules as $mod)
+        @forelse($displayModules as $mod)
             @php
                 $modSlug = $mod->module_slug;
                 $modTitle = TenantProvisioningService::resolveModuleTitle($modSlug);
@@ -102,7 +118,6 @@
             <div
                 class="rounded-2xl border {{ $mod->is_active ? 'border-gray-200 dark:border-gray-700/80 bg-gray-50/70 dark:bg-gray-900/50' : 'border-gray-200/60 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-900/20 opacity-70' }} p-5 space-y-4 flex flex-col justify-between">
 
-                {{-- Module Header --}}
                 <div class="space-y-3">
                     <div class="flex items-center justify-between gap-3">
                         <div class="flex items-center gap-3">
@@ -127,7 +142,6 @@
                             </div>
                         </div>
 
-                        {{-- Module Active Badge --}}
                         <div class="shrink-0">
                             @if($mod->is_active)
                                 <span

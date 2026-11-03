@@ -193,4 +193,49 @@ class UiRegressionGuardTest extends TestCase
         $scripts = $this->moduleView('user/dashboard/partials/scripts.blade.php');
         $this->assertStringContainsString("activeTab: (window.location.hash && ['operations', 'analytics', 'intelligence'].includes(window.location.hash.substring(1))) ? window.location.hash.substring(1) : 'operations'", $scripts);
     }
+
+    public function test_tenant_show_and_subaccount_show_have_clean_tabs_and_no_sales_reseller(): void
+    {
+        // 1. Check tenant show view
+        $tenantShow = $this->moduleView('user/tenants/show.blade.php');
+        $this->assertStringContainsString("setTab('overview')", $tenantShow);
+        $this->assertStringContainsString("setTab('modules')", $tenantShow);
+        $this->assertStringContainsString("setTab('quotas')", $tenantShow);
+        $this->assertStringContainsString("setTab('branding')", $tenantShow);
+        $this->assertStringContainsString("setTab('invoices')", $tenantShow);
+
+        // Check manager card has NO "نماینده فروش ارائه‌دهنده"
+        $managerCard = $this->moduleView('user/tenants/partials/show/manager-card.blade.php');
+        $this->assertStringNotContainsString('نماینده فروش ارائه‌دهنده', $managerCard);
+        $this->assertStringNotContainsString('نماینده فروش', $managerCard);
+
+        // 2. Check subaccount show view
+        $subaccountShow = $this->moduleView('user/subaccounts/show.blade.php');
+        $this->assertStringContainsString("setTab('tenants')", $subaccountShow);
+        $this->assertStringContainsString("setTab('profile')", $subaccountShow);
+        $this->assertStringContainsString("setTab('modules')", $subaccountShow);
+        $this->assertStringContainsString("setTab('invoices')", $subaccountShow);
+        $this->assertStringContainsString("setTab('orders')", $subaccountShow);
+
+        $this->assertStringNotContainsString('نماینده ارائه‌دهنده سامانه:', $subaccountShow);
+        $this->assertStringNotContainsString('ثبت دستی نماینده', $subaccountShow);
+        $this->assertStringNotContainsString('نماینده فروش', $subaccountShow);
+    }
+
+    public function test_tenant_active_modules_include_package_modules(): void
+    {
+        $tenant = new \App\Models\Tenant();
+        $tenant->status = \App\Models\Tenant::STATUS_ACTIVE;
+        $tenant->plan_expires_at = now()->addYear();
+
+        $pkg = new \Modules\ResellerHub\App\Models\ResellerPackage();
+        $pkg->name = 'Test Plan';
+        $pkg->modules = ['clients', 'booking', 'invoices'];
+        $tenant->setRelation('package', $pkg);
+
+        $slugs = $tenant->activeModuleSlugs();
+        $this->assertContains('clients', $slugs);
+        $this->assertContains('booking', $slugs);
+        $this->assertContains('invoices', $slugs);
+    }
 }

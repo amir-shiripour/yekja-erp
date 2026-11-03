@@ -6,6 +6,7 @@ namespace Modules\ResellerHub\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
+use App\Models\TenantModule;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -198,7 +199,27 @@ class ResellerDashboardController extends Controller
 
         $this->authorizeTenantAccess($tenant);
 
-        $tenant->load(['modules', 'owner', 'subAccount', 'reseller.user', 'package', 'orders.invoice']);
+        app(\App\Tenancy\TenantManager::class)->bypass(function () use ($tenant) {
+            $tenant->load(['modules', 'owner', 'subAccount', 'reseller.user', 'package', 'orders.invoice']);
+
+            // Auto-sync package modules if tenant has a package but 0 tenant_modules
+            if ($tenant->modules->isEmpty() && $tenant->package && is_array($tenant->package->modules)) {
+                foreach ($tenant->package->modules as $modSlug) {
+                    $slug = strtolower(trim($modSlug));
+                    TenantModule::updateOrCreate(
+                        [
+                            'tenant_id' => $tenant->id,
+                            'module_slug' => $slug,
+                        ],
+                        [
+                            'is_active' => true,
+                            'expires_at' => $tenant->plan_expires_at,
+                        ]
+                    );
+                }
+                $tenant->load('modules');
+            }
+        });
 
         $effectiveReseller = ($isSuperAdmin && $tenant->reseller) ? $tenant->reseller : $reseller;
         $resellerSettings = $effectiveReseller ? ResellerSetting::allForReseller($effectiveReseller->id) : [];

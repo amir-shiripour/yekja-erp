@@ -21,16 +21,6 @@
             <span class="text-gray-500 dark:text-gray-400">نشانی ایمیل (نام کاربری):</span>
             <span class="text-xs font-bold text-gray-800 dark:text-gray-200 dir-ltr">{{ $managerEmail }}</span>
         </div>
-
-        @if($parentReseller)
-            <div
-                class="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700/40 text-xs">
-                <span class="text-gray-500 dark:text-gray-400">نماینده فروش ارائه‌دهنده:</span>
-                <span class="font-bold text-indigo-600 dark:text-indigo-400">
-                    {{ $parentReseller->company_name ?: ($parentReseller->user?->name ?? 'نماینده #' . $parentReseller->id) }}
-                </span>
-            </div>
-        @endif
     </div>
     <div class="pt-6 border-t border-gray-100 dark:border-gray-700/60 mt-auto">
         <template x-if="status === 'pending_payment'">

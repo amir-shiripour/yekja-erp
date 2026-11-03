@@ -1,11 +1,11 @@
-@php use Morilog\Jalali\Jalalian; @endphp
+@php use Modules\ResellerHub\App\Services\DomainVerificationService;use Morilog\Jalali\Jalalian; @endphp
 <script>
     window.tenantPageConfig = {
         tenantId: {{ (int)$tenant->id }},
         status: @json($tenant->status),
         expiresAt: @json($tenant->plan_expires_at ? reseller_format_jalali($tenant->plan_expires_at, 'Y/m/d') : 'نامحدود'),
         customDomain: @json($tenant->custom_domain ?? ''),
-        cnameTarget: @json(app(\Modules\ResellerHub\App\Services\DomainVerificationService::class)->getTargetCname()),
+        cnameTarget: @json(app(DomainVerificationService::class)->getTargetCname()),
         availablePeriods: @json($availablePeriods),
         currency: @json($currencyLabel),
         packageName: @json($tenantPackage?->name ?? 'طرح اختصاصی'),
@@ -36,6 +36,17 @@
             renewUrl: config.renewUrl || '',
             toggleUrl: config.toggleUrl || '',
             updateDomainUrl: config.updateDomainUrl || '',
+            activeTab: (window.location.hash && ['overview', 'modules', 'quotas', 'branding', 'invoices'].includes(window.location.hash.substring(1)))
+                ? window.location.hash.substring(1)
+                : 'overview',
+            setTab(tab) {
+                this.activeTab = tab;
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState(null, null, '#' + tab);
+                } else {
+                    window.location.hash = '#' + tab;
+                }
+            },
             dnsModalOpen: false,
             dnsChecking: false,
             dnsStatus: 'pending',
