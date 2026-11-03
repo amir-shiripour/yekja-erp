@@ -429,5 +429,38 @@ class UiRegressionGuardTest extends TestCase
         $this->assertStringContainsString('nextStep()', $editActions);
         $this->assertStringContainsString('prevStep()', $editActions);
         $this->assertStringContainsString('currentStep === 3', $editActions);
+
+        // 6. Verify duplicate buttons were completely removed from individual card partials
+        foreach (['create', 'edit'] as $mode) {
+            foreach (['card-basic', 'card-modules', 'card-pricing'] as $partial) {
+                $cardContent = $this->moduleView("user/packages/partials/{$mode}/{$partial}.blade.php");
+                $this->assertStringNotContainsString('nextStep()', $cardContent, "Duplicate nextStep found in {$mode}/{$partial}");
+                $this->assertStringNotContainsString('prevStep()', $cardContent, "Duplicate prevStep found in {$mode}/{$partial}");
+            }
+        }
+    }
+
+    public function test_package_show_has_responsive_tab_navigation_with_deep_linking(): void
+    {
+        $showBlade = $this->moduleView('user/packages/show.blade.php');
+
+        // Tab state and method declarations
+        $this->assertStringContainsString('activeTab:', $showBlade);
+        $this->assertStringContainsString('setTab(tab)', $showBlade);
+
+        // Tab buttons with hash keys
+        $this->assertStringContainsString("setTab('pricing')", $showBlade);
+        $this->assertStringContainsString("setTab('modules')", $showBlade);
+        $this->assertStringContainsString("setTab('tenants')", $showBlade);
+
+        // Tab titles
+        $this->assertStringContainsString('تعرفه‌گذاری و دوره‌ها', $showBlade);
+        $this->assertStringContainsString('ماژول‌ها و امکانات', $showBlade);
+        $this->assertStringContainsString('سامانه‌های متصل CRM', $showBlade);
+
+        // Tab content containers
+        $this->assertStringContainsString('x-show="activeTab === \'pricing\'"', $showBlade);
+        $this->assertStringContainsString('x-show="activeTab === \'modules\'"', $showBlade);
+        $this->assertStringContainsString('x-show="activeTab === \'tenants\'"', $showBlade);
     }
 }

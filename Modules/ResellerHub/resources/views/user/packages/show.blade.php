@@ -174,6 +174,18 @@
                 defaultDuration: config.defaultDuration || '12',
                 isSuperAdmin: Boolean(config.isSuperAdmin),
                 resellersList: config.resellersList || [],
+                activeTab: (typeof window !== 'undefined' && window.location.hash && ['pricing', 'modules', 'tenants'].includes(window.location.hash.substring(1)))
+                    ? window.location.hash.substring(1)
+                    : 'pricing',
+
+                setTab(tab) {
+                    this.activeTab = tab;
+                    if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
+                        window.history.replaceState(null, null, '#' + tab);
+                    } else if (typeof window !== 'undefined') {
+                        window.location.hash = '#' + tab;
+                    }
+                },
 
                 cleanBaseDomain() {
                     let d = this.baseDomain || (typeof window !== 'undefined' ? window.location.hostname : '');
@@ -1219,11 +1231,83 @@
             </x-resellerhub::card>
         </div>
 
-        {{-- PRICING MATRIX CARD --}}
-        <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
-            <div
-                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
-                <div class="flex items-center gap-3">
+        {{-- Tab Navigation Bar --}}
+        <div
+            class="bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-100 dark:border-gray-700/60 p-1.5 shadow-xs backdrop-blur-xl">
+            <nav class="flex items-center gap-1.5 overflow-x-auto scrollbar-none" aria-label="Tabs">
+                {{-- Tab 1: Pricing & Subscription Matrix --}}
+                <button type="button"
+                        @click="setTab('pricing')"
+                        :class="activeTab === 'pricing'
+                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>تعرفه‌گذاری و دوره‌ها</span>
+                    @if($hasDiscount)
+                        <span
+                            :class="activeTab === 'pricing' ? 'bg-white/20 text-white' : 'bg-rose-100 dark:bg-rose-900/60 text-rose-600 dark:text-rose-300'"
+                            class="px-2 py-0.5 rounded-full text-xs font-bold">
+                            تخفیف‌دار
+                        </span>
+                    @endif
+                </button>
+
+                {{-- Tab 2: Modules & Features --}}
+                <button type="button"
+                        @click="setTab('modules')"
+                        :class="activeTab === 'modules'
+                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    <span>ماژول‌ها و امکانات</span>
+                    <span
+                        :class="activeTab === 'modules' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                        class="px-2 py-0.5 rounded-full text-xs font-bold">
+                        {{ reseller_fa_num(count($packageModules)) }}
+                    </span>
+                </button>
+
+                {{-- Tab 3: Connected Tenants --}}
+                <button type="button"
+                        @click="setTab('tenants')"
+                        :class="activeTab === 'tenants'
+                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <span>سامانه‌های متصل CRM</span>
+                    <span
+                        :class="activeTab === 'tenants' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                        class="px-2 py-0.5 rounded-full text-xs font-bold">
+                        {{ reseller_fa_num($tenants->count()) }}
+                    </span>
+                </button>
+            </nav>
+        </div>
+
+        {{-- Tab 1 Content: Pricing & Subscription Matrix --}}
+        <div x-show="activeTab === 'pricing'"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="space-y-6">
+
+            {{-- PRICING MATRIX CARD --}}
+            <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+                <div
+                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
+                    <div class="flex items-center gap-3">
                     <span
                         class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-black text-sm flex items-center justify-center">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1231,20 +1315,20 @@
                                   d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </span>
-                    <div>
-                        <h2 class="text-base font-black text-gray-900 dark:text-white">تعرفه‌ها و چرخه‌های مالی
-                            پکیج</h2>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            نوع فروش: <strong
-                                class="text-gray-700 dark:text-gray-300">{{ $priceTypeLabels[$priceType] ?? 'اشتراکی' }}</strong>
-                        </p>
+                        <div>
+                            <h2 class="text-base font-black text-gray-900 dark:text-white">تعرفه‌ها و چرخه‌های مالی
+                                پکیج</h2>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                نوع فروش: <strong
+                                    class="text-gray-700 dark:text-gray-300">{{ $priceTypeLabels[$priceType] ?? 'اشتراکی' }}</strong>
+                            </p>
+                        </div>
                     </div>
-                </div>
 
-                <div class="flex items-center gap-3">
-                    @if($hasDiscount)
-                        <span
-                            class="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-black flex items-center gap-1.5 shadow-2xs">
+                    <div class="flex items-center gap-3">
+                        @if($hasDiscount)
+                            <span
+                                class="px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-black flex items-center gap-1.5 shadow-2xs">
                             <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor"
                                  viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1252,250 +1336,260 @@
                             </svg>
                             <span>{{ $discountLabel }}</span>
                         </span>
-                    @else
-                        <span
-                            class="px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-xs font-bold">
+                        @else
+                            <span
+                                class="px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-xs font-bold">
                             بدون تخفیف
                         </span>
-                    @endif
-                    <a href="{{ route('reseller.packages.edit', $package->id) }}"
-                       class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
-                        <span>ویرایش قیمت‌ها</span>
-                        <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-
-            @if($priceType === PackagePriceType::FREE->value)
-                <div
-                    class="p-5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-3">
-                    <svg class="w-8 h-8 text-emerald-500 shrink-0" fill="none" stroke="currentColor"
-                         viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <div>
-                        <span class="block text-sm font-black text-emerald-700 dark:text-emerald-400">این پکیج به
-                            صورت رایگان در اختیار مشتریان قرار می‌گیرد</span>
-                        <span class="block text-xs text-emerald-600/80 dark:text-emerald-500/70 mt-0.5">هیچ
-                            هزینه‌ای بابت اشتراک یا راه‌اندازی از مشتری دریافت نمی‌شود.</span>
-                    </div>
-                </div>
-            @elseif($priceType === PackagePriceType::ONE_TIME->value)
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div
-                        class="p-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/30 dark:bg-indigo-950/20 space-y-2 shadow-xs ring-1 ring-indigo-500/20">
-                        <span class="text-xs font-black text-indigo-900 dark:text-indigo-300 block">قیمت یک‌باره
-                            (مادام‌العمر)</span>
-                        <div class="text-lg font-black text-indigo-600 dark:text-indigo-400">
-                            {{ $package->one_time_price > 0 ? reseller_fa_num(number_format($package->one_time_price)) . ' ' . $currencyLabel : 'تعریف نشده' }}
-                        </div>
-                        <span class="text-xs text-indigo-600/70 dark:text-indigo-400/70 font-bold block">یک
-                            پرداخت، دسترسی همیشگی</span>
-                    </div>
-
-                    <div
-                        class="p-4 rounded-2xl border {{ $hasDiscount ? 'border-rose-200/80 dark:border-rose-900/40 bg-rose-50/30 dark:bg-rose-950/15' : 'border-gray-100 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-900/20' }} space-y-2">
-                        <span
-                            class="text-xs font-bold {{ $hasDiscount ? 'text-rose-900 dark:text-rose-300' : 'text-gray-400 dark:text-gray-500' }} block">تخفیف پکیج</span>
-                        <div
-                            class="text-base font-black {{ $hasDiscount ? 'text-rose-600 dark:text-rose-400' : 'text-gray-500 dark:text-gray-400' }}">
-                            @if($hasDiscount)
-                                {{ reseller_fa_num(number_format($discountValue)) . ' ' . $currencyLabel }}
-                            @else
-                                بدون تخفیف
-                            @endif
-                        </div>
-                        <span
-                            class="text-xs {{ $hasDiscount ? 'text-rose-600/70 dark:text-rose-400/70 font-bold' : 'text-gray-400' }} block">
-                            {{ $hasDiscount ? 'کسر خودکار در صدور فاکتور' : 'تخفیف پیش‌فرضی تنظیم نشده' }}
-                        </span>
-                    </div>
-
-                    <div
-                        class="p-4 rounded-2xl border border-amber-200/80 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/15 space-y-2">
-                        <span class="text-xs font-bold text-amber-900 dark:text-amber-300 block">راه‌اندازی
-                            اولیه</span>
-                        <div class="text-base font-black text-amber-700 dark:text-amber-400">
-                            {{ $package->setup_fee > 0 ? reseller_fa_num(number_format($package->setup_fee)) . ' ' . $currencyLabel : 'رایگان' }}
-                        </div>
-                        <span class="text-xs text-amber-600/70 dark:text-amber-400/70 block">کانفیگ و ستاپ
-                            اختصاصی</span>
-                    </div>
-                </div>
-            @else
-                @php
-                    $activeMonths = $package->getActiveMonths();
-                    if (empty($activeMonths) && $priceType === PackagePriceType::SUBSCRIPTION->value) {
-                        $activeMonths = [1, 3, 6, 12];
-                    }
-                @endphp
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                    @forelse($activeMonths as $m)
-                        @php
-                            $pPrice = $package->getPriceForMonths($m);
-                            $pHasDiscount = $package->hasActiveDiscountForMonths($m);
-                            $pFinalPrice = $pHasDiscount ? $package->getFinalPriceForMonths($m) : $pPrice;
-                            $pIsCustomDiscount = $package->hasCustomDiscountForMonths($m);
-                            $cycle = BillingCycle::fromMonths($m);
-                            $isYearly = ($cycle === BillingCycle::ANNUAL);
-                            $label = ResellerHelper::durationLabel($m, true);
-                            $note = match($cycle) {
-                                BillingCycle::MONTHLY => 'پایه محاسبه دوره‌ای',
-                                BillingCycle::QUARTERLY => 'اشتراک فصلی',
-                                BillingCycle::SEMI_ANNUAL => 'اشتراک نیم‌سال',
-                                BillingCycle::ANNUAL => 'پلن یک‌ساله استاندارد',
-                                BillingCycle::BIENNIAL => 'اشتراک ۲ ساله',
-                                BillingCycle::TRIENNIAL => 'اشتراک ۳ ساله',
-                                default => 'دوره ' . reseller_fa_num($m) . ' ماهه اختصاصی',
-                            };
-                        @endphp
-                        @if($isYearly)
-                            <div
-                                class="p-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/30 dark:bg-indigo-950/20 space-y-2 shadow-xs ring-1 ring-indigo-500/20">
-                                <div class="flex items-center justify-between gap-1">
-                                    <span
-                                        class="text-xs font-black text-indigo-900 dark:text-indigo-300">{{ $label }}</span>
-                                    <span
-                                        class="px-2 py-0.5 rounded-md bg-indigo-600 text-white text-xs font-black">پیشنهادی</span>
-                                </div>
-                                @if($pHasDiscount && $pFinalPrice < $pPrice)
-                                    <div class="text-xs text-gray-400 line-through tabular-nums">
-                                        {{ reseller_fa_num(number_format($pPrice)) }} {{ $currencyLabel }}
-                                    </div>
-                                    <div class="text-lg font-black text-emerald-600 dark:text-emerald-400">
-                                        {{ reseller_fa_num(number_format($pFinalPrice)) }} {{ $currencyLabel }}
-                                    </div>
-                                @else
-                                    <div class="text-lg font-black text-indigo-600 dark:text-indigo-400">
-                                        {{ $pPrice > 0 ? reseller_fa_num(number_format($pPrice)) . ' ' . $currencyLabel : 'تعریف نشده' }}
-                                    </div>
-                                @endif
-                                <span
-                                    class="text-xs text-indigo-600/70 dark:text-indigo-400/70 font-bold block">
-                                    {{ $pIsCustomDiscount ? 'دارای تخفیف اختصاصی دوره' : $note }}
-                                </span>
-                            </div>
-                        @else
-                            <div
-                                class="p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30 space-y-2">
-                                <div class="flex items-center justify-between gap-1">
-                                    <span
-                                        class="text-xs font-bold text-gray-500 dark:text-gray-400 block">{{ $label }}</span>
-                                    @if($pIsCustomDiscount && $pHasDiscount)
-                                        <span
-                                            class="px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 text-[9px] font-black">تخفیف اختصاصی</span>
-                                    @endif
-                                </div>
-                                @if($pHasDiscount && $pFinalPrice < $pPrice)
-                                    <div class="text-xs text-gray-400 line-through tabular-nums">
-                                        {{ reseller_fa_num(number_format($pPrice)) }} {{ $currencyLabel }}
-                                    </div>
-                                    <div class="text-base font-black text-emerald-600 dark:text-emerald-400">
-                                        {{ reseller_fa_num(number_format($pFinalPrice)) }} {{ $currencyLabel }}
-                                    </div>
-                                @else
-                                    <div class="text-base font-black text-gray-900 dark:text-white">
-                                        {{ $pPrice > 0 ? reseller_fa_num(number_format($pPrice)) . ' ' . $currencyLabel : 'تعریف نشده' }}
-                                    </div>
-                                @endif
-                                <span class="text-xs text-gray-400 block">{{ $note }}</span>
-                            </div>
                         @endif
-                    @empty
-                        <div
-                            class="col-span-full p-5 text-center text-xs text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/30 rounded-2xl border border-amber-200 dark:border-amber-800/60">
-                            هیچ دوره اشتراکی برای این پکیج فعال نشده است.
-                        </div>
-                    @endforelse
-
-                    <div
-                        class="p-4 rounded-2xl border {{ $hasDiscount ? 'border-rose-200/80 dark:border-rose-900/40 bg-rose-50/30 dark:bg-rose-950/15' : 'border-gray-100 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-900/20' }} space-y-2">
-                        <span
-                            class="text-xs font-bold {{ $hasDiscount ? 'text-rose-900 dark:text-rose-300' : 'text-gray-400 dark:text-gray-500' }} block">تخفیف پکیج</span>
-                        <div
-                            class="text-base font-black {{ $hasDiscount ? 'text-rose-600 dark:text-rose-400' : 'text-gray-500 dark:text-gray-400' }}">
-                            @if($hasDiscount)
-                                {{ reseller_fa_num(number_format($discountValue)) . ' ' . $currencyLabel }}
-                            @else
-                                بدون تخفیف
-                            @endif
-                        </div>
-                        <span
-                            class="text-xs {{ $hasDiscount ? 'text-rose-600/70 dark:text-rose-400/70 font-bold' : 'text-gray-400' }} block">
-                            {{ $hasDiscount ? 'کسر خودکار در فاکتور' : 'تنظیم نشده' }}
-                        </span>
-                    </div>
-
-                    <div
-                        class="p-4 rounded-2xl border border-amber-200/80 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/15 space-y-2">
-                        <span class="text-xs font-bold text-amber-900 dark:text-amber-300 block">راه‌اندازی
-                            اولیه</span>
-                        <div class="text-base font-black text-amber-700 dark:text-amber-400">
-                            {{ $package->setup_fee > 0 ? reseller_fa_num(number_format($package->setup_fee)) . ' ' . $currencyLabel : 'رایگان' }}
-                        </div>
-                        <span
-                            class="text-xs text-amber-600/70 dark:text-amber-400/70 block">کانفیگ و ستاپ اختصاصی</span>
-                    </div>
-                </div>
-            @endif
-
-            {{-- DISCOUNT DETAILS & INVOICING BANNER --}}
-            @if($priceType !== PackagePriceType::FREE->value)
-                <div
-                    class="p-4 rounded-2xl {{ $hasDiscount ? 'bg-gradient-to-r from-rose-50/90 via-rose-50/40 to-transparent dark:from-rose-950/40 dark:via-rose-950/15 dark:to-transparent border border-rose-200/80 dark:border-rose-800/50' : 'bg-gray-50/70 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800' }} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="flex items-center gap-3.5">
-                        <div
-                            class="w-10 h-10 rounded-xl {{ $hasDiscount ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300' : 'bg-gray-200/70 dark:bg-gray-800 text-gray-500' }} flex items-center justify-center shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div
-                                class="text-xs sm:text-sm font-black {{ $hasDiscount ? 'text-rose-900 dark:text-rose-200' : 'text-gray-800 dark:text-gray-200' }}">
-                                @if($hasDiscount)
-                                    تخفیف پکیج: {{ $discountLabel }}
-                                @else
-                                    وضعیت تخفیف پکیج: بدون تخفیف
-                                @endif
-                            </div>
-                            <p class="text-xs {{ $hasDiscount ? 'text-rose-700/80 dark:text-rose-300/70' : 'text-gray-500 dark:text-gray-400' }} mt-0.5">
-                                @if($hasDiscount)
-                                    مبلغ این تخفیف به صورت پیش‌فرض در صورتحساب و فاکتور اولیه ساخت فوری این پکیج کسر
-                                    می‌شود.
-                                @else
-                                    هیچ تخفیف پیش‌فرضی برای این پکیج تنظیم نشده است. در صورت نیاز به اعمال تخفیف
-                                    می‌توانید از بخش ویرایش پکیج آن را مشخص کنید.
-                                @endif
-                            </p>
-                        </div>
-                    </div>
-                    @if(!$hasDiscount)
                         <a href="{{ route('reseller.packages.edit', $package->id) }}"
-                           class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0 group">
-                            <span>افزودن تخفیف به پکیج</span>
-                            <svg class="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-0.5"
-                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                      d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                           class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+                            <span>ویرایش قیمت‌ها</span>
+                            <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" stroke="currentColor"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
                         </a>
-                    @endif
+                    </div>
                 </div>
-            @endif
-        </x-resellerhub::card>
 
-        {{-- ACTIVE MODULES & CAPABILITIES (COMPACT 3-COLUMN CARD GRID) --}}
-        <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
-            <div
-                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
-                <div>
-                    <h2 class="text-base font-black text-gray-900 dark:text-white flex items-center gap-2.5">
+                @if($priceType === PackagePriceType::FREE->value)
+                    <div
+                        class="p-5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-3">
+                        <svg class="w-8 h-8 text-emerald-500 shrink-0" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                        <span class="block text-sm font-black text-emerald-700 dark:text-emerald-400">این پکیج به
+                            صورت رایگان در اختیار مشتریان قرار می‌گیرد</span>
+                            <span class="block text-xs text-emerald-600/80 dark:text-emerald-500/70 mt-0.5">هیچ
+                            هزینه‌ای بابت اشتراک یا راه‌اندازی از مشتری دریافت نمی‌شود.</span>
+                        </div>
+                    </div>
+                @elseif($priceType === PackagePriceType::ONE_TIME->value)
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div
+                            class="p-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/30 dark:bg-indigo-950/20 space-y-2 shadow-xs ring-1 ring-indigo-500/20">
+                        <span class="text-xs font-black text-indigo-900 dark:text-indigo-300 block">قیمت یک‌باره
+                            (مادام‌العمر)</span>
+                            <div class="text-lg font-black text-indigo-600 dark:text-indigo-400">
+                                {{ $package->one_time_price > 0 ? reseller_fa_num(number_format($package->one_time_price)) . ' ' . $currencyLabel : 'تعریف نشده' }}
+                            </div>
+                            <span class="text-xs text-indigo-600/70 dark:text-indigo-400/70 font-bold block">یک
+                            پرداخت، دسترسی همیشگی</span>
+                        </div>
+
+                        <div
+                            class="p-4 rounded-2xl border {{ $hasDiscount ? 'border-rose-200/80 dark:border-rose-900/40 bg-rose-50/30 dark:bg-rose-950/15' : 'border-gray-100 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-900/20' }} space-y-2">
+                        <span
+                            class="text-xs font-bold {{ $hasDiscount ? 'text-rose-900 dark:text-rose-300' : 'text-gray-400 dark:text-gray-500' }} block">تخفیف پکیج</span>
+                            <div
+                                class="text-base font-black {{ $hasDiscount ? 'text-rose-600 dark:text-rose-400' : 'text-gray-500 dark:text-gray-400' }}">
+                                @if($hasDiscount)
+                                    {{ reseller_fa_num(number_format($discountValue)) . ' ' . $currencyLabel }}
+                                @else
+                                    بدون تخفیف
+                                @endif
+                            </div>
+                            <span
+                                class="text-xs {{ $hasDiscount ? 'text-rose-600/70 dark:text-rose-400/70 font-bold' : 'text-gray-400' }} block">
+                            {{ $hasDiscount ? 'کسر خودکار در صدور فاکتور' : 'تخفیف پیش‌فرضی تنظیم نشده' }}
+                        </span>
+                        </div>
+
+                        <div
+                            class="p-4 rounded-2xl border border-amber-200/80 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/15 space-y-2">
+                        <span class="text-xs font-bold text-amber-900 dark:text-amber-300 block">راه‌اندازی
+                            اولیه</span>
+                            <div class="text-base font-black text-amber-700 dark:text-amber-400">
+                                {{ $package->setup_fee > 0 ? reseller_fa_num(number_format($package->setup_fee)) . ' ' . $currencyLabel : 'رایگان' }}
+                            </div>
+                            <span class="text-xs text-amber-600/70 dark:text-amber-400/70 block">کانفیگ و ستاپ
+                            اختصاصی</span>
+                        </div>
+                    </div>
+                @else
+                    @php
+                        $activeMonths = $package->getActiveMonths();
+                        if (empty($activeMonths) && $priceType === PackagePriceType::SUBSCRIPTION->value) {
+                            $activeMonths = [1, 3, 6, 12];
+                        }
+                    @endphp
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                        @forelse($activeMonths as $m)
+                            @php
+                                $pPrice = $package->getPriceForMonths($m);
+                                $pHasDiscount = $package->hasActiveDiscountForMonths($m);
+                                $pFinalPrice = $pHasDiscount ? $package->getFinalPriceForMonths($m) : $pPrice;
+                                $pIsCustomDiscount = $package->hasCustomDiscountForMonths($m);
+                                $cycle = BillingCycle::fromMonths($m);
+                                $isYearly = ($cycle === BillingCycle::ANNUAL);
+                                $label = ResellerHelper::durationLabel($m, true);
+                                $note = match($cycle) {
+                                    BillingCycle::MONTHLY => 'پایه محاسبه دوره‌ای',
+                                    BillingCycle::QUARTERLY => 'اشتراک فصلی',
+                                    BillingCycle::SEMI_ANNUAL => 'اشتراک نیم‌سال',
+                                    BillingCycle::ANNUAL => 'پلن یک‌ساله استاندارد',
+                                    BillingCycle::BIENNIAL => 'اشتراک ۲ ساله',
+                                    BillingCycle::TRIENNIAL => 'اشتراک ۳ ساله',
+                                    default => 'دوره ' . reseller_fa_num($m) . ' ماهه اختصاصی',
+                                };
+                            @endphp
+                            @if($isYearly)
+                                <div
+                                    class="p-4 rounded-2xl border-2 border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/30 dark:bg-indigo-950/20 space-y-2 shadow-xs ring-1 ring-indigo-500/20">
+                                    <div class="flex items-center justify-between gap-1">
+                                    <span
+                                        class="text-xs font-black text-indigo-900 dark:text-indigo-300">{{ $label }}</span>
+                                        <span
+                                            class="px-2 py-0.5 rounded-md bg-indigo-600 text-white text-xs font-black">پیشنهادی</span>
+                                    </div>
+                                    @if($pHasDiscount && $pFinalPrice < $pPrice)
+                                        <div class="text-xs text-gray-400 line-through tabular-nums">
+                                            {{ reseller_fa_num(number_format($pPrice)) }} {{ $currencyLabel }}
+                                        </div>
+                                        <div class="text-lg font-black text-emerald-600 dark:text-emerald-400">
+                                            {{ reseller_fa_num(number_format($pFinalPrice)) }} {{ $currencyLabel }}
+                                        </div>
+                                    @else
+                                        <div class="text-lg font-black text-indigo-600 dark:text-indigo-400">
+                                            {{ $pPrice > 0 ? reseller_fa_num(number_format($pPrice)) . ' ' . $currencyLabel : 'تعریف نشده' }}
+                                        </div>
+                                    @endif
+                                    <span
+                                        class="text-xs text-indigo-600/70 dark:text-indigo-400/70 font-bold block">
+                                    {{ $pIsCustomDiscount ? 'دارای تخفیف اختصاصی دوره' : $note }}
+                                </span>
+                                </div>
+                            @else
+                                <div
+                                    class="p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30 space-y-2">
+                                    <div class="flex items-center justify-between gap-1">
+                                    <span
+                                        class="text-xs font-bold text-gray-500 dark:text-gray-400 block">{{ $label }}</span>
+                                        @if($pIsCustomDiscount && $pHasDiscount)
+                                            <span
+                                                class="px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 text-[9px] font-black">تخفیف اختصاصی</span>
+                                        @endif
+                                    </div>
+                                    @if($pHasDiscount && $pFinalPrice < $pPrice)
+                                        <div class="text-xs text-gray-400 line-through tabular-nums">
+                                            {{ reseller_fa_num(number_format($pPrice)) }} {{ $currencyLabel }}
+                                        </div>
+                                        <div class="text-base font-black text-emerald-600 dark:text-emerald-400">
+                                            {{ reseller_fa_num(number_format($pFinalPrice)) }} {{ $currencyLabel }}
+                                        </div>
+                                    @else
+                                        <div class="text-base font-black text-gray-900 dark:text-white">
+                                            {{ $pPrice > 0 ? reseller_fa_num(number_format($pPrice)) . ' ' . $currencyLabel : 'تعریف نشده' }}
+                                        </div>
+                                    @endif
+                                    <span class="text-xs text-gray-400 block">{{ $note }}</span>
+                                </div>
+                            @endif
+                        @empty
+                            <div
+                                class="col-span-full p-5 text-center text-xs text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/30 rounded-2xl border border-amber-200 dark:border-amber-800/60">
+                                هیچ دوره اشتراکی برای این پکیج فعال نشده است.
+                            </div>
+                        @endforelse
+
+                        <div
+                            class="p-4 rounded-2xl border {{ $hasDiscount ? 'border-rose-200/80 dark:border-rose-900/40 bg-rose-50/30 dark:bg-rose-950/15' : 'border-gray-100 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-900/20' }} space-y-2">
+                        <span
+                            class="text-xs font-bold {{ $hasDiscount ? 'text-rose-900 dark:text-rose-300' : 'text-gray-400 dark:text-gray-500' }} block">تخفیف پکیج</span>
+                            <div
+                                class="text-base font-black {{ $hasDiscount ? 'text-rose-600 dark:text-rose-400' : 'text-gray-500 dark:text-gray-400' }}">
+                                @if($hasDiscount)
+                                    {{ reseller_fa_num(number_format($discountValue)) . ' ' . $currencyLabel }}
+                                @else
+                                    بدون تخفیف
+                                @endif
+                            </div>
+                            <span
+                                class="text-xs {{ $hasDiscount ? 'text-rose-600/70 dark:text-rose-400/70 font-bold' : 'text-gray-400' }} block">
+                            {{ $hasDiscount ? 'کسر خودکار در فاکتور' : 'تنظیم نشده' }}
+                        </span>
+                        </div>
+
+                        <div
+                            class="p-4 rounded-2xl border border-amber-200/80 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/15 space-y-2">
+                        <span class="text-xs font-bold text-amber-900 dark:text-amber-300 block">راه‌اندازی
+                            اولیه</span>
+                            <div class="text-base font-black text-amber-700 dark:text-amber-400">
+                                {{ $package->setup_fee > 0 ? reseller_fa_num(number_format($package->setup_fee)) . ' ' . $currencyLabel : 'رایگان' }}
+                            </div>
+                            <span
+                                class="text-xs text-amber-600/70 dark:text-amber-400/70 block">کانفیگ و ستاپ اختصاصی</span>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- DISCOUNT DETAILS & INVOICING BANNER --}}
+                @if($priceType !== PackagePriceType::FREE->value)
+                    <div
+                        class="p-4 rounded-2xl {{ $hasDiscount ? 'bg-gradient-to-r from-rose-50/90 via-rose-50/40 to-transparent dark:from-rose-950/40 dark:via-rose-950/15 dark:to-transparent border border-rose-200/80 dark:border-rose-800/50' : 'bg-gray-50/70 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800' }} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3.5">
+                            <div
+                                class="w-10 h-10 rounded-xl {{ $hasDiscount ? 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300' : 'bg-gray-200/70 dark:bg-gray-800 text-gray-500' }} flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div
+                                    class="text-xs sm:text-sm font-black {{ $hasDiscount ? 'text-rose-900 dark:text-rose-200' : 'text-gray-800 dark:text-gray-200' }}">
+                                    @if($hasDiscount)
+                                        تخفیف پکیج: {{ $discountLabel }}
+                                    @else
+                                        وضعیت تخفیف پکیج: بدون تخفیف
+                                    @endif
+                                </div>
+                                <p class="text-xs {{ $hasDiscount ? 'text-rose-700/80 dark:text-rose-300/70' : 'text-gray-500 dark:text-gray-400' }} mt-0.5">
+                                    @if($hasDiscount)
+                                        مبلغ این تخفیف به صورت پیش‌فرض در صورتحساب و فاکتور اولیه ساخت فوری این پکیج کسر
+                                        می‌شود.
+                                    @else
+                                        هیچ تخفیف پیش‌فرضی برای این پکیج تنظیم نشده است. در صورت نیاز به اعمال تخفیف
+                                        می‌توانید از بخش ویرایش پکیج آن را مشخص کنید.
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                        @if(!$hasDiscount)
+                            <a href="{{ route('reseller.packages.edit', $package->id) }}"
+                               class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0 group">
+                                <span>افزودن تخفیف به پکیج</span>
+                                <svg class="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-0.5"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                          d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                                </svg>
+                            </a>
+                        @endif
+                    </div>
+                @endif
+            </x-resellerhub::card>
+        </div>
+
+        {{-- Tab 2 Content: Modules & Capabilities --}}
+        <div x-show="activeTab === 'modules'"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="space-y-6"
+             style="display: none;">
+
+            {{-- ACTIVE MODULES & CAPABILITIES (COMPACT 3-COLUMN CARD GRID) --}}
+            <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+                <div
+                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
+                    <div>
+                        <h2 class="text-base font-black text-gray-900 dark:text-white flex items-center gap-2.5">
                         <span
                             class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1503,76 +1597,76 @@
                                       d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                             </svg>
                         </span>
-                        <span>ماژول‌ها و دسترسی‌های فعال این پکیج</span>
-                        <span
-                            class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
+                            <span>ماژول‌ها و دسترسی‌های فعال این پکیج</span>
+                            <span
+                                class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
                             {{ reseller_fa_num(count($packageModules)) }} ماژول • {{ reseller_fa_num(count($packageFeatures)) }} قابلیت
                         </span>
-                    </h2>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        سامانه‌هایی که با این پکیج فعال شوند، به این ماژول‌ها و دسترسی‌های تفکیکی زیرمجموعه دسترسی
-                        خواهند داشت.
-                    </p>
+                        </h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            سامانه‌هایی که با این پکیج فعال شوند، به این ماژول‌ها و دسترسی‌های تفکیکی زیرمجموعه دسترسی
+                            خواهند داشت.
+                        </p>
+                    </div>
+
+                    <a href="{{ route('reseller.packages.edit', $package->id) }}"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                        </svg>
+                        <span>ویرایش ماژول‌ها و قابلیت‌ها</span>
+                    </a>
                 </div>
 
-                <a href="{{ route('reseller.packages.edit', $package->id) }}"
-                   class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-200 transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                    </svg>
-                    <span>ویرایش ماژول‌ها و قابلیت‌ها</span>
-                </a>
-            </div>
+                @if(empty($packageModules))
+                    <div class="p-8 text-center text-gray-400 text-xs sm:text-sm">
+                        هیچ ماژولی در این پکیج تعریف نشده است.
+                    </div>
+                @else
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+                        @foreach($packageModules as $slug)
+                            @php
+                                $mod = $modulesMap[$slug] ?? null;
+                                $catMod = $catalogMap[$slug] ?? null;
+                                $title = $mod ? $mod->title : $slug;
+                                $isAllowed = $mod ? $mod->is_allowed : false;
 
-            @if(empty($packageModules))
-                <div class="p-8 text-center text-gray-400 text-xs sm:text-sm">
-                    هیچ ماژولی در این پکیج تعریف نشده است.
-                </div>
-            @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-                    @foreach($packageModules as $slug)
-                        @php
-                            $mod = $modulesMap[$slug] ?? null;
-                            $catMod = $catalogMap[$slug] ?? null;
-                            $title = $mod ? $mod->title : $slug;
-                            $isAllowed = $mod ? $mod->is_allowed : false;
-
-                            $allModFeatures = $catMod ? collect($catMod['features'] ?? []) : collect();
-                            $booleanFeatures = $allModFeatures->where('type', 'feature');
-                            $quotaFeatures = $allModFeatures->where('type', 'quota');
-                            $activeModFeatures = $booleanFeatures->filter(function($f) use ($packageFeatures) {
-                                return in_array($f['key'], $packageFeatures, true);
-                            })->values();
-                        @endphp
-                        <div
-                            class="rounded-2xl border border-indigo-100 dark:border-indigo-900/60 bg-white dark:bg-gray-800 shadow-xs overflow-hidden transition-all duration-200 hover:shadow-md">
-
-                            {{-- Card Header --}}
+                                $allModFeatures = $catMod ? collect($catMod['features'] ?? []) : collect();
+                                $booleanFeatures = $allModFeatures->where('type', 'feature');
+                                $quotaFeatures = $allModFeatures->where('type', 'quota');
+                                $activeModFeatures = $booleanFeatures->filter(function($f) use ($packageFeatures) {
+                                    return in_array($f['key'], $packageFeatures, true);
+                                })->values();
+                            @endphp
                             <div
-                                class="p-4 bg-gray-50/70 dark:bg-gray-900/40 border-b border-gray-100 dark:border-gray-700/60 flex items-start justify-between gap-2">
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-2">
+                                class="rounded-2xl border border-indigo-100 dark:border-indigo-900/60 bg-white dark:bg-gray-800 shadow-xs overflow-hidden transition-all duration-200 hover:shadow-md">
+
+                                {{-- Card Header --}}
+                                <div
+                                    class="p-4 bg-gray-50/70 dark:bg-gray-900/40 border-b border-gray-100 dark:border-gray-700/60 flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-2">
                                         <span
                                             class="text-sm font-black text-gray-900 dark:text-white truncate">{{ $title }}</span>
+                                            <span
+                                                class="px-1.5 py-0.2 rounded text-xs font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 shrink-0">فعال</span>
+                                        </div>
                                         <span
-                                            class="px-1.5 py-0.2 rounded text-xs font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 shrink-0">فعال</span>
-                                    </div>
-                                    <span
-                                        class="text-xs text-gray-400 block mt-0.5 dir-ltr text-right truncate">{{ $slug }}</span>
-                                    @if(!$isAllowed)
-                                        <span
-                                            class="inline-flex items-center gap-1 text-xs text-red-500 font-bold mt-1">
+                                            class="text-xs text-gray-400 block mt-0.5 dir-ltr text-right truncate">{{ $slug }}</span>
+                                        @if(!$isAllowed)
+                                            <span
+                                                class="inline-flex items-center gap-1 text-xs text-red-500 font-bold mt-1">
                                             (خارج از سهمیه فعلی نماینده)
                                         </span>
-                                    @endif
+                                        @endif
+                                    </div>
+
                                 </div>
 
-                            </div>
-
-                            {{-- Sub-bar: Capabilities count --}}
-                            <div
-                                class="px-3.5 py-2 bg-indigo-50/30 dark:bg-indigo-950/20 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs">
+                                {{-- Sub-bar: Capabilities count --}}
+                                <div
+                                    class="px-3.5 py-2 bg-indigo-50/30 dark:bg-indigo-950/20 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs">
                                 <span class="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                                     <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor"
                                          viewBox="0 0 24 24">
@@ -1581,71 +1675,71 @@
                                     </svg>
                                     <span>قابلیت‌های پکیج:</span>
                                 </span>
-                                <span
-                                    class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-gray-100 dark:border-gray-700">
+                                    <span
+                                        class="px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 text-xs font-bold text-indigo-600 dark:text-indigo-400 border border-gray-100 dark:border-gray-700">
                                     {{ reseller_fa_num($activeModFeatures->count()) }} از {{ reseller_fa_num($booleanFeatures->count()) }}
                                 </span>
-                            </div>
+                                </div>
 
-                            {{-- Capabilities Chips Body --}}
-                            <div class="p-3.5 space-y-2">
-                                @if($activeModFeatures->isNotEmpty())
-                                    <div class="max-h-48 overflow-y-auto custom-scrollbar space-y-1.5 pr-0.5">
-                                        @foreach($activeModFeatures as $feat)
-                                            <div
-                                                class="flex items-center justify-between gap-2 p-2 rounded-xl bg-gray-50/70 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700/60 text-xs">
-                                                <div class="flex items-center gap-2 min-w-0">
-                                                    <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none"
-                                                         stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                              stroke-width="3" d="M5 13l4 4L19 7"/>
-                                                    </svg>
+                                {{-- Capabilities Chips Body --}}
+                                <div class="p-3.5 space-y-2">
+                                    @if($activeModFeatures->isNotEmpty())
+                                        <div class="max-h-48 overflow-y-auto custom-scrollbar space-y-1.5 pr-0.5">
+                                            @foreach($activeModFeatures as $feat)
+                                                <div
+                                                    class="flex items-center justify-between gap-2 p-2 rounded-xl bg-gray-50/70 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700/60 text-xs">
+                                                    <div class="flex items-center gap-2 min-w-0">
+                                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none"
+                                                             stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                  stroke-width="3" d="M5 13l4 4L19 7"/>
+                                                        </svg>
+                                                        <span
+                                                            class="truncate font-medium text-gray-800 dark:text-gray-200">{{ $feat['title'] }}</span>
+                                                    </div>
                                                     <span
-                                                        class="truncate font-medium text-gray-800 dark:text-gray-200">{{ $feat['title'] }}</span>
-                                                </div>
-                                                <span
-                                                    class="text-xs font-bold text-emerald-600 dark:text-emerald-400 shrink-0 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">
+                                                        class="text-xs font-bold text-emerald-600 dark:text-emerald-400 shrink-0 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">
                                                     فعال در پکیج
                                                 </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @elseif($booleanFeatures->isEmpty())
+                                        <div class="py-3 text-center text-xs text-gray-400 italic">
+                                            تمام امکانات این ماژول به صورت کامل فعال است.
+                                        </div>
+                                    @else
+                                        <div class="py-3 text-center text-xs text-amber-500 font-bold">
+                                            هیچ قابلیت تفکیکی برای این ماژول انتخاب نشده است.
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Quotas & Numeric Limits Footer --}}
+                                @if($quotaFeatures->isNotEmpty())
+                                    <div
+                                        class="px-3.5 py-2.5 bg-gray-50/80 dark:bg-gray-900/60 border-t border-gray-100 dark:border-gray-700/60 space-y-1.5">
+                                        @foreach($quotaFeatures as $q)
+                                            @php
+                                                $qVal = $package->getLimit($q['key']);
+                                            @endphp
+                                            <div class="flex items-center justify-between text-xs gap-2">
+                                                <span class="text-gray-600 dark:text-gray-400 font-medium truncate">{{ $q['title'] }}:</span>
+                                                @if(!is_null($qVal))
+                                                    <span
+                                                        class="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-xs font-bold text-amber-700 dark:text-amber-400 border border-amber-200/50 shrink-0">
+                                                    حداکثر {{ reseller_fa_num($qVal) }} {{ $q['unit'] ?? 'عدد' }}
+                                                </span>
+                                                @else
+                                                    <span
+                                                        class="text-xs text-gray-400 font-bold shrink-0">نامحدود</span>
+                                                @endif
                                             </div>
                                         @endforeach
                                     </div>
-                                @elseif($booleanFeatures->isEmpty())
-                                    <div class="py-3 text-center text-xs text-gray-400 italic">
-                                        تمام امکانات این ماژول به صورت کامل فعال است.
-                                    </div>
-                                @else
-                                    <div class="py-3 text-center text-xs text-amber-500 font-bold">
-                                        هیچ قابلیت تفکیکی برای این ماژول انتخاب نشده است.
-                                    </div>
-                                @endif
-                            </div>
-
-                            {{-- Quotas & Numeric Limits Footer --}}
-                            @if($quotaFeatures->isNotEmpty())
-                                <div
-                                    class="px-3.5 py-2.5 bg-gray-50/80 dark:bg-gray-900/60 border-t border-gray-100 dark:border-gray-700/60 space-y-1.5">
-                                    @foreach($quotaFeatures as $q)
-                                        @php
-                                            $qVal = $package->getLimit($q['key']);
-                                        @endphp
-                                        <div class="flex items-center justify-between text-xs gap-2">
-                                            <span class="text-gray-600 dark:text-gray-400 font-medium truncate">{{ $q['title'] }}:</span>
-                                            @if(!is_null($qVal))
-                                                <span
-                                                    class="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-xs font-bold text-amber-700 dark:text-amber-400 border border-amber-200/50 shrink-0">
-                                                    حداکثر {{ reseller_fa_num($qVal) }} {{ $q['unit'] ?? 'عدد' }}
-                                                </span>
-                                            @else
-                                                <span
-                                                    class="text-xs text-gray-400 font-bold shrink-0">نامحدود</span>
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @elseif(!is_null($package->getLimit($slug)))
-                                <div
-                                    class="px-3.5 py-2 bg-gray-50/80 dark:bg-gray-900/60 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs">
+                                @elseif(!is_null($package->getLimit($slug)))
+                                    <div
+                                        class="px-3.5 py-2 bg-gray-50/80 dark:bg-gray-900/60 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs">
                                     <span class="text-gray-500 font-bold flex items-center gap-1.5">
                                         <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24"
                                              stroke="currentColor">
@@ -1654,25 +1748,84 @@
                                         </svg>
                                         <span>سقف مصرف (Limit):</span>
                                     </span>
-                                    <span
-                                        class="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-xs font-black text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
+                                        <span
+                                            class="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-xs font-black text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
                                         حداکثر {{ reseller_fa_num($package->getLimit($slug)) }} عدد
                                     </span>
-                                </div>
-                            @endif
+                                    </div>
+                                @endif
 
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </x-resellerhub::card>
+
+            {{-- OTHER SYSTEM MODULES NOT INCLUDED --}}
+            @php
+                $excludedModules = $availableModules->filter(function($m) use ($packageModules) {
+                    return !in_array($m->slug, $packageModules);
+                });
+            @endphp
+
+            @if($excludedModules->count() > 0)
+                <x-resellerhub::card class="p-6 sm:p-8 space-y-6" x-data="{ expanded: false }">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-black text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                </svg>
+                                <span>سایر ماژول‌های سیستم که در این پکیج غیرفعال هستند ({{ reseller_fa_num($excludedModules->count()) }})</span>
+                            </h3>
+                            <p class="text-xs text-gray-400 mt-0.5">
+                                این ماژول‌ها همراه با این پکیج فعال نیستند و در صورت نیاز در زمان ساخت به صورت دستی قابل
+                                افزودن خواهند بود.
+                            </p>
                         </div>
-                    @endforeach
-                </div>
-            @endif
-        </x-resellerhub::card>
 
-        {{-- TENANTS CREATED WITH THIS PACKAGE --}}
-        <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
-            <div
-                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
-                <div>
-                    <h2 class="text-base font-black text-gray-900 dark:text-white flex items-center gap-2.5">
+                        <button type="button" @click="expanded = !expanded"
+                                class="px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 cursor-pointer">
+                            <span x-text="expanded ? 'بستن لیست' : 'نمایش لیست'"></span>
+                        </button>
+                    </div>
+
+                    <div x-show="expanded" x-cloak
+                         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/60">
+                        @foreach($excludedModules as $m)
+                            <div
+                                class="p-3.5 rounded-2xl border bg-gray-50/40 dark:bg-gray-900/20 border-gray-100 dark:border-gray-800 flex items-center justify-between opacity-70">
+                                <div class="min-w-0 pr-1">
+                                <span class="text-xs font-bold text-gray-700 dark:text-gray-300 block truncate">
+                                    {{ $m->title }}
+                                </span>
+                                    <span class="text-xs text-gray-400 block mt-0.5 dir-ltr text-right truncate">
+                                    {{ $m->slug }}
+                                </span>
+                                </div>
+                                <span class="text-xs font-bold text-gray-400 shrink-0">غیرفعال</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </x-resellerhub::card>
+            @endif
+        </div>
+
+        {{-- Tab 3 Content: Connected Tenants --}}
+        <div x-show="activeTab === 'tenants'"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="space-y-6"
+             style="display: none;">
+
+            {{-- TENANTS CREATED WITH THIS PACKAGE --}}
+            <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+                <div
+                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
+                    <div>
+                        <h2 class="text-base font-black text-gray-900 dark:text-white flex items-center gap-2.5">
                         <span
                             class="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1680,236 +1833,197 @@
                                       d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                             </svg>
                         </span>
-                        <span>سامانه‌های CRM دارای این پکیج ({{ reseller_fa_num($tenants->count()) }})</span>
-                    </h2>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        لیست مشتریان و کلینیک‌هایی که با ترکیب ماژول‌های این پکیج راه‌اندازی شده‌اند.
-                    </p>
-                </div>
-
-                <button type="button" @click="openQuickProvision()"
-                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-500/20 transition cursor-pointer self-start sm:self-auto">
-                    <svg class="w-3.5 h-3.5 text-white-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                              d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                              clip-rule="evenodd"/>
-                    </svg>
-                    <span>ساخت فوری CRM با این پکیج</span>
-                </button>
-            </div>
-
-            @if($tenants->isEmpty())
-                <div class="py-12 text-center space-y-4">
-                    <div
-                        class="w-16 h-16 rounded-3xl bg-gray-50 dark:bg-gray-900/60 text-gray-400 flex items-center justify-center mx-auto border border-gray-100 dark:border-gray-800">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
-                                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                        </svg>
-                    </div>
-                    <div class="space-y-1 max-w-md mx-auto">
-                        <h3 class="text-sm font-black text-gray-800 dark:text-gray-200">هنوز هیچ سامانه‌ای با این پکیج
-                            ایجاد نشده است</h3>
-                        <p class="text-xs text-gray-400 leading-relaxed">
-                            می‌توانید با استفاده از دکمه زیر، در عرض چند ثانیه سامانه مشتری جدید را با این پکیج
-                            راه‌اندازی نمایید.
+                            <span>سامانه‌های CRM دارای این پکیج ({{ reseller_fa_num($tenants->count()) }})</span>
+                        </h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            لیست مشتریان و کلینیک‌هایی که با ترکیب ماژول‌های این پکیج راه‌اندازی شده‌اند.
                         </p>
                     </div>
+
                     <button type="button" @click="openQuickProvision()"
-                            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-600 text-indigo-600 dark:text-indigo-300 hover:text-white dark:hover:text-white text-xs font-black transition cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-500/20 transition cursor-pointer self-start sm:self-auto">
+                        <svg class="w-3.5 h-3.5 text-white-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                  d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                                  clip-rule="evenodd"/>
                         </svg>
-                        <span>راه‌اندازی فوری اولین CRM این پکیج</span>
+                        <span>ساخت فوری CRM با این پکیج</span>
                     </button>
                 </div>
-            @else
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right text-xs sm:text-sm">
-                        <thead class="bg-gray-50/75 dark:bg-gray-900/40 text-gray-500 dark:text-gray-400 text-xs">
-                        <tr>
-                            <th scope="col" class="py-3.5 px-4 font-bold">نام کسب‌وکار / سازمان</th>
-                            <th scope="col" class="py-3.5 px-4 font-bold">آدرس اختصاصی سامانه</th>
-                            <th scope="col" class="py-3.5 px-4 font-bold">مدیر ارشد سامانه</th>
-                            <th scope="col" class="py-3.5 px-4 font-bold text-center">وضعیت</th>
-                            <th scope="col" class="py-3.5 px-4 font-bold text-center">اعتبار لایسنس</th>
-                            <th scope="col" class="py-3.5 px-4 font-bold text-left">عملیات</th>
-                        </tr>
-                        </thead>
-                        <tbody
-                            class="divide-y divide-gray-100 dark:divide-gray-700/60 text-gray-700 dark:text-gray-300">
-                        @foreach($tenants as $t)
-                            @php
-                                $tenantManager = app(\App\Tenancy\TenantManager::class);
-                                $tenantUrl = route('reseller.tenants.login-as', $t->id);
-                                $displayUrl = $tenantManager->getTenantDisplayUrl($t);
-                                $isExpired = $t->isExpired();
-                                $isActive = $t->status === 'active' && !$isExpired;
-                            @endphp
-                            <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-900/20 transition">
-                                <td class="py-4 px-4">
-                                    <div class="font-black text-gray-900 dark:text-white">
-                                        <a href="{{ route('reseller.tenants.show', $t->id) }}"
-                                           class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">
-                                            {{ $t->name }}
-                                        </a>
-                                    </div>
-                                    <span class="text-xs text-gray-400 mt-0.5 block">
+
+                @if($tenants->isEmpty())
+                    <div class="py-12 text-center space-y-4">
+                        <div
+                            class="w-16 h-16 rounded-3xl bg-gray-50 dark:bg-gray-900/60 text-gray-400 flex items-center justify-center mx-auto border border-gray-100 dark:border-gray-800">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
+                                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                        </div>
+                        <div class="space-y-1 max-w-md mx-auto">
+                            <h3 class="text-sm font-black text-gray-800 dark:text-gray-200">هنوز هیچ سامانه‌ای با این
+                                پکیج
+                                ایجاد نشده است</h3>
+                            <p class="text-xs text-gray-400 leading-relaxed">
+                                می‌توانید با استفاده از دکمه زیر، در عرض چند ثانیه سامانه مشتری جدید را با این پکیج
+                                راه‌اندازی نمایید.
+                            </p>
+                        </div>
+                        <button type="button" @click="openQuickProvision()"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-600 text-indigo-600 dark:text-indigo-300 hover:text-white dark:hover:text-white text-xs font-black transition cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            <span>راه‌اندازی فوری اولین CRM این پکیج</span>
+                        </button>
+                    </div>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right text-xs sm:text-sm">
+                            <thead class="bg-gray-50/75 dark:bg-gray-900/40 text-gray-500 dark:text-gray-400 text-xs">
+                            <tr>
+                                <th scope="col" class="py-3.5 px-4 font-bold">نام کسب‌وکار / سازمان</th>
+                                <th scope="col" class="py-3.5 px-4 font-bold">آدرس اختصاصی سامانه</th>
+                                <th scope="col" class="py-3.5 px-4 font-bold">مدیر ارشد سامانه</th>
+                                <th scope="col" class="py-3.5 px-4 font-bold text-center">وضعیت</th>
+                                <th scope="col" class="py-3.5 px-4 font-bold text-center">اعتبار لایسنس</th>
+                                <th scope="col" class="py-3.5 px-4 font-bold text-left">عملیات</th>
+                            </tr>
+                            </thead>
+                            <tbody
+                                class="divide-y divide-gray-100 dark:divide-gray-700/60 text-gray-700 dark:text-gray-300">
+                            @foreach($tenants as $t)
+                                @php
+                                    $tenantManager = app(\App\Tenancy\TenantManager::class);
+                                    $tenantUrl = route('reseller.tenants.login-as', $t->id);
+                                    $displayUrl = $tenantManager->getTenantDisplayUrl($t);
+                                    $isExpired = $t->isExpired();
+                                    $isActive = $t->status === 'active' && !$isExpired;
+                                @endphp
+                                <tr class="hover:bg-gray-50/60 dark:hover:bg-gray-900/20 transition">
+                                    <td class="py-4 px-4">
+                                        <div class="font-black text-gray-900 dark:text-white">
+                                            <a href="{{ route('reseller.tenants.show', $t->id) }}"
+                                               class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                                {{ $t->name }}
+                                            </a>
+                                        </div>
+                                        <span class="text-xs text-gray-400 mt-0.5 block">
                                         شناسه: #{{ reseller_fa_num($t->id) }} &bull; ایجاد شده در: {{ $t->created_at ? reseller_fa_num(Jalalian::fromCarbon($t->created_at)->format('Y/m/d')) : '-' }}
                                     </span>
-                                </td>
+                                    </td>
 
-                                <td class="py-4 px-4">
-                                    <div class="inline-flex items-center gap-1.5">
-                                        <form method="POST" action="{{ $tenantUrl }}" target="_blank" class="inline">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline dir-ltr truncate max-w-[200px]"
-                                                    title="ورود مستقیم به پنل CRM">
-                                                {{ $displayUrl }}
-                                            </button>
-                                        </form>
-                                        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none"
-                                             stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                        </svg>
-                                    </div>
-                                </td>
-
-                                <td class="py-4 px-4 text-xs">
-                                    <div class="font-bold text-gray-800 dark:text-gray-200">
-                                        {{ $t->subAccount?->name ?? '—' }}
-                                    </div>
-                                    <div class="text-gray-400 text-xs mt-0.5">
-                                        {{ $t->subAccount?->mobile ? reseller_fa_num($t->subAccount->mobile) : ($t->subAccount?->email ?? '—') }}
-                                    </div>
-                                </td>
-
-                                <td class="py-4 px-4 text-center">
-                                    @if($isActive)
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/50">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                            فعال
-                                        </span>
-                                    @elseif($isExpired)
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/50">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                                            منقضی
-                                        </span>
-                                    @else
-                                        <span
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/50">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                            معلق
-                                        </span>
-                                    @endif
-                                </td>
-
-                                <td class="py-4 px-4 text-center text-xs">
-                                    @if($t->plan_expires_at)
-                                        <span class="font-bold text-gray-700 dark:text-gray-300 block">
-                                            {{ reseller_fa_num(Jalalian::fromCarbon($t->plan_expires_at)->format('Y/m/d')) }}
-                                        </span>
-                                        <span class="text-xs text-gray-400">
-                                            ({{ reseller_fa_num($t->plan_expires_at->diffForHumans()) }})
-                                        </span>
-                                    @else
-                                        <span class="text-gray-400">نامحدود</span>
-                                    @endif
-                                </td>
-
-                                <td class="py-4 px-4 text-left">
-                                    <div class="inline-flex items-center gap-1">
-                                        <a href="{{ $tenantUrl }}" target="_blank"
-                                           class="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-xl transition cursor-pointer"
-                                           title="ورود مستقیم به پنل سامانه">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <td class="py-4 px-4">
+                                        <div class="inline-flex items-center gap-1.5">
+                                            <form method="POST" action="{{ $tenantUrl }}" target="_blank"
+                                                  class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                        class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline dir-ltr truncate max-w-[200px]"
+                                                        title="ورود مستقیم به پنل CRM">
+                                                    {{ $displayUrl }}
+                                                </button>
+                                            </form>
+                                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none"
+                                                 stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                             </svg>
-                                        </a>
+                                        </div>
+                                    </td>
 
-                                        <a href="{{ route('reseller.tenants.show', $t->id) }}"
-                                           class="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition cursor-pointer"
-                                           title="مشاهده جزئیات سامانه">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </a>
+                                    <td class="py-4 px-4 text-xs">
+                                        <div class="font-bold text-gray-800 dark:text-gray-200">
+                                            {{ $t->subAccount?->name ?? '—' }}
+                                        </div>
+                                        <div class="text-gray-400 text-xs mt-0.5">
+                                            {{ $t->subAccount?->mobile ? reseller_fa_num($t->subAccount->mobile) : ($t->subAccount?->email ?? '—') }}
+                                        </div>
+                                    </td>
 
-                                        <a href="{{ route('reseller.tenants.edit', $t->id) }}"
-                                           class="p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition cursor-pointer"
-                                           title="ویرایش ماژول‌ها و اشتراک سامانه">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                            </svg>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-        </x-resellerhub::card>
+                                    <td class="py-4 px-4 text-center">
+                                        @if($isActive)
+                                            <span
+                                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/50">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            فعال
+                                        </span>
+                                        @elseif($isExpired)
+                                            <span
+                                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/50">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                            منقضی
+                                        </span>
+                                        @else
+                                            <span
+                                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/50">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                            معلق
+                                        </span>
+                                        @endif
+                                    </td>
 
-        {{-- OTHER SYSTEM MODULES NOT INCLUDED --}}
-        @php
-            $excludedModules = $availableModules->filter(function($m) use ($packageModules) {
-                return !in_array($m->slug, $packageModules);
-            });
-        @endphp
+                                    <td class="py-4 px-4 text-center text-xs">
+                                        @if($t->plan_expires_at)
+                                            <span class="font-bold text-gray-700 dark:text-gray-300 block">
+                                            {{ reseller_fa_num(Jalalian::fromCarbon($t->plan_expires_at)->format('Y/m/d')) }}
+                                        </span>
+                                            <span class="text-xs text-gray-400">
+                                            ({{ reseller_fa_num($t->plan_expires_at->diffForHumans()) }})
+                                        </span>
+                                        @else
+                                            <span class="text-gray-400">نامحدود</span>
+                                        @endif
+                                    </td>
 
-        @if($excludedModules->count() > 0)
-            <x-resellerhub::card class="p-6 sm:p-8 space-y-6" x-data="{ expanded: false }">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-sm font-black text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
-                            </svg>
-                            <span>سایر ماژول‌های سیستم که در این پکیج غیرفعال هستند ({{ reseller_fa_num($excludedModules->count()) }})</span>
-                        </h3>
-                        <p class="text-xs text-gray-400 mt-0.5">
-                            این ماژول‌ها همراه با این پکیج فعال نیستند و در صورت نیاز در زمان ساخت به صورت دستی قابل
-                            افزودن خواهند بود.
-                        </p>
+                                    <td class="py-4 px-4 text-left">
+                                        <div class="inline-flex items-center gap-1">
+                                            <a href="{{ $tenantUrl }}" target="_blank"
+                                               class="p-2 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-xl transition cursor-pointer"
+                                               title="ورود مستقیم به پنل سامانه">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2"
+                                                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                </svg>
+                                            </a>
+
+                                            <a href="{{ route('reseller.tenants.show', $t->id) }}"
+                                               class="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition cursor-pointer"
+                                               title="مشاهده جزئیات سامانه">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2"
+                                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2"
+                                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                            </a>
+
+                                            <a href="{{ route('reseller.tenants.edit', $t->id) }}"
+                                               class="p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition cursor-pointer"
+                                               title="ویرایش ماژول‌ها و اشتراک سامانه">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                     viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2"
+                                                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
                     </div>
-
-                    <button type="button" @click="expanded = !expanded"
-                            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 cursor-pointer">
-                        <span x-text="expanded ? 'بستن لیست' : 'نمایش لیست'"></span>
-                    </button>
-                </div>
-
-                <div x-show="expanded" x-cloak
-                     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/60">
-                    @foreach($excludedModules as $m)
-                        <div
-                            class="p-3.5 rounded-2xl border bg-gray-50/40 dark:bg-gray-900/20 border-gray-100 dark:border-gray-800 flex items-center justify-between opacity-70">
-                            <div class="min-w-0 pr-1">
-                                <span class="text-xs font-bold text-gray-700 dark:text-gray-300 block truncate">
-                                    {{ $m->title }}
-                                </span>
-                                <span class="text-xs text-gray-400 block mt-0.5 dir-ltr text-right truncate">
-                                    {{ $m->slug }}
-                                </span>
-                            </div>
-                            <span class="text-xs font-bold text-gray-400 shrink-0">غیرفعال</span>
-                        </div>
-                    @endforeach
-                </div>
+                @endif
             </x-resellerhub::card>
-        @endif
+        </div>
 
         {{-- Modals --}}
         @include('resellerhub::user.packages.partials.status-modal')

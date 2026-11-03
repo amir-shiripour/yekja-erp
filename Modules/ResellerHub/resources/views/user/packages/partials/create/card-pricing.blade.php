@@ -785,39 +785,4 @@
             </div>
         </div>
     </div>
-
-    {{-- Step 3 In-Card Footer --}}
-    <div class="pt-6 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
-        <button type="button" @click="prevStep()"
-                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer">
-            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
-            <span>مرحله قبلی: ماژول‌ها و دسترسی‌ها</span>
-        </button>
-
-        <button type="submit"
-                :disabled="submitting || selectedModules.length === 0 || hasPricingErrors()"
-                :title="hasPricingErrors() ? 'لطفاً ابتدا خطاهای مربوط به مبالغ تخفیف را اصلاح نمایید' : ''"
-                class="inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm rounded-xl shadow-lg shadow-indigo-600/25 transition cursor-pointer">
-            <template x-if="submitting">
-                <span class="flex items-center gap-2">
-                    <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                    </svg>
-                    <span>{{ __('resellerhub::messages.packages.form.saving') }}</span>
-                </span>
-            </template>
-            <template x-if="!submitting">
-                <span class="flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    <span>{{ __('resellerhub::messages.packages.form.submit_create') }}</span>
-                </span>
-            </template>
-        </button>
-    </div>
 </x-resellerhub::card>
