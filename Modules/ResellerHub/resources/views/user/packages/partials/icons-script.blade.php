@@ -129,6 +129,23 @@
             }
         });
 
+        if (opts.length === 0 && priceType === 'subscription') {
+            if (parseInt(pkg.yearly_price) > 0 || parseInt(pkg.monthly_price) > 0) {
+                standardOptions.forEach(item => {
+                    if (item.months === 12 && parseInt(pkg.yearly_price) > 0) {
+                        opts.push({value: '12', months: 12, key: 'yearly_price', label: item.label});
+                    } else if (item.months === 1 && parseInt(pkg.monthly_price) > 0) {
+                        opts.push({value: '1', months: 1, key: 'monthly_price', label: item.label});
+                    }
+                });
+            }
+            if (opts.length === 0 && Array.isArray(fallback) && fallback.length > 0) {
+                return fallback;
+            } else if (opts.length === 0 && Array.isArray(standardOptions) && standardOptions.length > 0) {
+                return standardOptions;
+            }
+        }
+
         opts.sort((a, b) => parseInt(a.value) - parseInt(b.value));
         return opts;
     };

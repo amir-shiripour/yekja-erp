@@ -2,7 +2,7 @@
     use Modules\ResellerHub\App\Models\ResellerSetting;
     use Modules\ResellerHub\App\Services\DomainVerificationService;
     use Morilog\Jalali\Jalalian;
-    @endphp
+@endphp
 
 @extends('layouts.user')
 
@@ -52,6 +52,7 @@
         'subAccounts' => $subAccounts ?? [],
         'packageStoreUrl' => route('reseller.packages.store'),
         'selectedPackageId' => request('package') ? (int)request('package') : null,
+        'selectedSubAccountId' => request('sub_account_id') ? (int)request('sub_account_id') : (old('sub_account_id') ? (int)old('sub_account_id') : null),
         'oldLimits' => old('limits', []),
         'catalog' => $catalog ?? [],
         'modulePricings' => $modulePricings ?? [],
@@ -102,21 +103,6 @@
                 </svg>
                 <span>بازگشت به داشبورد</span>
             </a>
-        </div>
-
-        {{-- Provisioning Info Banner --}}
-        <div
-            class="bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl p-4 flex items-center justify-between shadow-2xs">
-            <div class="flex items-center gap-3 text-sm text-indigo-900 dark:text-indigo-200">
-                <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" stroke="currentColor"
-                     viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>ظرفیت ساخت سامانه CRM: <strong
-                        class="text-base text-indigo-700 dark:text-indigo-300">نامحدود (بدون سقف)</strong></span>
-            </div>
-            <span class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hidden sm:inline">راه‌اندازی فوری و خودکار بدون نیاز به تایید دستی</span>
         </div>
 
         {{-- Stepper Progress Indicator --}}

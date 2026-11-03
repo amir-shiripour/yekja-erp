@@ -9,7 +9,6 @@ use Modules\ResellerHub\Tests\TestCase;
 
 /**
  * Regression guards for the ResellerHub admin UI.
-
  */
 class UiRegressionGuardTest extends TestCase
 {
@@ -71,10 +70,21 @@ class UiRegressionGuardTest extends TestCase
         $subIndex = $this->moduleView('user/subaccounts/index.blade.php');
         $subPartial = $this->moduleView('user/subaccounts/partials/subaccounts-table.blade.php');
         $tenantsIndex = $this->moduleView('user/tenants/index.blade.php');
+        $createBlade = $this->moduleView('user/tenants/create.blade.php');
+        $createStep1 = $this->moduleView('user/tenants/partials/create-wizard/step-1-identity.blade.php');
+        $createStep2 = $this->moduleView('user/tenants/partials/create-wizard/step-2-packages.blade.php');
+        $editStep1 = $this->moduleView('user/tenants/partials/edit-wizard/step-1-identity.blade.php');
 
         $this->assertStringNotContainsString('نماینده مجری', $subIndex, 'Subaccounts index view must not contain "نماینده مجری"');
         $this->assertStringNotContainsString('نماینده مجری', $subPartial, 'Subaccounts partial table must not contain "نماینده مجری"');
         $this->assertStringNotContainsString('نماینده مجری', $tenantsIndex, 'Tenants index view must not contain "نماینده مجری"');
+        $this->assertStringNotContainsString('نماینده مجری', $createStep1, 'Create wizard step-1 must not contain "نماینده مجری"');
+        $this->assertStringNotContainsString('نماینده مجری', $createStep2, 'Create wizard step-2 must not contain "نماینده مجری"');
+        $this->assertStringNotContainsString('نماینده مجری', $editStep1, 'Edit wizard step-1 must not contain "نماینده مجری"');
+
+        $this->assertStringNotContainsString('ظرفیت ساخت سامانه', $createBlade, 'Create view must not contain "ظرفیت ساخت سامانه"');
+        $this->assertStringNotContainsString('ظرفیت ساخت سامانه', $createStep2, 'Create wizard step-2 must not contain "ظرفیت ساخت سامانه"');
+        $this->assertStringContainsString('selectedSubAccountId', $createBlade, 'Create view config payload must include selectedSubAccountId');
     }
 
     public function test_tenants_index_has_unified_hub_elements(): void
