@@ -96,7 +96,7 @@
                                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <span
-                            x-text="invoiceNumberAuto ? '{{ __('resellerhub::messages.wizard.step3.invoice_number_label') }}' : '{{ __('resellerhub::messages.invoices.source_manual') }}'"></span>
+                            x-text="invoiceNumberAuto ? '{{ __('resellerhub::messages.wizard.step3.invoice_number_label') }}' : '{{ __('resellerhub::messages.wizard.step3.invoice_number_manual') }}'"></span>
                     </button>
                 </div>
 
@@ -668,6 +668,11 @@
                                     <span
                                         class="text-[9px] px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 font-bold"
                                         x-text="'(شامل تخفیف پکیج)'"></span>
+                                </template>
+                                <template x-if="getInvoiceDiscount() > 0 && getInvoiceSubtotal() > 0">
+                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-rose-600 text-white text-[10px] font-black font-sans shadow-2xs">
+                                        ٪<span x-text="faNum(Math.min(100, Math.round((getInvoiceDiscount() / getInvoiceSubtotal()) * 100)))"></span> تخفیف
+                                    </span>
                                 </template>
                             </div>
                             <template x-if="getInvoiceDiscount() > 0">

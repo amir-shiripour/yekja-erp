@@ -453,6 +453,25 @@
                 if (!eff.has_discount || eff.value <= 0) return rawPrice;
                 return Math.max(0, Math.round(rawPrice - eff.value));
             },
+
+            calcDiscountPercent(basePrice, discountValue) {
+                const p = parseFloat(basePrice) || 0;
+                const d = parseFloat(discountValue) || 0;
+                if (p <= 0 || d <= 0) return 0;
+                const pct = Math.round((d / p) * 100);
+                return Math.min(100, Math.max(0, pct));
+            },
+
+            calcPeriodDiscountPercent(months) {
+                const rawPrice = this.getPeriodPrice(months);
+                const eff = this.getEffectivePeriodDiscount(months);
+                if (!eff || !eff.has_discount || !eff.value) return 0;
+                return this.calcDiscountPercent(rawPrice, eff.value);
+            },
+
+            calcOneTimeDiscountPercent() {
+                return this.calcDiscountPercent(this.pricing.one_time_price, this.pricing.discount_value);
+            },
         };
     }
 

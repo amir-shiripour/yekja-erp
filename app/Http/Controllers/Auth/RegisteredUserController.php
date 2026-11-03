@@ -32,14 +32,14 @@ class RegisteredUserController extends Controller
         $settings = $this->getRegistrationSettings();
 
         // پیدا کردن نقش‌هایی که ثبت‌نام برای آنها فعال است
-        $enabledRoles = collect($settings)->filter(function($setting) {
+        $enabledRoles = collect($settings)->filter(function ($setting) {
             return isset($setting['enabled']) && $setting['enabled'] == '1';
         })->keys();
 
         $roles = Role::whereIn('id', $enabledRoles)->get();
 
         if ($roles->isEmpty()) {
-            abort(404, 'Registration is currently disabled.');
+            abort(404, 'در حال حاضر ثبت‌نام در سامانه غیرفعال می‌باشد.');
         }
 
         // اگر نقشی در URL مشخص شده باشد و ثبت‌نام برای آن فعال باشد
@@ -72,7 +72,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required', 'string', 'lowercase', 'email', 'max:255',
-                'unique:'.User::class,
+                'unique:' . User::class,
                 // ولیدیشن کاستوم: اگر درخواست فعالی دارد اخطار بده
                 function ($attribute, $value, $fail) {
                     $exists = RegistrationRequest::where('email', $value)->where('status', 'pending')->exists();
@@ -83,7 +83,7 @@ class RegisteredUserController extends Controller
             ],
             'mobile' => [
                 'nullable', 'string', 'max:20',
-                'unique:'.User::class,
+                'unique:' . User::class,
                 // ولیدیشن کاستوم: بررسی تکراری بودن موبایل در درخواست‌های در انتظار بررسی
                 function ($attribute, $value, $fail) {
                     if (!empty($value)) {
@@ -97,10 +97,13 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
             // ترجمه خطاهای متداول مستقیما در کنترلر برای جلوگیری از مشکل زبان سیستم
+            'role.required' => 'انتخاب نقش کاربری الزامی است.',
+            'role.exists' => 'نقش کاربری انتخاب شده معتبر نمی‌باشد.',
             'email.unique' => 'این ایمیل قبلاً در سیستم ثبت شده است و امکان ثبت‌نام مجدد با آن وجود ندارد.',
             'mobile.unique' => 'این شماره موبایل قبلاً در سیستم ثبت شده است.',
             'email.required' => 'وارد کردن ایمیل الزامی است.',
             'email.email' => 'فرمت ایمیل نامعتبر است.',
+            'email.lowercase' => 'نشانی ایمیل باید با حروف کوچک انگلیسی وارد شود.',
             'name.required' => 'نام و نام خانوادگی خود را وارد کنید.',
             'password.required' => 'رمز عبور الزامی است.',
             'password.confirmed' => 'رمز عبور و تکرار آن با هم مطابقت ندارند.',
@@ -110,7 +113,7 @@ class RegisteredUserController extends Controller
 
         // بررسی اینکه آیا ثبت‌نام برای این نقش فعال است
         if (!isset($settings[$role->id]) || $settings[$role->id]['enabled'] != '1') {
-            abort(403, 'Registration is disabled for this role.');
+            abort(403, 'ثبت‌نام برای این نقش کاربری غیرفعال است.');
         }
 
         // اعتبارسنجی فیلدهای سفارشی
@@ -121,21 +124,21 @@ class RegisteredUserController extends Controller
 
         foreach ($customFields as $field) {
             if ($field->is_required) {
-                $customFieldRules['custom_fields.'.$field->field_name] = ['required'];
+                $customFieldRules['custom_fields.' . $field->field_name] = ['required'];
                 // ایجاد پیام فارسی داینامیک با استفاده از لیبل همان فیلد
                 $fieldLabel = $field->label ?? $field->field_name;
-                $customFieldMessages['custom_fields.'.$field->field_name.'.required'] = "تکمیل فیلد «{$fieldLabel}» الزامی است.";
+                $customFieldMessages['custom_fields.' . $field->field_name . '.required'] = "تکمیل فیلد «{$fieldLabel}» الزامی است.";
             } else {
-                $customFieldRules['custom_fields.'.$field->field_name] = ['nullable'];
+                $customFieldRules['custom_fields.' . $field->field_name] = ['nullable'];
             }
 
             // اگر رول خاصی برای فیلد تعریف شده است (مثلا mimes:jpg,png)، آن را اضافه کنید
             if ($field->rules) {
-                $customFieldRules['custom_fields.'.$field->field_name] = array_merge($customFieldRules['custom_fields.'.$field->field_name], $field->rules);
+                $customFieldRules['custom_fields.' . $field->field_name] = array_merge($customFieldRules['custom_fields.' . $field->field_name], $field->rules);
             }
 
             // اختصاص نام فارسی فیلد به اتریبیوت لاراول برای نمایش در ارورهای استاندارد
-            $customFieldAttributes['custom_fields.'.$field->field_name] = $field->label ?? $field->field_name;
+            $customFieldAttributes['custom_fields.' . $field->field_name] = $field->label ?? $field->field_name;
         }
 
         if (!empty($customFieldRules)) {

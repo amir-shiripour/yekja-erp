@@ -1,7 +1,15 @@
 <?php
 
 return [
-    'accepted' => ':attribute باید پذیرفته شود.',
+    /*
+    |--------------------------------------------------------------------------
+    | Validation Language Lines (Persian / فارسی)
+    |--------------------------------------------------------------------------
+    | خطوط پیام‌های اعتبارسنجی پیش‌فرض لاراول
+    */
+
+    'accepted' => 'فیلد :attribute باید پذیرفته شود.',
+    'accepted_if' => 'فیلد :attribute هنگامی که :other برابر با :value است، باید پذیرفته شود.',
     'active_url' => ':attribute یک آدرس معتبر نیست.',
     'after' => ':attribute باید تاریخی بعد از :date باشد.',
     'after_or_equal' => ':attribute باید تاریخی بعد یا مساوی با :date باشد.',
@@ -9,6 +17,7 @@ return [
     'alpha_dash' => ':attribute باید فقط شامل حروف، اعداد، خط تیره و زیرخط باشد.',
     'alpha_num' => ':attribute باید فقط شامل حروف و اعداد باشد.',
     'array' => ':attribute باید یک آرایه باشد.',
+    'ascii' => 'فیلد :attribute فقط می‌تواند شامل حروف و نمادهای تک‌بایتی الفبایی-عددی باشد.',
     'before' => ':attribute باید تاریخی قبل از :date باشد.',
     'before_or_equal' => ':attribute باید تاریخی قبل یا مساوی با :date باشد.',
     'between' => [
@@ -18,18 +27,27 @@ return [
         'array' => ':attribute باید بین :min و :max آیتم باشد.',
     ],
     'boolean' => 'فیلد :attribute باید صحیح یا غلط باشد.',
+    'can' => 'فیلد :attribute دارای مقداری غیرمجاز است.',
     'confirmed' => 'تاییدیه :attribute مطابقت ندارد.',
+    'current_password' => 'کلمه عبور فعلی نادرست است.',
     'date' => ':attribute یک تاریخ معتبر نیست.',
     'date_equals' => ':attribute باید تاریخی مساوی با :date باشد.',
     'date_format' => ':attribute با فرمت :format مطابقت ندارد.',
+    'decimal' => 'فیلد :attribute باید دارای :decimal رقم اعشار باشد.',
+    'declined' => 'فیلد :attribute باید رد شود.',
+    'declined_if' => 'فیلد :attribute هنگامی که :other برابر با :value است، باید رد شود.',
     'different' => ':attribute و :other باید متفاوت باشند.',
     'digits' => ':attribute باید :digits رقم باشد.',
     'digits_between' => ':attribute باید بین :min و :max رقم باشد.',
     'dimensions' => ':attribute ابعاد تصویر نامعتبر دارد.',
     'distinct' => 'فیلد :attribute دارای مقدار تکراری است.',
+    'doesnt_end_with' => 'فیلد :attribute نباید با یکی از مقادیر زیر پایان یابد: :values.',
+    'doesnt_start_with' => 'فیلد :attribute نباید با یکی از مقادیر زیر شروع شود: :values.',
     'email' => ':attribute باید یک ایمیل معتبر باشد.',
     'ends_with' => ':attribute باید با یکی از مقادیر زیر پایان یابد: :values.',
+    'enum' => ':attribute انتخاب شده نامعتبر است.',
     'exists' => ':attribute انتخاب شده نامعتبر است.',
+    'extensions' => 'فایل :attribute باید یکی از پسوندهای مجاز زیر را داشته باشد: :values.',
     'file' => ':attribute باید یک فایل باشد.',
     'filled' => 'فیلد :attribute باید مقدار داشته باشد.',
     'gt' => [
@@ -44,6 +62,7 @@ return [
         'string' => ':attribute باید بیشتر یا مساوی :value کاراکتر باشد.',
         'array' => ':attribute باید :value آیتم یا بیشتر داشته باشد.',
     ],
+    'hex_color' => 'فیلد :attribute باید یک کد رنگ معتبر هگزادسیمال باشد.',
     'image' => ':attribute باید یک تصویر باشد.',
     'in' => ':attribute انتخاب شده نامعتبر است.',
     'in_array' => 'فیلد :attribute در :other وجود ندارد.',
@@ -52,6 +71,7 @@ return [
     'ipv4' => ':attribute باید یک آدرس IPv4 معتبر باشد.',
     'ipv6' => ':attribute باید یک آدرس IPv6 معتبر باشد.',
     'json' => ':attribute باید یک رشته JSON معتبر باشد.',
+    'lowercase' => 'فیلد :attribute باید فقط با حروف کوچک انگلیسی باشد.',
     'lt' => [
         'numeric' => ':attribute باید کوچکتر از :value باشد.',
         'file' => ':attribute باید کوچکتر از :value کیلوبایت باشد.',
@@ -64,12 +84,14 @@ return [
         'string' => ':attribute باید کمتر یا مساوی :value کاراکتر باشد.',
         'array' => ':attribute باید :value آیتم یا کمتر داشته باشد.',
     ],
+    'mac_address' => 'فیلد :attribute باید یک آدرس MAC معتبر باشد.',
     'max' => [
         'numeric' => ':attribute نباید بزرگتر از :max باشد.',
         'file' => ':attribute نباید بزرگتر از :max کیلوبایت باشد.',
         'string' => ':attribute نباید بیشتر از :max کاراکتر باشد.',
         'array' => ':attribute نباید بیشتر از :max آیتم داشته باشد.',
     ],
+    'max_digits' => 'فیلد :attribute نباید بیشتر از :max رقم داشته باشد.',
     'mimes' => ':attribute باید فایلی از نوع :values باشد.',
     'mimetypes' => ':attribute باید فایلی از نوع :values باشد.',
     'min' => [
@@ -78,14 +100,37 @@ return [
         'string' => ':attribute باید حداقل :min کاراکتر باشد.',
         'array' => ':attribute باید حداقل :min آیتم داشته باشد.',
     ],
+    'min_digits' => 'فیلد :attribute باید حداقل :min رقم داشته باشد.',
+    'missing' => 'فیلد :attribute نباید ارسال شود.',
+    'missing_if' => 'فیلد :attribute هنگامی که :other برابر با :value است، نباید ارسال شود.',
+    'missing_unless' => 'فیلد :attribute نباید ارسال شود مگر اینکه :other برابر با :value باشد.',
+    'missing_with' => 'فیلد :attribute در صورت حضور :values نباید ارسال شود.',
+    'missing_with_all' => 'فیلد :attribute در صورت حضور تمام :values نباید ارسال شود.',
+    'multiple_of' => 'فیلد :attribute باید مضربی از :value باشد.',
     'not_in' => ':attribute انتخاب شده نامعتبر است.',
     'not_regex' => 'فرمت :attribute نامعتبر است.',
     'numeric' => ':attribute باید یک عدد باشد.',
-    'password' => 'رمز عبور نادرست است.',
+    'password' => [
+        'letters' => 'فیلد :attribute باید حداقل شامل یک حرف انگلیسی باشد.',
+        'mixed' => 'فیلد :attribute باید حداقل شامل یک حرف بزرگ و یک حرف کوچک انگلیسی باشد.',
+        'numbers' => 'فیلد :attribute باید حداقل شامل یک عدد باشد.',
+        'symbols' => 'فیلد :attribute باید حداقل شامل یک نماد یا کاراکتر ویژه باشد.',
+        'uncompromised' => 'فیلد :attribute وارد شده در میان گذرواژه‌های فاش‌شده در اینترنت شناسایی شده است. لطفاً کلمه عبور دیگری انتخاب کنید.',
+    ],
     'present' => 'فیلد :attribute باید حضور داشته باشد.',
+    'present_if' => 'فیلد :attribute هنگامی که :other برابر با :value است، باید حضور داشته باشد.',
+    'present_unless' => 'فیلد :attribute باید حضور داشته باشد مگر اینکه :other برابر با :value باشد.',
+    'present_with' => 'فیلد :attribute در صورت حضور :values باید حضور داشته باشد.',
+    'present_with_all' => 'فیلد :attribute در صورت حضور تمام :values باید حضور داشته باشد.',
+    'prohibited' => 'ارسال فیلد :attribute مجاز نمی‌باشد.',
+    'prohibited_if' => 'ارسال فیلد :attribute هنگامی که :other برابر با :value است، مجاز نمی‌باشد.',
+    'prohibited_unless' => 'ارسال فیلد :attribute مجاز نیست مگر اینکه :other در :values باشد.',
+    'prohibits' => 'فیلد :attribute مانع از ارسال :other می‌شود.',
     'regex' => 'فرمت :attribute نامعتبر است.',
     'required' => 'فیلد :attribute الزامی است.',
+    'required_array_keys' => 'فیلد :attribute باید شامل مقادیر برای: :values باشد.',
     'required_if' => 'فیلد :attribute هنگامی که :other برابر با :value است، الزامی می‌باشد.',
+    'required_if_accepted' => 'فیلد :attribute در صورت پذیرش :other الزامی است.',
     'required_unless' => 'فیلد :attribute الزامی است مگر اینکه :other در :values باشد.',
     'required_with' => 'فیلد :attribute هنگامی که :values موجود است، الزامی می‌باشد.',
     'required_with_all' => 'فیلد :attribute هنگامی که :values موجود هستند، الزامی می‌باشد.',
@@ -101,8 +146,10 @@ return [
     'starts_with' => ':attribute باید با یکی از مقادیر زیر شروع شود: :values.',
     'string' => ':attribute باید یک رشته باشد.',
     'timezone' => ':attribute باید یک منطقه زمانی معتبر باشد.',
+    'ulid' => 'فیلد :attribute باید یک ULID معتبر باشد.',
     'unique' => 'این :attribute قبلاً در سیستم ثبت شده است.',
     'uploaded' => 'آپلود :attribute با شکست مواجه شد.',
+    'uppercase' => 'فیلد :attribute باید فقط با حروف بزرگ انگلیسی باشد.',
     'url' => 'فرمت :attribute نامعتبر است.',
     'uuid' => ':attribute باید یک UUID معتبر باشد.',
 
@@ -110,14 +157,12 @@ return [
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines
     |--------------------------------------------------------------------------
-    | در این بخش پیام‌های اختصاصی برای قوانین یا فیلدهای خاص تعریف می‌شوند.
     */
 
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
-        // پیام‌های اختصاصی برای بررسی درخواست‌های ثبت‌نام معلق
         'email' => [
             'pending' => 'شما قبلاً با این ایمیل یک درخواست ثبت‌نام ارسال کرده‌اید که در انتظار بررسی است.',
         ],
@@ -128,41 +173,77 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Custom Validation Attributes
+    | Custom Validation Attributes (Persian / فارسی)
     |--------------------------------------------------------------------------
-    | در اینجا اسامی فیلدها به زبان فارسی نگاشت می‌شوند تا در خطاهای لاراول جایگزین شوند.
     */
 
     'attributes' => [
-        // فیلدهای فرم ثبت نام و حساب کاربری
+        // احراز هویت و ثبت نام
         'name' => 'نام و نام خانوادگی',
-        'email' => 'ایمیل',
+        'email' => 'نشانی ایمیل',
         'mobile' => 'شماره موبایل',
+        'phone' => 'شماره تلفن',
         'password' => 'رمز عبور',
         'password_confirmation' => 'تکرار رمز عبور',
+        'current_password' => 'رمز عبور فعلی',
         'role' => 'نقش کاربری',
         'terms' => 'قوانین و مقررات',
+        'username' => 'نام کاربری',
+        'national_code' => 'کد ملی',
 
-        // فیلدهای قدیمی شما
+        // ساخت سامانه CRM و نمایندگی
+        'subdomain' => 'آدرس اختصاصی (ساب‌دامین)',
+        'custom_domain' => 'دامنه اختصاصی',
+        'domain_type' => 'نوع آدرس سامانه',
+        'package_id' => 'پکیج انتخابی',
+        'sub_account_id' => 'حساب خریدار (زیرمجموعه)',
+        'admin_name' => 'نام مدیر سامانه',
+        'admin_email' => 'نشانی ایمیل مدیر سامانه',
+        'admin_mobile' => 'شماره موبایل مدیر سامانه',
+        'expires_in_months' => 'مدت اعتبار اشتراک (ماه)',
+        'duration_months' => 'مدت دوره (ماه)',
+        'discount_price' => 'قیمت با تخفیف',
+        'price' => 'قیمت',
+        'one_time_price' => 'تعرفه خرید یک‌باره',
+        'setup_fee' => 'هزینه راه‌اندازی اولیه',
+        'discount_value' => 'مبلغ تخفیف',
+        'discount_type' => 'نوع تخفیف',
+        'discount_starts_at' => 'تاریخ شروع تخفیف',
+        'discount_expires_at' => 'تاریخ پایان تخفیف',
+        'company_name' => 'نام شرکت / مجموعه',
+        'tenant_mode' => 'حالت ساخت سامانه',
+        'existing_tenant_id' => 'سامانه انتخابی',
+
+        // تنظیمات فاکتور و صورت‌حساب
+        'invoice_number' => 'شماره فاکتور',
+        'invoice_issue_date' => 'تاریخ صدور فاکتور',
+        'invoice_due_date' => 'تاریخ سررسید فاکتور',
+        'invoice_tax_rate' => 'نرخ مالیات',
+        'invoice_tax_mode' => 'نوع محاسبه مالیات',
+        'invoice_discount_amount' => 'مبلغ تخفیف فاکتور',
+        'invoice_status' => 'وضعیت فاکتور',
+        'invoice_terms' => 'شرایط و قوانین فاکتور',
+        'invoice_notes' => 'یادداشت‌های فاکتور',
+        'invoice_items' => 'اقلام فاکتور',
+        'issue_invoice' => 'صدور فاکتور',
+
+        // برندینگ و سفارشی‌سازی
+        'white_label_type' => 'نوع برندینگ',
+        'branding' => 'تنظیمات برندینگ',
+        'branding.is_custom' => 'فعالسازی وایت‌لیبل',
+        'branding.brand_title' => 'عنوان برند اختصاصی',
+        'branding.brand_primary_color' => 'رنگ سازمانی برند',
+        'branding.brand_footer_text' => 'متن فوتر اختصاصی',
+        'branding.support_phone' => 'شماره پشتیبانی برند',
+        'branding.support_email' => 'ایمیل پشتیبانی برند',
+        'tenant_brand_logo' => 'فایل لوگوی سامانه',
+        'tenant_brand_favicon' => 'فایل فاوآیکون سامانه',
+
+        // عمومی
         'title' => 'عنوان',
         'description' => 'توضیحات',
-        'listing_type' => 'نوع فایل',
-        'property_type' => 'نوع ملک',
-        'document_type' => 'نوع سند',
-        'usage_type' => 'نوع کاربری',
-        'delivery_date' => 'تاریخ تحویل',
-        'code' => 'کد ملک',
-        'category_id' => 'دسته‌بندی',
         'address' => 'آدرس',
-        'latitude' => 'عرض جغرافیایی',
-        'longitude' => 'طول جغرافیایی',
-        'cover_image' => 'عکس شاخص',
-        'gallery_images' => 'گالری تصاویر',
-        'price' => 'قیمت',
-        'min_price' => 'قیمت کف',
-        'deposit_price' => 'مبلغ رهن',
-        'rent_price' => 'اجاره ماهیانه',
-        'advance_price' => 'مبلغ پیش‌پرداخت',
-        'video' => 'ویدیو',
+        'category_id' => 'دسته‌بندی',
+        'status' => 'وضعیت',
     ],
 ];

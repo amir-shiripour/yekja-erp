@@ -118,28 +118,51 @@
                 }
             },
 
-            copyText(text, msg = 'کپی شد') {
-                if (!text) return;
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(text).then(() => {
-                        this.showToast(msg, 'success');
-                    });
-                } else {
+            async copyText(text, msg = 'کپی شد') {
+                if (!text) return false;
+                let success = false;
+                if (navigator.clipboard) {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        success = true;
+                    } catch (_) {
+                        success = false;
+                    }
+                }
+                if (!success) {
                     const textArea = document.createElement('textarea');
                     textArea.value = text;
+                    textArea.setAttribute('readonly', '');
                     textArea.style.position = 'fixed';
-                    textArea.style.left = '-999999px';
+                    textArea.style.top = '0';
+                    textArea.style.left = '0';
+                    textArea.style.width = '2em';
+                    textArea.style.height = '2em';
+                    textArea.style.padding = '0';
+                    textArea.style.border = 'none';
+                    textArea.style.outline = 'none';
+                    textArea.style.boxShadow = 'none';
+                    textArea.style.background = 'transparent';
+                    textArea.style.opacity = '0';
+                    textArea.style.zIndex = '-9999';
                     document.body.appendChild(textArea);
                     textArea.focus();
                     textArea.select();
+                    textArea.setSelectionRange(0, textArea.value.length);
                     try {
-                        document.execCommand('copy');
-                        this.showToast(msg, 'success');
+                        success = document.execCommand('copy');
                     } catch (err) {
-                        this.showToast('خطا در کپی', 'error');
+                        success = false;
                     }
                     textArea.remove();
                 }
+
+                if (success) {
+                    this.showToast(msg, 'success');
+                } else {
+                    this.showToast('امکان کپی خودکار فراهم نشد. لطفاً به‌صورت دستی کپی نمایید.', 'error');
+                }
+                return success;
             },
 
             faNum(str) {
@@ -147,6 +170,14 @@
             },
 
             showToast(msg, type = 'success') {
+                if (typeof window.showToast === 'function') {
+                    try {
+                        window.showToast(msg, type);
+                        return;
+                    } catch (_) {
+                    }
+                }
+                window.dispatchEvent(new CustomEvent('toast', {detail: {message: msg, type: type}}));
                 this.toast.message = msg;
                 this.toast.type = type;
                 this.toast.show = true;

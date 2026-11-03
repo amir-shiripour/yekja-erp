@@ -238,4 +238,37 @@ class UiRegressionGuardTest extends TestCase
         $this->assertContains('booking', $slugs);
         $this->assertContains('invoices', $slugs);
     }
+
+    public function test_tenant_overview_copy_button_and_translations_and_package_discount_badges(): void
+    {
+        // 1. Check copy button in tenant subscription card
+        $subCard = $this->moduleView('user/tenants/partials/show/subscription-card.blade.php');
+        $this->assertStringContainsString('x-data="{ copied: false }"', $subCard);
+        $this->assertStringContainsString('کپی شد!', $subCard);
+
+        // 2. Check wizard step 3 translation keys
+        app()->setLocale('fa');
+        $this->assertEquals('تولید خودکار (از تنظیمات)', __('resellerhub::messages.wizard.step3.invoice_number_label'));
+        $this->assertEquals('ورود دستی', __('resellerhub::messages.wizard.step3.invoice_number_manual'));
+
+        // 3. Check Persian validation strings
+        $this->assertStringContainsString('حروف کوچک', __('validation.lowercase', ['attribute' => 'ایمیل']));
+        $this->assertStringContainsString('عدد', __('validation.password.numbers', ['attribute' => 'رمز عبور']));
+        $this->assertEquals('آدرس اختصاصی (ساب‌دامین)', __('validation.attributes.subdomain'));
+        $this->assertEquals('پکیج انتخابی', __('validation.attributes.package_id'));
+
+        // 4. Check dynamic discount percentage badge in package card-pricing
+        $createPricing = $this->moduleView('user/packages/partials/create/card-pricing.blade.php');
+        $this->assertStringContainsString('calcPeriodDiscountPercent(row.months)', $createPricing);
+        $this->assertStringContainsString('٪<span x-text="faNum(calcPeriodDiscountPercent(row.months))"></span> تخفیف', $createPricing);
+
+        $editPricing = $this->moduleView('user/packages/partials/edit/card-pricing.blade.php');
+        $this->assertStringContainsString('calcPeriodDiscountPercent(row.months)', $editPricing);
+        $this->assertStringContainsString('٪<span x-text="faNum(calcPeriodDiscountPercent(row.months))"></span> تخفیف', $editPricing);
+
+        // 5. Check script has calculation helpers
+        $createScript = $this->moduleView('user/packages/partials/create/script.blade.php');
+        $this->assertStringContainsString('calcDiscountPercent(basePrice, discountValue)', $createScript);
+        $this->assertStringContainsString('calcPeriodDiscountPercent(months)', $createScript);
+    }
 }
