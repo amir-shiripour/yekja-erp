@@ -70,7 +70,7 @@
 
     window.resellerSettingsManager = function (config) {
         config = config || window.resellerSettingsConfig || {};
-        const validTabs = ['general', 'tour', 'branding', 'finance', 'kyc', 'automation', 'tenancy'];
+        const validTabs = ['general', 'tour', 'branding', 'finance', 'kyc', 'automation', 'tenancy', 'database'];
         let initialTab = config.initialTab || localStorage.getItem('resellerSettingsTab') || 'general';
         if (!validTabs.includes(initialTab)) {
             initialTab = 'general';

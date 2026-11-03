@@ -4,6 +4,7 @@ namespace Modules\ResellerHub\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\CustomUserField;
+use App\Models\Tenant;
 use App\Tenancy\TenancyModelRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -15,9 +16,11 @@ use Modules\ResellerHub\App\Actions\Settings\UpdateResellerSettingsAction;
 use Modules\ResellerHub\App\Enums\ResellerSettingKey;
 use Modules\ResellerHub\App\Helpers\ResellerHelper;
 use Modules\ResellerHub\App\Http\Requests\UpdateResellerSettingsRequest;
+use Modules\ResellerHub\App\Models\Reseller;
 use Modules\ResellerHub\App\Models\ResellerPackage;
 use Modules\ResellerHub\App\Models\ResellerSetting;
 use Modules\ResellerHub\App\Services\ModuleCapabilityCatalogService;
+use Modules\ResellerHub\App\Services\TenantDataExporterService;
 use Modules\ResellerHub\App\Traits\HasReseller;
 use Throwable;
 
@@ -32,7 +35,7 @@ class ResellerSettingController extends Controller
         $this->catalogService = $catalogService;
     }
 
-    public function index(): View
+    public function index(Request $request, TenantDataExporterService $exporter): View
     {
         $reseller = $this->getReseller();
         $settings = ResellerSetting::allForReseller($reseller->id);
@@ -46,6 +49,79 @@ class ResellerSettingController extends Controller
         $tenancyHealth = TenancyModelRegistry::getHealthReport();
         $discoveredModels = TenancyModelRegistry::discoverAvailableModels();
 
+        $user = auth()->user();
+        $isSuperAdmin = method_exists($user, 'hasRole') && $user->hasRole('super-admin');
+
+        $exportTenants = collect();
+        $exportTenantsData = [];
+        $exportResellersList = collect();
+        $exportTotalTenants = 0;
+        $exportActiveTenants = 0;
+        $exportCustomDomainCount = 0;
+        $exportSearch = trim((string)$request->query('search', ''));
+        $exportStatus = $request->query('status');
+        $exportResellerId = $request->query('reseller_id');
+        $exportSortBy = $request->query('sort_by', 'latest');
+        $exportSortOrder = strtolower((string)$request->query('sort_order', 'desc'));
+
+        if ($isSuperAdmin) {
+            $baseQuery = Tenant::query();
+            $exportResellersList = Reseller::with('user')->orderBy('company_name')->get();
+
+            if ($exportResellerId && $exportResellerId !== 'all') {
+                $baseQuery->where('reseller_id', $exportResellerId);
+            }
+
+            // Summary Counters before search/status filter
+            $exportTotalTenants = (clone $baseQuery)->count();
+            $exportActiveTenants = (clone $baseQuery)->where('status', Tenant::STATUS_ACTIVE)->count();
+            $exportCustomDomainCount = (clone $baseQuery)->whereNotNull('custom_domain')
+                ->where('custom_domain', '!=', '')->count();
+
+            // Search Filter
+            if ($exportSearch !== '') {
+                $term = '%' . $exportSearch . '%';
+                $baseQuery->where(function ($q) use ($term) {
+                    $q->where('name', 'like', $term)
+                        ->orWhere('subdomain', 'like', $term)
+                        ->orWhere('custom_domain', 'like', $term)
+                        ->orWhereHas('subAccount', function ($sq) use ($term) {
+                            $sq->where('name', 'like', $term)
+                                ->orWhere('company_name', 'like', $term);
+                        });
+                });
+            }
+
+            // Status Filter
+            if ($exportStatus && in_array($exportStatus, [Tenant::STATUS_ACTIVE, Tenant::STATUS_SUSPENDED, Tenant::STATUS_EXPIRED], true)) {
+                $baseQuery->where('status', $exportStatus);
+            }
+
+            // Sorting
+            if ($exportSortBy === 'oldest') {
+                $baseQuery->orderBy('id', 'asc');
+            } elseif ($exportSortBy === 'name_asc') {
+                $baseQuery->orderBy('name', 'asc');
+            } elseif ($exportSortBy === 'name_desc') {
+                $baseQuery->orderBy('name', 'desc');
+            } elseif ($exportSortBy === 'created_at_asc') {
+                $baseQuery->orderBy('created_at', 'asc');
+            } else {
+                $baseQuery->orderBy('id', 'desc');
+            }
+
+            $perPage = (int)$request->query('per_page', 10);
+            if ($perPage < 5 || $perPage > 100) {
+                $perPage = 10;
+            }
+
+            $exportTenants = $baseQuery->with(['subAccount.user', 'reseller.user', 'package'])
+                ->paginate($perPage, ['*'], 'export_page')
+                ->withQueryString();
+
+            $exportTenantsData = $exporter->getStatisticsForMultipleTenants($exportTenants->items());
+        }
+
         return view('resellerhub::user.settings.index', compact(
             'reseller',
             'settings',
@@ -55,7 +131,19 @@ class ResellerSettingController extends Controller
             'resellerPackages',
             'subAccountCustomFields',
             'tenancyHealth',
-            'discoveredModels'
+            'discoveredModels',
+            'isSuperAdmin',
+            'exportTenants',
+            'exportTenantsData',
+            'exportResellersList',
+            'exportTotalTenants',
+            'exportActiveTenants',
+            'exportCustomDomainCount',
+            'exportSearch',
+            'exportStatus',
+            'exportResellerId',
+            'exportSortBy',
+            'exportSortOrder'
         ));
     }
 

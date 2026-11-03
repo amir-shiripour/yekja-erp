@@ -31,17 +31,25 @@
 
     $tabs = [
         'general'       => ['label' => 'عمومی', 'icon' => 'clock'],
-        'tour'          => ['label' => 'تور و راه‌اندازی', 'icon' => 'flag'],
-        'branding'      => ['label' => 'برند و وایت‌ لیبل', 'icon' => 'sparkles'],
+        'tour'          => ['label' => 'تور راه‌اندازی', 'icon' => 'flag'],
+        'branding'      => ['label' => 'برند و ظاهر', 'icon' => 'sparkles'],
         'finance'       => ['label' => 'مالی و فاکتور', 'icon' => 'coin'],
-        'kyc'           => ['label' => 'احراز هویت زیرمجموعه‌ها', 'icon' => 'identification'],
-        'automation'    => ['label' => 'اتوماسیون و گردش کار', 'icon' => 'bolt'],
-        'tenancy'       => ['label' => 'چندمستاجری و مدل‌ها', 'icon' => 'shield-check'],
+        'kyc'           => ['label' => 'احراز هویت', 'icon' => 'identification'],
+        'automation'    => ['label' => 'اتوماسیون', 'icon' => 'bolt'],
+        'tenancy'       => ['label' => 'چندمستاجری', 'icon' => 'shield-check'],
     ];
+
+    $isSuperAdmin = $isSuperAdmin ?? (auth()->user() && method_exists(auth()->user(), 'hasRole') && auth()->user()->hasRole('super-admin'));
+    if ($isSuperAdmin) {
+        $tabs['database'] = ['label' => 'استخراج دیتابیس', 'icon' => 'database'];
+    }
 
     $initialTab = request('tab', session('active_tab', 'general'));
     if ($initialTab === 'pricing') {
         $initialTab = 'finance';
+    }
+    if ($initialTab === 'database' && !$isSuperAdmin) {
+        $initialTab = 'general';
     }
 @endphp
 
@@ -98,13 +106,13 @@
             <div class="sticky top-4 z-30 mb-6">
                 <div
                     role="tablist" aria-label="تب‌های تنظیمات نمایندگی"
-                    class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl p-2 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex flex-wrap items-center gap-1.5 w-full max-w-full">
+                    class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl p-1.5 sm:p-2 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm flex items-center gap-1 sm:gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-full max-w-full">
                     @foreach($tabs as $tabKey => $tab)
                         <button type="button" role="tab" id="tab-{{ $tabKey }}" aria-controls="tabpanel-{{ $tabKey }}"
                                 :aria-selected="activeTab === '{{ $tabKey }}' ? 'true' : 'false'"
                                 @click="activeTab = '{{ $tabKey }}'"
-                                :class="activeTab === '{{ $tabKey }}' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-700 dark:hover:text-gray-200'"
-                                class="flex-1 min-w-[120px] sm:min-w-36 flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer">
+                                :class="activeTab === '{{ $tabKey }}' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'"
+                                class="shrink-0 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer whitespace-nowrap">
                             @switch($tab['icon'])
                                 @case('coin')
                                     <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -169,6 +177,13 @@
                                               d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                                     </svg>
                                     @break
+                                @case('database')
+                                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                         stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7M4 7c0-2 1.5-3 3.5-3h9c2 0 3.5 1 3.5 3M4 7c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3m0 5c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3"/>
+                                    </svg>
+                                    @break
                             @endswitch
                             <span>{{ $tab['label'] }}</span>
                         </button>
@@ -197,7 +212,7 @@
             {{-- Sticky Save Action Bar --}}
             <div class="sticky bottom-4 mt-8 max-w-full min-w-0 transition-all duration-200"
                  :class="{ 'z-10': defaultPackageDropdownOpen, 'z-40': !defaultPackageDropdownOpen }"
-                 x-show="activeTab !== 'automation' && activeTab !== 'kyc' && activeTab !== 'tenancy'">
+                 x-show="activeTab !== 'automation' && activeTab !== 'kyc' && activeTab !== 'tenancy' && activeTab !== 'database'">
                 <div
                     class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl p-4 rounded-2xl border border-gray-200 dark:border-gray-700/50 shadow-[0_10px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex flex-row-reverse items-center justify-between gap-4 max-w-full min-w-0">
                     <button type="submit"
@@ -240,6 +255,15 @@
             و دکمه «ذخیره تنظیمات» عملاً هیچ درخواستی ارسال نکند؛ بنابراین بیرون از فرم رندر می‌شود.
         --}}
         @include('resellerhub::user.settings.tabs.tab-tenancy')
+
+        {{--
+            Tab 7: Tenant Database & SQL Data Export (Super Admin Only)
+            این تب منحصراً برای سوپرادمین سیستم فعال است و امکان جستجو، فیلتر و دریافت خروجی دیتابیس (SQL Dump و JSON) را می‌دهد.
+            جهت جلوگیری از تداخل فرم جستجو با فرم ذخیره تنظیمات، بیرون از <form> رندر می‌شود.
+        --}}
+        @if($isSuperAdmin)
+            @include('resellerhub::user.settings.tabs.tab-database')
+        @endif
 
         {{-- Seed Workflows Confirmation Modal --}}
         @include('resellerhub::user.settings.modals.confirm-seed-modal')
