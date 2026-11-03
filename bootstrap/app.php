@@ -15,6 +15,10 @@ $app = new Illuminate\Foundation\Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
 
+$app->useLangPath(
+    is_dir($app->basePath('lang')) ? $app->basePath('lang') : $app->resourcePath('lang')
+);
+
 /*
 |--------------------------------------------------------------------------
 | Bind Important Interfaces

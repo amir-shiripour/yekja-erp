@@ -15,12 +15,20 @@
         },
         init() {
             window._rhToastComponent = this;
-            window.showToast = (msgOrType, maybeMsg) => {
+            window.showToast = (arg1, arg2) => {
                 let t = 'success';
-                let m = msgOrType;
-                if (maybeMsg !== undefined) {
-                    t = msgOrType;
-                    m = maybeMsg;
+                let m = '';
+                const types = ['success', 'error', 'danger', 'info', 'warning'];
+                if (arg2 !== undefined) {
+                    if (types.includes(arg1)) {
+                        t = arg1;
+                        m = arg2;
+                    } else {
+                        m = arg1;
+                        t = arg2;
+                    }
+                } else {
+                    m = arg1;
                 }
                 this.showToast(m, t);
             };

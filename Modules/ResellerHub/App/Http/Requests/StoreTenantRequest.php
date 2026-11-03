@@ -282,6 +282,10 @@ class StoreTenantRequest extends FormRequest
             'subdomain.regex' => 'سابدامین فقط می‌تواند شامل حروف کوچک انگلیسی، اعداد و خط تیره (-) باشد.',
             'subdomain.unique' => 'این سابدامین قبلاً توسط سازمان دیگری ثبت شده است.',
             'subdomain.not_in' => 'این سابدامین سیستمی و رزرو شده است و امکان استفاده از آن وجود ندارد.',
+            'custom_domain.required' => 'وارد کردن دامنه اختصاصی الزامی است.',
+            'custom_domain.regex' => 'فرمت دامنه اختصاصی نامعتبر است (مثال: crm.yourbrand.com).',
+            'custom_domain.unique' => 'این دامنه اختصاصی قبلاً در سامانه ثبت شده است.',
+            'custom_domain.not_in' => 'امکان استفاده از این دامنه رزرو شده وجود ندارد.',
             'admin_name.required' => 'وارد کردن نام و نام خانوادگی مدیر سامانه الزامی است.',
             'admin_email.required' => 'وارد کردن نشانی ایمیل مدیر سامانه الزامی است.',
             'admin_email.email' => 'فرمت ایمیل وارد شده معتبر نمی‌باشد.',
@@ -293,6 +297,39 @@ class StoreTenantRequest extends FormRequest
             'password.min' => 'کلمه عبور باید حداقل ۶ کاراکتر باشد.',
             'password.confirmed' => 'تکرار کلمه عبور با کلمه عبور اولیه مطابقت ندارد.',
             'invoice_number.max' => 'شماره فاکتور نمی‌تواند بیش از ۶۴ کاراکتر باشد.',
+            'tenant_brand_logo.max' => 'حجم فایل لوگو نمی‌تواند بیشتر از ۲ مگابایت باشد.',
+            'tenant_brand_logo.mimes' => 'فرمت لوگو باید یکی از فرمت‌های تصویری مجاز باشد.',
+            'tenant_brand_favicon.max' => 'حجم فایل فاوآیکون نمی‌تواند بیشتر از ۱ مگابایت باشد.',
+            'tenant_brand_favicon.mimes' => 'فرمت فاوآیکون باید یکی از فرمت‌های ico, png, svg یا jpg باشد.',
+        ];
+    }
+
+    /**
+     * Custom Persian validation attributes.
+     */
+    public function attributes(): array
+    {
+        return [
+            'tenant_mode' => 'حالت ساخت سامانه',
+            'existing_tenant_id' => 'سامانه انتخاب‌شده',
+            'sub_account_id' => 'حساب خریدار (زیرمجموعه)',
+            'name' => 'نام کسب‌وکار / کلینیک',
+            'domain_type' => 'نوع آدرس سامانه',
+            'subdomain' => 'آدرس اختصاصی (ساب‌دامین)',
+            'custom_domain' => 'دامنه اختصاصی',
+            'package_id' => 'پکیج انتخابی',
+            'admin_name' => 'نام مدیر سامانه',
+            'admin_email' => 'نشانی ایمیل مدیر سامانه',
+            'admin_mobile' => 'شماره موبایل مدیر سامانه',
+            'password' => 'کلمه عبور مدیر سامانه',
+            'expires_in_months' => 'مدت اعتبار اشتراک (ماه)',
+            'invoice_number' => 'شماره فاکتور',
+            'invoice_issue_date' => 'تاریخ صدور فاکتور',
+            'invoice_due_date' => 'تاریخ سررسید فاکتور',
+            'invoice_tax_rate' => 'نرخ مالیات',
+            'invoice_discount_amount' => 'مبلغ تخفیف فاکتور',
+            'tenant_brand_logo' => 'لوگوی اختصاصی سامانه',
+            'tenant_brand_favicon' => 'فاوآیکون اختصاصی سامانه',
         ];
     }
 }

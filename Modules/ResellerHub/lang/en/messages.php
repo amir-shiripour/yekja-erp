@@ -786,6 +786,8 @@ return [
             'submit_tenant' => 'Create the system',
             'prev_step' => 'Previous step (admin details)',
             'free_package_notice' => 'This package is free and needs no financial invoice.',
+            'invoice_number_label' => 'Auto-generate (From Settings)',
+            'invoice_number_manual' => 'Manual Entry',
         ],
     ],
 ];
