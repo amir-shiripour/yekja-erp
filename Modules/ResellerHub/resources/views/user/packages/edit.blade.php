@@ -57,6 +57,13 @@
             ];
         }
     }
+
+    $initialStep = 1;
+    if ($errors->hasAny(['modules', 'modules.*', 'features', 'features.*'])) {
+        $initialStep = 2;
+    } elseif ($errors->hasAny(['period_prices', 'period_prices.*', 'period_discounts', 'period_discounts.*', 'one_time_price', 'price_type', 'setup_fee', 'discount_value'])) {
+        $initialStep = 3;
+    }
 @endphp
 
 @section('content')
@@ -69,8 +76,36 @@
          class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative">
         @include('resellerhub::user.packages.partials.edit.header')
 
+        {{-- Stepper Progress Indicator --}}
+        @include('resellerhub::user.packages.partials.stepper')
+
         <form action="{{ route('reseller.packages.update', $package->id) }}" method="POST"
-              @submit="if (hasPricingErrors()) { $event.preventDefault(); submitting = false; if (window.showToast) { window.showToast('error', 'لطفاً ابتدا خطاهای مربوط به مبالغ تخفیف را اصلاح نمایید.'); } return false; } submitting = true"
+              novalidate
+              @submit="
+                  if (!packageName.trim()) {
+                      $event.preventDefault();
+                      submitting = false;
+                      currentStep = 1;
+                      if (window.showToast) window.showToast('warning', 'لطفاً ابتدا نام پکیج را وارد نمایید.');
+                      $nextTick(() => { const inp = document.querySelector('input[name=name]'); if (inp) inp.focus(); });
+                      return false;
+                  }
+                  if (selectedModules.length === 0) {
+                      $event.preventDefault();
+                      submitting = false;
+                      currentStep = 2;
+                      if (window.showToast) window.showToast('warning', 'لطفاً حداقل یک ماژول برای این پکیج انتخاب کنید.');
+                      return false;
+                  }
+                  if (hasPricingErrors()) {
+                      $event.preventDefault();
+                      submitting = false;
+                      currentStep = 3;
+                      if (window.showToast) window.showToast('error', 'لطفاً ابتدا خطاهای مربوط به مبالغ تخفیف را اصلاح نمایید.');
+                      return false;
+                  }
+                  submitting = true;
+              "
               class="space-y-8">
             @csrf
             @method('PUT')
@@ -124,9 +159,33 @@
                 <input type="hidden" name="features[]" :value="feat">
             </template>
 
-            @include('resellerhub::user.packages.partials.edit.card-basic')
-            @include('resellerhub::user.packages.partials.edit.card-modules')
-            @include('resellerhub::user.packages.partials.edit.card-pricing')
+            {{-- Step 1: Basic Identity --}}
+            <div x-show="currentStep === 1"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-cloak class="space-y-6">
+                @include('resellerhub::user.packages.partials.edit.card-basic')
+            </div>
+
+            {{-- Step 2: Modules & Permissions --}}
+            <div x-show="currentStep === 2"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-cloak class="space-y-6">
+                @include('resellerhub::user.packages.partials.edit.card-modules')
+            </div>
+
+            {{-- Step 3: Pricing & Discounts --}}
+            <div x-show="currentStep === 3"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-cloak class="space-y-6">
+                @include('resellerhub::user.packages.partials.edit.card-pricing')
+            </div>
+
             @include('resellerhub::user.packages.partials.edit.actions')
         </form>
     </div>

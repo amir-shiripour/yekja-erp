@@ -21,7 +21,8 @@
         oldActivePeriods: @json(old('active_periods', $defaultActivePeriods)),
         oldPeriodPrices: @json(old('period_prices', $package->period_prices ?? [])),
         oldPeriodDiscounts: @json($formattedPeriodDiscounts),
-        oldLimits: @json(old('limits', $package->limits ?? []))
+        oldLimits: @json(old('limits', $package->limits ?? [])),
+        initialStep: {{ $initialStep ?? 1 }}
     };
 
     function packageEditManager(config) {
@@ -74,6 +75,55 @@
             packageName: @json(old('name', $package->name ?? '')),
             isActive: @json((bool)old('is_active', $package->isActive())),
             submitting: false,
+
+            currentStep: (config.initialStep && config.initialStep >= 1 && config.initialStep <= 3) ? config.initialStep : 1,
+            totalSteps: 3,
+
+            goToStep(step) {
+                if (step < 1 || step > this.totalSteps) return;
+                if (step > 1 && !this.packageName.trim()) {
+                    if (window.showToast) window.showToast('warning', 'لطفاً ابتدا نام پکیج را وارد نمایید.');
+                    const inp = document.querySelector('input[name=name]');
+                    if (inp) inp.focus();
+                    return;
+                }
+                if (step === 3 && this.selectedModules.length === 0) {
+                    if (window.showToast) window.showToast('warning', 'لطفاً حداقل یک ماژول برای این پکیج انتخاب کنید.');
+                    return;
+                }
+                this.currentStep = step;
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            },
+
+            nextStep() {
+                if (this.currentStep === 1) {
+                    if (!this.packageName.trim()) {
+                        if (window.showToast) window.showToast('warning', 'لطفاً ابتدا نام پکیج را وارد نمایید.');
+                        const inp = document.querySelector('input[name=name]');
+                        if (inp) inp.focus();
+                        return;
+                    }
+                    this.currentStep = 2;
+                    window.scrollTo({top: 0, behavior: 'smooth'});
+                    return;
+                }
+                if (this.currentStep === 2) {
+                    if (this.selectedModules.length === 0) {
+                        if (window.showToast) window.showToast('warning', 'لطفاً حداقل یک ماژول برای این پکیج انتخاب کنید.');
+                        return;
+                    }
+                    this.currentStep = 3;
+                    window.scrollTo({top: 0, behavior: 'smooth'});
+                    return;
+                }
+            },
+
+            prevStep() {
+                if (this.currentStep > 1) {
+                    this.currentStep--;
+                    window.scrollTo({top: 0, behavior: 'smooth'});
+                }
+            },
 
             standardPresetMonths: standardPresetMonths,
             allPeriodOptions: window.resellerDurationOptions || [],
