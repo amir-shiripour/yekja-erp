@@ -158,6 +158,12 @@ class TenantProvisioningController extends Controller
             ->paginate($perPage, ['*'], 'sub_page')
             ->withQueryString();
 
+        $unassignedSubAccounts = (clone $subAccountBaseQuery)
+            ->whereDoesntHave('tenants')
+            ->whereNull('tenant_id')
+            ->with(['user', 'reseller.user'])
+            ->get();
+
         $allResellers = $isSuperAdmin ? Reseller::select('id', 'company_name')->get() : collect();
         $currencyLabel = $reseller ? $reseller->getCurrencyLabel() : reseller_currency_label('toman');
 
@@ -165,6 +171,7 @@ class TenantProvisioningController extends Controller
             'reseller',
             'tenants',
             'subAccounts',
+            'unassignedSubAccounts',
             'activeTab',
             'isSuperAdmin',
             'allResellers',

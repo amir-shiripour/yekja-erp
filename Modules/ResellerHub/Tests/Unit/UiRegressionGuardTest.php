@@ -80,13 +80,28 @@ class UiRegressionGuardTest extends TestCase
     public function test_tenants_index_has_unified_hub_elements(): void
     {
         $blade = $this->moduleView('user/tenants/index.blade.php');
+        $tableBlade = $this->moduleView('user/dashboard/partials/tenants-table.blade.php');
 
-        $this->assertStringContainsString('tab-btn-tenants', $blade);
-        $this->assertStringContainsString('tab-btn-subaccounts', $blade);
-        $this->assertStringContainsString('tabpanel-tenants', $blade);
-        $this->assertStringContainsString('tabpanel-subaccounts', $blade);
+        // Verify removed elements
+        $this->assertStringNotContainsString('Fleet & Clients Hub', $blade);
+        $this->assertStringNotContainsString('tab-btn-tenants', $blade);
+        $this->assertStringNotContainsString('tab-btn-subaccounts', $blade);
+        $this->assertStringNotContainsString('استخراج دیتابیس (SQL Dump)', $blade);
+        $this->assertStringNotContainsString('reseller_id', $tableBlade);
+
+        // Verify unified stats & panel
+        $this->assertStringContainsString('unified-tenants-panel', $blade);
         $this->assertStringContainsString('totalTenants', $blade);
         $this->assertStringContainsString('totalSubAccounts', $blade);
+
+        // Verify table columns & delete actions
+        $this->assertStringContainsString('نام CRM', $tableBlade);
+        $this->assertStringContainsString('وضعیت دسترسی', $tableBlade);
+        $this->assertStringContainsString('اعتبار لایسنس', $tableBlade);
+        $this->assertStringContainsString('طرح و پکیج', $tableBlade);
+        $this->assertStringContainsString('آدرس دسترسی', $tableBlade);
+        $this->assertStringContainsString('openTenantDeleteModal', $tableBlade);
+        $this->assertStringContainsString('openSubAccountDeleteModal', $tableBlade);
     }
 
     public function test_sub_accounts_table_has_no_owner_or_manager_column(): void
