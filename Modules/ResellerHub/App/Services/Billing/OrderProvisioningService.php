@@ -6,6 +6,7 @@ use App\Models\Tenant;
 use App\Models\TenantModule;
 use App\Services\ActivityLogger;
 use App\Support\PermissionCatalog;
+use App\Tenancy\TenantManager;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -166,289 +167,289 @@ class OrderProvisioningService
      */
     public function convertInvoiceToOrder(ResellerInvoice $invoice, array $orderData = []): ResellerOrder
     {
-        return DB::transaction(function () use ($invoice, $orderData) {
-            // Re-read under a row lock: this method is reachable from several
-            // entry points (payment callback, mark-as-paid, status update) and
-            // must be safe to replay.
-            $invoice = ResellerInvoice::query()
-                ->whereKey($invoice->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+        return app(TenantManager::class)->bypass(function () use ($invoice, $orderData) {
+            return DB::transaction(function () use ($invoice, $orderData) {
+                $invoice = ResellerInvoice::query()
+                    ->whereKey($invoice->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            $isRenewal = $invoice->parent_invoice_id || !empty($invoice->meta['is_renewal']) || !empty($invoice->meta['renewal_of_order_id']);
-            if ($isRenewal) {
-                $renewalOrder = null;
-                if (!empty($invoice->meta['renewal_of_order_id'])) {
-                    $renewalOrder = ResellerOrder::with('tenant')->find($invoice->meta['renewal_of_order_id']);
-                }
-                if (!$renewalOrder && !empty($invoice->meta['source_order_id']) && !empty($invoice->meta['is_renewal'])) {
-                    $renewalOrder = ResellerOrder::with('tenant')->find($invoice->meta['source_order_id']);
-                }
-                if (!$renewalOrder && $invoice->parent_invoice_id) {
-                    $renewalOrder = ResellerOrder::with('tenant')->where('invoice_id', $invoice->parent_invoice_id)->first();
-                }
-                if (!$renewalOrder && $invoice->tenant_id) {
-                    $baseQuery = ResellerOrder::with('tenant')
-                        ->where('tenant_id', $invoice->tenant_id)
-                        ->where('reseller_id', $invoice->reseller_id);
-
-                    if ($invoice->package_id) {
-                        $renewalOrder = (clone $baseQuery)->where('package_id', $invoice->package_id)->orderBy('id', 'desc')->first();
+                $isRenewal = $invoice->parent_invoice_id || !empty($invoice->meta['is_renewal']) || !empty($invoice->meta['renewal_of_order_id']);
+                if ($isRenewal) {
+                    $renewalOrder = null;
+                    if (!empty($invoice->meta['renewal_of_order_id'])) {
+                        $renewalOrder = ResellerOrder::with('tenant')->find($invoice->meta['renewal_of_order_id']);
                     }
-
-                    if (!$renewalOrder) {
-                        $renewalOrder = (clone $baseQuery)
-                            ->whereNotIn('billing_cycle', ['addon', 'custom_addition'])
-                            ->orderBy('id', 'desc')
-                            ->first();
+                    if (!$renewalOrder && !empty($invoice->meta['source_order_id']) && !empty($invoice->meta['is_renewal'])) {
+                        $renewalOrder = ResellerOrder::with('tenant')->find($invoice->meta['source_order_id']);
                     }
-                }
-
-                if ($renewalOrder) {
-                    if (!$invoice->source_order_id) {
-                        $invoice->source_order_id = $renewalOrder->id;
-                        $invoice->save();
+                    if (!$renewalOrder && $invoice->parent_invoice_id) {
+                        $renewalOrder = ResellerOrder::with('tenant')->where('invoice_id', $invoice->parent_invoice_id)->first();
                     }
+                    if (!$renewalOrder && $invoice->tenant_id) {
+                        $baseQuery = ResellerOrder::with('tenant')
+                            ->where('tenant_id', $invoice->tenant_id)
+                            ->where('reseller_id', $invoice->reseller_id);
 
-                    if (!$invoice->isPaid()) {
-                        return $renewalOrder;
-                    }
-
-                    // Idempotency gate: a paid renewal/upgrade invoice extends
-                    // its order exactly once. Any replay (double callback, a
-                    // "mark as paid" click after an online payment, a manual
-                    // status change) returns the order untouched.
-                    if ($invoice->renewal_applied_at !== null) {
-                        Log::info('[OrderProvisioningService] Renewal already applied, skipping replay.', [
-                            'invoice_id' => $invoice->id,
-                            'order_id' => $renewalOrder->id,
-                            'applied_at' => $invoice->renewal_applied_at?->toIso8601String(),
-                        ]);
-
-                        return $renewalOrder;
-                    }
-
-                    if (!empty($invoice->meta['is_upgrade'])) {
-                        $toPackageId = (int)($invoice->meta['to_package_id'] ?? $invoice->package_id);
-                        $newPackage = $toPackageId ? ResellerPackage::find($toPackageId) : null;
-
-                        if ($newPackage && $renewalOrder->tenant) {
-                            $renewalOrder->tenant->update(['package_id' => $newPackage->id]);
+                        if ($invoice->package_id) {
+                            $renewalOrder = (clone $baseQuery)->where('package_id', $invoice->package_id)->orderBy('id', 'desc')->first();
                         }
 
-                        // Merge new package modules into modules_snapshot
-                        if ($newPackage && is_array($newPackage->modules)) {
-                            $currentSnapshot = $renewalOrder->modules_snapshot ?? [];
-                            $existingSlugs = collect($currentSnapshot)->pluck('slug')->toArray();
-                            $cycle = $renewalOrder->billing_cycle ?? 'yearly';
-                            $cycleMonths = ResellerOrder::cycleToMonths($cycle);
-                            foreach ($newPackage->modules as $mSlug) {
-                                if (!in_array($mSlug, $existingSlugs)) {
-                                    $currentSnapshot[] = [
-                                        'type' => 'module',
-                                        'slug' => $mSlug,
-                                        'title' => ResellerHelper::getModuleTitle($mSlug),
-                                        'duration_months' => $cycleMonths,
-                                    ];
-                                }
+                        if (!$renewalOrder) {
+                            $renewalOrder = (clone $baseQuery)
+                                ->whereNotIn('billing_cycle', ['addon', 'custom_addition'])
+                                ->orderBy('id', 'desc')
+                                ->first();
+                        }
+                    }
+
+                    if ($renewalOrder) {
+                        if (!$invoice->source_order_id) {
+                            $invoice->source_order_id = $renewalOrder->id;
+                            $invoice->save();
+                        }
+
+                        if (!$invoice->isPaid()) {
+                            return $renewalOrder;
+                        }
+
+
+                        if ($invoice->renewal_applied_at !== null) {
+                            Log::info('[OrderProvisioningService] Renewal already applied, skipping replay.', [
+                                'invoice_id' => $invoice->id,
+                                'order_id' => $renewalOrder->id,
+                                'applied_at' => $invoice->renewal_applied_at?->toIso8601String(),
+                            ]);
+
+                            return $renewalOrder;
+                        }
+
+                        if (!empty($invoice->meta['is_upgrade'])) {
+                            $toPackageId = (int)($invoice->meta['to_package_id'] ?? $invoice->package_id);
+                            $newPackage = $toPackageId ? ResellerPackage::find($toPackageId) : null;
+
+                            if ($newPackage && $renewalOrder->tenant) {
+                                $renewalOrder->tenant->update(['package_id' => $newPackage->id]);
                             }
-                            $renewalOrder->modules_snapshot = $currentSnapshot;
-                            $renewalOrder->renewal_price = $newPackage->getPriceForMonths($cycleMonths);
+
+                            // Merge new package modules into modules_snapshot
+                            if ($newPackage && is_array($newPackage->modules)) {
+                                $currentSnapshot = $renewalOrder->modules_snapshot ?? [];
+                                $existingSlugs = collect($currentSnapshot)->pluck('slug')->toArray();
+                                $cycle = $renewalOrder->billing_cycle ?? 'yearly';
+                                $cycleMonths = ResellerOrder::cycleToMonths($cycle);
+                                foreach ($newPackage->modules as $mSlug) {
+                                    if (!in_array($mSlug, $existingSlugs)) {
+                                        $currentSnapshot[] = [
+                                            'type' => 'module',
+                                            'slug' => $mSlug,
+                                            'title' => ResellerHelper::getModuleTitle($mSlug),
+                                            'duration_months' => $cycleMonths,
+                                        ];
+                                    }
+                                }
+                                $renewalOrder->modules_snapshot = $currentSnapshot;
+                                $renewalOrder->renewal_price = $newPackage->getPriceForMonths($cycleMonths);
+                            }
+
+                            $renewalOrder->status = ResellerOrder::STATUS_ACTIVE;
+                            $renewalOrder->total_amount = (int)$renewalOrder->total_amount + (int)$invoice->total;
+                            $renewalOrder->contract_value = (int)$invoice->total;
+                            $renewalOrder->save();
+
+                            $this->provisionOrderToTenant($renewalOrder);
+                            $this->markRenewalApplied($invoice);
+                            event(new OrderProvisioned($renewalOrder));
+                            return $renewalOrder;
                         }
 
-                        $renewalOrder->status = ResellerOrder::STATUS_ACTIVE;
-                        $renewalOrder->total_amount = (int)$renewalOrder->total_amount + (int)$invoice->total;
-                        $renewalOrder->contract_value = (int)$invoice->total;
-                        $renewalOrder->save();
+                        $durationMonths = (int)($invoice->meta['duration_months'] ?? 12);
+                        if ($durationMonths <= 0) {
+                            $durationMonths = 12;
+                        }
+
+                        $durationDays = (int)($invoice->meta['duration_days'] ?? 0);
+
+                        $baseStart = ($renewalOrder->end_date && Carbon::parse($renewalOrder->end_date)->isFuture())
+                            ? Carbon::parse($renewalOrder->end_date)
+                            : Carbon::now();
+
+                        $newEndDate = ($durationDays > 0)
+                            ? (clone $baseStart)->addDays($durationDays)
+                            : (clone $baseStart)->addMonths($durationMonths);
+
+                        $renewalOrder->update([
+                            'status' => ResellerOrder::STATUS_ACTIVE,
+                            'end_date' => $newEndDate,
+                            'renewal_date' => $newEndDate,
+                            'total_amount' => (int)$renewalOrder->total_amount + (int)$invoice->total,
+                            'contract_value' => (int)$invoice->total,
+                            'renewal_price' => (int)$invoice->total,
+                        ]);
 
                         $this->provisionOrderToTenant($renewalOrder);
                         $this->markRenewalApplied($invoice);
-                        event(new OrderProvisioned($renewalOrder));
+                        event(new OrderRenewed($renewalOrder));
                         return $renewalOrder;
                     }
-
-                    $durationMonths = (int)($invoice->meta['duration_months'] ?? 12);
-                    if ($durationMonths <= 0) {
-                        $durationMonths = 12;
-                    }
-
-                    $durationDays = (int)($invoice->meta['duration_days'] ?? 0);
-
-                    $baseStart = ($renewalOrder->end_date && Carbon::parse($renewalOrder->end_date)->isFuture())
-                        ? Carbon::parse($renewalOrder->end_date)
-                        : Carbon::now();
-
-                    $newEndDate = ($durationDays > 0)
-                        ? (clone $baseStart)->addDays($durationDays)
-                        : (clone $baseStart)->addMonths($durationMonths);
-
-                    $renewalOrder->update([
-                        'status' => ResellerOrder::STATUS_ACTIVE,
-                        'end_date' => $newEndDate,
-                        'renewal_date' => $newEndDate,
-                        // total_amount accumulates lifetime revenue; contract_value tracks
-                        // the value of the term that is currently in force.
-                        'total_amount' => (int)$renewalOrder->total_amount + (int)$invoice->total,
-                        'contract_value' => (int)$invoice->total,
-                        'renewal_price' => (int)$invoice->total,
-                    ]);
-
-                    $this->provisionOrderToTenant($renewalOrder);
-                    $this->markRenewalApplied($invoice);
-                    event(new OrderRenewed($renewalOrder));
-                    return $renewalOrder;
                 }
-            }
 
-            // 2. If an order already exists for this invoice
-            if ($invoice->order) {
-                $existingOrder = $invoice->order;
-                if ($invoice->isPaid() && $existingOrder->status !== ResellerOrder::STATUS_ACTIVE) {
-                    $existingOrder->update(['status' => ResellerOrder::STATUS_ACTIVE]);
-                    if ($invoice->tenant_id) {
-                        $this->provisionOrderToTenant($existingOrder);
+                // 2. If an order already exists for this invoice
+                if ($invoice->order) {
+                    $existingOrder = $invoice->order;
+                    if ($invoice->isPaid() && $existingOrder->status !== ResellerOrder::STATUS_ACTIVE) {
+                        $existingOrder->update(['status' => ResellerOrder::STATUS_ACTIVE]);
+                        if ($invoice->tenant_id) {
+                            $this->provisionOrderToTenant($existingOrder);
+                        }
+                    }
+                    return $existingOrder;
+                }
+
+                // Collect modules snapshot from invoice items
+                $modulesSnapshot = [];
+                $maxDuration = 0;
+
+                $catalogService = app(ModuleCapabilityCatalogService::class);
+                $fullCatalog = $catalogService->getFullCatalog($invoice->reseller);
+                $moduleTitlesMap = $fullCatalog->pluck('title', 'slug')->toArray();
+
+                foreach ($invoice->items as $item) {
+                    if ($item->item_type === 'module' && !empty($item->item_key)) {
+                        $mTitle = $item->title;
+                        if (empty($mTitle) || $mTitle === $item->item_key) {
+                            $mTitle = $moduleTitlesMap[$item->item_key] ?? ($moduleTitlesMap[strtolower($item->item_key)] ?? $item->item_key);
+                        }
+                        $modulesSnapshot[] = [
+                            'type' => 'module',
+                            'slug' => $item->item_key,
+                            'title' => $mTitle,
+                            'duration_months' => $item->duration_months,
+                        ];
+                        $maxDuration = max($maxDuration, $item->duration_months);
+                    } elseif (in_array($item->item_type, ['package', 'package_upgrade'])) {
+                        $effectivePkg = $invoice->package ?: ($invoice->tenant?->package ?: ($invoice->package_id ? ResellerPackage::find($invoice->package_id) : null));
+                        $tenantModuleSlugs = $invoice->tenant ? $invoice->tenant->modules()->pluck('module_slug')->toArray() : [];
+                        $pkgModules = $effectivePkg?->modules ?? $tenantModuleSlugs;
+                        if (!empty($pkgModules) && is_array($pkgModules)) {
+                            foreach ($pkgModules as $mSlug) {
+                                $mTitle = $moduleTitlesMap[$mSlug] ?? ($moduleTitlesMap[strtolower($mSlug)] ?? $mSlug);
+                                $modulesSnapshot[] = [
+                                    'type' => 'module',
+                                    'slug' => $mSlug,
+                                    'title' => $mTitle,
+                                    'duration_months' => $item->duration_months,
+                                ];
+                            }
+                        }
+                        $maxDuration = max($maxDuration, $item->duration_months);
+                    } elseif ($item->item_type === 'feature' && !empty($item->item_key)) {
+                        $modulesSnapshot[] = [
+                            'type' => 'feature',
+                            'key' => $item->item_key,
+                            'title' => $item->title,
+                            'duration_months' => $item->duration_months,
+                        ];
                     }
                 }
-                return $existingOrder;
-            }
 
-            // Collect modules snapshot from invoice items
-            $modulesSnapshot = [];
-            $maxDuration = 0;
-
-            $catalogService = app(ModuleCapabilityCatalogService::class);
-            $fullCatalog = $catalogService->getFullCatalog($invoice->reseller);
-            $moduleTitlesMap = $fullCatalog->pluck('title', 'slug')->toArray();
-
-            foreach ($invoice->items as $item) {
-                if ($item->item_type === 'module' && !empty($item->item_key)) {
-                    $mTitle = $item->title;
-                    if (empty($mTitle) || $mTitle === $item->item_key) {
-                        $mTitle = $moduleTitlesMap[$item->item_key] ?? ($moduleTitlesMap[strtolower($item->item_key)] ?? $item->item_key);
-                    }
-                    $modulesSnapshot[] = [
-                        'type' => 'module',
-                        'slug' => $item->item_key,
-                        'title' => $mTitle,
-                        'duration_months' => $item->duration_months,
-                    ];
-                    $maxDuration = max($maxDuration, $item->duration_months);
-                } elseif (in_array($item->item_type, ['package', 'package_upgrade'])) {
+                // Fallback: If snapshot is still empty, populate from package or tenant modules
+                if (empty($modulesSnapshot)) {
                     $effectivePkg = $invoice->package ?: ($invoice->tenant?->package ?: ($invoice->package_id ? ResellerPackage::find($invoice->package_id) : null));
-                    $pkgModules = $effectivePkg?->modules ?? ($invoice->tenant?->modules ?? []);
-                    if (!empty($pkgModules) && is_array($pkgModules)) {
-                        foreach ($pkgModules as $mSlug) {
+                    $tenantModuleSlugs = $invoice->tenant ? $invoice->tenant->modules()->pluck('module_slug')->toArray() : [];
+                    $fallbackModules = $effectivePkg?->modules ?? $tenantModuleSlugs;
+                    if (!empty($fallbackModules) && is_array($fallbackModules)) {
+                        foreach ($fallbackModules as $mSlug) {
                             $mTitle = $moduleTitlesMap[$mSlug] ?? ($moduleTitlesMap[strtolower($mSlug)] ?? $mSlug);
                             $modulesSnapshot[] = [
                                 'type' => 'module',
                                 'slug' => $mSlug,
                                 'title' => $mTitle,
-                                'duration_months' => $item->duration_months,
+                                'duration_months' => $invoice->duration_months ?: 12,
                             ];
                         }
                     }
-                    $maxDuration = max($maxDuration, $item->duration_months);
-                } elseif ($item->item_type === 'feature' && !empty($item->item_key)) {
-                    $modulesSnapshot[] = [
-                        'type' => 'feature',
-                        'key' => $item->item_key,
-                        'title' => $item->title,
-                        'duration_months' => $item->duration_months,
-                    ];
                 }
-            }
 
-            // Fallback: If snapshot is still empty, populate from package or tenant modules
-            if (empty($modulesSnapshot)) {
-                $effectivePkg = $invoice->package ?: ($invoice->tenant?->package ?: ($invoice->package_id ? ResellerPackage::find($invoice->package_id) : null));
-                $fallbackModules = $effectivePkg?->modules ?? ($invoice->tenant?->modules ?? []);
-                if (!empty($fallbackModules) && is_array($fallbackModules)) {
-                    foreach ($fallbackModules as $mSlug) {
-                        $mTitle = $moduleTitlesMap[$mSlug] ?? ($moduleTitlesMap[strtolower($mSlug)] ?? $mSlug);
-                        $modulesSnapshot[] = [
-                            'type' => 'module',
-                            'slug' => $mSlug,
-                            'title' => $mTitle,
-                            'duration_months' => $invoice->duration_months ?: 12,
-                        ];
-                    }
+                if ($maxDuration <= 0) {
+                    $maxDuration = (int)($invoice->meta['duration_months'] ?? 0);
                 }
-            }
+                if ($maxDuration <= 0) {
+                    $maxDuration = 12;
+                }
 
-            if ($maxDuration <= 0) {
-                $maxDuration = (int)($invoice->meta['duration_months'] ?? 0);
-            }
-            if ($maxDuration <= 0) {
-                $maxDuration = 12;
-            }
+                $startDate = Carbon::now();
+                $endDate = (clone $startDate)->addMonths($maxDuration);
 
-            $startDate = Carbon::now();
-            $endDate = (clone $startDate)->addMonths($maxDuration);
+                $billingCycle = match (true) {
+                    $maxDuration <= 1 => 'monthly',
+                    $maxDuration <= 3 => 'quarterly',
+                    $maxDuration <= 6 => 'semi_annual',
+                    default => 'yearly',
+                };
 
-            $billingCycle = match (true) {
-                $maxDuration <= 1 => 'monthly',
-                $maxDuration <= 3 => 'quarterly',
-                $maxDuration <= 6 => 'semi_annual',
-                default => 'yearly',
-            };
+                $isPaid = $invoice->isPaid();
 
-            $isPaid = $invoice->isPaid();
+                $order = ResellerOrder::create([
+                    'reseller_id' => $invoice->reseller_id,
+                    'invoice_id' => $invoice->id,
+                    'tenant_id' => $invoice->tenant_id,
+                    'order_number' => ResellerOrder::generateNextNumber($invoice->reseller_id),
+                    'sub_account_name' => $invoice->sub_account_name,
+                    'sub_account_mobile' => $invoice->sub_account_mobile,
+                    'sub_account_email' => $invoice->sub_account_email,
+                    'status' => $isPaid ? ResellerOrder::STATUS_ACTIVE : ResellerOrder::STATUS_PENDING,
+                    'billing_cycle' => $billingCycle,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'renewal_date' => $endDate,
+                    'total_amount' => $invoice->total,
+                    'contract_value' => $invoice->total,
+                    'renewal_price' => $invoice->total,
+                    'renewal_price_type' => 'auto',
+                    'modules_snapshot' => $modulesSnapshot,
+                    'provisioning_status' => ResellerOrder::PROVISION_NOT,
+                    'notes' => $orderData['notes'] ?? "سفارش صادر شده از فاکتور {$invoice->invoice_number}",
+                    'created_by' => $invoice->created_by ?? auth()->id(),
+                ]);
 
-            $order = ResellerOrder::create([
-                'reseller_id' => $invoice->reseller_id,
-                'invoice_id' => $invoice->id,
-                'tenant_id' => $invoice->tenant_id,
-                'order_number' => ResellerOrder::generateNextNumber($invoice->reseller_id),
-                'sub_account_name' => $invoice->sub_account_name,
-                'sub_account_mobile' => $invoice->sub_account_mobile,
-                'sub_account_email' => $invoice->sub_account_email,
-                'status' => $isPaid ? ResellerOrder::STATUS_ACTIVE : ResellerOrder::STATUS_PENDING,
-                'billing_cycle' => $billingCycle,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'renewal_date' => $endDate,
-                'total_amount' => $invoice->total,
-                'contract_value' => $invoice->total,
-                'renewal_price' => $invoice->total,
-                'renewal_price_type' => 'auto',
-                'modules_snapshot' => $modulesSnapshot,
-                'provisioning_status' => ResellerOrder::PROVISION_NOT,
-                'notes' => $orderData['notes'] ?? "سفارش صادر شده از فاکتور {$invoice->invoice_number}",
-                'created_by' => $invoice->created_by ?? auth()->id(),
-            ]);
+                // If tenant is attached, provision modules only if invoice is paid
+                if ($invoice->tenant_id) {
+                    if ($isPaid) {
+                        $this->provisionOrderToTenant($order);
+                    } else {
+                        $tenant = Tenant::find($invoice->tenant_id);
+                        if ($tenant) {
+                            $processedSlugs = [];
+                            foreach ($modulesSnapshot as $item) {
+                                if (($item['type'] ?? '') === 'module' && !empty($item['slug'])) {
+                                    $slug = strtolower(trim($item['slug']));
+                                    if (isset($processedSlugs[$slug])) {
+                                        continue;
+                                    }
+                                    $processedSlugs[$slug] = true;
 
-            // If tenant is attached, provision modules only if invoice is paid
-            if ($invoice->tenant_id) {
-                if ($isPaid) {
-                    $this->provisionOrderToTenant($order);
-                } else {
-                    $tenant = Tenant::find($invoice->tenant_id);
-                    if ($tenant) {
-                        foreach ($modulesSnapshot as $item) {
-                            if (($item['type'] ?? '') === 'module' && !empty($item['slug'])) {
-                                $slug = strtolower(trim($item['slug']));
-                                $existingModule = TenantModule::where('tenant_id', $tenant->id)
-                                    ->where('module_slug', $slug)
-                                    ->first();
-
-                                if (!$existingModule) {
-                                    TenantModule::create([
-                                        'tenant_id' => $tenant->id,
-                                        'module_slug' => $slug,
-                                        'is_active' => false,
-                                        'expires_at' => $endDate,
-                                    ]);
+                                    TenantModule::updateOrCreate(
+                                        [
+                                            'tenant_id' => $tenant->id,
+                                            'module_slug' => $slug,
+                                        ],
+                                        [
+                                            'is_active' => false,
+                                            'expires_at' => $endDate,
+                                        ]
+                                    );
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            event(new OrderCreated($order));
+                event(new OrderCreated($order));
 
-            return $order;
-        }, 3);
+                return $order;
+            }, 3);
+        });
     }
 
     /**

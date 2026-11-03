@@ -46,7 +46,8 @@
             {{-- Exclusive Option Cards --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                 {{-- Option 1: Shared Subdomain --}}
-                <div tabindex="0" role="button" aria-label="سابدامین اشتراکی" @click="domainType = 'subdomain'; syncInvoiceItemsFromModules();"
+                <div tabindex="0" role="button" aria-label="سابدامین اشتراکی"
+                     @click="domainType = 'subdomain'; syncInvoiceItemsFromModules();"
                      :class="domainType === 'subdomain'
                                  ? 'border-indigo-600 bg-white dark:bg-gray-800 shadow-md shadow-indigo-600/10 ring-2 ring-indigo-500/30'
                                  : 'border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-white dark:hover:bg-gray-800'"
@@ -83,7 +84,8 @@
                 </div>
 
                 {{-- Option 2: Custom Domain --}}
-                <div tabindex="0" role="button" aria-label="دامنه اختصاصی" @click="domainType = 'custom'; syncInvoiceItemsFromModules();"
+                <div tabindex="0" role="button" aria-label="دامنه اختصاصی"
+                     @click="domainType = 'custom'; syncInvoiceItemsFromModules();"
                      :class="domainType === 'custom'
                                  ? 'border-indigo-600 bg-white dark:bg-gray-800 shadow-md shadow-indigo-600/10 ring-2 ring-indigo-500/30'
                                  : 'border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-white dark:hover:bg-gray-800'"
@@ -142,7 +144,8 @@
                                           class="px-4 py-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 select-none bg-gray-100/80 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 font-medium whitespace-nowrap shrink-0 flex items-center">
                                         <bdi dir="ltr">{{ $wizardBaseDomain }}/</bdi>
                                     </span>
-                        <input type="text" name="subdomain" x-model="form.subdomain" :aria-invalid="(subdomainStatus === 'unavailable' || !!errors.subdomain) ? 'true' : 'false'"
+                        <input type="text" name="subdomain" x-model="form.subdomain"
+                               :aria-invalid="(subdomainStatus === 'unavailable' || !!errors.subdomain) ? 'true' : 'false'"
                                @input.debounce.400ms="checkSubdomain()" placeholder="parsa-clinic"
                                class="flex-1 min-w-0 px-4 py-3 bg-transparent border-0 text-xs sm:text-sm text-left dir-ltr focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400">
                     </div>
@@ -253,7 +256,8 @@
                 {{-- Domain Input & Live Check Button --}}
                 <div class="flex flex-col sm:flex-row items-stretch gap-3">
                     <div class="relative flex-1">
-                        <x-resellerhub::input class="text-left pl-11 py-3" type="text" name="custom_domain" x-bind:aria-invalid="(domainStatus === 'unavailable' || !!errors.custom_domain) ? 'true' : 'false'"
+                        <x-resellerhub::input class="text-left pl-11 py-3" type="text" name="custom_domain"
+                                              x-bind:aria-invalid="(domainStatus === 'unavailable' || !!errors.custom_domain) ? 'true' : 'false'"
                                               x-model="form.custom_domain"
                                               @input.debounce.500ms="checkCustomDomain(); syncInvoiceItemsFromModules();"
                                               placeholder="crm.parsa-clinic.ir"
@@ -474,7 +478,8 @@
             {{-- Mode Switchers --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                 {{-- Option 1: Default Reseller Branding --}}
-                <div tabindex="0" role="button" aria-label="برندینگ پیش‌فرض نماینده" @click="whiteLabelType = 'default'; syncInvoiceItemsFromModules();"
+                <div tabindex="0" role="button" aria-label="برندینگ پیش‌فرض نماینده"
+                     @click="whiteLabelType = 'default'; syncInvoiceItemsFromModules();"
                      :class="whiteLabelType === 'default'
                                  ? 'border-indigo-600 bg-white dark:bg-gray-800 shadow-md shadow-indigo-600/10 ring-2 ring-indigo-500/30'
                                  : 'border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-white dark:hover:bg-gray-800'"
@@ -498,7 +503,7 @@
                                         class="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold border border-blue-200/50">پیش‌فرض سیستم</span>
                                 </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                    سامانه با لوگو، رنگ سازمانی و عنوان تجاری شما به عنوان نماینده مجری
+                                    سامانه با لوگو، رنگ سازمانی و عنوان تجاری شما به عنوان نماینده
                                     پیکربندی
                                     می‌شود.
                                 </p>
@@ -514,7 +519,8 @@
                 </div>
 
                 {{-- Option 2: Custom White-Label --}}
-                <div tabindex="0" role="button" aria-label="برندینگ اختصاصی وایت‌لیبل" @click="whiteLabelType = 'custom'; syncInvoiceItemsFromModules();"
+                <div tabindex="0" role="button" aria-label="برندینگ اختصاصی وایت‌لیبل"
+                     @click="whiteLabelType = 'custom'; syncInvoiceItemsFromModules();"
                      :class="whiteLabelType === 'custom'
                                  ? 'border-indigo-600 bg-white dark:bg-gray-800 shadow-md shadow-indigo-600/10 ring-2 ring-indigo-500/30'
                                  : 'border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-white dark:hover:bg-gray-800'"

@@ -355,7 +355,7 @@
                 subdomain: '',
                 custom_domain: '',
                 reseller_id: (config && config.currentReseller) ? config.currentReseller.id : '',
-                sub_account_id: '',
+                sub_account_id: (config && config.selectedSubAccountId) ? String(config.selectedSubAccountId) : '',
                 admin_name: '',
                 admin_mobile: '',
                 admin_email: '',
@@ -1285,6 +1285,12 @@
                 if (this.whiteLabelSetupFee > 0) {
                     this.whiteLabelSetupFeeDisplay = this.formatPriceInput(this.whiteLabelSetupFee);
                 }
+                if (config && config.selectedSubAccountId) {
+                    const targetSub = this.subAccounts.find(sa => String(sa.id) === String(config.selectedSubAccountId));
+                    if (targetSub) {
+                        this.selectSubAccount(targetSub);
+                    }
+                }
                 if (this.activePackageId) {
                     const found = this.packages.find(p => p.id === this.activePackageId);
                     if (found) {
@@ -1823,6 +1829,13 @@
                 if (this.activePackageId) {
                     formData.set('package_id', this.activePackageId);
                 }
+                if (this.form.expires_in_months) {
+                    formData.set('expires_in_months', this.form.expires_in_months);
+                }
+                formData.delete('modules[]');
+                (this.selectedModules || []).forEach(slug => {
+                    formData.append('modules[]', slug);
+                });
                 if (this.issueInvoice) {
                     formData.set('invoice_status', 'unpaid');
                     formData.set('invoice_issue_date', this.invoiceIssueDate || '');

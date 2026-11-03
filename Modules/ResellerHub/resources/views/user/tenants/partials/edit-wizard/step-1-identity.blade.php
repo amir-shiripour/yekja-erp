@@ -348,7 +348,7 @@
                                     class="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold border border-blue-200/50">پیش‌فرض</span>
                             </div>
                             <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                سامانه با لوگو، رنگ سازمانی و عنوان تجاری شما به عنوان نماینده مجری نمایش داده
+                                سامانه با لوگو، رنگ سازمانی و عنوان تجاری شما به عنوان نماینده نمایش داده
                                 می‌شود.
                             </p>
                         </div>
