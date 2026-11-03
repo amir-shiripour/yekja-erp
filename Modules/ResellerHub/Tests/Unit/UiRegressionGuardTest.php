@@ -377,4 +377,57 @@ class UiRegressionGuardTest extends TestCase
         $this->assertStringContainsString('getGlobalDiscountError()', $createScript);
         $this->assertStringContainsString('hasPricingErrors()', $createScript);
     }
+
+    public function test_package_create_and_edit_have_step_by_step_wizard_with_stepper_and_preserved_logic(): void
+    {
+        // 1. Verify Stepper Partial
+        $stepper = $this->moduleView('user/packages/partials/stepper.blade.php');
+        $this->assertStringContainsString('role="progressbar"', $stepper);
+        $this->assertStringContainsString('goToStep(1)', $stepper);
+        $this->assertStringContainsString('goToStep(2)', $stepper);
+        $this->assertStringContainsString('goToStep(3)', $stepper);
+        $this->assertStringContainsString('مشخصات و هویت پکیج', $stepper);
+        $this->assertStringContainsString('ماژول‌ها و دسترسی‌ها', $stepper);
+        $this->assertStringContainsString('تعرفه‌گذاری و قیمت', $stepper);
+
+        // 2. Verify Create View includes stepper and step containers
+        $createBlade = $this->moduleView('user/packages/create.blade.php');
+        $this->assertStringContainsString("user.packages.partials.stepper", $createBlade);
+        $this->assertStringContainsString('x-show="currentStep === 1"', $createBlade);
+        $this->assertStringContainsString('x-show="currentStep === 2"', $createBlade);
+        $this->assertStringContainsString('x-show="currentStep === 3"', $createBlade);
+        $this->assertStringContainsString("route('reseller.packages.store')", $createBlade);
+
+        // 3. Verify Edit View includes stepper and step containers
+        $editBlade = $this->moduleView('user/packages/edit.blade.php');
+        $this->assertStringContainsString("user.packages.partials.stepper", $editBlade);
+        $this->assertStringContainsString('x-show="currentStep === 1"', $editBlade);
+        $this->assertStringContainsString('x-show="currentStep === 2"', $editBlade);
+        $this->assertStringContainsString('x-show="currentStep === 3"', $editBlade);
+        $this->assertStringContainsString("route('reseller.packages.update'", $editBlade);
+
+        // 4. Verify step navigation methods in scripts
+        $createScript = $this->moduleView('user/packages/partials/create/script.blade.php');
+        $this->assertStringContainsString('currentStep:', $createScript);
+        $this->assertStringContainsString('goToStep(step)', $createScript);
+        $this->assertStringContainsString('nextStep()', $createScript);
+        $this->assertStringContainsString('prevStep()', $createScript);
+
+        $editScript = $this->moduleView('user/packages/partials/edit/script.blade.php');
+        $this->assertStringContainsString('currentStep:', $editScript);
+        $this->assertStringContainsString('goToStep(step)', $editScript);
+        $this->assertStringContainsString('nextStep()', $editScript);
+        $this->assertStringContainsString('prevStep()', $editScript);
+
+        // 5. Verify action bars have step navigation
+        $createActions = $this->moduleView('user/packages/partials/create/actions.blade.php');
+        $this->assertStringContainsString('nextStep()', $createActions);
+        $this->assertStringContainsString('prevStep()', $createActions);
+        $this->assertStringContainsString('currentStep === 3', $createActions);
+
+        $editActions = $this->moduleView('user/packages/partials/edit/actions.blade.php');
+        $this->assertStringContainsString('nextStep()', $editActions);
+        $this->assertStringContainsString('prevStep()', $editActions);
+        $this->assertStringContainsString('currentStep === 3', $editActions);
+    }
 }
