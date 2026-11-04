@@ -21,6 +21,11 @@ enum OnboardingStepIcon: string
     case BUILDING_OFFICE = 'building-office';
     case PHONE = 'phone';
     case CHECK_CIRCLE = 'check-circle';
+    case CLIPBOARD_DOCUMENT_LIST = 'clipboard-document-list';
+    case IDENTIFICATION = 'identification';
+    case CHART_BAR = 'chart-bar';
+    case MAP_PIN = 'map-pin';
+    case ADJUSTMENTS_HORIZONTAL = 'adjustments-horizontal';
 
     public function label(): string
     {
@@ -42,6 +47,11 @@ enum OnboardingStepIcon: string
             self::BUILDING_OFFICE => __('resellerhub::messages.onboarding.icons.building_office'),
             self::PHONE => __('resellerhub::messages.onboarding.icons.phone'),
             self::CHECK_CIRCLE => __('resellerhub::messages.onboarding.icons.check_circle'),
+            self::CLIPBOARD_DOCUMENT_LIST => __('resellerhub::messages.onboarding.icons.clipboard_document_list'),
+            self::IDENTIFICATION => __('resellerhub::messages.onboarding.icons.identification'),
+            self::CHART_BAR => __('resellerhub::messages.onboarding.icons.chart_bar'),
+            self::MAP_PIN => __('resellerhub::messages.onboarding.icons.map_pin'),
+            self::ADJUSTMENTS_HORIZONTAL => __('resellerhub::messages.onboarding.icons.adjustments_horizontal'),
         };
     }
 
@@ -65,6 +75,11 @@ enum OnboardingStepIcon: string
             self::BUILDING_OFFICE => '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>',
             self::PHONE => '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>',
             self::CHECK_CIRCLE => '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>',
+            self::CLIPBOARD_DOCUMENT_LIST => '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>',
+            self::IDENTIFICATION => '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" /></svg>',
+            self::CHART_BAR => '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>',
+            self::MAP_PIN => '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>',
+            self::ADJUSTMENTS_HORIZONTAL => '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>',
         };
     }
 
@@ -75,7 +90,7 @@ enum OnboardingStepIcon: string
 
     public static function renderSvg(?string $iconId): string
     {
-        if (! $iconId) {
+        if (!$iconId) {
             return self::defaultSvg();
         }
 
@@ -89,7 +104,7 @@ enum OnboardingStepIcon: string
      */
     public static function toFrontendArray(): array
     {
-        return array_map(fn (self $case) => [
+        return array_map(fn(self $case) => [
             'id' => $case->value,
             'label' => $case->label(),
             'svg' => $case->svg(),

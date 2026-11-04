@@ -44,6 +44,7 @@ use Modules\ResellerHub\App\Helpers\ResellerHelper;
  * @method static ResellerSetting firstOrCreate(array $attributes = [], array $values = [])
  * @method static ResellerSetting updateOrCreate(array $attributes, array $values = [])
  * @method static Builder|ResellerSetting where(string|array|Closure $column, mixed $operator = null, mixed $value = null, string $boolean = 'and')
+ * @noinspection SqlResolve
  */
 class ResellerSetting extends Model
 {

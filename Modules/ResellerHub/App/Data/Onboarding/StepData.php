@@ -25,6 +25,8 @@ class StepData extends Data
         public ?string $actionUrl = null,
         public bool    $isCore = true,
         public bool    $canManualComplete = false,
+        public ?array  $customFields = null,
+        public ?string $fieldGroup = null,
     )
     {
     }

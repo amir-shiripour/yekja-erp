@@ -17,6 +17,8 @@ enum OnboardingStepPreset: string
     case FIRST_INVOICE = 'first_invoice';
     case COMMUNITY_CHANNEL = 'community_channel';
     case MANUAL_TASK = 'manual_task';
+    case OFFICE_DETAILS = 'office_details';
+    case BUSINESS_TARGET = 'business_target';
 
     public function title(): string
     {
@@ -29,6 +31,8 @@ enum OnboardingStepPreset: string
             self::FIRST_INVOICE => __('resellerhub::messages.onboarding.presets.first_invoice_title'),
             self::COMMUNITY_CHANNEL => __('resellerhub::messages.onboarding.presets.community_channel_title'),
             self::MANUAL_TASK => __('resellerhub::messages.onboarding.presets.manual_task_title'),
+            self::OFFICE_DETAILS => __('resellerhub::messages.onboarding.presets.office_details_title'),
+            self::BUSINESS_TARGET => __('resellerhub::messages.onboarding.presets.business_target_title'),
         };
     }
 
@@ -43,6 +47,8 @@ enum OnboardingStepPreset: string
             self::FIRST_INVOICE => __('resellerhub::messages.onboarding.presets.first_invoice_desc'),
             self::COMMUNITY_CHANNEL => __('resellerhub::messages.onboarding.presets.community_channel_desc'),
             self::MANUAL_TASK => __('resellerhub::messages.onboarding.presets.manual_task_desc'),
+            self::OFFICE_DETAILS => __('resellerhub::messages.onboarding.presets.office_details_desc'),
+            self::BUSINESS_TARGET => __('resellerhub::messages.onboarding.presets.business_target_desc'),
         };
     }
 
@@ -57,6 +63,8 @@ enum OnboardingStepPreset: string
             self::FIRST_INVOICE => __('resellerhub::messages.onboarding.presets.first_invoice_badge'),
             self::COMMUNITY_CHANNEL => __('resellerhub::messages.onboarding.presets.community_channel_badge'),
             self::MANUAL_TASK => __('resellerhub::messages.onboarding.presets.manual_task_badge'),
+            self::OFFICE_DETAILS => __('resellerhub::messages.onboarding.presets.office_details_badge'),
+            self::BUSINESS_TARGET => __('resellerhub::messages.onboarding.presets.business_target_badge'),
         };
     }
 
@@ -71,6 +79,8 @@ enum OnboardingStepPreset: string
             self::FIRST_INVOICE => OnboardingStepIcon::DOCUMENT_TEXT,
             self::COMMUNITY_CHANNEL => OnboardingStepIcon::MEGAPHONE,
             self::MANUAL_TASK => OnboardingStepIcon::CLIPBOARD_DOCUMENT_CHECK,
+            self::OFFICE_DETAILS => OnboardingStepIcon::CLIPBOARD_DOCUMENT_LIST,
+            self::BUSINESS_TARGET => OnboardingStepIcon::CHART_BAR,
         };
     }
 
@@ -84,6 +94,7 @@ enum OnboardingStepPreset: string
         return match ($this) {
             self::COMMUNITY_CHANNEL => 'external',
             self::MANUAL_TASK => 'manual',
+            self::OFFICE_DETAILS, self::BUSINESS_TARGET => 'custom_fields',
             default => 'internal',
         };
     }
@@ -116,7 +127,7 @@ enum OnboardingStepPreset: string
             self::BOOKING_SETUP => '/user/booking',
             self::FIRST_INVOICE => '/user/invoices/create',
             self::COMMUNITY_CHANNEL => 'https://t.me',
-            self::MANUAL_TASK => null,
+            self::MANUAL_TASK, self::OFFICE_DETAILS, self::BUSINESS_TARGET => null,
         };
     }
 
@@ -125,6 +136,62 @@ enum OnboardingStepPreset: string
         return match ($this) {
             self::COMMUNITY_CHANNEL, self::MANUAL_TASK => true,
             default => false,
+        };
+    }
+
+    public function customFields(): ?array
+    {
+        return match ($this) {
+            self::OFFICE_DETAILS => [
+                [
+                    'name' => 'fax',
+                    'label' => __('resellerhub::messages.onboarding.presets.office_details_fax_label'),
+                    'type' => 'tel',
+                    'is_required' => false,
+                    'placeholder' => '021-xxxxxxxx',
+                ],
+                [
+                    'name' => 'postal_code',
+                    'label' => __('resellerhub::messages.onboarding.presets.office_details_postal_label'),
+                    'type' => 'number',
+                    'is_required' => false,
+                    'placeholder' => '1234567890',
+                ],
+            ],
+            self::BUSINESS_TARGET => [
+                [
+                    'name' => 'monthly_target',
+                    'label' => __('resellerhub::messages.onboarding.presets.business_target_monthly_label'),
+                    'type' => 'number',
+                    'is_required' => false,
+                    'placeholder' => 'مثال: ۵۰۰۰۰۰۰۰',
+                ],
+                [
+                    'name' => 'staff_count',
+                    'label' => __('resellerhub::messages.onboarding.presets.business_target_staff_label'),
+                    'type' => 'number',
+                    'is_required' => false,
+                    'placeholder' => 'مثال: ۵',
+                ],
+            ],
+            default => null,
+        };
+    }
+
+    public function fieldGroup(): ?string
+    {
+        return match ($this) {
+            self::OFFICE_DETAILS => 'contact',
+            self::BUSINESS_TARGET => 'business',
+            default => null,
+        };
+    }
+
+    public function targetScope(): string
+    {
+        return match ($this) {
+            self::BUSINESS_TARGET => 'tenant',
+            default => 'user',
         };
     }
 
@@ -169,6 +236,9 @@ enum OnboardingStepPreset: string
             'can_manual_complete' => $case->canManualComplete(),
             'required_quota' => $case->requiredQuota()?->value ?? '',
             'is_required' => false,
+            'custom_fields' => $case->customFields(),
+            'field_group' => $case->fieldGroup(),
+            'target_scope' => $case->targetScope(),
         ], self::cases());
     }
 }

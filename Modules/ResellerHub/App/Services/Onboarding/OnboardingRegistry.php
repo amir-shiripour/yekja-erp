@@ -253,9 +253,11 @@ class OnboardingRegistry
                 actionUrl: !empty($cs['action_url']) ? (string)$cs['action_url'] : null,
                 isCore: $isCore,
                 canManualComplete: $canManualComplete,
+                customFields: !empty($cs['custom_fields']) ? (array)$cs['custom_fields'] : null,
+                fieldGroup: !empty($cs['field_group']) ? (string)$cs['field_group'] : null,
             );
 
-            // Filter if requires module that tenant doesn't have
+            // Filter if it requires module that tenant doesn't have
             if ($stepData->requiredModule && !in_array(strtolower($stepData->requiredModule), $activeModules, true)) {
                 continue;
             }

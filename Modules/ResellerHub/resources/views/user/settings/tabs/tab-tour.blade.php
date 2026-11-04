@@ -2,6 +2,7 @@
      class="space-y-6">
 
     <style>
+        /*noinspection CssUnusedSymbol*/
         .tour-sortable-ghost {
             opacity: 0.35 !important;
             background: rgba(99, 102, 241, 0.08) !important;
@@ -10,10 +11,12 @@
             transform: scale(0.99);
         }
 
+        /*noinspection CssUnusedSymbol*/
         .tour-sortable-chosen {
             border-color: #6366f1 !important;
         }
 
+        /*noinspection CssUnusedSymbol*/
         .tour-sortable-drag {
             cursor: grabbing !important;
             box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.25), 0 8px 10px -6px rgba(99, 102, 241, 0.25) !important;
@@ -23,6 +26,7 @@
             z-index: 9999 !important;
         }
 
+        /*noinspection CssUnusedSymbol*/
         .dark .tour-sortable-drag {
             background-color: #1f2937 !important;
         }
@@ -36,8 +40,10 @@
     <input type="hidden" name="onboarding_tour_celebration_title" :value="tourCelebrationTitle || ''">
     <input type="hidden" name="onboarding_tour_celebration_message" :value="tourCelebrationMessage || ''">
     <input type="hidden" name="onboarding_tour_steps" :value="JSON.stringify(tourSteps)">
-    <input type="hidden" name="onboarding_tour_optional_reminder_enabled" :value="tourOptionalReminderEnabled ? '1' : '0'">
-    <input type="hidden" name="onboarding_tour_optional_reminder_interval_days" :value="tourOptionalReminderIntervalDays">
+    <input type="hidden" name="onboarding_tour_optional_reminder_enabled"
+           :value="tourOptionalReminderEnabled ? '1' : '0'">
+    <input type="hidden" name="onboarding_tour_optional_reminder_interval_days"
+           :value="tourOptionalReminderIntervalDays">
     <input type="hidden" name="onboarding_tour_optional_reminder_mode" :value="tourOptionalReminderMode">
 
     {{-- Tour Master Toggle Card with Checkbox --}}
@@ -519,7 +525,8 @@
     <x-resellerhub::card
         class="p-6 sm:p-8 space-y-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
         {{-- Header --}}
-        <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-4">
+        <div
+            class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-4">
             <div class="flex items-center gap-3">
                 <span
                     class="p-2.5 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/80 dark:to-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-2xl shadow-xs border border-indigo-200/80 dark:border-indigo-800/80">
@@ -531,12 +538,14 @@
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <h2 class="text-base font-black text-gray-900 dark:text-white">مدیریت یادآوری و نمایش مراحل اختیاری تور</h2>
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-900/60">
+                        <span
+                            class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-900/60">
                             هوشمند و انعطاف‌پذیر
                         </span>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        تعیین رفتار سیستم در صورتی که کاربر مراحل اجباری را گذرانده و دکمه «پر کردن بعداً» را برای مراحل اختیاری انتخاب کند.
+                        تعیین رفتار سیستم در صورتی که کاربر مراحل اجباری را گذرانده و دکمه «پر کردن بعداً» را برای مراحل
+                        اختیاری انتخاب کند.
                     </p>
                 </div>
             </div>
@@ -556,13 +565,15 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 class="text-sm font-black text-gray-900 dark:text-white">ارسال یادآور برای گام‌های اختیاری تکمیل‌نشده</h3>
+                            <h3 class="text-sm font-black text-gray-900 dark:text-white">ارسال یادآور برای گام‌های
+                                اختیاری تکمیل‌نشده</h3>
                             <span class="px-2 py-0.5 rounded-md text-xs font-bold"
                                   :class="tourOptionalReminderEnabled ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700'"
                                   x-text="tourOptionalReminderEnabled ? 'یادآوری خودکار فعال' : 'بدون یادآوری (غیرفعال)'"></span>
                         </div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                            در صورت فعال بودن، اگر کاربر گزینه «پر کردن بعداً» را بزند، سامانه پس از بازه زمانی مقرر دوباره مراحل اختیاری را به وی یادآوری خواهد کرد.
+                            در صورت فعال بودن، اگر کاربر گزینه «پر کردن بعداً» را بزند، سامانه پس از بازه زمانی مقرر
+                            دوباره مراحل اختیاری را به وی یادآوری خواهد کرد.
                         </p>
                     </div>
                 </div>
@@ -571,10 +582,13 @@
                     <input type="checkbox"
                            x-model="tourOptionalReminderEnabled"
                            class="sr-only peer">
-                    <div class="w-14 h-8 bg-gray-300 dark:bg-gray-700 rounded-full peer peer-checked:bg-indigo-600 transition-colors duration-300 shadow-inner"></div>
-                    <div class="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center pointer-events-none">
-                        <svg class="w-3.5 h-3.5 text-indigo-600 opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    <div
+                        class="w-14 h-8 bg-gray-300 dark:bg-gray-700 rounded-full peer peer-checked:bg-indigo-600 transition-colors duration-300 shadow-inner"></div>
+                    <div
+                        class="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center pointer-events-none">
+                        <svg class="w-3.5 h-3.5 text-indigo-600 opacity-0 peer-checked:opacity-100 transition-opacity"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                         </svg>
                     </div>
                 </label>
@@ -586,7 +600,8 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
-                        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
@@ -605,8 +620,10 @@
                         class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer"
                         :class="tourOptionalReminderIntervalDays === 1 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
                     <div class="flex items-center justify-between w-full">
-                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۲۴س</span>
-                        <span x-show="tourOptionalReminderIntervalDays === 1" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        <span
+                            class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۲۴س</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 1"
+                              class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
                     </div>
                     <div>
                         <span class="text-xs font-black block">هر ۲۴ ساعت</span>
@@ -619,10 +636,13 @@
                         @click="tourOptionalReminderIntervalDays = 3"
                         class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer relative"
                         :class="tourOptionalReminderIntervalDays === 3 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
-                    <span class="absolute -top-2 start-3 px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-black rounded-md shadow-xs">پیشنهادی</span>
+                    <span
+                        class="absolute -top-2 start-3 px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-black rounded-md shadow-xs">پیشنهادی</span>
                     <div class="flex items-center justify-between w-full">
-                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۳ر</span>
-                        <span x-show="tourOptionalReminderIntervalDays === 3" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        <span
+                            class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۳ر</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 3"
+                              class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
                     </div>
                     <div>
                         <span class="text-xs font-black block">هر ۳ روز یک‌بار</span>
@@ -636,8 +656,10 @@
                         class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer"
                         :class="tourOptionalReminderIntervalDays === 7 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
                     <div class="flex items-center justify-between w-full">
-                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۷ر</span>
-                        <span x-show="tourOptionalReminderIntervalDays === 7" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        <span
+                            class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۷ر</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 7"
+                              class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
                     </div>
                     <div>
                         <span class="text-xs font-black block">هر هفته (۷ روز)</span>
@@ -651,8 +673,10 @@
                         class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer"
                         :class="tourOptionalReminderIntervalDays === 14 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
                     <div class="flex items-center justify-between w-full">
-                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۱۴ر</span>
-                        <span x-show="tourOptionalReminderIntervalDays === 14" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        <span
+                            class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۱۴ر</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 14"
+                              class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
                     </div>
                     <div>
                         <span class="text-xs font-black block">هر دو هفته</span>
@@ -666,8 +690,10 @@
                         class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer"
                         :class="tourOptionalReminderIntervalDays === 30 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
                     <div class="flex items-center justify-between w-full">
-                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۳۰ر</span>
-                        <span x-show="tourOptionalReminderIntervalDays === 30" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        <span
+                            class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۳۰ر</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 30"
+                              class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
                     </div>
                     <div>
                         <span class="text-xs font-black block">هر ماه (۳۰ روز)</span>
@@ -681,8 +707,10 @@
                         class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer"
                         :class="tourOptionalReminderIntervalDays === 0 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
                     <div class="flex items-center justify-between w-full">
-                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">ورود</span>
-                        <span x-show="tourOptionalReminderIntervalDays === 0" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        <span
+                            class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">ورود</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 0"
+                              class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
                     </div>
                     <div>
                         <span class="text-xs font-black block">در هر بار ورود</span>
@@ -693,9 +721,11 @@
         </div>
 
         {{-- Presentation Mode: Pill vs Auto-Expanded Card --}}
-        <div x-show="tourOptionalReminderEnabled" x-transition.duration.300ms class="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <div x-show="tourOptionalReminderEnabled" x-transition.duration.300ms
+             class="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
             <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
-                <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                 </svg>
@@ -716,10 +746,12 @@
                     <div class="flex-1">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-black text-gray-900 dark:text-white">نوار جمع‌شده و مینیمال (Pill / Ribbon)</span>
-                            <span x-show="tourOptionalReminderMode === 'pill'" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                            <span x-show="tourOptionalReminderMode === 'pill'"
+                                  class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
                         </div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            یک نوار باریک، شکیل و آرامش‌بخش در بالای داشبورد نمایش می‌یابد که مزاحم کار کاربر نمی‌شود و با یک کلیک باز می‌گردد.
+                            یک نوار باریک، شکیل و آرامش‌بخش در بالای داشبورد نمایش می‌یابد که مزاحم کار کاربر نمی‌شود و
+                            با یک کلیک باز می‌گردد.
                         </p>
                     </div>
                 </button>
@@ -738,10 +770,12 @@
                     <div class="flex-1">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-black text-gray-900 dark:text-white">باز شدن خودکار کارد مراحل (Auto-Expanded Card)</span>
-                            <span x-show="tourOptionalReminderMode === 'card'" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                            <span x-show="tourOptionalReminderMode === 'card'"
+                                  class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
                         </div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            پس از فرارسیدن موعد یادآوری، کارد کامل مراحل در داشبورد باز می‌شود تا توجه کاربر به تکمیل مراحل باقیمانده جلب شود.
+                            پس از فرارسیدن موعد یادآوری، کارد کامل مراحل در داشبورد باز می‌شود تا توجه کاربر به تکمیل
+                            مراحل باقیمانده جلب شود.
                         </p>
                     </div>
                 </button>
@@ -749,8 +783,10 @@
         </div>
 
         {{-- Helper Information Tip --}}
-        <div class="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 flex items-start gap-3">
-            <span class="p-1 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5">
+        <div
+            class="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 flex items-start gap-3">
+            <span
+                class="p-1 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -758,7 +794,10 @@
             </span>
             <div class="text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
                 <span class="font-bold">راهنمای هوشمند عملکرد تور:</span>
-                هنگامی که تمام مراحل اجباری راه‌اندازی توسط کاربر انجام شود و فقط مراحل اختیاری باقی مانده باشد، دکمه شکیل <strong>«پر کردن بعداً و ورود به پیشخوان»</strong> در بالای تور نمایش داده می‌شود. با کلیک کاربر روی آن، تور فوراً بسته شده و پیشخوان کامل CRM باز می‌گردد، و طبق بازه زمانی تعریف‌شده در این بخش، در آینده مجدداً یادآوری خواهد شد.
+                هنگامی که تمام مراحل اجباری راه‌اندازی توسط کاربر انجام شود و فقط مراحل اختیاری باقی مانده باشد، دکمه
+                شکیل <strong>«پر کردن بعداً و ورود به پیشخوان»</strong> در بالای تور نمایش داده می‌شود. با کلیک کاربر
+                روی آن، تور فوراً بسته شده و پیشخوان کامل CRM باز می‌گردد، و طبق بازه زمانی تعریف‌شده در این بخش، در
+                آینده مجدداً یادآوری خواهد شد.
             </div>
         </div>
     </x-resellerhub::card>
@@ -935,24 +974,50 @@
                              class="space-y-3 pt-3 border-t border-gray-100 dark:border-gray-700">
                             <div class="space-y-1.5">
                                 <x-resellerhub::label>نوع اقدام (Action):</x-resellerhub::label>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                     <button type="button"
                                             @click="editingStep.action_type = 'internal'"
-                                            class="p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1"
+                                            class="p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1.5"
                                             :class="editingStep.action_type === 'internal' ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400'">
+                                        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none"
+                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                        </svg>
                                         <span class="text-xs font-black">صفحه داخلی CRM</span>
                                     </button>
                                     <button type="button"
                                             @click="editingStep.action_type = 'external'"
-                                            class="p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1"
+                                            class="p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1.5"
                                             :class="editingStep.action_type === 'external' ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400'">
+                                        <svg class="w-4 h-4 text-sky-600 dark:text-sky-400" fill="none"
+                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
                                         <span class="text-xs font-black">لینک بیرونی</span>
                                     </button>
                                     <button type="button"
                                             @click="editingStep.action_type = 'manual'"
-                                            class="p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1"
+                                            class="p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1.5"
                                             :class="editingStep.action_type === 'manual' ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400'">
+                                        <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none"
+                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
                                         <span class="text-xs font-black">چک‌ لیست دستی</span>
+                                    </button>
+                                    <button type="button"
+                                            @click="editingStep.action_type = 'custom_fields'"
+                                            class="p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1.5"
+                                            :class="editingStep.action_type === 'custom_fields' ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400'">
+                                        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none"
+                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                        </svg>
+                                        <span class="text-xs font-black">فیلدهای سفارشی</span>
                                     </button>
                                 </div>
                             </div>
@@ -976,6 +1041,159 @@
                                 <x-resellerhub::label>آدرس اینترنتی (URL):</x-resellerhub::label>
                                 <input type="url" x-model="editingStep.action_url" placeholder="https://..."
                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2 text-xs text-left font-mono text-gray-900 dark:text-white">
+                            </div>
+
+                            <div x-show="editingStep.action_type === 'custom_fields'" class="space-y-3">
+                                <div
+                                    class="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-3 border-b border-gray-100 dark:border-gray-700">
+                                    <div class="space-y-1.5">
+                                        <x-resellerhub::label>دسته‌بندی موضوعی:</x-resellerhub::label>
+                                        <select x-model="editingStep.field_group"
+                                                class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-xs font-bold text-gray-900 dark:text-white">
+                                            <option value="contact">اطلاعات تماس، فکس و نشانی اداری</option>
+                                            <option value="identity">مشخصات حقوقی و هویتی</option>
+                                            <option value="business">اهداف و اطلاعات تجاری</option>
+                                            <option value="system">پارامترها و مشخصات سیستم</option>
+                                            <option value="general">اطلاعات تکمیلی و متفرقه</option>
+                                        </select>
+                                    </div>
+                                    <div class="space-y-1.5">
+                                        <x-resellerhub::label>اقامتگاه دائمی فیلدها:</x-resellerhub::label>
+                                        <select x-model="editingStep.target_scope"
+                                                class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-xs font-bold text-gray-900 dark:text-white">
+                                            <option value="user">پروفایل کاربری مدیر (/user/profile)</option>
+                                            <option value="tenant">تنظیمات کسب‌وکار و شرکت (/user/settings)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between flex-wrap gap-2">
+                                        <span class="text-xs font-black text-gray-800 dark:text-gray-200">الگوهای آماده و فیلدهای قابل انتخاب:</span>
+                                        <button type="button" @click="addCustomFieldToEditStep()"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition-all cursor-pointer shadow-xs">
+                                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            <span>+ فیلد سفارشی دلخواه</span>
+                                        </button>
+                                    </div>
+
+                                    {{-- Categorized Preset Tabs / Buttons --}}
+                                    <div class="p-3 rounded-2xl bg-gray-100/70 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700/80 space-y-2.5">
+                                        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                                            <template x-for="cat in fieldPresetsCatalog" :key="cat.category">
+                                                <button type="button"
+                                                        @click="editActivePresetTab = cat.category"
+                                                        class="px-2.5 py-1 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer"
+                                                        :class="editActivePresetTab === cat.category ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700 border border-gray-200/60 dark:border-gray-700'"
+                                                        x-text="cat.categoryLabel"></button>
+                                            </template>
+                                            <template x-if="availableSystemFields && availableSystemFields.length > 0">
+                                                <button type="button"
+                                                        @click="editActivePresetTab = 'system_database'"
+                                                        class="px-2.5 py-1 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer"
+                                                        :class="editActivePresetTab === 'system_database' ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-white dark:bg-gray-800 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800'">
+                                                    فیلدهای سیستم (<span x-text="availableSystemFields.length"></span>)
+                                                </button>
+                                            </template>
+                                        </div>
+
+                                        <div class="flex items-center gap-1.5 flex-wrap pt-1">
+                                            <template x-for="cat in fieldPresetsCatalog" :key="cat.category">
+                                                <div x-show="editActivePresetTab === cat.category" class="flex items-center gap-1.5 flex-wrap w-full">
+                                                    <template x-for="fld in cat.fields" :key="fld.name">
+                                                        <button type="button"
+                                                                @click="addCustomFieldToEditStep(fld)"
+                                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg bg-white dark:bg-gray-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 text-gray-700 dark:text-gray-200 hover:text-indigo-600 border border-gray-200/80 dark:border-gray-700 transition-all cursor-pointer shadow-2xs">
+                                                            <span class="text-indigo-500 font-black">+</span>
+                                                            <span x-text="fld.label"></span>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </template>
+
+                                            <template x-if="availableSystemFields && availableSystemFields.length > 0">
+                                                <div x-show="editActivePresetTab === 'system_database'" class="flex items-center gap-1.5 flex-wrap w-full">
+                                                    <template x-for="fld in availableSystemFields" :key="fld.field_name">
+                                                        <button type="button"
+                                                                @click="addCustomFieldToEditStep(fld)"
+                                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800 transition-all cursor-pointer shadow-2xs">
+                                                            <span class="text-purple-600 font-black">+</span>
+                                                            <span x-text="fld.label"></span>
+                                                            <span class="text-[10px] opacity-75 font-mono" x-text="'(' + fld.field_name + ')'"></span>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <template x-if="!editingStep.custom_fields || editingStep.custom_fields.length === 0">
+                                        <div class="p-5 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 text-center text-xs text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-900/40 space-y-1">
+                                            <p class="font-bold">هنوز فیلدی به این مرحله اضافه نشده است.</p>
+                                            <p>می‌توانید از الگوهای آماده بالا فیلد انتخاب کنید یا دکمه «+ فیلد سفارشی دلخواه» را بزنید.</p>
+                                        </div>
+                                    </template>
+
+                                    <div class="space-y-2.5">
+                                        <template x-for="(fld, fIdx) in editingStep.custom_fields" :key="fIdx">
+                                            <div class="p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 shadow-2xs space-y-2.5">
+                                                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                                                    <div class="sm:col-span-4">
+                                                        <input type="text" x-model="fld.label" placeholder="برچسب فارسی فیلد (مثال: شماره فکس)"
+                                                               class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900 px-3 py-1.5 text-xs font-bold text-gray-900 dark:text-white">
+                                                    </div>
+                                                    <div class="sm:col-span-3">
+                                                        <input type="text" x-model="fld.name" placeholder="کلید انگلیسی (fax)"
+                                                               class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900 px-3 py-1.5 text-xs font-mono dir-ltr text-left text-gray-900 dark:text-white">
+                                                    </div>
+                                                    <div class="sm:col-span-3">
+                                                        <select x-model="fld.type"
+                                                                class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900 px-2 py-1.5 text-xs font-bold text-gray-900 dark:text-white">
+                                                            <option value="text">متن تک‌خطی</option>
+                                                            <option value="number">عددی</option>
+                                                            <option value="currency">مبلغ مالی (تومان)</option>
+                                                            <option value="tel">تلفن ثابت / فکس</option>
+                                                            <option value="mobile">شماره همراه</option>
+                                                            <option value="email">آدرس ایمیل</option>
+                                                            <option value="date">تاریخ</option>
+                                                            <option value="time">ساعت / زمان</option>
+                                                            <option value="textarea">متن چندخطی</option>
+                                                            <option value="select">منوی کشویی گزینه‌ای</option>
+                                                            <option value="checkbox">تیک‌باکس (بلی/خیر)</option>
+                                                            <option value="url">وب‌سایت / لینک اینترنتی</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="sm:col-span-2 flex items-center justify-between sm:justify-end gap-2">
+                                                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-bold text-gray-700 dark:text-gray-300">
+                                                            <input type="checkbox" x-model="fld.is_required"
+                                                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                                            <span>اجباری</span>
+                                                        </label>
+                                                        <button type="button" @click="removeCustomFieldFromEditStep(fIdx)"
+                                                                class="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer shrink-0"
+                                                                title="حذف این فیلد">
+                                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div x-show="fld.type === 'select'" class="pt-2 border-t border-gray-100 dark:border-gray-700/60">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 shrink-0">گزینه‌های منو (با کاما):</span>
+                                                        <input type="text" x-model="fld.options_str"
+                                                               @input="fld.options = fld.options_str ? fld.options_str.split(',').map(s => s.trim()).filter(Boolean) : []"
+                                                               placeholder="مثال: مطب مرکزی, شعبه شرق, کلینیک تخصصی"
+                                                               class="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900 px-3 py-1 text-xs text-gray-900 dark:text-white">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1189,7 +1407,7 @@
                                 <h4 class="text-xs font-black text-gray-900 dark:text-white">نوع اقدام و لینک مقصد</h4>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                                 <button type="button"
                                         @click="newStep.action_type = 'internal'"
                                         class="p-3.5 rounded-xl border text-right transition-all cursor-pointer relative flex flex-col justify-between gap-2"
@@ -1255,6 +1473,28 @@
                                         <span class="text-xs text-gray-500 dark:text-gray-400">تأیید مستقیم توسط خود کاربر</span>
                                     </div>
                                 </button>
+
+                                <button type="button"
+                                        @click="newStep.action_type = 'custom_fields'"
+                                        class="p-3.5 rounded-xl border text-right transition-all cursor-pointer relative flex flex-col justify-between gap-2"
+                                        :class="newStep.action_type === 'custom_fields' ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
+                                    <div class="flex items-center justify-between w-full">
+                                        <span
+                                            class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                            </svg>
+                                        </span>
+                                        <span x-show="newStep.action_type === 'custom_fields'"
+                                              class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-black block">فیلدهای سفارشی</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">فرم عددی، فکس، کد پستی یا فیلد دلخواه</span>
+                                    </div>
+                                </button>
                             </div>
 
                             {{-- Target Input Area --}}
@@ -1295,6 +1535,256 @@
                                               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                     <span>این مرحله نیاز به URL ندارد؛ در پنل کاربر دکمه‌ای برای ثبت «تأیید و انجام شد» تعبیه می‌شود.</span>
+                                </div>
+
+                                {{-- If Custom Fields --}}
+                                <div x-show="newStep.action_type === 'custom_fields'" class="space-y-4">
+                                    {{-- Visual Category & Scope Pickers --}}
+                                    <div class="space-y-3.5 pb-3 border-b border-gray-100 dark:border-gray-700">
+                                        {{-- 1. Category Selector --}}
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center justify-between">
+                                                <x-resellerhub::label>دسته‌بندی موضوعی فیلدها در پروفایل:
+                                                </x-resellerhub::label>
+                                                <span class="text-[11px] text-gray-400 font-bold"
+                                                      x-text="newStep.field_group === 'contact' ? 'اطلاعات تماس، فکس و نشانی اداری' : (newStep.field_group === 'identity' ? 'مشخصات حقوقی و هویتی' : (newStep.field_group === 'business' ? 'اهداف و اطلاعات تجاری' : (newStep.field_group === 'system' ? 'پارامترها و مشخصات سیستم' : 'اطلاعات تکمیلی و متفرقه')))"></span>
+                                            </div>
+                                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
+                                                <button type="button" @click="newStep.field_group = 'contact'"
+                                                        :class="newStep.field_group === 'contact' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20 font-bold' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300'"
+                                                        class="p-2 rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer">
+                                                    <svg class="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400"
+                                                         fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                         stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                                    </svg>
+                                                    <span class="text-[11px] leading-tight block">تماس و نشانی</span>
+                                                </button>
+
+                                                <button type="button" @click="newStep.field_group = 'identity'"
+                                                        :class="newStep.field_group === 'identity' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20 font-bold' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300'"
+                                                        class="p-2 rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer">
+                                                    <svg class="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400"
+                                                         fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                         stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                                                    </svg>
+                                                    <span class="text-[11px] leading-tight block">هویتی و حقوقی</span>
+                                                </button>
+
+                                                <button type="button" @click="newStep.field_group = 'business'"
+                                                        :class="newStep.field_group === 'business' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20 font-bold' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300'"
+                                                        class="p-2 rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer">
+                                                    <svg class="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400"
+                                                         fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                         stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                                    </svg>
+                                                    <span class="text-[11px] leading-tight block">اهداف و تجاری</span>
+                                                </button>
+
+                                                <button type="button" @click="newStep.field_group = 'system'"
+                                                        :class="newStep.field_group === 'system' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20 font-bold' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300'"
+                                                        class="p-2 rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer">
+                                                    <svg class="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400"
+                                                         fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                         stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    </svg>
+                                                    <span class="text-[11px] leading-tight block">سیستم و فنی</span>
+                                                </button>
+
+                                                <button type="button" @click="newStep.field_group = 'general'"
+                                                        :class="newStep.field_group === 'general' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/20 font-bold' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300'"
+                                                        class="p-2 rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition-all cursor-pointer col-span-2 sm:col-span-1">
+                                                    <svg class="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400"
+                                                         fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                         stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                                    </svg>
+                                                    <span class="text-[11px] leading-tight block">تکمیلی و عمومی</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {{-- 2. Target Scope Selector --}}
+                                        <div class="space-y-1.5">
+                                            <x-resellerhub::label>اقامتگاه دائمی فیلدها پس از اتمام تور:
+                                            </x-resellerhub::label>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                <button type="button" @click="newStep.target_scope = 'user'"
+                                                        :class="newStep.target_scope === 'user' ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-2xs' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300'"
+                                                        class="p-2.5 rounded-xl border flex items-center gap-2.5 text-right transition-all cursor-pointer">
+                                                    <span
+                                                        class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                                             stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                        </svg>
+                                                    </span>
+                                                    <div class="min-w-0">
+                                                        <span class="text-xs font-black block truncate">پروفایل کاربری مدیر</span>
+                                                        <span
+                                                            class="text-[10px] text-gray-500 dark:text-gray-400 font-mono dir-ltr block truncate">/user/profile</span>
+                                                    </div>
+                                                </button>
+
+                                                <button type="button" @click="newStep.target_scope = 'tenant'"
+                                                        :class="newStep.target_scope === 'tenant' ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-2xs' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300'"
+                                                        class="p-2.5 rounded-xl border flex items-center gap-2.5 text-right transition-all cursor-pointer">
+                                                    <span
+                                                        class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                                             stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                                        </svg>
+                                                    </span>
+                                                    <div class="min-w-0">
+                                                        <span class="text-xs font-black block truncate">تنظیمات مطب و کلینیک</span>
+                                                        <span
+                                                            class="text-[10px] text-gray-500 dark:text-gray-400 font-mono dir-ltr block truncate">/user/settings</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between flex-wrap gap-2">
+                                            <span class="text-xs font-black text-gray-800 dark:text-gray-200">الگوهای آماده و فیلدهای قابل انتخاب:</span>
+                                            <button type="button" @click="addCustomFieldToNewStep()"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition-all cursor-pointer shadow-xs">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                                </svg>
+                                                <span>+ فیلد سفارشی دلخواه</span>
+                                            </button>
+                                        </div>
+
+                                        {{-- Categorized Preset Tabs / Buttons --}}
+                                        <div class="p-3 rounded-2xl bg-gray-100/70 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700/80 space-y-2.5">
+                                            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                                                <template x-for="cat in fieldPresetsCatalog" :key="cat.category">
+                                                    <button type="button"
+                                                            @click="activePresetTab = cat.category"
+                                                            class="px-2.5 py-1 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer"
+                                                            :class="activePresetTab === cat.category ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700 border border-gray-200/60 dark:border-gray-700'"
+                                                            x-text="cat.categoryLabel"></button>
+                                                </template>
+                                                <template x-if="availableSystemFields && availableSystemFields.length > 0">
+                                                    <button type="button"
+                                                            @click="activePresetTab = 'system_database'"
+                                                            class="px-2.5 py-1 rounded-lg font-bold transition-all whitespace-nowrap cursor-pointer"
+                                                            :class="activePresetTab === 'system_database' ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-white dark:bg-gray-800 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800'">
+                                                        فیلدهای سیستم (<span x-text="availableSystemFields.length"></span>)
+                                                    </button>
+                                                </template>
+                                            </div>
+
+                                            <div class="flex items-center gap-1.5 flex-wrap pt-1">
+                                                <template x-for="cat in fieldPresetsCatalog" :key="cat.category">
+                                                    <div x-show="activePresetTab === cat.category" class="flex items-center gap-1.5 flex-wrap w-full">
+                                                        <template x-for="fld in cat.fields" :key="fld.name">
+                                                            <button type="button"
+                                                                    @click="addCustomFieldToNewStep(fld)"
+                                                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg bg-white dark:bg-gray-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 text-gray-700 dark:text-gray-200 hover:text-indigo-600 border border-gray-200/80 dark:border-gray-700 transition-all cursor-pointer shadow-2xs">
+                                                                <span class="text-indigo-500 font-black">+</span>
+                                                                <span x-text="fld.label"></span>
+                                                            </button>
+                                                        </template>
+                                                    </div>
+                                                </template>
+
+                                                <template x-if="availableSystemFields && availableSystemFields.length > 0">
+                                                    <div x-show="activePresetTab === 'system_database'" class="flex items-center gap-1.5 flex-wrap w-full">
+                                                        <template x-for="fld in availableSystemFields" :key="fld.field_name">
+                                                            <button type="button"
+                                                                    @click="addCustomFieldToNewStep(fld)"
+                                                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800 transition-all cursor-pointer shadow-2xs">
+                                                                <span class="text-purple-600 font-black">+</span>
+                                                                <span x-text="fld.label"></span>
+                                                                <span class="text-[10px] opacity-75 font-mono" x-text="'(' + fld.field_name + ')'"></span>
+                                                            </button>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+
+                                        <template x-if="!newStep.custom_fields || newStep.custom_fields.length === 0">
+                                            <div class="p-5 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 text-center text-xs text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-900/40 space-y-1">
+                                                <p class="font-bold">هنوز فیلدی به این مرحله اضافه نشده است.</p>
+                                                <p>می‌توانید از الگوهای آماده بالا فیلد انتخاب کنید یا دکمه «+ فیلد سفارشی دلخواه» را بزنید.</p>
+                                            </div>
+                                        </template>
+
+                                        <div class="space-y-2.5">
+                                            <template x-for="(fld, fIdx) in newStep.custom_fields" :key="fIdx">
+                                                <div class="p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 shadow-2xs space-y-2.5">
+                                                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                                                        <div class="sm:col-span-4">
+                                                            <input type="text" x-model="fld.label" placeholder="برچسب فارسی فیلد (مثال: شماره پروانه)"
+                                                                   class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900 px-3 py-1.5 text-xs font-bold text-gray-900 dark:text-white">
+                                                        </div>
+                                                        <div class="sm:col-span-3">
+                                                            <input type="text" x-model="fld.name" placeholder="کلید انگلیسی (license_no)"
+                                                                   class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900 px-3 py-1.5 text-xs font-mono dir-ltr text-left text-gray-900 dark:text-white">
+                                                        </div>
+                                                        <div class="sm:col-span-3">
+                                                            <select x-model="fld.type"
+                                                                    class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900 px-2 py-1.5 text-xs font-bold text-gray-900 dark:text-white">
+                                                                <option value="text">متن تک‌خطی</option>
+                                                                <option value="number">عددی</option>
+                                                                <option value="currency">مبلغ مالی (تومان)</option>
+                                                                <option value="tel">تلفن ثابت / فکس</option>
+                                                                <option value="mobile">شماره همراه</option>
+                                                                <option value="email">آدرس ایمیل</option>
+                                                                <option value="date">تاریخ</option>
+                                                                <option value="time">ساعت / زمان</option>
+                                                                <option value="textarea">متن چندخطی</option>
+                                                                <option value="select">منوی کشویی گزینه‌ای</option>
+                                                                <option value="checkbox">تیک‌باکس (بلی/خیر)</option>
+                                                                <option value="url">وب‌سایت / لینک اینترنتی</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="sm:col-span-2 flex items-center justify-between sm:justify-end gap-2">
+                                                            <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs font-bold text-gray-700 dark:text-gray-300">
+                                                                <input type="checkbox" x-model="fld.is_required"
+                                                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                                                <span>اجباری</span>
+                                                            </label>
+                                                            <button type="button" @click="removeCustomFieldFromNewStep(fIdx)"
+                                                                    class="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer shrink-0"
+                                                                    title="حذف این فیلد">
+                                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div x-show="fld.type === 'select'" class="pt-2 border-t border-gray-100 dark:border-gray-700/60">
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 shrink-0">گزینه‌های منو (با کاما):</span>
+                                                            <input type="text" x-model="fld.options_str"
+                                                                   @input="fld.options = fld.options_str ? fld.options_str.split(',').map(s => s.trim()).filter(Boolean) : []"
+                                                                   placeholder="مثال: مطب مرکزی, شعبه شرق, کلینیک تخصصی"
+                                                                   class="flex-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900 px-3 py-1 text-xs text-gray-900 dark:text-white">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

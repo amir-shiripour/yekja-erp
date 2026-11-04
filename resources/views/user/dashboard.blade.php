@@ -1,6 +1,7 @@
 @extends('layouts.user')
 
 @php
+    /** @noinspection SqlResolve */
     use App\Models\Tenant;
     use App\Support\WidgetRegistry;
     use App\Models\WidgetSetting;
@@ -10,17 +11,13 @@
     use Modules\ResellerHub\App\Models\ResellerSetting;
 
     $title = 'داشبورد';
-
-    // همه ویجت‌های ثبت‌شده از هسته + ماژول‌ها
     $allWidgets = WidgetRegistry::all();
-
     $userWidgetsKeys = [];
     $userLayout = [];
 
     if(auth()->check()) {
         $user = auth()->user();
 
-        // اگر User از Spatie\HasRoles استفاده می‌کند:
         $roleIds = method_exists($user, 'roles')
             ? $user->roles()->pluck('id')
             : collect();
@@ -33,14 +30,12 @@
                 ->toArray();
         }
 
-        // دریافت تنظیمات چیدمان کاربر
         $dashboardSetting = UserDashboardSetting::where('user_id', $user->id)->first();
         if ($dashboardSetting && !empty($dashboardSetting->layout)) {
             $userLayout = $dashboardSetting->layout;
         }
     }
 
-    // فیلتر کردن ویجت‌های مجاز
     $authorizedWidgets = [];
     foreach($allWidgets as $key => $widget) {
         $enabledForRole = in_array($widget['key'], $userWidgetsKeys, true);
@@ -54,16 +49,11 @@
         }
     }
 
-    // مرتب‌سازی ویجت‌ها بر اساس چیدمان کاربر
     $sortedWidgets = [];
-    $hiddenWidgets = []; // برای استفاده در JS
-
-    // لیست نهایی برای رندر (شامل مخفی‌ها هم می‌شود تا در DOM باشند)
+    $hiddenWidgets = [];
     $renderList = [];
 
-    // اگر کاربر چیدمان ذخیره شده دارد
     if (!empty($userLayout)) {
-        // ویجت‌های موجود در چیدمان کاربر
         foreach ($userLayout as $item) {
             if (isset($authorizedWidgets[$item['key']])) {
                 $widget = $authorizedWidgets[$item['key']];
@@ -77,17 +67,14 @@
                     $hiddenWidgets[$item['key']] = $widget;
                 }
 
-                // حذف از لیست اصلی تا تکراری نشود
                 unset($authorizedWidgets[$item['key']]);
             }
         }
     }
 
-    // اضافه کردن ویجت‌های جدید که هنوز در چیدمان کاربر نیستند
     foreach ($authorizedWidgets as $widget) {
-        $widget['visible'] = true; // پیش‌فرض نمایش داده شوند
+        $widget['visible'] = true;
 
-        // تنظیمات پیش‌فرض برای عرض و ارتفاع ویجت‌ها
         if ($widget['key'] === 'today_reminders') {
              $widget['colSpan'] = 2;
         } else {
@@ -130,7 +117,6 @@
 @section('content')
     <div x-data="dashboardManager(@js($renderList), @js($hiddenWidgets))" class="space-y-8 pb-12">
 
-        {{-- هدر و دکمه ویرایش --}}
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             @if($isOnboardingActive)
                 <div>
@@ -182,16 +168,13 @@
             @endif
         </div>
 
-        {{-- بنر اخطار و پرداخت سفارش در انتظار پرداخت --}}
         @includeIf('resellerhub::partials.unpaid-order-banner')
 
-        {{-- ویجت بنتو آنبوردینگ و تور راه‌اندازی سریع سامانه --}}
         @if($shouldRenderTourWidget)
             @livewire('resellerhub.onboarding-widget')
         @endif
 
         @if(!$isOnboardingActive)
-            {{-- پنل ویجت‌های مخفی (فقط در حالت ویرایش) --}}
             <div x-show="editMode && Object.keys(hiddenWidgets).length > 0" x-transition
                  class="bg-indigo-50 dark:bg-indigo-900/10 border-2 border-dashed border-indigo-200 dark:border-indigo-800/50 rounded-2xl p-6 animate-in fade-in slide-in-from-top-4">
                 <div class="flex items-center gap-2 mb-4">
@@ -225,7 +208,6 @@
                 </div>
             </div>
 
-            {{-- شبکه ویجت‌ها --}}
             <div
                 x-ref="grid"
                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 grid-flow-row-dense items-start"
@@ -249,7 +231,6 @@
                         data-rowspan="{{ $widget['rowSpan'] }}"
                         id="widget-{{ $widget['key'] }}"
                     >
-                        {{-- لایه پوششی برای جلوگیری از تعامل با محتوای ویجت در حالت ویرایش --}}
                         <div x-show="editMode"
                              class="absolute inset-0 z-10 bg-white/10 dark:bg-black/10 backdrop-blur-[1px] rounded-2xl cursor-move flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <div
@@ -261,8 +242,6 @@
                                 جابجایی
                             </div>
                         </div>
-
-                        {{-- هدر ویجت در حالت ویرایش --}}
                         <div x-show="editMode"
                              class="relative z-20 px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50/80 dark:bg-gray-800/80 rounded-t-2xl backdrop-blur-sm">
                             <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
@@ -270,7 +249,6 @@
                                 <span class="text-xs font-bold">{{ $widget['label'] ?? $widget['key'] }}</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                {{-- کنترل‌های تغییر اندازه --}}
                                 <div
                                     class="flex items-center bg-white dark:bg-gray-700 rounded-lg p-0.5 border border-gray-200 dark:border-gray-600">
                                     <button @click="changeSize('{{ $widget['key'] }}', 1, 1)"
@@ -312,8 +290,6 @@
                     </div>
                 @endforeach
             </div>
-
-            {{-- پیام خالی بودن داشبورد --}}
             <div x-show="!editMode && document.querySelectorAll('.widget-card:not(.hidden)').length === 0"
                  class="text-center py-20">
                 <div
@@ -339,7 +315,6 @@
         function dashboardManager(allWidgets, initialHidden) {
             return {
                 editMode: false,
-                // تبدیل آرایه ویجت‌ها به آبجکت برای دسترسی سریع‌تر
                 widgetsMap: allWidgets.reduce((acc, w) => {
                     acc[w.key] = w;
                     return acc;
@@ -348,15 +323,13 @@
                 sortable: null,
 
                 init() {
-                    // مقداردهی اولیه SortableJS
                     if (this.$refs.grid && typeof Sortable !== 'undefined') {
                         this.sortable = new Sortable(this.$refs.grid, {
                             animation: 200,
-                            disabled: true, // در ابتدا غیرفعال
+                            disabled: true,
                             ghostClass: 'opacity-40',
                             dragClass: 'cursor-grabbing',
                             onEnd: () => {
-                                // ترتیب جدید را ذخیره نمی‌کنیم تا زمانی که دکمه ذخیره زده شود
                             }
                         });
                     }
@@ -365,7 +338,6 @@
                 toggleEditMode() {
                     this.editMode = !this.editMode;
 
-                    // فعال/غیرفعال کردن Sortable
                     if (this.sortable) {
                         this.sortable.option("disabled", !this.editMode);
                     }
@@ -378,13 +350,11 @@
                 hideWidget(key) {
                     const el = document.getElementById('widget-' + key);
                     if (el) {
-                        // انیمیشن مخفی شدن
                         el.classList.add('scale-90', 'opacity-0');
                         setTimeout(() => {
                             el.classList.add('hidden');
                             el.classList.remove('scale-90', 'opacity-0');
 
-                            // اضافه کردن به لیست مخفی‌ها
                             if (this.widgetsMap[key]) {
                                 this.hiddenWidgets[key] = this.widgetsMap[key];
                             }
@@ -398,10 +368,7 @@
                         el.classList.remove('hidden');
                         delete this.hiddenWidgets[key];
 
-                        // اسکرول به ویجت
                         el.scrollIntoView({behavior: 'smooth', block: 'center'});
-
-                        // انیمیشن
                         el.classList.add('ring-4', 'ring-emerald-500', 'scale-105');
                         setTimeout(() => el.classList.remove('ring-4', 'ring-emerald-500', 'scale-105'), 600);
                     }
@@ -410,10 +377,8 @@
                 changeSize(key, cols, rows) {
                     const el = document.getElementById('widget-' + key);
                     if (el) {
-                        // حذف کلاس‌های قبلی
                         el.classList.remove('col-span-1', 'md:col-span-2', 'lg:col-span-2', 'lg:col-span-3', 'row-span-1', 'row-span-2');
 
-                        // اضافه کردن کلاس‌های جدید برای ستون
                         if (cols === 2) {
                             el.classList.add('md:col-span-2', 'lg:col-span-2');
                         } else if (cols === 3) {
@@ -422,26 +387,21 @@
                             el.classList.add('col-span-1');
                         }
 
-                        // اضافه کردن کلاس‌های جدید برای ردیف
                         if (rows === 2) {
                             el.classList.add('row-span-2');
                         } else {
                             el.classList.add('row-span-1');
                         }
 
-                        // بروزرسانی dataset برای ذخیره در هنگام saveLayout
                         el.setAttribute('data-colspan', cols);
                         el.setAttribute('data-rowspan', rows);
 
-                        // آپدیت sortable در صورت نیاز
                         setTimeout(() => {
-                            // در مرورگرهایی که grid dense استفاده می‌شود تغییر اندازه بلافاصله اعمال می‌شود
                         }, 50);
                     }
                 },
 
                 saveLayout() {
-                    // جمع‌آوری ترتیب فعلی از DOM
                     const grid = this.$refs.grid;
                     const items = Array.from(grid.children);
                     const layout = items.map(item => {

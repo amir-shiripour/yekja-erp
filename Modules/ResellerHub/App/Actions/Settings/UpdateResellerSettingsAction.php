@@ -11,6 +11,9 @@ use Modules\ResellerHub\App\Models\ResellerSetting;
 use Modules\ResellerHub\App\Services\Onboarding\OnboardingStateService;
 use App\Models\Tenant;
 
+/**
+ * @noinspection SqlResolve
+ */
 class UpdateResellerSettingsAction
 {
     use FileUploadTrait;
@@ -190,9 +193,13 @@ class UpdateResellerSettingsAction
             $data[ResellerSettingKey::OnboardingTourOptionalReminderMode->value] = $validated[ResellerSettingKey::OnboardingTourOptionalReminderMode->value];
         }
         if (array_key_exists(ResellerSettingKey::OnboardingTourSteps->value, $validated)) {
-            $rawSteps = is_array($validated[ResellerSettingKey::OnboardingTourSteps->value])
-                ? $validated[ResellerSettingKey::OnboardingTourSteps->value]
-                : (json_decode((string)$validated[ResellerSettingKey::OnboardingTourSteps->value], true) ?: []);
+            $stepsVal = $validated[ResellerSettingKey::OnboardingTourSteps->value];
+            if (is_array($stepsVal)) {
+                $rawSteps = $stepsVal;
+            } else {
+                $decodedSteps = json_decode((string)$stepsVal, true);
+                $rawSteps = is_array($decodedSteps) ? $decodedSteps : [];
+            }
 
             $data[ResellerSettingKey::OnboardingTourSteps->value] = $this->normalizeTourSteps($rawSteps);
         }

@@ -25,6 +25,9 @@ use Carbon\Carbon;
 use Modules\ResellerHub\App\Services\TenantQuotaService;
 use Throwable;
 
+/**
+ * @noinspection SqlResolve
+ */
 class OnboardingStateService
 {
     public const CACHE_TTL_SECONDS = 3600;

@@ -24,6 +24,9 @@ use Modules\ResellerHub\App\Services\TenantDataExporterService;
 use Modules\ResellerHub\App\Traits\HasReseller;
 use Throwable;
 
+/**
+ * @noinspection SqlResolve
+ */
 class ResellerSettingController extends Controller
 {
     use HasReseller;

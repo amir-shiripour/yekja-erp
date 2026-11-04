@@ -40,6 +40,7 @@ use Throwable;
  * @method static Tenant|null find(mixed $id, array $columns = ['*'])
  * @method static Tenant findOrFail(mixed $id, array $columns = ['*'])
  * @method static Builder|Tenant where(string|array|Closure $column, mixed $operator = null, mixed $value = null, string $boolean = 'and')
+ * @noinspection SqlResolve
  */
 class Tenant extends Model
 {
@@ -163,11 +164,7 @@ class Tenant extends Model
 
     public function isRenewable(): bool
     {
-        if ($this->package && !$this->package->getPriceTypeEnum()->hasRenewal()) {
-            return false;
-        }
-
-        return true;
+        return !($this->package && !$this->package->getPriceTypeEnum()->hasRenewal());
     }
 
     public function isPendingPayment(): bool

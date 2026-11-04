@@ -260,7 +260,8 @@
                             @else
                                 <button
                                     type="button"
-                                    @if($nextStep->actionType === 'link' && $nextStep->actionUrl) onclick="window.open('{{ $nextStep->actionUrl }}', '_blank')"
+                                    @if(in_array($nextStep->actionType, ['custom_fields', 'form'], true)) wire:click.stop="openCustomFieldsModal('{{ $nSlug }}')"
+                                    @elseif($nextStep->actionType === 'link' && $nextStep->actionUrl) onclick="window.open('{{ $nextStep->actionUrl }}', '_blank')"
                                     @else wire:click.stop="completeCustomStep('{{ $nSlug }}')" @endif
                                     class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs hover:shadow transition-all cursor-pointer shrink-0">
                                     <span>{{ $nextStep->title }}</span>
@@ -448,6 +449,16 @@
                         @php
                             $stepUrl = $this->getStepActionUrl($sData);
                             $isExternal = in_array(strtolower($sData->actionType), ['external', 'link'], true);
+                            $stepTitleColor = 'text-gray-400';
+                            if ($isDone) {
+                                $stepTitleColor = 'text-emerald-600 dark:text-emerald-400';
+                            } elseif ($isAccessible) {
+                                $stepTitleColor = 'text-indigo-600 dark:text-indigo-400';
+                            }
+                            $stepBadgeText = $isAccessible ? 'گام جاری' : 'در انتظار';
+                            if (!empty($sData->badge)) {
+                                $stepBadgeText = $sData->badge;
+                            }
                         @endphp
                         <button type="button"
                                 @if($isAccessible)
@@ -456,12 +467,9 @@
                                 @elseif($sData->slug === 'configure_domain') wire:click="openDomainModal"
                                 @elseif($sData->slug === 'configure_branding') wire:click="openBrandingModal"
                                 @elseif($sData->slug === 'select_package') wire:click="openPackageModal"
+                                @elseif(in_array(strtolower($sData->actionType), ['custom_fields', 'form'], true)) wire:click="openCustomFieldsModal('{{ $sData->slug }}')"
                                 @elseif($stepUrl)
-                                    @if($isExternal)
-                                        onclick="window.open('{{ $stepUrl }}', '_blank')"
-                                @else
-                                    onclick="window.location.href = '{{ $stepUrl }}'"
-                                @endif
+                                    onclick="{{ $isExternal ? "window.open('{$stepUrl}', '_blank')" : "window.location.href = '{$stepUrl}'" }}"
                                 @elseif($sData->canManualComplete && !$isDone)
                                     wire:click="completeCustomStep('{{ $sData->slug }}')"
                                 @endif
@@ -498,7 +506,7 @@
                             </div>
                             <div class="text-center mt-2 max-w-[110px]">
                                 <span
-                                    class="text-xs font-bold block truncate transition-colors {{ $isDone ? 'text-emerald-600 dark:text-emerald-400' : ($isAccessible ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400') }}">
+                                    class="text-xs font-bold block truncate transition-colors {{ $stepTitleColor }}">
                                     @fa($stepNum). {{ $sData->title }}
                                 </span>
                                 <span class="text-xs hidden sm:block mt-0.5">
@@ -516,7 +524,7 @@
                                         <span class="text-gray-400">صرف‌نظر شد</span>
                                     @else
                                         <span
-                                            class="text-gray-400 dark:text-gray-500">{{ $sData->badge ?: ($isAccessible ? 'گام جاری' : 'در انتظار') }}</span>
+                                            class="text-gray-400 dark:text-gray-500">{{ $stepBadgeText }}</span>
                                     @endif
                                 </span>
                             </div>
@@ -534,7 +542,33 @@
                         $isDone = ($sStatus === TenantOnboardingState::STATUS_COMPLETED);
                         $isSkipped = ($sStatus === TenantOnboardingState::STATUS_SKIPPED);
                         $isAccessible = $item['is_accessible'];
+                        $isQuotaLocked = !empty($item['is_quota_locked']);
                         $stepNum = $idx + 1;
+
+                        $badgeText = 'قفل شده';
+                        if ($isDone) {
+                            $badgeText = 'تکمیل شد';
+                        } elseif ($isSkipped) {
+                            $badgeText = 'رد شد';
+                        } elseif ($isQuotaLocked) {
+                            $badgeText = __('resellerhub::messages.onboarding.step_quota_locked_badge');
+                        } elseif ($isAccessible) {
+                            $badgeText = !empty($sData->badge) ? $sData->badge : ('گام ' . $stepNum);
+                        }
+
+                        $btnClass = 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed';
+                        if ($isAccessible) {
+                            $btnClass = $isDone
+                                ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer'
+                                : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 active:scale-95 cursor-pointer';
+                        }
+
+                        $packageBtnClass = 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed';
+                        if ($isAccessible) {
+                            $packageBtnClass = $isDone
+                                ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer'
+                                : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/25 active:scale-95 cursor-pointer';
+                        }
                     @endphp
                     <div class="group relative rounded-2xl p-5 border transition-all duration-200 flex flex-col justify-between
                         @if ($isDone)
@@ -594,7 +628,7 @@
                                             bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400
                                         @endif
                                     ">
-                                        {{ $isDone ? 'تکمیل شد' : ($isSkipped ? 'رد شد' : ($isQuotaLocked ? __('resellerhub::messages.onboarding.step_quota_locked_badge') : ($isAccessible ? ($sData->badge ?: 'گام ' . $stepNum) : 'قفل شده'))) }}
+                                        {{ $badgeText }}
                                     </span>
                                 </div>
                             </div>
@@ -622,7 +656,7 @@
                             @elseif ($sData->slug === 'configure_domain')
                                 <button @if($isAccessible) wire:click="openDomainModal" @endif
                                 @disabled(!$isAccessible)
-                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ !$isAccessible ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed' : ($isDone ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 active:scale-95 cursor-pointer') }}">
+                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ $btnClass }}">
                                     <span>{{ $isDone ? 'تغییر تنظیمات دامنه' : 'تنظیم دامین' }}</span>
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -632,7 +666,7 @@
                             @elseif ($sData->slug === 'configure_branding')
                                 <button @if($isAccessible) wire:click="openBrandingModal" @endif
                                 @disabled(!$isAccessible)
-                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ !$isAccessible ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed' : ($isDone ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 active:scale-95 cursor-pointer') }}">
+                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ $btnClass }}">
                                     <span>{{ $isDone ? 'تغییر وایت‌لیبل' : 'تنظیم وایت‌لیبل' }}</span>
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -642,7 +676,7 @@
                             @elseif ($sData->slug === 'select_package')
                                 <button @if($isAccessible) wire:click="openPackageModal" @endif
                                 @disabled(!$isAccessible)
-                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ !$isAccessible ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed' : ($isDone ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/25 active:scale-95 cursor-pointer') }}">
+                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ $packageBtnClass }}">
                                     <span>{{ $isDone ? 'مدیریت و ارتقای پکیج' : 'انتخاب پکیج و پرداخت' }}</span>
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -681,10 +715,18 @@
                                             @endif
                                         </div>
                                     @elseif($stepUrl)
+                                        @php
+                                            $urlBtnText = 'انجام مرحله (ورود به صفحه)';
+                                            if ($isDone) {
+                                                $urlBtnText = 'ورود به این بخش';
+                                            } elseif ($isExternal) {
+                                                $urlBtnText = 'مشاهده لینک خارجی';
+                                            }
+                                        @endphp
                                         <a href="{{ $stepUrl }}"
                                            @if($isExternal) target="_blank" rel="noopener noreferrer" @endif
                                            class="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer {{ $isDone ? 'bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/25 active:scale-95' }}">
-                                            <span>{{ $isDone ? 'ورود به این بخش' : ($isExternal ? 'مشاهده لینک خارجی' : 'انجام مرحله (ورود به صفحه)') }}</span>
+                                            <span>{{ $urlBtnText }}</span>
                                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24"
                                                  stroke="currentColor">
                                                 @if($isExternal)
@@ -730,6 +772,31 @@
                                                                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                 <span>تأیید خودکار</span>
                                             </span>
+                                        @endif
+                                    @elseif(in_array(strtolower($sData->actionType), ['custom_fields', 'form'], true))
+                                        {{-- Dynamic Custom Fields Form Modal --}}
+                                        @if(!$isDone)
+                                            <button type="button"
+                                                    wire:click="openCustomFieldsModal('{{ $sData->slug }}')"
+                                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-black rounded-xl shadow-md shadow-indigo-600/25 active:scale-95 transition-all cursor-pointer">
+                                                <span>تکمیل و ثبت فیلدهای این مرحله</span>
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                                     stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </button>
+                                        @else
+                                            <button type="button"
+                                                    wire:click="openCustomFieldsModal('{{ $sData->slug }}')"
+                                                    class="w-full inline-flex items-center justify-center gap-2 py-2 px-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 rounded-xl border border-emerald-200/80 dark:border-emerald-800/80 text-xs font-black hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors cursor-pointer">
+                                                <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                                     stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                                <span>تکمیل شد (مشاهده یا ویرایش)</span>
+                                            </button>
                                         @endif
                                     @else
                                         {{-- No Action URL: Pure manual checklist step --}}
@@ -855,7 +922,13 @@
                                                 ></textarea>
                                             @elseif ($fieldType === 'select')
                                                 @php
-                                                    $meta = is_array($field->meta) ? $field->meta : (json_decode($field->meta ?? '[]', true) ?: []);
+                                                    $meta = [];
+                                                    if (is_array($field->meta)) {
+                                                        $meta = $field->meta;
+                                                    } elseif (!empty($field->meta)) {
+                                                        $decodedMeta = json_decode((string)$field->meta, true);
+                                                        $meta = is_array($decodedMeta) ? $decodedMeta : [];
+                                                    }
                                                     $options = $meta['options'] ?? [];
                                                 @endphp
                                                 <select
@@ -1401,7 +1474,13 @@
                                     $rawPrice = $pkg->isFree() ? 0 : $pkg->getPriceForMonths($months);
                                     $price = $pkg->isFree() ? 0 : $pkg->getFinalPriceForMonths($months);
                                     $hasDiscount = !$pkg->isFree() && ($pkg->isSubscription() ? $pkg->hasActiveDiscountForMonths($months) : $pkg->hasActiveDiscount()) && $price < $rawPrice;
-                                    $modules = is_array($pkg->modules) ? $pkg->modules : (json_decode($pkg->modules ?? '[]', true) ?: []);
+                                    $modules = [];
+                                    if (is_array($pkg->modules)) {
+                                        $modules = $pkg->modules;
+                                    } elseif (!empty($pkg->modules)) {
+                                        $decodedMod = json_decode((string)$pkg->modules, true);
+                                        $modules = is_array($decodedMod) ? $decodedMod : [];
+                                    }
                                 @endphp
                                 <div wire:key="package-card-{{ $pkg->id }}" class="relative rounded-2xl p-5 border transition-all flex flex-col justify-between
                                     @if ($isCurrentPkg)
@@ -1518,7 +1597,15 @@
                                                 @endif
                                             "
                                         >
-                                            <span>{{ $isCurrentPkg ? 'انتخاب مجدد' : ($pkg->isFree() ? 'فعال‌سازی پلن رایگان' : 'انتخاب و پرداخت آنلاین') }}</span>
+                                            @php
+                                                $packageBtnLabel = 'انتخاب و پرداخت آنلاین';
+                                                if ($isCurrentPkg) {
+                                                    $packageBtnLabel = 'انتخاب مجدد';
+                                                } elseif ($pkg->isFree()) {
+                                                    $packageBtnLabel = 'فعال‌سازی پلن رایگان';
+                                                }
+                                            @endphp
+                                            <span>{{ $packageBtnLabel }}</span>
                                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                                                  stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -1549,6 +1636,183 @@
                         </span>
                     </div>
 
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Custom Dynamic Fields Modal --}}
+    @if ($showCustomFieldsModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="custom-fields-modal-title" role="dialog"
+             aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs transition-opacity"
+                     wire:click="closeCustomFieldsModal"></div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div
+                    class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-3xl text-right overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full border border-gray-100 dark:border-gray-700">
+
+                    <div
+                        class="p-6 bg-gradient-to-r from-indigo-50/70 via-purple-50/50 to-white dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="p-2.5 bg-indigo-600 text-white rounded-2xl shadow-md shadow-indigo-600/30">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                </svg>
+                            </span>
+                            <div>
+                                <h3 class="text-base font-black text-gray-900 dark:text-white"
+                                    id="custom-fields-modal-title">
+                                    {{ $activeCustomStepTitle }}
+                                </h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                    {{ $activeCustomStepDescription ?: 'لطفاً فیلدهای زیر را برای تکمیل راه‌اندازی با دقت تکمیل نمایید.' }}
+                                </p>
+                            </div>
+                        </div>
+                        <button wire:click="closeCustomFieldsModal"
+                                class="p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form wire:submit.prevent="saveCustomFields">
+                        <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                            @if(empty($activeCustomStepFields))
+                                <div
+                                    class="p-6 text-center text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
+                                    فیلد سفارشی برای این مرحله پیکربندی نشده است. می‌توانید دکمه ثبت را جهت تأیید گام
+                                    بزنید.
+                                </div>
+                            @else
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    @foreach($activeCustomStepFields as $field)
+                                        @php
+                                            $fName = $field['name'] ?? $field['field_name'] ?? '';
+                                            $fLabel = $field['label'] ?? $fName;
+                                            $fType = strtolower($field['type'] ?? $field['field_type'] ?? 'text');
+                                            $fRequired = !empty($field['required']) || !empty($field['is_required']);
+                                            $fPlaceholder = $field['placeholder'] ?? '';
+                                            $isFull = ($fType === 'textarea');
+                                        @endphp
+                                        <div class="{{ $isFull ? 'sm:col-span-2' : 'sm:col-span-1' }} space-y-1.5">
+                                            <div class="flex items-center justify-between">
+                                                <label class="text-xs font-bold text-gray-800 dark:text-gray-200">
+                                                    {{ $fLabel }}
+                                                    @if($fRequired)
+                                                        <span class="text-rose-500 font-black">*</span>
+                                                    @else
+                                                        <span
+                                                            class="text-[10px] text-gray-400 font-normal">(اختیاری)</span>
+                                                    @endif
+                                                </label>
+                                            </div>
+
+                                            @if($fType === 'textarea')
+                                                <textarea wire:model.defer="customFieldsForm.{{ $fName }}"
+                                                          rows="3"
+                                                          placeholder="{{ $fPlaceholder }}"
+                                                          class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"></textarea>
+                                            @elseif($fType === 'select')
+                                                @php
+                                                    $selectOpts = [];
+                                                    if (is_array($field['options'] ?? null)) {
+                                                        $selectOpts = $field['options'];
+                                                    } elseif (!empty($field['options'])) {
+                                                        $selectOpts = array_map('trim', explode(',', $field['options']));
+                                                    }
+                                                @endphp
+                                                <select wire:model.defer="customFieldsForm.{{ $fName }}"
+                                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
+                                                    <option value="">انتخاب کنید...</option>
+                                                    @foreach($selectOpts as $opt)
+                                                        <option value="{{ $opt }}">{{ $opt }}</option>
+                                                    @endforeach
+                                                </select>
+                                            @elseif($fType === 'checkbox')
+                                                <div
+                                                    class="flex items-center justify-between p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900">
+                                                    <span
+                                                        class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $fPlaceholder ?: 'فعال‌سازی / تأیید' }}</span>
+                                                    <label class="relative inline-flex items-center cursor-pointer">
+                                                        <input type="checkbox"
+                                                               wire:model.defer="customFieldsForm.{{ $fName }}"
+                                                               value="1" class="sr-only peer">
+                                                        <div
+                                                            class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                                                    </label>
+                                                </div>
+                                            @elseif($fType === 'currency')
+                                                <div class="relative">
+                                                    <input type="number"
+                                                           wire:model.defer="customFieldsForm.{{ $fName }}"
+                                                           placeholder="{{ $fPlaceholder ?: 'مبلغ به تومان' }}"
+                                                           class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900 px-3.5 py-2.5 pl-14 text-xs font-mono dir-ltr text-left text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
+                                                    <span
+                                                        class="absolute inset-y-0 left-0 flex items-center px-3 text-[11px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 rounded-l-xl">تومان</span>
+                                                </div>
+                                            @elseif($fType === 'url')
+                                                <input type="url" wire:model.defer="customFieldsForm.{{ $fName }}"
+                                                       placeholder="{{ $fPlaceholder ?: 'https://...' }}"
+                                                       class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900 px-3.5 py-2.5 text-xs font-mono dir-ltr text-left text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
+                                            @elseif($fType === 'time')
+                                                <input type="time" wire:model.defer="customFieldsForm.{{ $fName }}"
+                                                       class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900 px-3.5 py-2.5 text-xs font-mono text-center text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
+                                            @elseif($fType === 'mobile')
+                                                <input type="tel" wire:model.defer="customFieldsForm.{{ $fName }}"
+                                                       placeholder="{{ $fPlaceholder ?: '۰۹xxxxxxxxx' }}"
+                                                       class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900 px-3.5 py-2.5 text-xs font-mono dir-ltr text-left text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
+                                            @else
+                                                <input
+                                                    type="{{ in_array($fType, ['number', 'email', 'date', 'tel']) ? $fType : 'text' }}"
+                                                    wire:model.defer="customFieldsForm.{{ $fName }}"
+                                                    placeholder="{{ $fPlaceholder }}"
+                                                    class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 {{ in_array($fType, ['number', 'tel', 'email']) ? 'dir-ltr text-left' : '' }}">
+                                            @endif
+
+                                            @error('customFieldsForm.' . $fName)
+                                            <p class="text-[11px] text-rose-500 font-bold mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <div
+                                class="p-3.5 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 flex items-center gap-2.5 text-xs text-indigo-900 dark:text-indigo-300">
+                                <svg class="w-4 h-4 shrink-0 text-indigo-600 dark:text-indigo-400" fill="none"
+                                     viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>اطلاعات ثبت‌شده در این گام به شکل پایدار در بخش پروفایل و اطلاعات کاربری شما ذخیره می‌شوند و بعد از پایان تور نیز همواره قابل مشاهده و ویرایش هستند.</span>
+                            </div>
+                        </div>
+
+                        <div
+                            class="p-5 bg-gray-50/80 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                            <button
+                                type="button"
+                                wire:click="closeCustomFieldsModal"
+                                class="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700 rounded-xl transition-all cursor-pointer">
+                                انصراف
+                            </button>
+                            <button
+                                type="submit"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/30 transition-all cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span>ذخیره اطلاعات و تأیید گام</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
