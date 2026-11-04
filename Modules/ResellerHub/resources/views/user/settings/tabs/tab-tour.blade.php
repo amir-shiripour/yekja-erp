@@ -36,6 +36,9 @@
     <input type="hidden" name="onboarding_tour_celebration_title" :value="tourCelebrationTitle || ''">
     <input type="hidden" name="onboarding_tour_celebration_message" :value="tourCelebrationMessage || ''">
     <input type="hidden" name="onboarding_tour_steps" :value="JSON.stringify(tourSteps)">
+    <input type="hidden" name="onboarding_tour_optional_reminder_enabled" :value="tourOptionalReminderEnabled ? '1' : '0'">
+    <input type="hidden" name="onboarding_tour_optional_reminder_interval_days" :value="tourOptionalReminderIntervalDays">
+    <input type="hidden" name="onboarding_tour_optional_reminder_mode" :value="tourOptionalReminderMode">
 
     {{-- Tour Master Toggle Card with Checkbox --}}
     <x-resellerhub::card
@@ -508,6 +511,254 @@
                         </div>
                     </div>
                 </template>
+            </div>
+        </div>
+    </x-resellerhub::card>
+
+    {{-- Card 4: Optional Steps Reminder & Frequency Management --}}
+    <x-resellerhub::card
+        class="p-6 sm:p-8 space-y-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
+        {{-- Header --}}
+        <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-4">
+            <div class="flex items-center gap-3">
+                <span
+                    class="p-2.5 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/80 dark:to-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-2xl shadow-xs border border-indigo-200/80 dark:border-indigo-800/80">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </span>
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h2 class="text-base font-black text-gray-900 dark:text-white">مدیریت یادآوری و نمایش مراحل اختیاری تور</h2>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-900/60">
+                            هوشمند و انعطاف‌پذیر
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        تعیین رفتار سیستم در صورتی که کاربر مراحل اجباری را گذرانده و دکمه «پر کردن بعداً» را برای مراحل اختیاری انتخاب کند.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Master Toggle for Optional Reminder --}}
+        <div class="p-5 rounded-2xl border transition-all"
+             :class="tourOptionalReminderEnabled ? 'bg-indigo-50/40 dark:bg-indigo-950/20 border-indigo-200/80 dark:border-indigo-800/60' : 'bg-gray-50/70 dark:bg-gray-800/40 border-gray-200/80 dark:border-gray-700'">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-3.5">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-all"
+                         :class="tourOptionalReminderEnabled ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25' : 'bg-gray-200 dark:bg-gray-700 text-gray-400'">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-black text-gray-900 dark:text-white">ارسال یادآور برای گام‌های اختیاری تکمیل‌نشده</h3>
+                            <span class="px-2 py-0.5 rounded-md text-xs font-bold"
+                                  :class="tourOptionalReminderEnabled ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700'"
+                                  x-text="tourOptionalReminderEnabled ? 'یادآوری خودکار فعال' : 'بدون یادآوری (غیرفعال)'"></span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                            در صورت فعال بودن، اگر کاربر گزینه «پر کردن بعداً» را بزند، سامانه پس از بازه زمانی مقرر دوباره مراحل اختیاری را به وی یادآوری خواهد کرد.
+                        </p>
+                    </div>
+                </div>
+
+                <label class="relative inline-flex items-center cursor-pointer shrink-0 select-none">
+                    <input type="checkbox"
+                           x-model="tourOptionalReminderEnabled"
+                           class="sr-only peer">
+                    <div class="w-14 h-8 bg-gray-300 dark:bg-gray-700 rounded-full peer peer-checked:bg-indigo-600 transition-colors duration-300 shadow-inner"></div>
+                    <div class="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center pointer-events-none">
+                        <svg class="w-3.5 h-3.5 text-indigo-600 opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        {{-- Reminder Frequency / Interval Options (visible if enabled) --}}
+        <div x-show="tourOptionalReminderEnabled" x-transition.duration.300ms class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span>فاصله زمانی تکرار یادآوری (چند وقت یک‌بار نشان دهد؟):</span>
+                    </h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        مدت زمانی که پس از بستن موقت تور توسط کاربر، یادآور مجدداً ظاهر شود.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2.5">
+                {{-- Option 1: 24 Hours / Daily --}}
+                <button type="button"
+                        @click="tourOptionalReminderIntervalDays = 1"
+                        class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer"
+                        :class="tourOptionalReminderIntervalDays === 1 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
+                    <div class="flex items-center justify-between w-full">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۲۴س</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 1" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-black block">هر ۲۴ ساعت</span>
+                        <span class="text-[11px] text-gray-500 dark:text-gray-400 block mt-0.5">یادآوری روزانه</span>
+                    </div>
+                </button>
+
+                {{-- Option 2: 3 Days (Recommended) --}}
+                <button type="button"
+                        @click="tourOptionalReminderIntervalDays = 3"
+                        class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer relative"
+                        :class="tourOptionalReminderIntervalDays === 3 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
+                    <span class="absolute -top-2 start-3 px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-black rounded-md shadow-xs">پیشنهادی</span>
+                    <div class="flex items-center justify-between w-full">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۳ر</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 3" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-black block">هر ۳ روز یک‌بار</span>
+                        <span class="text-[11px] text-gray-500 dark:text-gray-400 block mt-0.5">تعادل مطلوب</span>
+                    </div>
+                </button>
+
+                {{-- Option 3: 7 Days / Weekly --}}
+                <button type="button"
+                        @click="tourOptionalReminderIntervalDays = 7"
+                        class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer"
+                        :class="tourOptionalReminderIntervalDays === 7 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
+                    <div class="flex items-center justify-between w-full">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۷ر</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 7" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-black block">هر هفته (۷ روز)</span>
+                        <span class="text-[11px] text-gray-500 dark:text-gray-400 block mt-0.5">یادآوری هفتگی</span>
+                    </div>
+                </button>
+
+                {{-- Option 4: 14 Days --}}
+                <button type="button"
+                        @click="tourOptionalReminderIntervalDays = 14"
+                        class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer"
+                        :class="tourOptionalReminderIntervalDays === 14 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
+                    <div class="flex items-center justify-between w-full">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۱۴ر</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 14" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-black block">هر دو هفته</span>
+                        <span class="text-[11px] text-gray-500 dark:text-gray-400 block mt-0.5">بازه طولانی‌تر</span>
+                    </div>
+                </button>
+
+                {{-- Option 5: 30 Days / Monthly --}}
+                <button type="button"
+                        @click="tourOptionalReminderIntervalDays = 30"
+                        class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer"
+                        :class="tourOptionalReminderIntervalDays === 30 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
+                    <div class="flex items-center justify-between w-full">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">۳۰ر</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 30" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-black block">هر ماه (۳۰ روز)</span>
+                        <span class="text-[11px] text-gray-500 dark:text-gray-400 block mt-0.5">ماهانه یک‌بار</span>
+                    </div>
+                </button>
+
+                {{-- Option 6: Every Session / Login (0) --}}
+                <button type="button"
+                        @click="tourOptionalReminderIntervalDays = 0"
+                        class="p-3.5 rounded-2xl border text-right transition-all flex flex-col justify-between gap-2.5 cursor-pointer"
+                        :class="tourOptionalReminderIntervalDays === 0 ? 'border-indigo-600 bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'">
+                    <div class="flex items-center justify-between w-full">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black">ورود</span>
+                        <span x-show="tourOptionalReminderIntervalDays === 0" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                    </div>
+                    <div>
+                        <span class="text-xs font-black block">در هر بار ورود</span>
+                        <span class="text-[11px] text-gray-500 dark:text-gray-400 block mt-0.5">در هر سشن جدید</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        {{-- Presentation Mode: Pill vs Auto-Expanded Card --}}
+        <div x-show="tourOptionalReminderEnabled" x-transition.duration.300ms class="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
+                <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                </svg>
+                <span>حالت نمایش یادآور در پیشخوان (Reminder Display Mode):</span>
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button type="button"
+                        @click="tourOptionalReminderMode = 'pill'"
+                        class="p-4 rounded-2xl border text-right transition-all flex items-start gap-3.5 cursor-pointer"
+                        :class="tourOptionalReminderMode === 'pill' ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/40 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'">
+                    <span class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                          :class="tourOptionalReminderMode === 'pill' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                        </svg>
+                    </span>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-gray-900 dark:text-white">نوار جمع‌شده و مینیمال (Pill / Ribbon)</span>
+                            <span x-show="tourOptionalReminderMode === 'pill'" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            یک نوار باریک، شکیل و آرامش‌بخش در بالای داشبورد نمایش می‌یابد که مزاحم کار کاربر نمی‌شود و با یک کلیک باز می‌گردد.
+                        </p>
+                    </div>
+                </button>
+
+                <button type="button"
+                        @click="tourOptionalReminderMode = 'card'"
+                        class="p-4 rounded-2xl border text-right transition-all flex items-start gap-3.5 cursor-pointer"
+                        :class="tourOptionalReminderMode === 'card' ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/40 ring-2 ring-indigo-500/20 shadow-xs' : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'">
+                    <span class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                          :class="tourOptionalReminderMode === 'card' ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                    </span>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-gray-900 dark:text-white">باز شدن خودکار کارد مراحل (Auto-Expanded Card)</span>
+                            <span x-show="tourOptionalReminderMode === 'card'" class="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            پس از فرارسیدن موعد یادآوری، کارد کامل مراحل در داشبورد باز می‌شود تا توجه کاربر به تکمیل مراحل باقیمانده جلب شود.
+                        </p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        {{-- Helper Information Tip --}}
+        <div class="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 flex items-start gap-3">
+            <span class="p-1 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </span>
+            <div class="text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
+                <span class="font-bold">راهنمای هوشمند عملکرد تور:</span>
+                هنگامی که تمام مراحل اجباری راه‌اندازی توسط کاربر انجام شود و فقط مراحل اختیاری باقی مانده باشد، دکمه شکیل <strong>«پر کردن بعداً و ورود به پیشخوان»</strong> در بالای تور نمایش داده می‌شود. با کلیک کاربر روی آن، تور فوراً بسته شده و پیشخوان کامل CRM باز می‌گردد، و طبق بازه زمانی تعریف‌شده در این بخش، در آینده مجدداً یادآوری خواهد شد.
             </div>
         </div>
     </x-resellerhub::card>

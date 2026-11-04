@@ -47,8 +47,9 @@
         </div>
     @endif
 
-    {{-- State 1: Dismissed Compact Pill --}}
-    @if ($isDismissed)
+    @if (!empty($isCompleted) || !empty($isTourDismissedOrPostponed))
+
+    @elseif ($isDismissed)
         <div
             wire:click="reopen"
             role="button"
@@ -63,9 +64,14 @@
                               d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                 </span>
-                <span class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                <span
+                    class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                     راه‌اندازی گام‌به‌گام سامانه
                     <span class="text-xs font-normal text-gray-500 dark:text-gray-400 mr-1.5">({{ reseller_fa_num($percentage) }}٪ تکمیل شده)</span>
+                    @if(!empty($onlyOptionalRemaining))
+                        <span
+                            class="mr-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">مراحل باقیمانده اختیاری است</span>
+                    @endif
                 </span>
             </div>
             <button
@@ -74,7 +80,8 @@
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/70 hover:bg-indigo-100 dark:hover:bg-indigo-900/70 text-indigo-700 dark:text-indigo-300 text-xs font-bold rounded-xl transition-all border border-indigo-200/80 dark:border-indigo-800 cursor-pointer"
             >
                 <span>نمایش مراحل راه‌اندازی</span>
-                <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none"
+                     viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
@@ -147,7 +154,8 @@
                     </span>
                     <div class="min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-sm font-black text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                            <span
+                                class="text-sm font-black text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                 راه‌اندازی سامانه CRM
                             </span>
                             <span
@@ -156,7 +164,8 @@
                             </span>
                         </div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                            {{ reseller_fa_num($completedCount) }} از {{ reseller_fa_num($totalCount) }} گام راه‌اندازی انجام شده است — <span class="text-indigo-600 dark:text-indigo-400 font-medium">کلیک برای مشاهده مراحل</span>
+                            {{ reseller_fa_num($completedCount) }} از {{ reseller_fa_num($totalCount) }} گام راه‌اندازی
+                            انجام شده است — <span class="text-indigo-600 dark:text-indigo-400 font-medium">کلیک برای مشاهده مراحل</span>
                         </p>
                     </div>
                 </div>
@@ -167,7 +176,9 @@
                         wire:click.stop="toggleCollapse"
                         class="flex items-center gap-2 flex-1 sm:w-44 cursor-pointer hover:opacity-90 transition-opacity"
                         title="پیشرفت کل: {{ $percentage }}٪ (کلیک برای باز کردن تور)">
-                        <div class="flex-1 bg-gray-100 dark:bg-gray-700/80 rounded-full h-2.5 overflow-hidden border border-gray-200/50 dark:border-gray-700" dir="rtl">
+                        <div
+                            class="flex-1 bg-gray-100 dark:bg-gray-700/80 rounded-full h-2.5 overflow-hidden border border-gray-200/50 dark:border-gray-700"
+                            dir="rtl">
                             <div
                                 class="h-full rounded-full bg-indigo-600 transition-all duration-500 shadow-xs"
                                 style="width: {{ (int)$percentage }}%; min-width: {{ $percentage > 0 ? '6px' : '0' }}; background-color: #4f46e5 !important; background: linear-gradient(to left, #4f46e5, #6366f1) !important;"></div>
@@ -262,6 +273,20 @@
                         @endif
                     @endif
 
+                    @if(!empty($onlyOptionalRemaining))
+                        <button
+                            type="button"
+                            wire:click.stop="postponeOptionalTour"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
+                            title="ورود به پیشخوان و تکمیل موارد اختیاری در آینده">
+                            <span>پر کردن بعداً</span>
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                    @endif
+
                     {{-- Explicit Expand Button with Text & Icon --}}
                     <button
                         type="button"
@@ -269,7 +294,8 @@
                         title="مشاهده و باز کردن مراحل راه‌اندازی"
                         class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-50 dark:bg-indigo-950/70 hover:bg-indigo-100 dark:hover:bg-indigo-900/70 text-indigo-700 dark:text-indigo-300 text-xs font-bold rounded-xl transition-all border border-indigo-200/80 dark:border-indigo-800 cursor-pointer shrink-0">
                         <span>مشاهده مراحل تور</span>
-                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
@@ -313,7 +339,26 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 self-end md:self-auto">
+                <div class="flex items-center gap-2 self-end md:self-auto flex-wrap">
+                    @if(!empty($onlyOptionalRemaining))
+                        <button
+                            type="button"
+                            wire:click="postponeOptionalTour"
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-black rounded-xl shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/35 transition-all cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0 shrink-0"
+                            title="ورود به پیشخوان و تکمیل موارد اختیاری در آینده"
+                        >
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                 stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>پر کردن بعداً و ورود به پیشخوان</span>
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                    @endif
+
                     <button
                         wire:click="toggleCollapse"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-all border border-gray-200/80 dark:border-gray-600 cursor-pointer"
@@ -336,6 +381,46 @@
                     </button>
                 </div>
             </div>
+
+            @if(!empty($onlyOptionalRemaining))
+                <div
+                    class="p-4 sm:p-5 rounded-2xl bg-gradient-to-l from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-200/80 dark:border-emerald-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3.5">
+                        <span
+                            class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-500/30">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                 stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </span>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-xs sm:text-sm font-black text-emerald-950 dark:text-emerald-200">
+                                    تمامی مراحل پایه و اجباری راه‌اندازی با موفقیت انجام شدند
+                                </h3>
+                                <span
+                                    class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300">
+                                    گام‌های باقیمانده اختیاری هستند
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+                                بخش‌های باقیمانده برای شخصی‌سازی بیشتر و اختیاری هستند. می‌توانید هم‌اکنون وارد پیشخوان
+                                شوید و هر زمان مایل بودید آن‌ها را تکمیل کنید.
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        wire:click="postponeOptionalTour"
+                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black rounded-xl shadow-md shadow-emerald-500/25 transition-all cursor-pointer shrink-0"
+                    >
+                        <span>پر کردن بعداً و ورود به پیشخوان</span>
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                </div>
+            @endif
 
             {{-- Interactive Enterprise 4-Step Connected Progress Stepper --}}
             <div
@@ -915,8 +1000,11 @@
                                             dir="ltr">
                                             <span
                                                 class="inline-flex items-center gap-1.5 px-3.5 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-mono font-bold border-r border-gray-200 dark:border-gray-700 select-none shrink-0">
-                                                <svg class="w-3.5 h-3.5 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                                                <svg class="w-3.5 h-3.5 text-indigo-500 shrink-0" fill="none"
+                                                     viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2"
+                                                          d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
                                                 </svg>
                                                 {{ $displayHost }}/
                                             </span>
@@ -931,8 +1019,10 @@
 
                                         @error('subdomainInput')
                                         <div class="flex items-center gap-1.5 text-xs text-red-500 font-semibold mt-1">
-                                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24"
+                                                 stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                             </svg>
                                             <span>{{ $message }}</span>
                                         </div>
@@ -940,12 +1030,14 @@
                                     </div>
 
                                     {{-- Live Preview Section (بخش زنده پیش‌نمایش آدرس سامانه) --}}
-                                    <div class="rounded-2xl p-4 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 dark:from-indigo-950/30 dark:via-gray-800/80 dark:to-purple-950/20 border border-indigo-100 dark:border-indigo-900/50 shadow-xs space-y-2.5">
+                                    <div
+                                        class="rounded-2xl p-4 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 dark:from-indigo-950/30 dark:via-gray-800/80 dark:to-purple-950/20 border border-indigo-100 dark:border-indigo-900/50 shadow-xs space-y-2.5">
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center gap-2">
                                                 <span class="relative flex h-2.5 w-2.5">
-                                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
-                                                          x-show="cleanSlug"></span>
+                                                    <span
+                                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+                                                        x-show="cleanSlug"></span>
                                                     <span class="relative inline-flex rounded-full h-2.5 w-2.5"
                                                           :class="cleanSlug ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'"></span>
                                                 </span>
@@ -961,9 +1053,13 @@
                                         </div>
 
                                         {{-- Address Bar Look --}}
-                                        <div class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-mono shadow-inner overflow-x-auto" dir="ltr">
-                                            <svg class="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        <div
+                                            class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-mono shadow-inner overflow-x-auto"
+                                            dir="ltr">
+                                            <svg class="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                             </svg>
                                             <span class="text-gray-400 dark:text-gray-500 text-[11px] select-none">https://</span>
                                             <span class="text-gray-700 dark:text-gray-200 font-semibold select-none">{{ $displayHost }}/</span>
@@ -973,7 +1069,8 @@
                                         </div>
 
                                         <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed text-right">
-                                            این نشانی آدرس مستقیم سامانه شماست که مدیران و کارکنان با مراجعه به آن وارد پنل کاری می‌شوند.
+                                            این نشانی آدرس مستقیم سامانه شماست که مدیران و کارکنان با مراجعه به آن وارد
+                                            پنل کاری می‌شوند.
                                         </p>
                                     </div>
                                 </div>
@@ -992,8 +1089,10 @@
                                         />
                                         @error('customDomainInput')
                                         <div class="flex items-center gap-1.5 text-xs text-red-500 font-semibold mt-1">
-                                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24"
+                                                 stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                             </svg>
                                             <span>{{ $message }}</span>
                                         </div>
@@ -1110,7 +1209,7 @@
 
                             <div class="space-y-1.5">
                                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                                    رنگ سازمانی و تم اصلی  <span class="text-red-500 font-extrabold">*</span>
+                                    رنگ سازمانی و تم اصلی <span class="text-red-500 font-extrabold">*</span>
                                 </label>
                                 <div class="flex items-center gap-3">
                                     <input

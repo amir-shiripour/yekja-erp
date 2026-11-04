@@ -17,6 +17,7 @@ use Modules\Clients\Entities\Client;
 use Modules\ResellerHub\App\Data\Onboarding\StepData;
 use Modules\ResellerHub\App\Enums\OnboardingStep;
 use Modules\ResellerHub\App\Enums\OnboardingStepPreset;
+use Modules\ResellerHub\App\Enums\OnboardingTourStatus;
 use Modules\ResellerHub\App\Events\TenantOnboardingStepCompleted;
 use Modules\ResellerHub\App\Models\TenantOnboardingState;
 use Modules\ResellerHub\App\Models\ResellerSetting;
@@ -344,6 +345,103 @@ class OnboardingStateService
     }
 
     /**
+     * Check if all remaining (uncompleted / unskipped) steps for a tenant are optional.
+     */
+    public function areRemainingStepsOptional(Tenant|int $tenant): bool
+    {
+        $tenantModel = $tenant instanceof Tenant ? $tenant : Tenant::find($tenant);
+        if (!$tenantModel || $tenantModel->isOnboardingCompleted()) {
+            return false;
+        }
+
+        $progress = $this->getTenantProgress($tenantModel);
+        if (empty($progress['journeys']) || empty($progress['total']) || !empty($progress['is_finished'])) {
+            return false;
+        }
+
+        $steps = $progress['journeys'][0]['steps'] ?? [];
+        $hasIncompleteRequired = false;
+        $remainingOptionalCount = 0;
+
+        foreach ($steps as $item) {
+            $isDone = in_array($item['status'], [
+                TenantOnboardingState::STATUS_COMPLETED,
+                TenantOnboardingState::STATUS_SKIPPED,
+            ], true);
+
+            if (!$isDone) {
+                if ($item['step']->isRequired) {
+                    $hasIncompleteRequired = true;
+                } else {
+                    $remainingOptionalCount++;
+                }
+            }
+        }
+
+        return !$hasIncompleteRequired && ($remainingOptionalCount > 0);
+    }
+
+    /**
+     * Determine if the tour is currently dismissed or in a postponed/snoozed state for a tenant.
+     * Takes into account the reseller's optional tour reminder settings.
+     */
+    public function isTourDismissedOrPostponed(Tenant|int $tenant): bool
+    {
+        $tenantModel = $tenant instanceof Tenant ? $tenant : Tenant::find($tenant);
+        if (!$tenantModel) {
+            return false;
+        }
+
+        // If tenant's onboarding tour is already marked as completed, it remains permanently closed/dismissed
+        if ($tenantModel->isOnboardingCompleted()) {
+            return true;
+        }
+
+        $tourConfig = ResellerSetting::getOnboardingTourConfig($tenantModel->reseller_id);
+        if (empty($tourConfig['enabled'])) {
+            return true;
+        }
+
+        $tenantSettings = $tenantModel->settings ?? [];
+        $postponedAt = $tenantSettings['onboarding_postponed_at'] ?? null;
+
+        // If user never postponed optional steps:
+        if (!$postponedAt) {
+            return (bool)session('onboarding_widget_dismissed', false);
+        }
+
+        // Reminders for optional steps:
+        $reminderEnabled = (bool)($tourConfig['optional_reminder_enabled'] ?? true);
+        $intervalDays = (int)($tourConfig['optional_reminder_interval_days'] ?? 3);
+
+        // If reminder is disabled or set to never (-1):
+        if (!$reminderEnabled || $intervalDays === -1) {
+            return true;
+        }
+
+        // If interval is 0 (every new session / login):
+        if ($intervalDays === 0) {
+            return (bool)session('onboarding_widget_dismissed', false);
+        }
+
+        // Check if intervalDays have passed since postponedAt:
+        try {
+            $postponedCarbon = Carbon::parse($postponedAt);
+            $hoursPassed = $postponedCarbon->diffInHours(now());
+
+            if ($hoursPassed >= ($intervalDays * 24)) {
+                // Reminder interval has elapsed! Tour should pop up again.
+                session()->forget('onboarding_widget_dismissed');
+                return false;
+            }
+
+            return true;
+        } catch (Throwable $e) {
+            return (bool)session('onboarding_widget_dismissed', false);
+        }
+    }
+
+    /**
      * Compute comprehensive onboarding progress for a tenant.
      *
      * @param Tenant|int $tenant
@@ -370,6 +468,23 @@ class OnboardingStateService
                 'is_finished' => true,
                 'next_step' => null,
                 'journeys' => [],
+                'status' => OnboardingTourStatus::COMPLETED->value,
+            ];
+        }
+
+        if ($tenantModel->isOnboardingCompleted()) {
+            $states = $this->getTenantStates($tenantModel->id);
+            $count = max(count($states), 1);
+            return [
+                'total' => $count,
+                'completed' => $count,
+                'skipped' => 0,
+                'percentage' => 100,
+                'is_finished' => true,
+                'next_step' => null,
+                'journeys' => [],
+                'status' => OnboardingTourStatus::COMPLETED->value,
+                'completed_at' => data_get($tenantModel->settings, 'onboarding_completed_at'),
             ];
         }
 
@@ -513,7 +628,7 @@ class OnboardingStateService
                             ]);
                         }
                     } elseif (!$step->canManualComplete && $isCurrentlyCompleted) {
-                        // Reconcile false positive: manual completion not permitted and entity does not exist in DB
+
                         $applyStepReversion($step->slug);
                     }
                 }
@@ -590,6 +705,11 @@ class OnboardingStateService
         $percentage = $totalSteps > 0 ? (int)round(($completedSteps / $totalSteps) * 100) : 100;
         $isFinished = ($totalSteps > 0) && ($completedSteps + $skippedSteps >= $totalSteps);
 
+        if ($isFinished && !$tenantModel->isOnboardingCompleted()) {
+            $tenantModel->setOnboardingStatus(OnboardingTourStatus::COMPLETED)->save();
+            $this->flushCache($tenantModel->id);
+        }
+
         return [
             'total' => $totalSteps,
             'completed' => $completedSteps,
@@ -598,6 +718,7 @@ class OnboardingStateService
             'is_finished' => $isFinished,
             'next_step' => $nextStep,
             'journeys' => $journeysData,
+            'status' => $tenantModel->getOnboardingStatus()->value,
         ];
     }
 

@@ -16,6 +16,7 @@ use Modules\ResellerHub\App\Enums\BrandColor;
 use Modules\ResellerHub\App\Enums\InvoiceStatus;
 use Modules\ResellerHub\App\Enums\InvoiceType;
 use Modules\ResellerHub\App\Enums\OnboardingStep;
+use Modules\ResellerHub\App\Enums\OnboardingTourStatus;
 use Modules\ResellerHub\App\Helpers\ResellerHelper;
 use Modules\ResellerHub\App\Http\Requests\SaveTenantBrandingRequest;
 use Modules\ResellerHub\App\Models\Reseller;
@@ -74,14 +75,29 @@ class OnboardingWidget extends Component
 
     public function mount(): void
     {
-        $this->isCollapsed = (bool)session('onboarding_widget_collapsed', false);
-        $this->isDismissed = (bool)session('onboarding_widget_dismissed', false);
-
         $tenant = $this->getTenant();
         $reseller = $this->getReseller();
         $allowCustomDomains = $reseller ? $reseller->allowsCustomDomains() : true;
 
         if ($tenant) {
+            /** @var OnboardingStateService $stateService */
+            $stateService = app(OnboardingStateService::class);
+            $this->isDismissed = $stateService->isTourDismissedOrPostponed($tenant);
+
+            $tourConfig = ResellerSetting::getOnboardingTourConfig($tenant->reseller_id);
+            $reminderMode = $tourConfig['optional_reminder_mode'] ?? 'pill';
+            $hasPostponed = !empty($tenant->settings['onboarding_postponed_at']);
+
+            if (!$this->isDismissed && $hasPostponed) {
+                if ($reminderMode === 'card') {
+                    $this->isCollapsed = false;
+                } else {
+                    $this->isCollapsed = true;
+                }
+            } else {
+                $this->isCollapsed = (bool)session('onboarding_widget_collapsed', false);
+            }
+
             $this->subdomainInput = '';
             $this->customDomainInput = (string)($tenant->custom_domain ?? '');
             if ($allowCustomDomains && !empty($tenant->custom_domain)) {
@@ -97,6 +113,9 @@ class OnboardingWidget extends Component
             $this->supportPhone = reseller_fa_num((string)($b['support_phone'] ?? ''));
             $this->supportEmail = (string)($b['support_email'] ?? '');
             $this->selectedPackageId = $tenant->package_id;
+        } else {
+            $this->isDismissed = (bool)session('onboarding_widget_dismissed', false);
+            $this->isCollapsed = (bool)session('onboarding_widget_collapsed', false);
         }
 
         $this->loadKycValues();
@@ -110,8 +129,41 @@ class OnboardingWidget extends Component
 
     public function dismiss(): void
     {
+        $tenant = $this->getTenant();
+        if ($tenant) {
+            /** @var OnboardingStateService $stateService */
+            $stateService = app(OnboardingStateService::class);
+            $progress = $stateService->getTenantProgress($tenant);
+            if (!empty($progress['is_finished'])) {
+                $tenant->setOnboardingStatus(OnboardingTourStatus::COMPLETED)->save();
+                $stateService->flushCache($tenant->id);
+            }
+        }
+
         $this->isDismissed = true;
         session(['onboarding_widget_dismissed' => true]);
+    }
+
+    /**
+     * Postpone optional tour steps and proceed directly to dashboard.
+     */
+    public function postponeOptionalTour(): void
+    {
+        $tenant = $this->getTenant();
+        if ($tenant) {
+            $tenant->setOnboardingStatus(OnboardingTourStatus::POSTPONED)->save();
+            /** @var OnboardingStateService $stateService */
+            $stateService = app(OnboardingStateService::class);
+            $stateService->flushCache($tenant->id);
+        }
+
+        $this->isDismissed = true;
+        session(['onboarding_widget_dismissed' => true]);
+
+        $this->successMessage = 'مراحل اختیاری به تعویق افتاد. به پیشخوان CRM خوش آمدید!';
+
+        $targetUrl = $tenant ? app(TenantManager::class)->getTenantUrl($tenant, 'user/dashboard') : route('user.dashboard');
+        $this->redirect($targetUrl, navigate: false);
     }
 
     public function reopen(): void
@@ -859,11 +911,21 @@ class OnboardingWidget extends Component
 
             $reseller = $this->getReseller();
             $allowCustomDomains = $reseller ? $reseller->allowsCustomDomains() : true;
+            $onlyOptionalRemaining = $stateService->areRemainingStepsOptional($tenant);
+            $hasPostponed = !empty($tenant->settings['onboarding_postponed_at']);
+            $isTourDismissedOrPostponed = $stateService->isTourDismissedOrPostponed($tenant);
+            $isCompleted = $tenant->isOnboardingCompleted();
+            $reminderMode = $tourConfig['optional_reminder_mode'] ?? 'pill';
 
             return view('resellerhub::livewire.dashboard.onboarding-widget', [
                 'tenant' => $tenant,
                 'tourConfig' => $tourConfig,
                 'progress' => $progress,
+                'onlyOptionalRemaining' => $onlyOptionalRemaining,
+                'hasPostponed' => $hasPostponed,
+                'isTourDismissedOrPostponed' => $isTourDismissedOrPostponed,
+                'isCompleted' => $isCompleted,
+                'reminderMode' => $reminderMode,
                 'isFinished' => $progress['is_finished'],
                 'isDismissed' => $this->isDismissed,
                 'isCollapsed' => $this->isCollapsed,

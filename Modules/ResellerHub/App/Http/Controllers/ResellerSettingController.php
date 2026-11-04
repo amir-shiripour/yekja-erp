@@ -174,6 +174,9 @@ class ResellerSettingController extends Controller
                 'onboarding_tour_grace_period_days' => (int)ResellerSetting::get($reseller->id, ResellerSettingKey::OnboardingTourGracePeriodDays, 3),
                 'onboarding_tour_celebration_title' => (string)ResellerSetting::get($reseller->id, ResellerSettingKey::OnboardingTourCelebrationTitle, ''),
                 'onboarding_tour_celebration_message' => (string)ResellerSetting::get($reseller->id, ResellerSettingKey::OnboardingTourCelebrationMessage, ''),
+                'onboarding_tour_optional_reminder_enabled' => (bool)ResellerSetting::get($reseller->id, ResellerSettingKey::OnboardingTourOptionalReminderEnabled, true),
+                'onboarding_tour_optional_reminder_interval_days' => (int)ResellerSetting::get($reseller->id, ResellerSettingKey::OnboardingTourOptionalReminderIntervalDays, 3),
+                'onboarding_tour_optional_reminder_mode' => (string)ResellerSetting::get($reseller->id, ResellerSettingKey::OnboardingTourOptionalReminderMode, 'pill'),
             ]);
         }
 

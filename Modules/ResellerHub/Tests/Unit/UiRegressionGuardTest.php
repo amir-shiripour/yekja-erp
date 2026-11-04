@@ -535,4 +535,134 @@ class UiRegressionGuardTest extends TestCase
             $this->assertContains($response->status(), [403, 302], 'Non-superadmin must be denied or redirected away from tenants export.');
         }
     }
+
+    public function test_optional_tour_reminder_settings_and_postpone_controls(): void
+    {
+        // 1. Verify tab-tour has reminder settings inputs and UI
+        $tourBlade = $this->moduleView('user/settings/tabs/tab-tour.blade.php');
+        $this->assertStringContainsString('onboarding_tour_optional_reminder_enabled', $tourBlade);
+        $this->assertStringContainsString('onboarding_tour_optional_reminder_interval_days', $tourBlade);
+        $this->assertStringContainsString('onboarding_tour_optional_reminder_mode', $tourBlade);
+        $this->assertStringContainsString('مدیریت یادآوری و نمایش مراحل اختیاری تور', $tourBlade);
+        $this->assertStringContainsString('فاصله زمانی تکرار یادآوری', $tourBlade);
+
+        // 2. Verify onboarding-widget has postpone CTA and button
+        $widgetBlade = $this->moduleView('livewire/dashboard/onboarding-widget.blade.php');
+        $this->assertStringContainsString('postponeOptionalTour', $widgetBlade);
+        $this->assertStringContainsString('پر کردن بعداً و ورود به پیشخوان', $widgetBlade);
+
+        // 3. Verify settings script initializes the reminder config
+        $scriptBlade = $this->moduleView('user/settings/partials/settings-script.blade.php');
+        $this->assertStringContainsString('tourOptionalReminderEnabled', $scriptBlade);
+        $this->assertStringContainsString('tourOptionalReminderIntervalDays', $scriptBlade);
+        $this->assertStringContainsString('tourOptionalReminderMode', $scriptBlade);
+    }
+
+    public function test_optional_tour_reminder_and_snooze_service_logic(): void
+    {
+        $stateService = app(\Modules\ResellerHub\App\Services\Onboarding\OnboardingStateService::class);
+        $tenant = \App\Models\Tenant::first();
+
+        if ($tenant) {
+            // Ensure tenant is in an active (in_progress) tour state for testing snooze
+            $tenant->setOnboardingStatus(\Modules\ResellerHub\App\Enums\OnboardingTourStatus::IN_PROGRESS)->save();
+            $settings = $tenant->settings ?? [];
+            unset($settings['onboarding_completed_at']);
+            $tenant->settings = $settings;
+            $tenant->save();
+
+            // Test 1: When tenant has postponed_at within interval (e.g. 1 hour ago)
+            $tenant->settings = array_merge($tenant->settings ?? [], [
+                'onboarding_postponed_at' => now()->subHour()->toIso8601String(),
+            ]);
+            $tenant->save();
+
+            // Set reminder interval to 3 days (72 hours)
+            \Modules\ResellerHub\App\Models\ResellerSetting::set(
+                $tenant->reseller_id ?: 1,
+                \Modules\ResellerHub\App\Enums\ResellerSettingKey::OnboardingTourOptionalReminderEnabled,
+                1
+            );
+            \Modules\ResellerHub\App\Models\ResellerSetting::set(
+                $tenant->reseller_id ?: 1,
+                \Modules\ResellerHub\App\Enums\ResellerSettingKey::OnboardingTourOptionalReminderIntervalDays,
+                3
+            );
+
+            // Within interval: must be dismissed/postponed (true)
+            $this->assertTrue(
+                $stateService->isTourDismissedOrPostponed($tenant),
+                'Tour must remain postponed while within reminder interval.'
+            );
+
+            // Test 2: When postponed_at was 4 days ago (interval elapsed)
+            $tenant->settings = array_merge($tenant->settings ?? [], [
+                'onboarding_postponed_at' => now()->subDays(4)->toIso8601String(),
+            ]);
+            $tenant->save();
+
+            // Elapsed: reminder should trigger! (false)
+            $this->assertFalse(
+                $stateService->isTourDismissedOrPostponed($tenant),
+                'Tour must trigger re-prompt when reminder interval has elapsed.'
+            );
+
+            // Test 3: When reminder is disabled completely
+            \Modules\ResellerHub\App\Models\ResellerSetting::set(
+                $tenant->reseller_id ?: 1,
+                \Modules\ResellerHub\App\Enums\ResellerSettingKey::OnboardingTourOptionalReminderEnabled,
+                0
+            );
+
+            $this->assertTrue(
+                $stateService->isTourDismissedOrPostponed($tenant),
+                'Tour must permanently stay dismissed when optional reminders are disabled.'
+            );
+        }
+    }
+
+    public function test_onboarding_tour_status_lifecycle_and_update_immunity(): void
+    {
+        $tenant = \App\Models\Tenant::first();
+        $this->assertNotNull($tenant);
+
+        // 1. Initial/Progress lifecycle
+        $tenant->setOnboardingStatus(\Modules\ResellerHub\App\Enums\OnboardingTourStatus::IN_PROGRESS)->save();
+        $this->assertEquals(\Modules\ResellerHub\App\Enums\OnboardingTourStatus::IN_PROGRESS, $tenant->getOnboardingStatus());
+        $this->assertFalse($tenant->isOnboardingCompleted());
+
+        // 2. Postponed lifecycle
+        $tenant->setOnboardingStatus(\Modules\ResellerHub\App\Enums\OnboardingTourStatus::POSTPONED)->save();
+        $this->assertEquals(\Modules\ResellerHub\App\Enums\OnboardingTourStatus::POSTPONED, $tenant->getOnboardingStatus());
+        $this->assertFalse($tenant->isOnboardingCompleted());
+
+        // 3. Completed lifecycle
+        $tenant->setOnboardingStatus(\Modules\ResellerHub\App\Enums\OnboardingTourStatus::COMPLETED)->save();
+        $this->assertEquals(\Modules\ResellerHub\App\Enums\OnboardingTourStatus::COMPLETED, $tenant->getOnboardingStatus());
+        $this->assertTrue($tenant->isOnboardingCompleted());
+        $this->assertNotNull($tenant->getOnboardingCompletedAt());
+
+        $stateService = app(\Modules\ResellerHub\App\Services\Onboarding\OnboardingStateService::class);
+        $stateService->flushCache($tenant->id);
+
+        // 4. Completed tenant is immune to newly added tour steps
+        $progress = $stateService->getTenantProgress($tenant);
+        $this->assertTrue($progress['is_finished']);
+        $this->assertEquals(100, $progress['percentage']);
+        $this->assertEquals(\Modules\ResellerHub\App\Enums\OnboardingTourStatus::COMPLETED->value, $progress['status']);
+
+        // 5. Verify dashboard views hide tour widget completely when completed or postponed
+        $dashboardBlade = file_get_contents(resource_path('views/user/dashboard.blade.php'));
+        $this->assertStringContainsString('$shouldRenderTourWidget', $dashboardBlade);
+        $this->assertStringContainsString('@if($shouldRenderTourWidget)', $dashboardBlade);
+        $this->assertStringContainsString('isOnboardingCompleted()', $dashboardBlade);
+
+        $widgetBlade = $this->moduleView('livewire/dashboard/onboarding-widget.blade.php');
+        $this->assertStringContainsString('$isCompleted', $widgetBlade);
+        $this->assertStringContainsString('$isTourDismissedOrPostponed', $widgetBlade);
+
+        // 6. Verify Tab Tour toggle switch has proper sliding knob in RTL
+        $tourBlade = $this->moduleView('user/settings/tabs/tab-tour.blade.php');
+        $this->assertStringContainsString('peer-checked:-translate-x-6', $tourBlade);
+    }
 }

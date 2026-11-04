@@ -130,6 +130,9 @@ class UpdateResellerSettingsRequest extends FormRequest
             'onboarding_tour_celebration_title' => ['nullable', 'string', 'max:150'],
             'onboarding_tour_celebration_message' => ['nullable', 'string', 'max:1000'],
             'onboarding_tour_steps' => ['nullable', 'array'],
+            'onboarding_tour_optional_reminder_enabled' => ['nullable', 'boolean'],
+            'onboarding_tour_optional_reminder_interval_days' => ['nullable', 'integer', 'min:0', 'max:365'],
+            'onboarding_tour_optional_reminder_mode' => ['nullable', 'string', 'in:pill,card,banner'],
 
             // Branding fields
             'company_name' => ['nullable', 'string', 'max:150'],
