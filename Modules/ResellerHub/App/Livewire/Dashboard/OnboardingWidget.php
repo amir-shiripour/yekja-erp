@@ -29,6 +29,9 @@ use Modules\ResellerHub\App\Services\Onboarding\OnboardingStateService;
 use Modules\ResellerHub\App\Services\ResellerBillingService;
 use Modules\ResellerHub\App\Services\TenantQuotaService;
 
+/**
+ * @noinspection SqlResolve
+ */
 class OnboardingWidget extends Component
 {
     public bool $isCollapsed = false;
@@ -490,11 +493,14 @@ class OnboardingWidget extends Component
             return null;
         }
 
-        $reseller = $tenant->reseller ?: ($pkg->reseller_id ? Reseller::find($pkg->reseller_id) : null);
+        $reseller = $tenant->reseller;
+        if (!$reseller && $pkg->reseller_id) {
+            $reseller = Reseller::find($pkg->reseller_id);
+        }
         if (!$reseller) {
             $this->addError('package', __('resellerhub::messages.onboarding.errors.reseller_not_found'));
 
-            return;
+            return null;
         }
 
         $periodKey = $period ?: $this->selectedPeriod;
@@ -526,7 +532,7 @@ class OnboardingWidget extends Component
                     'message' => $limitCheck['message'],
                 ]);
 
-                return;
+                return null;
             }
         }
 
@@ -654,6 +660,8 @@ class OnboardingWidget extends Component
             'amountFormatted' => $formattedPrice,
             'currencyLabel' => $currencyLabel,
         ]);
+
+        return null;
     }
 
     #[On('refresh-onboarding')]
@@ -777,9 +785,12 @@ class OnboardingWidget extends Component
                     $base[] = 'string';
                     break;
                 case 'select':
-                    $selectOpts = is_array($field['options'] ?? null)
-                        ? $field['options']
-                        : (!empty($field['options']) ? array_map('trim', explode(',', $field['options'])) : []);
+                    $selectOpts = [];
+                    if (is_array($field['options'] ?? null)) {
+                        $selectOpts = $field['options'];
+                    } elseif (!empty($field['options'])) {
+                        $selectOpts = array_map('trim', explode(',', $field['options']));
+                    }
                     if (!empty($selectOpts)) {
                         $base[] = 'in:' . implode(',', array_values($selectOpts));
                     } else {
@@ -822,9 +833,12 @@ class OnboardingWidget extends Component
 
             // 3. Ensure CustomUserField schema record exists so it permanently renders in /user/profile
             if (class_exists(CustomUserField::class)) {
-                $fieldOpts = is_array($field['options'] ?? null)
-                    ? $field['options']
-                    : (!empty($field['options']) ? array_map('trim', explode(',', $field['options'])) : null);
+                $fieldOpts = null;
+                if (is_array($field['options'] ?? null)) {
+                    $fieldOpts = $field['options'];
+                } elseif (!empty($field['options'])) {
+                    $fieldOpts = array_map('trim', explode(',', $field['options']));
+                }
 
                 CustomUserField::firstOrCreate(
                     [
@@ -1054,8 +1068,15 @@ class OnboardingWidget extends Component
     protected function getReseller(): ?Reseller
     {
         $tenant = $this->getTenant();
+        if (!$tenant) {
+            return null;
+        }
 
-        return $tenant?->reseller ?: ($tenant?->reseller_id ? Reseller::find($tenant->reseller_id) : null);
+        if ($tenant->reseller) {
+            return $tenant->reseller;
+        }
+
+        return $tenant->reseller_id ? Reseller::find($tenant->reseller_id) : null;
     }
 
     public function render()

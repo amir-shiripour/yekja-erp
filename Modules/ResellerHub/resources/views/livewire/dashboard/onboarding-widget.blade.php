@@ -449,6 +449,16 @@
                         @php
                             $stepUrl = $this->getStepActionUrl($sData);
                             $isExternal = in_array(strtolower($sData->actionType), ['external', 'link'], true);
+                            $stepTitleColor = 'text-gray-400';
+                            if ($isDone) {
+                                $stepTitleColor = 'text-emerald-600 dark:text-emerald-400';
+                            } elseif ($isAccessible) {
+                                $stepTitleColor = 'text-indigo-600 dark:text-indigo-400';
+                            }
+                            $stepBadgeText = $isAccessible ? 'گام جاری' : 'در انتظار';
+                            if (!empty($sData->badge)) {
+                                $stepBadgeText = $sData->badge;
+                            }
                         @endphp
                         <button type="button"
                                 @if($isAccessible)
@@ -459,11 +469,7 @@
                                 @elseif($sData->slug === 'select_package') wire:click="openPackageModal"
                                 @elseif(in_array(strtolower($sData->actionType), ['custom_fields', 'form'], true)) wire:click="openCustomFieldsModal('{{ $sData->slug }}')"
                                 @elseif($stepUrl)
-                                    @if($isExternal)
-                                        onclick="window.open('{{ $stepUrl }}', '_blank')"
-                                @else
-                                    onclick="window.location.href = '{{ $stepUrl }}'"
-                                @endif
+                                    onclick="{{ $isExternal ? "window.open('{$stepUrl}', '_blank')" : "window.location.href = '{$stepUrl}'" }}"
                                 @elseif($sData->canManualComplete && !$isDone)
                                     wire:click="completeCustomStep('{{ $sData->slug }}')"
                                 @endif
@@ -500,7 +506,7 @@
                             </div>
                             <div class="text-center mt-2 max-w-[110px]">
                                 <span
-                                    class="text-xs font-bold block truncate transition-colors {{ $isDone ? 'text-emerald-600 dark:text-emerald-400' : ($isAccessible ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400') }}">
+                                    class="text-xs font-bold block truncate transition-colors {{ $stepTitleColor }}">
                                     @fa($stepNum). {{ $sData->title }}
                                 </span>
                                 <span class="text-xs hidden sm:block mt-0.5">
@@ -518,7 +524,7 @@
                                         <span class="text-gray-400">صرف‌نظر شد</span>
                                     @else
                                         <span
-                                            class="text-gray-400 dark:text-gray-500">{{ $sData->badge ?: ($isAccessible ? 'گام جاری' : 'در انتظار') }}</span>
+                                            class="text-gray-400 dark:text-gray-500">{{ $stepBadgeText }}</span>
                                     @endif
                                 </span>
                             </div>
@@ -536,7 +542,33 @@
                         $isDone = ($sStatus === TenantOnboardingState::STATUS_COMPLETED);
                         $isSkipped = ($sStatus === TenantOnboardingState::STATUS_SKIPPED);
                         $isAccessible = $item['is_accessible'];
+                        $isQuotaLocked = !empty($item['is_quota_locked']);
                         $stepNum = $idx + 1;
+
+                        $badgeText = 'قفل شده';
+                        if ($isDone) {
+                            $badgeText = 'تکمیل شد';
+                        } elseif ($isSkipped) {
+                            $badgeText = 'رد شد';
+                        } elseif ($isQuotaLocked) {
+                            $badgeText = __('resellerhub::messages.onboarding.step_quota_locked_badge');
+                        } elseif ($isAccessible) {
+                            $badgeText = !empty($sData->badge) ? $sData->badge : ('گام ' . $stepNum);
+                        }
+
+                        $btnClass = 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed';
+                        if ($isAccessible) {
+                            $btnClass = $isDone
+                                ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer'
+                                : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 active:scale-95 cursor-pointer';
+                        }
+
+                        $packageBtnClass = 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed';
+                        if ($isAccessible) {
+                            $packageBtnClass = $isDone
+                                ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer'
+                                : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/25 active:scale-95 cursor-pointer';
+                        }
                     @endphp
                     <div class="group relative rounded-2xl p-5 border transition-all duration-200 flex flex-col justify-between
                         @if ($isDone)
@@ -596,7 +628,7 @@
                                             bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400
                                         @endif
                                     ">
-                                        {{ $isDone ? 'تکمیل شد' : ($isSkipped ? 'رد شد' : ($isQuotaLocked ? __('resellerhub::messages.onboarding.step_quota_locked_badge') : ($isAccessible ? ($sData->badge ?: 'گام ' . $stepNum) : 'قفل شده'))) }}
+                                        {{ $badgeText }}
                                     </span>
                                 </div>
                             </div>
@@ -624,7 +656,7 @@
                             @elseif ($sData->slug === 'configure_domain')
                                 <button @if($isAccessible) wire:click="openDomainModal" @endif
                                 @disabled(!$isAccessible)
-                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ !$isAccessible ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed' : ($isDone ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 active:scale-95 cursor-pointer') }}">
+                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ $btnClass }}">
                                     <span>{{ $isDone ? 'تغییر تنظیمات دامنه' : 'تنظیم دامین' }}</span>
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -634,7 +666,7 @@
                             @elseif ($sData->slug === 'configure_branding')
                                 <button @if($isAccessible) wire:click="openBrandingModal" @endif
                                 @disabled(!$isAccessible)
-                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ !$isAccessible ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed' : ($isDone ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 active:scale-95 cursor-pointer') }}">
+                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ $btnClass }}">
                                     <span>{{ $isDone ? 'تغییر وایت‌لیبل' : 'تنظیم وایت‌لیبل' }}</span>
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -644,7 +676,7 @@
                             @elseif ($sData->slug === 'select_package')
                                 <button @if($isAccessible) wire:click="openPackageModal" @endif
                                 @disabled(!$isAccessible)
-                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ !$isAccessible ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed' : ($isDone ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/25 active:scale-95 cursor-pointer') }}">
+                                class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ $packageBtnClass }}">
                                     <span>{{ $isDone ? 'مدیریت و ارتقای پکیج' : 'انتخاب پکیج و پرداخت' }}</span>
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -683,10 +715,18 @@
                                             @endif
                                         </div>
                                     @elseif($stepUrl)
+                                        @php
+                                            $urlBtnText = 'انجام مرحله (ورود به صفحه)';
+                                            if ($isDone) {
+                                                $urlBtnText = 'ورود به این بخش';
+                                            } elseif ($isExternal) {
+                                                $urlBtnText = 'مشاهده لینک خارجی';
+                                            }
+                                        @endphp
                                         <a href="{{ $stepUrl }}"
                                            @if($isExternal) target="_blank" rel="noopener noreferrer" @endif
                                            class="flex-1 inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer {{ $isDone ? 'bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/25 active:scale-95' }}">
-                                            <span>{{ $isDone ? 'ورود به این بخش' : ($isExternal ? 'مشاهده لینک خارجی' : 'انجام مرحله (ورود به صفحه)') }}</span>
+                                            <span>{{ $urlBtnText }}</span>
                                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24"
                                                  stroke="currentColor">
                                                 @if($isExternal)
@@ -882,7 +922,13 @@
                                                 ></textarea>
                                             @elseif ($fieldType === 'select')
                                                 @php
-                                                    $meta = is_array($field->meta) ? $field->meta : (json_decode($field->meta ?? '[]', true) ?: []);
+                                                    $meta = [];
+                                                    if (is_array($field->meta)) {
+                                                        $meta = $field->meta;
+                                                    } elseif (!empty($field->meta)) {
+                                                        $decodedMeta = json_decode((string)$field->meta, true);
+                                                        $meta = is_array($decodedMeta) ? $decodedMeta : [];
+                                                    }
                                                     $options = $meta['options'] ?? [];
                                                 @endphp
                                                 <select
@@ -1428,7 +1474,13 @@
                                     $rawPrice = $pkg->isFree() ? 0 : $pkg->getPriceForMonths($months);
                                     $price = $pkg->isFree() ? 0 : $pkg->getFinalPriceForMonths($months);
                                     $hasDiscount = !$pkg->isFree() && ($pkg->isSubscription() ? $pkg->hasActiveDiscountForMonths($months) : $pkg->hasActiveDiscount()) && $price < $rawPrice;
-                                    $modules = is_array($pkg->modules) ? $pkg->modules : (json_decode($pkg->modules ?? '[]', true) ?: []);
+                                    $modules = [];
+                                    if (is_array($pkg->modules)) {
+                                        $modules = $pkg->modules;
+                                    } elseif (!empty($pkg->modules)) {
+                                        $decodedMod = json_decode((string)$pkg->modules, true);
+                                        $modules = is_array($decodedMod) ? $decodedMod : [];
+                                    }
                                 @endphp
                                 <div wire:key="package-card-{{ $pkg->id }}" class="relative rounded-2xl p-5 border transition-all flex flex-col justify-between
                                     @if ($isCurrentPkg)
@@ -1545,7 +1597,15 @@
                                                 @endif
                                             "
                                         >
-                                            <span>{{ $isCurrentPkg ? 'انتخاب مجدد' : ($pkg->isFree() ? 'فعال‌سازی پلن رایگان' : 'انتخاب و پرداخت آنلاین') }}</span>
+                                            @php
+                                                $packageBtnLabel = 'انتخاب و پرداخت آنلاین';
+                                                if ($isCurrentPkg) {
+                                                    $packageBtnLabel = 'انتخاب مجدد';
+                                                } elseif ($pkg->isFree()) {
+                                                    $packageBtnLabel = 'فعال‌سازی پلن رایگان';
+                                                }
+                                            @endphp
+                                            <span>{{ $packageBtnLabel }}</span>
                                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
                                                  stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -1638,7 +1698,7 @@
                                             $fType = strtolower($field['type'] ?? $field['field_type'] ?? 'text');
                                             $fRequired = !empty($field['required']) || !empty($field['is_required']);
                                             $fPlaceholder = $field['placeholder'] ?? '';
-                                            $isFull = in_array($fType, ['textarea']);
+                                            $isFull = ($fType === 'textarea');
                                         @endphp
                                         <div class="{{ $isFull ? 'sm:col-span-2' : 'sm:col-span-1' }} space-y-1.5">
                                             <div class="flex items-center justify-between">
@@ -1660,9 +1720,12 @@
                                                           class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"></textarea>
                                             @elseif($fType === 'select')
                                                 @php
-                                                    $selectOpts = is_array($field['options'] ?? null)
-                                                        ? $field['options']
-                                                        : (!empty($field['options']) ? array_map('trim', explode(',', $field['options'])) : []);
+                                                    $selectOpts = [];
+                                                    if (is_array($field['options'] ?? null)) {
+                                                        $selectOpts = $field['options'];
+                                                    } elseif (!empty($field['options'])) {
+                                                        $selectOpts = array_map('trim', explode(',', $field['options']));
+                                                    }
                                                 @endphp
                                                 <select wire:model.defer="customFieldsForm.{{ $fName }}"
                                                         class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
@@ -1672,19 +1735,26 @@
                                                     @endforeach
                                                 </select>
                                             @elseif($fType === 'checkbox')
-                                                <div class="flex items-center justify-between p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900">
-                                                    <span class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $fPlaceholder ?: 'فعال‌سازی / تأیید' }}</span>
+                                                <div
+                                                    class="flex items-center justify-between p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900">
+                                                    <span
+                                                        class="text-xs text-gray-700 dark:text-gray-300 font-medium">{{ $fPlaceholder ?: 'فعال‌سازی / تأیید' }}</span>
                                                     <label class="relative inline-flex items-center cursor-pointer">
-                                                        <input type="checkbox" wire:model.defer="customFieldsForm.{{ $fName }}" value="1" class="sr-only peer">
-                                                        <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                                                        <input type="checkbox"
+                                                               wire:model.defer="customFieldsForm.{{ $fName }}"
+                                                               value="1" class="sr-only peer">
+                                                        <div
+                                                            class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
                                                     </label>
                                                 </div>
                                             @elseif($fType === 'currency')
                                                 <div class="relative">
-                                                    <input type="number" wire:model.defer="customFieldsForm.{{ $fName }}"
+                                                    <input type="number"
+                                                           wire:model.defer="customFieldsForm.{{ $fName }}"
                                                            placeholder="{{ $fPlaceholder ?: 'مبلغ به تومان' }}"
                                                            class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900 px-3.5 py-2.5 pl-14 text-xs font-mono dir-ltr text-left text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
-                                                    <span class="absolute inset-y-0 left-0 flex items-center px-3 text-[11px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 rounded-l-xl">تومان</span>
+                                                    <span
+                                                        class="absolute inset-y-0 left-0 flex items-center px-3 text-[11px] font-bold text-gray-400 bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 rounded-l-xl">تومان</span>
                                                 </div>
                                             @elseif($fType === 'url')
                                                 <input type="url" wire:model.defer="customFieldsForm.{{ $fName }}"

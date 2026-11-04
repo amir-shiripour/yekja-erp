@@ -15,6 +15,7 @@ use Modules\ResellerHub\Tests\TestCase;
 
 /**
  * Regression guards for the ResellerHub admin UI.
+ * @noinspection SqlResolve
  */
 class UiRegressionGuardTest extends TestCase
 {
@@ -165,7 +166,9 @@ class UiRegressionGuardTest extends TestCase
         $used = [];
         foreach ($files as $file) {
             preg_match_all('/messages\.subscription\.views\.([a-zA-Z0-9_]+)/', File::get($file), $matches);
-            $used = array_merge($used, $matches[1]);
+            if (!empty($matches[1])) {
+                array_push($used, ...$matches[1]);
+            }
         }
 
         $used = array_values(array_unique($used));
@@ -274,11 +277,11 @@ class UiRegressionGuardTest extends TestCase
         // 4. Check dynamic discount percentage badge in package card-pricing
         $createPricing = $this->moduleView('user/packages/partials/create/card-pricing.blade.php');
         $this->assertStringContainsString('calcPeriodDiscountPercent(row.months)', $createPricing);
-        $this->assertStringContainsString('٪<span x-text="faNum(calcPeriodDiscountPercent(row.months))"></span> تخفیف', $createPricing);
+        $this->assertStringContainsString('٪<span ' . 'x-text="faNum(calcPeriodDiscountPercent(row.months))"></span> تخفیف', $createPricing);
 
         $editPricing = $this->moduleView('user/packages/partials/edit/card-pricing.blade.php');
         $this->assertStringContainsString('calcPeriodDiscountPercent(row.months)', $editPricing);
-        $this->assertStringContainsString('٪<span x-text="faNum(calcPeriodDiscountPercent(row.months))"></span> تخفیف', $editPricing);
+        $this->assertStringContainsString('٪<span ' . 'x-text="faNum(calcPeriodDiscountPercent(row.months))"></span> تخفیف', $editPricing);
 
         // 5. Check script has calculation helpers
         $createScript = $this->moduleView('user/packages/partials/create/script.blade.php');

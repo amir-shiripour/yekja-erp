@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Permission\Models\Role;
 
+/**
+ * @noinspection SqlResolve
+ */
 class CustomUserField extends Model
 {
     use HasFactory;
@@ -33,6 +36,7 @@ class CustomUserField extends Model
         'is_required',
         'rules',
         'meta',
+        'options',
     ];
 
     public function role(): BelongsTo

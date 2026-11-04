@@ -1,7 +1,10 @@
 @php
+    /** @noinspection SqlResolve */
     use App\Models\CustomUserField;
     use App\Models\UserCustomValue;
-    use App\Tenancy\TenantManager;$user = auth()->user();
+    use App\Tenancy\TenantManager;
+
+    $user = auth()->user();
     $userRoles = $user->roles->pluck('name')->toArray();
     $userRolesDisplay = $user->roles->pluck('display_name')->toArray();
     $isSubAccount = !empty($user->tenant_id) || app(TenantManager::class)->hasTenant();
@@ -25,9 +28,16 @@
     foreach ($customFields as $cf) {
         if (!array_key_exists($cf->field_name, $this->state['custom'])) {
             $val = $customValues->get($cf->field_name)?->value ?? '';
-            $this->state['custom'][$cf->field_name] = ($cf->field_type === 'checkbox')
-                ? (is_string($val) ? (json_decode($val, true) ?: []) : (is_array($val) ? $val : []))
-                : $val;
+            if ($cf->field_type === 'checkbox') {
+                if (is_string($val)) {
+                    $decoded = json_decode($val, true);
+                    $this->state['custom'][$cf->field_name] = is_array($decoded) ? $decoded : [];
+                } else {
+                    $this->state['custom'][$cf->field_name] = is_array($val) ? $val : [];
+                }
+            } else {
+                $this->state['custom'][$cf->field_name] = $val;
+            }
         }
     }
 
@@ -268,8 +278,14 @@
                                 $type = strtolower($field->field_type ?? 'text');
                                 if ($type === 'file') continue;
 
-                                $isFullWidth = in_array($type, ['textarea']);
-                                $opts = is_array($field->meta) ? ($field->meta['options'] ?? null) : (is_string($field->meta) ? (json_decode($field->meta, true)['options'] ?? null) : null);
+                                $isFullWidth = ($type === 'textarea');
+                                $opts = null;
+                                if (is_array($field->meta)) {
+                                    $opts = $field->meta['options'] ?? null;
+                                } elseif (is_string($field->meta)) {
+                                    $decodedMeta = json_decode($field->meta, true);
+                                    $opts = is_array($decodedMeta) ? ($decodedMeta['options'] ?? null) : null;
+                                }
                                 $isLtrField = in_array($type, ['number', 'email', 'url', 'tel', 'color']) || in_array($field->field_name, ['kdmly', 'national_code', 'national_id', 'melli_code']);
                             @endphp
 

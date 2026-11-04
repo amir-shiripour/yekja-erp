@@ -6,6 +6,8 @@
     use App\Models\CustomUserField;
 
     $availableSysFields = CustomUserField::forSubAccounts()->get(['field_name', 'label', 'field_type', 'category_group', 'target_scope', 'is_required'])->toArray();
+    $resolvedCompanyName = !empty($reseller->company_name) ? $reseller->company_name : ($reseller->name ?? '');
+    $resolvedBrandTitle = !empty($reseller->brand_title) ? $reseller->brand_title : $resolvedCompanyName;
 @endphp
 <script>
     window.faNum = window.faNum || function (str) {
@@ -175,8 +177,8 @@
             removeLogoFlag: false,
             removeFaviconFlag: false,
             removeSealFlag: false,
-            companyName: @json($reseller->company_name ?: ($reseller->name ?: '')),
-            brandTitle: @json($reseller->brand_title ?: ($reseller->company_name ?: ($reseller->name ?: ''))),
+            companyName: @json($resolvedCompanyName),
+            brandTitle: @json($resolvedBrandTitle),
             brandPrimaryColor: config.brandPrimaryColor || '#4f46e5',
             brandFooterText: @json($reseller->brand_footer_text ?: ''),
             supportPhone: @json(reseller_fa_num((string) ($reseller->support_phone ?? ''))),
@@ -339,11 +341,7 @@
             },
 
             getPrerequisiteCandidates(stepSlug) {
-                return (this.tourSteps || []).filter(s => {
-                    if (s.slug === stepSlug) return false;
-                    if (this.wouldCreateCycle(stepSlug, s.slug)) return false;
-                    return true;
-                });
+                return (this.tourSteps || []).filter(s => s.slug !== stepSlug && !this.wouldCreateCycle(stepSlug, s.slug));
             },
 
             moveStepAndDescendantsAfter(stepSlug, prereqSlug) {
@@ -960,13 +958,9 @@
                 if (!this.pricingSearch.trim()) return list;
                 const s = this.pricingSearch.trim().toLowerCase();
                 return list.filter(m => {
-                    if ((m.title || '').toLowerCase().includes(s) || (m.slug || '').toLowerCase().includes(s)) {
-                        return true;
-                    }
-                    if (m.features && m.features.some(f => (f.title || '').toLowerCase().includes(s) || (f.key || '').toLowerCase().includes(s))) {
-                        return true;
-                    }
-                    return false;
+                    const matchesMeta = (m.title || '').toLowerCase().includes(s) || (m.slug || '').toLowerCase().includes(s);
+                    const matchesFeatures = Boolean(m.features && m.features.some(f => (f.title || '').toLowerCase().includes(s) || (f.key || '').toLowerCase().includes(s)));
+                    return matchesMeta || matchesFeatures;
                 });
             },
 
@@ -1164,21 +1158,21 @@
             updateSubdomainPreview() {
                 let pat = (this.subdomainPattern || 'crm-{rand}').trim();
                 // Replace {name}
-                pat = pat.replace(/\{name\}/gi, 'ali');
+                pat = pat.replace(/\{name}/gi, 'ali');
                 // Replace {rand} or {rand:N}
-                pat = pat.replace(/\{rand(?::(\d+))?\}/gi, (match, p1) => {
+                pat = pat.replace(/\{rand(?::(\d+))?}/gi, (match, p1) => {
                     const len = parseInt(p1) > 0 ? parseInt(p1) : 6;
                     return '583921'.slice(0, len).padEnd(len, '7');
                 });
                 // Replace {alpha} or {alpha:N}
-                pat = pat.replace(/\{alpha(?::(\d+))?\}/gi, (match, p1) => {
+                pat = pat.replace(/\{alpha(?::(\d+))?}/gi, (match, p1) => {
                     const len = parseInt(p1) > 0 ? parseInt(p1) : 5;
                     return 'appxy'.slice(0, len).padEnd(len, 'z');
                 });
                 // Replace {mobile_tail}
-                pat = pat.replace(/\{mobile_tail\}/gi, '45678');
+                pat = pat.replace(/\{mobile_tail}/gi, '45678');
                 // Replace {date}
-                pat = pat.replace(/\{date\}/gi, '1405');
+                pat = pat.replace(/\{date}/gi, '1405');
                 // Clean characters: lowercase, alphanumeric and hyphens
                 let cleaned = pat.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
                 if (!cleaned) {
