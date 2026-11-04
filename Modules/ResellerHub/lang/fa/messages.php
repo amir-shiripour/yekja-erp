@@ -1,6 +1,38 @@
 <?php
 
 return array(
+    'comparison' => [
+        'section_title'       => 'مقایسه سریع پلن‌ها',
+        'section_subtitle'    => 'ویژگی‌ها و محدودیت‌های هر پلن را به‌صورت کنار‌هم ببینید.',
+        'group_modules'       => 'ماژول‌های فعال',
+        'group_quotas'        => 'سقف‌ها و محدودیت‌ها',
+        'group_features'      => 'قابلیت‌های ویژه',
+        'unlimited'           => 'نامحدود',
+        'not_included'        => 'ندارد',
+        'included'            => 'دارد',
+        'per_month'           => 'ماهانه',
+        'monthly_equivalent'  => 'معادل ماهانه: :amount تومان',
+        'discount_off'        => ':percent٪ تخفیف',
+        'get_started'         => 'انتخاب و شروع',
+        'price_label'         => 'قیمت',
+        'currency'            => 'تومان',
+        'free_badge'          => 'رایگان',
+        'popular_badge'       => 'پیشنهادی',
+        'not_in_period'       => 'این دوره فعال نیست',
+        'setup_fee_label'     => 'هزینه راه‌اندازی',
+        'feature'             => 'ویژگی',
+        'module'              => 'ماژول',
+        'quota'               => 'سقف',
+        'search_placeholder'  => 'جستجوی قابلیت یا ماژول...',
+        'only_differences'    => 'فقط نمایش تفاوت‌ها',
+        'show_all'            => 'نمایش همه ویژگی‌ها',
+        'cta_footer_title'    => 'انتخاب پلن مناسب شما',
+        'cta_footer_desc'     => 'آماده شروع هستید؟ بهترین پلن را بر اساس نیاز کسب‌وکار خود انتخاب کنید.',
+        'no_results'          => 'هیچ ویژگی‌ای متناسب با جستجوی شما یافت نشد.',
+        'clear_search'        => 'پاک کردن فیلتر',
+        'items_count'         => ':count مورد',
+    ],
+
     'common' =>
         array(
             'success' => 'عملیات با موفقیت انجام شد.',

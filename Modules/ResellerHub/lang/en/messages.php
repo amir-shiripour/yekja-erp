@@ -1,6 +1,38 @@
 <?php
 
 return [
+    'comparison' => [
+        'section_title'       => 'Quick Plan Comparison',
+        'section_subtitle'    => 'See features and limits of every plan side by side.',
+        'group_modules'       => 'Active Modules',
+        'group_quotas'        => 'Quotas & Limits',
+        'group_features'      => 'Premium Features',
+        'unlimited'           => 'Unlimited',
+        'not_included'        => 'Not included',
+        'included'            => 'Included',
+        'per_month'           => 'per month',
+        'monthly_equivalent'  => ':amount Toman/mo',
+        'discount_off'        => ':percent% OFF',
+        'get_started'         => 'Get Started',
+        'price_label'         => 'Price',
+        'currency'            => 'Toman',
+        'free_badge'          => 'Free',
+        'popular_badge'       => 'Recommended',
+        'not_in_period'       => 'Not available in this period',
+        'setup_fee_label'     => 'Setup fee',
+        'feature'             => 'Feature',
+        'module'              => 'Module',
+        'quota'               => 'Limit',
+        'search_placeholder'  => 'Search feature or module...',
+        'only_differences'    => 'Show only differences',
+        'show_all'            => 'Show all features',
+        'cta_footer_title'    => 'Choose Your Plan',
+        'cta_footer_desc'     => 'Ready to get started? Select the plan that fits your business needs.',
+        'no_results'          => 'No features matched your search.',
+        'clear_search'        => 'Clear search',
+        'items_count'         => ':count items',
+    ],
+
     'common' => [
         'success' => 'Operation completed successfully.',
         'error' => 'An error occurred while performing the operation.',
