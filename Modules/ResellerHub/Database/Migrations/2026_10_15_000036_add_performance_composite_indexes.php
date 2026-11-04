@@ -67,9 +67,13 @@ return new class extends Migration
 
         $existing = DB::select("SHOW INDEX FROM `{$table}` WHERE Key_name = ?", [$indexName]);
         if (!empty($existing)) {
-            Schema::table($table, function (Blueprint $t) use ($indexName) {
-                $t->dropIndex($indexName);
-            });
+            try {
+                Schema::table($table, function (Blueprint $t) use ($indexName) {
+                    $t->dropIndex($indexName);
+                });
+            } catch (\Throwable $e) {
+                // Index may be needed by a foreign key constraint; safe to ignore on rollback
+            }
         }
     }
 };
