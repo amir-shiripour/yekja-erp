@@ -110,6 +110,9 @@ class ResellerSetting extends Model
         'onboarding_tour_celebration_title',
         'onboarding_tour_celebration_message',
         'onboarding_tour_steps',
+        'onboarding_tour_optional_reminder_enabled',
+        'onboarding_tour_optional_reminder_interval_days',
+        'onboarding_tour_optional_reminder_mode',
     ];
 
     protected $casts = [
@@ -140,6 +143,8 @@ class ResellerSetting extends Model
         'onboarding_tour_enabled' => 'boolean',
         'onboarding_tour_grace_period_days' => 'integer',
         'onboarding_tour_steps' => 'array',
+        'onboarding_tour_optional_reminder_enabled' => 'boolean',
+        'onboarding_tour_optional_reminder_interval_days' => 'integer',
     ];
 
     /**
@@ -383,6 +388,9 @@ class ResellerSetting extends Model
             'celebration_title' => $setting?->onboarding_tour_celebration_title ?: 'تبریک! سامانه CRM شما ۱۰۰٪ پیکربندی و فعال شد',
             'celebration_message' => $setting?->onboarding_tour_celebration_message ?: 'احراز هویت، دامنه اختصاصی، برند وایت‌لیبل و پکیج شما فعال هستند. تمامی ماژول‌ها در سایدبار در دسترس شما قرار دارند.',
             'steps' => self::getOnboardingTourSteps($resellerId),
+            'optional_reminder_enabled' => $setting ? (bool)($setting->onboarding_tour_optional_reminder_enabled ?? true) : true,
+            'optional_reminder_interval_days' => (int)($setting?->onboarding_tour_optional_reminder_interval_days ?? 3),
+            'optional_reminder_mode' => $setting?->onboarding_tour_optional_reminder_mode ?: 'pill',
         ];
     }
 }

@@ -55,6 +55,9 @@
         onboardingTourGracePeriodDays: @json((int)($settings['onboarding_tour_grace_period_days'] ?? 3)),
         onboardingTourCelebrationTitle: @json($settings['onboarding_tour_celebration_title'] ?? __('resellerhub::messages.onboarding.celebration_default_title')),
         onboardingTourCelebrationMessage: @json($settings['onboarding_tour_celebration_message'] ?? __('resellerhub::messages.onboarding.celebration_default_message')),
+        onboardingTourOptionalReminderEnabled: @json(isset($settings['onboarding_tour_optional_reminder_enabled']) ? (bool)$settings['onboarding_tour_optional_reminder_enabled'] : true),
+        onboardingTourOptionalReminderIntervalDays: @json((int)($settings['onboarding_tour_optional_reminder_interval_days'] ?? 3)),
+        onboardingTourOptionalReminderMode: @json($settings['onboarding_tour_optional_reminder_mode'] ?? 'pill'),
         onboardingTourSteps: @json(ResellerSetting::getOnboardingTourSteps($reseller->id)),
         defaultTourSteps: @json(ResellerSetting::getDefaultOnboardingSteps()),
         customStepPresets: @json(OnboardingStepPreset::toFrontendArray()),
@@ -162,6 +165,9 @@
             tourGracePeriodDays: parseInt(config.onboardingTourGracePeriodDays) || 3,
             tourCelebrationTitle: config.onboardingTourCelebrationTitle || '',
             tourCelebrationMessage: config.onboardingTourCelebrationMessage || '',
+            tourOptionalReminderEnabled: config.onboardingTourOptionalReminderEnabled !== undefined ? Boolean(config.onboardingTourOptionalReminderEnabled) : true,
+            tourOptionalReminderIntervalDays: config.onboardingTourOptionalReminderIntervalDays !== undefined ? parseInt(config.onboardingTourOptionalReminderIntervalDays) : 3,
+            tourOptionalReminderMode: config.onboardingTourOptionalReminderMode || 'pill',
             tourSteps: (config.onboardingTourSteps && Array.isArray(config.onboardingTourSteps)) ? JSON.parse(JSON.stringify(config.onboardingTourSteps)).map(s => ({
                 ...s,
                 depends_on: s.depends_on || '',
@@ -1242,6 +1248,15 @@
                         }
                         if (data.onboarding_tour_celebration_message !== undefined) {
                             this.tourCelebrationMessage = data.onboarding_tour_celebration_message;
+                        }
+                        if (data.onboarding_tour_optional_reminder_enabled !== undefined) {
+                            this.tourOptionalReminderEnabled = Boolean(data.onboarding_tour_optional_reminder_enabled);
+                        }
+                        if (data.onboarding_tour_optional_reminder_interval_days !== undefined) {
+                            this.tourOptionalReminderIntervalDays = parseInt(data.onboarding_tour_optional_reminder_interval_days);
+                        }
+                        if (data.onboarding_tour_optional_reminder_mode) {
+                            this.tourOptionalReminderMode = data.onboarding_tour_optional_reminder_mode;
                         }
                         if (data.allow_custom_domains !== undefined) {
                             this.allowCustomDomains = Boolean(data.allow_custom_domains);

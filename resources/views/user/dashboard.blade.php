@@ -107,13 +107,23 @@
     }
 
     $isOnboardingActive = false;
+    $shouldRenderTourWidget = false;
     if ($tenantForDashboard) {
-        $onboardingProgress = app(OnboardingStateService::class)->getTenantProgress($tenantForDashboard);
-        $tourConfig = \Modules\ResellerHub\App\Models\ResellerSetting::getOnboardingTourConfig($tenantForDashboard->reseller_id);
+        $stateService = app(OnboardingStateService::class);
+        $onboardingProgress = $stateService->getTenantProgress($tenantForDashboard);
+        $tourConfig = ResellerSetting::getOnboardingTourConfig($tenantForDashboard->reseller_id);
+        $isDismissedOrPostponed = $stateService->isTourDismissedOrPostponed($tenantForDashboard);
+        $isTourCompleted = $tenantForDashboard->isOnboardingCompleted();
+
         $isOnboardingActive = ($tourConfig['enabled'] ?? true)
             && !($onboardingProgress['is_finished'] ?? false)
             && !empty($onboardingProgress['total'])
-            && !session('onboarding_widget_dismissed', false);
+            && !$isTourCompleted
+            && !$isDismissedOrPostponed;
+
+        $shouldRenderTourWidget = ($tourConfig['enabled'] ?? true)
+            && !$isTourCompleted
+            && !$isDismissedOrPostponed;
     }
 @endphp
 
@@ -176,7 +186,9 @@
         @includeIf('resellerhub::partials.unpaid-order-banner')
 
         {{-- ویجت بنتو آنبوردینگ و تور راه‌اندازی سریع سامانه --}}
-        @livewire('resellerhub.onboarding-widget')
+        @if($shouldRenderTourWidget)
+            @livewire('resellerhub.onboarding-widget')
+        @endif
 
         @if(!$isOnboardingActive)
             {{-- پنل ویجت‌های مخفی (فقط در حالت ویرایش) --}}

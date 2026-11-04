@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Clients\Entities\Client;
+use Modules\ResellerHub\App\Enums\OnboardingTourStatus;
 use Modules\ResellerHub\App\Models\Reseller;
 use Modules\ResellerHub\App\Models\ResellerInvoice;
 use Modules\ResellerHub\App\Models\ResellerOrder;
@@ -509,5 +510,74 @@ class Tenant extends Model
         }
 
         return false;
+    }
+
+    /**
+     * Get the tenant's current onboarding tour lifecycle status.
+     */
+    public function getOnboardingStatus(): OnboardingTourStatus
+    {
+        $statusStr = data_get($this->settings, 'onboarding_status');
+        if ($statusStr) {
+            return OnboardingTourStatus::fromOrDefault($statusStr);
+        }
+
+        // If onboarding_completed_at is present, it is definitely completed
+        if (!empty(data_get($this->settings, 'onboarding_completed_at'))) {
+            return OnboardingTourStatus::COMPLETED;
+        }
+
+        // If onboarding_postponed_at is set, it is in postponed status
+        if (!empty(data_get($this->settings, 'onboarding_postponed_at'))) {
+            return OnboardingTourStatus::POSTPONED;
+        }
+
+        return OnboardingTourStatus::IN_PROGRESS;
+    }
+
+    /**
+     * Determine if the tenant has completed their onboarding tour.
+     */
+    public function isOnboardingCompleted(): bool
+    {
+        return $this->getOnboardingStatus() === OnboardingTourStatus::COMPLETED;
+    }
+
+    /**
+     * Update the tenant's onboarding tour status and timestamp.
+     */
+    public function setOnboardingStatus(OnboardingTourStatus|string $status, ?string $timestamp = null): self
+    {
+        $statusEnum = $status instanceof OnboardingTourStatus ? $status : OnboardingTourStatus::fromOrDefault($status);
+        $settings = $this->settings ?? [];
+        $settings['onboarding_status'] = $statusEnum->value;
+
+        if ($statusEnum === OnboardingTourStatus::COMPLETED) {
+            $settings['onboarding_completed_at'] = $timestamp ?? now()->toIso8601String();
+            unset($settings['onboarding_postponed_at']);
+        } elseif ($statusEnum === OnboardingTourStatus::POSTPONED) {
+            $settings['onboarding_postponed_at'] = $timestamp ?? now()->toIso8601String();
+        }
+
+        $this->settings = $settings;
+        return $this;
+    }
+
+    /**
+     * Get the completion timestamp if completed.
+     */
+    public function getOnboardingCompletedAt(): ?Carbon
+    {
+        $ts = data_get($this->settings, 'onboarding_completed_at');
+        return $ts ? Carbon::parse($ts) : null;
+    }
+
+    /**
+     * Get the postponed timestamp if postponed.
+     */
+    public function getOnboardingPostponedAt(): ?Carbon
+    {
+        $ts = data_get($this->settings, 'onboarding_postponed_at');
+        return $ts ? Carbon::parse($ts) : null;
     }
 }

@@ -70,6 +70,9 @@ enum ResellerSettingKey: string
     case OnboardingTourCelebrationTitle = 'onboarding_tour_celebration_title';
     case OnboardingTourCelebrationMessage = 'onboarding_tour_celebration_message';
     case OnboardingTourSteps = 'onboarding_tour_steps';
+    case OnboardingTourOptionalReminderEnabled = 'onboarding_tour_optional_reminder_enabled';
+    case OnboardingTourOptionalReminderIntervalDays = 'onboarding_tour_optional_reminder_interval_days';
+    case OnboardingTourOptionalReminderMode = 'onboarding_tour_optional_reminder_mode';
 
     /**
      * Resolve ResellerSettingKey instance safely from string or self.

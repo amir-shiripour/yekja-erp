@@ -36,7 +36,10 @@ class UpdateResellerSettingsAction
             array_key_exists(ResellerSettingKey::OnboardingTourDisplayMode->value, $settingsData) ||
             array_key_exists(ResellerSettingKey::OnboardingTourCelebrationTitle->value, $settingsData) ||
             array_key_exists(ResellerSettingKey::OnboardingTourCelebrationMessage->value, $settingsData) ||
-            array_key_exists(ResellerSettingKey::OnboardingTourGracePeriodDays->value, $settingsData)
+            array_key_exists(ResellerSettingKey::OnboardingTourGracePeriodDays->value, $settingsData) ||
+            array_key_exists(ResellerSettingKey::OnboardingTourOptionalReminderEnabled->value, $settingsData) ||
+            array_key_exists(ResellerSettingKey::OnboardingTourOptionalReminderIntervalDays->value, $settingsData) ||
+            array_key_exists(ResellerSettingKey::OnboardingTourOptionalReminderMode->value, $settingsData)
         ) {
             ResellerSetting::clearRuntimeCache();
             $tenantIds = Tenant::where('reseller_id', $reseller->id)->pluck('id');
@@ -176,6 +179,15 @@ class UpdateResellerSettingsAction
         }
         if ($request->has(ResellerSettingKey::OnboardingTourEnabled->value)) {
             $data[ResellerSettingKey::OnboardingTourEnabled->value] = $request->boolean(ResellerSettingKey::OnboardingTourEnabled->value) ? 1 : 0;
+        }
+        if ($request->has(ResellerSettingKey::OnboardingTourOptionalReminderEnabled->value)) {
+            $data[ResellerSettingKey::OnboardingTourOptionalReminderEnabled->value] = $request->boolean(ResellerSettingKey::OnboardingTourOptionalReminderEnabled->value) ? 1 : 0;
+        }
+        if (array_key_exists(ResellerSettingKey::OnboardingTourOptionalReminderIntervalDays->value, $validated)) {
+            $data[ResellerSettingKey::OnboardingTourOptionalReminderIntervalDays->value] = (int)$validated[ResellerSettingKey::OnboardingTourOptionalReminderIntervalDays->value];
+        }
+        if (array_key_exists(ResellerSettingKey::OnboardingTourOptionalReminderMode->value, $validated)) {
+            $data[ResellerSettingKey::OnboardingTourOptionalReminderMode->value] = $validated[ResellerSettingKey::OnboardingTourOptionalReminderMode->value];
         }
         if (array_key_exists(ResellerSettingKey::OnboardingTourSteps->value, $validated)) {
             $rawSteps = is_array($validated[ResellerSettingKey::OnboardingTourSteps->value])
