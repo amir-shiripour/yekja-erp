@@ -44,6 +44,14 @@ class OnboardingWidget extends Component
 
     public bool $showPackageModal = false;
 
+    // Step 5: Custom Fields Form Modal
+    public bool $showCustomFieldsModal = false;
+    public string $activeCustomStepSlug = '';
+    public string $activeCustomStepTitle = '';
+    public string $activeCustomStepDescription = '';
+    public array $activeCustomStepFields = [];
+    public array $customFieldsForm = [];
+
     // Toast/Feedback
     public string $successMessage = '';
 
@@ -665,6 +673,187 @@ class OnboardingWidget extends Component
                 $this->redirect($targetUrl, navigate: false);
             }
         }
+    }
+
+    public function openCustomFieldsModal(string $stepSlug): void
+    {
+        $tenant = $this->getTenant();
+        if (!$tenant) {
+            return;
+        }
+
+        $this->isCollapsed = false;
+        session(['onboarding_widget_collapsed' => false]);
+        $this->activeCustomStepSlug = $stepSlug;
+
+        $step = app(OnboardingRegistry::class)->getStep($stepSlug);
+        $this->activeCustomStepTitle = $step?->title ?? 'تکمیل اطلاعات سفارشی';
+        $this->activeCustomStepDescription = $step?->description ?? '';
+
+        $stepFields = $step?->customFields ?? [];
+        if (empty($stepFields)) {
+            $resellerId = $tenant->reseller_id;
+            $tourSteps = ResellerSetting::getOnboardingTourSteps($resellerId);
+            foreach ($tourSteps as $ts) {
+                if (($ts['slug'] ?? '') === $stepSlug && !empty($ts['custom_fields'])) {
+                    $stepFields = $ts['custom_fields'];
+                    break;
+                }
+            }
+        }
+
+        $this->activeCustomStepFields = $stepFields;
+        $this->customFieldsForm = [];
+
+        $tenantUser = $this->getTenantUser();
+        $userCustomValues = $tenantUser ? UserCustomValue::where('user_id', $tenantUser->id)->get()->keyBy('field_name') : collect();
+        $tenantSettingsCustom = data_get($tenant->settings, 'custom_fields', []);
+
+        foreach ($stepFields as $field) {
+            $name = $field['name'] ?? $field['field_name'] ?? '';
+            if (!$name) continue;
+            $scope = $field['target_scope'] ?? 'user';
+            $val = ($scope === 'tenant')
+                ? ($tenantSettingsCustom[$name] ?? ($userCustomValues->get($name)?->value ?? ''))
+                : ($userCustomValues->get($name)?->value ?? ($tenantSettingsCustom[$name] ?? ''));
+
+            $this->customFieldsForm[$name] = $val;
+        }
+
+        $this->showCustomFieldsModal = true;
+    }
+
+    public function closeCustomFieldsModal(): void
+    {
+        $this->showCustomFieldsModal = false;
+        $this->activeCustomStepSlug = '';
+        $this->activeCustomStepFields = [];
+        $this->customFieldsForm = [];
+        $this->resetErrorBag();
+    }
+
+    public function saveCustomFields(): void
+    {
+        $tenant = $this->getTenant();
+        $tenantUser = $this->getTenantUser();
+        if (!$tenant || !$tenantUser) {
+            $this->addError('custom_fields', __('resellerhub::messages.onboarding.errors.kyc_user_not_found'));
+            return;
+        }
+
+        $rules = [];
+        $attributes = [];
+
+        foreach ($this->activeCustomStepFields as $field) {
+            $name = $field['name'] ?? $field['field_name'] ?? '';
+            if (!$name) continue;
+
+            $key = 'customFieldsForm.' . $name;
+            $type = strtolower($field['type'] ?? $field['field_type'] ?? 'text');
+            $isRequired = !empty($field['required']) || !empty($field['is_required']);
+            $base = $isRequired ? ['required'] : ['nullable'];
+
+            switch ($type) {
+                case 'number':
+                case 'currency':
+                    $base[] = 'numeric';
+                    break;
+                case 'date':
+                    $base[] = 'date';
+                    break;
+                case 'email':
+                    $base[] = 'email';
+                    break;
+                case 'url':
+                    $base[] = 'url';
+                    break;
+                case 'checkbox':
+                    $base[] = 'boolean';
+                    break;
+                case 'tel':
+                case 'mobile':
+                case 'phone':
+                case 'time':
+                    $base[] = 'string';
+                    break;
+                case 'select':
+                    $selectOpts = is_array($field['options'] ?? null)
+                        ? $field['options']
+                        : (!empty($field['options']) ? array_map('trim', explode(',', $field['options'])) : []);
+                    if (!empty($selectOpts)) {
+                        $base[] = 'in:' . implode(',', array_values($selectOpts));
+                    } else {
+                        $base[] = 'string';
+                    }
+                    break;
+                default:
+                    $base[] = 'string';
+            }
+
+            $rules[$key] = $base;
+            $attributes[$key] = $field['label'] ?? $name;
+        }
+
+        if (!empty($rules)) {
+            $this->validate($rules, [], $attributes);
+        }
+
+        $tenantSettings = $tenant->settings ?? [];
+        $tenantCustom = data_get($tenantSettings, 'custom_fields', []);
+
+        foreach ($this->activeCustomStepFields as $field) {
+            $name = $field['name'] ?? $field['field_name'] ?? '';
+            if (!$name || !array_key_exists($name, $this->customFieldsForm)) continue;
+
+            $val = (string)$this->customFieldsForm[$name];
+            $scope = $field['target_scope'] ?? 'user';
+            $group = $field['group'] ?? $field['category_group'] ?? CustomUserField::resolveCategoryGroup($name);
+
+            // 1. Always save in UserCustomValue for unified profile access
+            UserCustomValue::updateOrCreate(
+                ['user_id' => $tenantUser->id, 'field_name' => $name],
+                ['value' => $val]
+            );
+
+            // 2. If tenant scope, also save in tenant settings
+            if ($scope === 'tenant') {
+                $tenantCustom[$name] = $val;
+            }
+
+            // 3. Ensure CustomUserField schema record exists so it permanently renders in /user/profile
+            if (class_exists(CustomUserField::class)) {
+                $fieldOpts = is_array($field['options'] ?? null)
+                    ? $field['options']
+                    : (!empty($field['options']) ? array_map('trim', explode(',', $field['options'])) : null);
+
+                CustomUserField::firstOrCreate(
+                    [
+                        'entity_type' => CustomUserField::ENTITY_SUB_ACCOUNT,
+                        'field_name' => $name,
+                    ],
+                    [
+                        'role_name' => 'sub_account',
+                        'label' => $field['label'] ?? $name,
+                        'field_type' => $type,
+                        'category_group' => $group,
+                        'target_scope' => $scope,
+                        'is_required' => !empty($field['required']) || !empty($field['is_required']),
+                        'meta' => $fieldOpts ? ['options' => $fieldOpts] : null,
+                    ]
+                );
+            }
+        }
+
+        if (!empty($tenantCustom)) {
+            $tenantSettings['custom_fields'] = $tenantCustom;
+            $tenant->settings = $tenantSettings;
+            $tenant->save();
+        }
+
+        $this->completeStep($this->activeCustomStepSlug);
+        $this->showCustomFieldsModal = false;
+        $this->successMessage = __('اطلاعات با موفقیت ذخیره شد و گام تکمیل گردید.');
+        $this->dispatch('notify', ['type' => 'success', 'text' => $this->successMessage]);
     }
 
     public function completeStep(string $stepSlug): void

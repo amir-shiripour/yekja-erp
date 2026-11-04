@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\ResellerHub\Tests\Unit;
 
+use App\Models\CustomUserField;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Support\Facades\File;
+use Modules\ResellerHub\App\Data\Onboarding\StepData;
+use Modules\ResellerHub\App\Enums\OnboardingStepPreset;
+use Modules\ResellerHub\App\Livewire\Dashboard\OnboardingWidget;
 use Modules\ResellerHub\Tests\TestCase;
 
 /**
@@ -224,8 +230,8 @@ class UiRegressionGuardTest extends TestCase
 
     public function test_tenant_active_modules_include_package_modules(): void
     {
-        $tenant = new \App\Models\Tenant();
-        $tenant->status = \App\Models\Tenant::STATUS_ACTIVE;
+        $tenant = new Tenant();
+        $tenant->status = Tenant::STATUS_ACTIVE;
         $tenant->plan_expires_at = now()->addYear();
 
         $pkg = new \Modules\ResellerHub\App\Models\ResellerPackage();
@@ -512,7 +518,7 @@ class UiRegressionGuardTest extends TestCase
 
     public function test_database_export_access_control_via_http(): void
     {
-        $superAdmin = \App\Models\User::role('super-admin')->first();
+        $superAdmin = User::role('super-admin')->first();
         if ($superAdmin) {
             $response = $this->actingAs($superAdmin)->get(route('reseller.settings.index', ['tab' => 'database']));
             $response->assertOk();
@@ -526,7 +532,7 @@ class UiRegressionGuardTest extends TestCase
         }
 
         // Test non-superadmin user
-        $regularUser = \App\Models\User::whereDoesntHave('roles', function ($q) {
+        $regularUser = User::whereDoesntHave('roles', function ($q) {
             $q->where('name', 'super-admin');
         })->first();
 
@@ -561,7 +567,7 @@ class UiRegressionGuardTest extends TestCase
     public function test_optional_tour_reminder_and_snooze_service_logic(): void
     {
         $stateService = app(\Modules\ResellerHub\App\Services\Onboarding\OnboardingStateService::class);
-        $tenant = \App\Models\Tenant::first();
+        $tenant = Tenant::first();
 
         if ($tenant) {
             // Ensure tenant is in an active (in_progress) tour state for testing snooze
@@ -623,7 +629,7 @@ class UiRegressionGuardTest extends TestCase
 
     public function test_onboarding_tour_status_lifecycle_and_update_immunity(): void
     {
-        $tenant = \App\Models\Tenant::first();
+        $tenant = Tenant::first();
         $this->assertNotNull($tenant);
 
         // 1. Initial/Progress lifecycle
@@ -664,5 +670,134 @@ class UiRegressionGuardTest extends TestCase
         // 6. Verify Tab Tour toggle switch has proper sliding knob in RTL
         $tourBlade = $this->moduleView('user/settings/tabs/tab-tour.blade.php');
         $this->assertStringContainsString('peer-checked:-translate-x-6', $tourBlade);
+    }
+
+    public function test_custom_fields_in_tour_steps_and_categorized_profile_persistence(): void
+    {
+        // 1. Verify CustomUserField category resolution
+        $this->assertEquals(
+            CustomUserField::CATEGORY_CONTACT,
+            CustomUserField::resolveCategoryGroup('office_fax')
+        );
+        $this->assertEquals(
+            CustomUserField::CATEGORY_CONTACT,
+            CustomUserField::resolveCategoryGroup('postal_code')
+        );
+        $this->assertEquals(
+            CustomUserField::CATEGORY_IDENTITY,
+            CustomUserField::resolveCategoryGroup('melli_code')
+        );
+        $this->assertEquals(
+            CustomUserField::CATEGORY_BUSINESS,
+            CustomUserField::resolveCategoryGroup('monthly_target')
+        );
+
+        // 2. Verify OnboardingStepPreset for custom fields
+        $officePreset = OnboardingStepPreset::OFFICE_DETAILS;
+        $this->assertEquals('custom_fields', $officePreset->actionType());
+        $this->assertEquals('contact', $officePreset->fieldGroup());
+        $this->assertNotEmpty($officePreset->customFields());
+        $this->assertEquals('fax', $officePreset->customFields()[0]['name']);
+
+        $targetPreset = OnboardingStepPreset::BUSINESS_TARGET;
+        $this->assertEquals('custom_fields', $targetPreset->actionType());
+        $this->assertEquals('business', $targetPreset->fieldGroup());
+        $this->assertEquals('tenant', $targetPreset->targetScope());
+
+        // 3. Verify StepData can carry custom fields and field groups
+        $stepData = new StepData(
+            slug: 'custom_fax_step',
+            journey: 'crm_setup',
+            title: 'اطلاعات فکس',
+            description: 'توضیحات فکس',
+            routeAction: 'user.dashboard',
+            actionType: 'custom_fields',
+            customFields: [['name' => 'fax', 'label' => 'فکس', 'type' => 'tel', 'required' => true]],
+            fieldGroup: 'contact',
+        );
+        $this->assertEquals('custom_fields', $stepData->actionType);
+        $this->assertEquals('contact', $stepData->fieldGroup);
+        $this->assertCount(1, $stepData->customFields);
+
+        // 4. Verify OnboardingWidget modal and saving logic
+        $tenant = Tenant::first();
+        $this->assertNotNull($tenant);
+        $user = $tenant->owner ?? User::first();
+        $this->assertNotNull($user);
+
+        // Mock Livewire component execution
+        $widget = new OnboardingWidget();
+        $widget->activeCustomStepSlug = 'custom_office_step';
+        $widget->activeCustomStepTitle = 'مشخصات اداری';
+        $widget->activeCustomStepFields = [
+            ['name' => 'test_fax', 'label' => 'شماره فکس تست', 'type' => 'tel', 'required' => false, 'target_scope' => 'user'],
+            ['name' => 'test_postal', 'label' => 'کد پستی تست', 'type' => 'number', 'required' => false, 'target_scope' => 'tenant'],
+        ];
+        $widget->customFieldsForm = [
+            'test_fax' => '021-88776655',
+            'test_postal' => '1998877665',
+        ];
+
+        // Ensure session/auth context
+        $this->actingAs($user);
+        session(['tenant_id' => $tenant->id]);
+
+        $widget->saveCustomFields();
+
+        // 5. Verify UserCustomValue was saved for user
+        $savedFax = \App\Models\UserCustomValue::where('user_id', $user->id)
+            ->where('field_name', 'test_fax')
+            ->value('value');
+        $this->assertEquals('021-88776655', $savedFax);
+
+        // 6. Verify CustomUserField record was automatically created with category group
+        $cuf = CustomUserField::where('field_name', 'test_fax')->first();
+        $this->assertNotNull($cuf);
+        $this->assertEquals(CustomUserField::CATEGORY_CONTACT, $cuf->category_group);
+        $this->assertEquals(CustomUserField::ENTITY_SUB_ACCOUNT, $cuf->entity_type);
+
+        // 7. Verify tenant settings saved tenant-scoped custom fields
+        $tenant->refresh();
+        $this->assertEquals('1998877665', data_get($tenant->settings, 'custom_fields.test_postal'));
+
+        // 8. Verify profile blade has categorized groups markup and synced with messages.php
+        $profileBlade = file_get_contents(resource_path('views/profile/update-profile-information-form.blade.php'));
+        $this->assertStringContainsString('groupedFields', $profileBlade);
+        $this->assertStringContainsString('resolveCategoryGroup', $profileBlade);
+        $this->assertStringContainsString('resellerhub::messages.profile.categories.contact_title', $profileBlade);
+        $this->assertStringContainsString('resellerhub::messages.profile.categories.identity_title', $profileBlade);
+        $this->assertStringContainsString('resellerhub::messages.profile.categories.business_title', $profileBlade);
+        $this->assertEquals('اطلاعات تماس، فکس و نشانی اداری', __('resellerhub::messages.profile.categories.contact_title'));
+        $this->assertEquals('مشخصات هویتی و حقوقی', __('resellerhub::messages.profile.categories.identity_title'));
+        $this->assertEquals('اهداف و اطلاعات کسب‌وکار', __('resellerhub::messages.profile.categories.business_title'));
+
+        // 9. Verify tab-tour has custom_fields action type and extended field builder with all 12 types and presets catalog
+        $tourBlade = $this->moduleView('user/settings/tabs/tab-tour.blade.php');
+        $this->assertStringContainsString('action_type = \'custom_fields\'', $tourBlade);
+        $this->assertStringContainsString('فیلدهای سفارشی', $tourBlade);
+        $this->assertStringContainsString('addCustomFieldToNewStep', $tourBlade);
+        $this->assertStringContainsString('newStep.field_group', $tourBlade);
+        $this->assertStringContainsString('newStep.target_scope', $tourBlade);
+        $this->assertStringContainsString('fieldPresetsCatalog', $tourBlade);
+        $this->assertStringContainsString('الگوهای آماده و فیلدهای قابل انتخاب', $tourBlade);
+        $this->assertStringContainsString('value="currency"', $tourBlade);
+        $this->assertStringContainsString('value="mobile"', $tourBlade);
+        $this->assertStringContainsString('value="select"', $tourBlade);
+        $this->assertStringContainsString('value="checkbox"', $tourBlade);
+        $this->assertStringContainsString('value="time"', $tourBlade);
+        $this->assertStringContainsString('value="url"', $tourBlade);
+        $this->assertStringContainsString('options_str', $tourBlade);
+
+        // 10. Verify onboarding-widget has custom fields modal and specialized input renderers
+        $widgetBlade = $this->moduleView('livewire/dashboard/onboarding-widget.blade.php');
+        $this->assertStringContainsString('showCustomFieldsModal', $widgetBlade);
+        $this->assertStringContainsString('openCustomFieldsModal', $widgetBlade);
+        $this->assertStringContainsString('saveCustomFields', $widgetBlade);
+        $this->assertStringContainsString('$fType === \'currency\'', $widgetBlade);
+        $this->assertStringContainsString('$fType === \'checkbox\'', $widgetBlade);
+        $this->assertStringContainsString('$fType === \'select\'', $widgetBlade);
+        $this->assertStringContainsString('$fType === \'time\'', $widgetBlade);
+        $this->assertStringContainsString('$fType === \'mobile\'', $widgetBlade);
+        $this->assertStringContainsString('$fType === \'url\'', $widgetBlade);
     }
 }

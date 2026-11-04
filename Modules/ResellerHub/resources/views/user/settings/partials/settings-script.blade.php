@@ -3,6 +3,9 @@
     use Modules\ResellerHub\App\Enums\OnboardingStepIcon;
     use Modules\ResellerHub\App\Enums\OnboardingStepPreset;
     use Modules\ResellerHub\App\Models\ResellerSetting;
+    use App\Models\CustomUserField;
+
+    $availableSysFields = CustomUserField::forSubAccounts()->get(['field_name', 'label', 'field_type', 'category_group', 'target_scope', 'is_required'])->toArray();
 @endphp
 <script>
     window.faNum = window.faNum || function (str) {
@@ -63,6 +66,53 @@
         customStepPresets: @json(OnboardingStepPreset::toFrontendArray()),
         internalRouteOptions: @json(OnboardingInternalRoute::toFrontendArray()),
         iconCatalog: @json(OnboardingStepIcon::toFrontendArray()),
+        availableSystemFields: @json($availableSysFields),
+        fieldPresetsCatalog: [
+            {
+                category: 'identity',
+                categoryLabel: 'هویتی و حقوقی',
+                fields: [
+                    { name: 'national_code', label: 'کد ملی / شناسه ملی', type: 'text', placeholder: '۱۰ رقم بدون خط تیره', target_scope: 'user', is_required: true },
+                    { name: 'registration_no', label: 'شماره ثبت شرکت / موسسه', type: 'number', placeholder: 'مثال: ۵۴۸۹۲', target_scope: 'tenant', is_required: false },
+                    { name: 'legal_id', label: 'شناسه ملی حقوقی (۱۱ رقمی)', type: 'number', placeholder: 'مثال: ۱۰۱۰xxxxxxx', target_scope: 'tenant', is_required: false },
+                    { name: 'economic_code', label: 'کد اقتصادی ۱۲ رقمی', type: 'number', placeholder: 'مثال: ۴۱۱xxxxxxxx', target_scope: 'tenant', is_required: false },
+                    { name: 'license_no', label: 'شماره پروانه بهره‌برداری / مجوز', type: 'text', placeholder: 'شماره پروانه صنفی یا پروانه طبابت', target_scope: 'tenant', is_required: false }
+                ]
+            },
+            {
+                category: 'contact',
+                categoryLabel: 'تماس و نشانی اداری',
+                fields: [
+                    { name: 'landline_phone', label: 'تلفن ثابت دفتر مرکزی', type: 'tel', placeholder: '۰۲۱-۸۸xxxxxx', target_scope: 'tenant', is_required: false },
+                    { name: 'fax', label: 'شماره فکس رسمی', type: 'tel', placeholder: '۰۲۱-۸۸xxxxxx', target_scope: 'tenant', is_required: false },
+                    { name: 'secondary_mobile', label: 'شماره همراه پشتیبان / مدیر فنی', type: 'mobile', placeholder: '۰۹xxxxxxxxx', target_scope: 'user', is_required: false },
+                    { name: 'postal_code', label: 'کد پستی ۱۰ رقمی', type: 'number', placeholder: '۱۰ رقم بدون فاصله', target_scope: 'tenant', is_required: false },
+                    { name: 'full_address', label: 'نشانی کامل پستی و موقعیت', type: 'textarea', placeholder: 'استان، شهر، خیابان، پلاک، واحد...', target_scope: 'tenant', is_required: false },
+                    { name: 'website_url', label: 'آدرس وب‌سایت رسمی', type: 'url', placeholder: 'https://example.com', target_scope: 'tenant', is_required: false }
+                ]
+            },
+            {
+                category: 'business',
+                categoryLabel: 'کسب‌وکار و کلینیک',
+                fields: [
+                    { name: 'medical_council_no', label: 'شماره نظام پزشکی / صنفی', type: 'text', placeholder: 'مثال: ۱۲۳۴۵', target_scope: 'user', is_required: false },
+                    { name: 'brand_name', label: 'نام تجاری یا تابلوی مرکز', type: 'text', placeholder: 'نام تجاری، نام کلینیک یا تابلو', target_scope: 'tenant', is_required: false },
+                    { name: 'monthly_target', label: 'تارگت مالی ماهانه (تومان)', type: 'currency', placeholder: 'مبلغ به تومان', target_scope: 'tenant', is_required: false },
+                    { name: 'staff_count', label: 'تعداد پرسنل / کارمندان', type: 'number', placeholder: 'مثال: ۱۵', target_scope: 'tenant', is_required: false },
+                    { name: 'bank_iban', label: 'شماره شبا بانکی (IR)', type: 'text', placeholder: 'IRxxxxxxxxxxxxxxxxxxxxxxxx', target_scope: 'tenant', is_required: false },
+                    { name: 'working_hours', label: 'ساعات کاری و پذیرش', type: 'text', placeholder: 'شنبه تا چهارشنبه ۸ الی ۱۷', target_scope: 'tenant', is_required: false }
+                ]
+            },
+            {
+                category: 'system',
+                categoryLabel: 'سیستم و پارامترهای فنی',
+                fields: [
+                    { name: 'device_ip_port', label: 'آدرس آی‌پی / پورت تجهیزات متصل', type: 'text', placeholder: '192.168.1.100:8080', target_scope: 'tenant', is_required: false },
+                    { name: 'default_sms_sender', label: 'سرشماره اختصاصی پیامک', type: 'text', placeholder: '3000xxxx / 5000xxxx', target_scope: 'tenant', is_required: false },
+                    { name: 'invoice_prefix', label: 'پیش‌شماره فاکتورهای حساب', type: 'text', placeholder: 'INV-', target_scope: 'tenant', is_required: false }
+                ]
+            }
+        ],
         messages: {
             onboarding: @json(__('resellerhub::messages.onboarding')),
             pricing: @json(__('resellerhub::messages.pricing')),
@@ -174,6 +224,11 @@
             })) : [],
             tourSortableInstance: null,
 
+            availableSystemFields: config.availableSystemFields || [],
+            fieldPresetsCatalog: config.fieldPresetsCatalog || [],
+            activePresetTab: 'identity',
+            editActivePresetTab: 'identity',
+
             editStepModalOpen: false,
             editingStep: {},
             editingIndex: -1,
@@ -228,6 +283,11 @@
                 this.newStep.action_url = preset.action_url;
                 this.newStep.is_required = Boolean(preset.is_required);
                 this.newStep.can_manual_complete = Boolean(preset.can_manual_complete);
+                if (preset.custom_fields) {
+                    this.newStep.custom_fields = JSON.parse(JSON.stringify(preset.custom_fields));
+                    this.newStep.field_group = preset.field_group || 'contact';
+                    this.newStep.target_scope = preset.target_scope || 'user';
+                }
                 this.newStepError = '';
                 this.showToast(this.t('preset_applied', {title: preset.title}), 'info');
             },
@@ -569,6 +629,22 @@
                 step.depends_on = step.depends_on || '';
                 if (!step.action_type) step.action_type = 'internal';
                 if (!step.icon) step.icon = 'sparkles';
+                if (!step.custom_fields) step.custom_fields = [];
+                if (!step.field_group) step.field_group = 'contact';
+                if (!step.target_scope) step.target_scope = 'user';
+                if (Array.isArray(step.custom_fields)) {
+                    step.custom_fields.forEach(fld => {
+                        if (fld.options && Array.isArray(fld.options)) {
+                            fld.options_str = fld.options.join(', ');
+                        } else if (fld.options && typeof fld.options === 'string') {
+                            fld.options_str = fld.options;
+                            fld.options = fld.options.split(',').map(s => s.trim()).filter(Boolean);
+                        } else {
+                            fld.options_str = '';
+                            fld.options = [];
+                        }
+                    });
+                }
                 if (!step.internal_route) {
                     step.internal_route = (step.action_url && step.action_url.startsWith('/'))
                         ? step.action_url.replace(/^\//, '')
@@ -597,6 +673,16 @@
                         } else if (this.editingStep.action_type === 'manual') {
                             this.editingStep.action_url = null;
                             this.editingStep.can_manual_complete = true;
+                        } else if (this.editingStep.action_type === 'custom_fields') {
+                            this.editingStep.action_url = null;
+                            this.editingStep.can_manual_complete = false;
+                            if (Array.isArray(this.editingStep.custom_fields)) {
+                                this.editingStep.custom_fields.forEach(fld => {
+                                    if (fld.type === 'select' && fld.options_str) {
+                                        fld.options = fld.options_str.split(',').map(s => s.trim()).filter(Boolean);
+                                    }
+                                });
+                            }
                         }
                     }
                     const originalStep = this.tourSteps[this.editingIndex];
@@ -629,8 +715,87 @@
                     is_required: false,
                     depends_on_mode: lastStep ? 'previous' : 'none',
                     specific_depends_on: lastStep ? lastStep.slug : null,
+                    field_group: 'contact',
+                    target_scope: 'user',
+                    custom_fields: [],
                 };
                 this.addCustomStepModalOpen = true;
+            },
+
+            addCustomFieldToNewStep(preset = null) {
+                if (!this.newStep.custom_fields) {
+                    this.newStep.custom_fields = [];
+                }
+                if (preset) {
+                    const rawOpts = preset.options || [];
+                    const optsArr = Array.isArray(rawOpts) ? rawOpts : (typeof rawOpts === 'string' ? rawOpts.split(',').map(s => s.trim()).filter(Boolean) : []);
+                    this.newStep.custom_fields.push({
+                        name: preset.name || preset.field_name || ('field_' + (this.newStep.custom_fields.length + 1)),
+                        label: preset.label || 'فیلد جدید',
+                        type: preset.type || preset.field_type || 'text',
+                        is_required: Boolean(preset.is_required),
+                        placeholder: preset.placeholder || '',
+                        options: optsArr,
+                        options_str: optsArr.join(', '),
+                        target_scope: preset.target_scope || this.newStep.target_scope || 'user',
+                    });
+                } else {
+                    const idx = this.newStep.custom_fields.length + 1;
+                    this.newStep.custom_fields.push({
+                        name: 'field_' + idx,
+                        label: 'فیلد جدید ' + idx,
+                        type: 'text',
+                        is_required: false,
+                        placeholder: '',
+                        options: [],
+                        options_str: '',
+                        target_scope: this.newStep.target_scope || 'user',
+                    });
+                }
+            },
+
+            removeCustomFieldFromNewStep(index) {
+                if (this.newStep.custom_fields && this.newStep.custom_fields[index] !== undefined) {
+                    this.newStep.custom_fields.splice(index, 1);
+                }
+            },
+
+            addCustomFieldToEditStep(preset = null) {
+                if (!this.editingStep.custom_fields) {
+                    this.editingStep.custom_fields = [];
+                }
+                if (preset) {
+                    const rawOpts = preset.options || [];
+                    const optsArr = Array.isArray(rawOpts) ? rawOpts : (typeof rawOpts === 'string' ? rawOpts.split(',').map(s => s.trim()).filter(Boolean) : []);
+                    this.editingStep.custom_fields.push({
+                        name: preset.name || preset.field_name || ('field_' + (this.editingStep.custom_fields.length + 1)),
+                        label: preset.label || 'فیلد جدید',
+                        type: preset.type || preset.field_type || 'text',
+                        is_required: Boolean(preset.is_required),
+                        placeholder: preset.placeholder || '',
+                        options: optsArr,
+                        options_str: optsArr.join(', '),
+                        target_scope: preset.target_scope || this.editingStep.target_scope || 'user',
+                    });
+                } else {
+                    const idx = this.editingStep.custom_fields.length + 1;
+                    this.editingStep.custom_fields.push({
+                        name: 'field_' + idx,
+                        label: 'فیلد جدید ' + idx,
+                        type: 'text',
+                        is_required: false,
+                        placeholder: '',
+                        options: [],
+                        options_str: '',
+                        target_scope: this.editingStep.target_scope || 'user',
+                    });
+                }
+            },
+
+            removeCustomFieldFromEditStep(index) {
+                if (this.editingStep.custom_fields && this.editingStep.custom_fields[index] !== undefined) {
+                    this.editingStep.custom_fields.splice(index, 1);
+                }
             },
 
             createCustomStep() {
@@ -656,6 +821,16 @@
                 } else if (this.newStep.action_type === 'manual') {
                     finalActionUrl = null;
                     canManualComplete = true;
+                } else if (this.newStep.action_type === 'custom_fields') {
+                    finalActionUrl = null;
+                    canManualComplete = false;
+                    if (Array.isArray(this.newStep.custom_fields)) {
+                        this.newStep.custom_fields.forEach(fld => {
+                            if (fld.type === 'select' && fld.options_str) {
+                                fld.options = fld.options_str.split(',').map(s => s.trim()).filter(Boolean);
+                            }
+                        });
+                    }
                 }
 
                 let dependsOn = null;
@@ -682,6 +857,9 @@
                     action_target: null,
                     action_url: finalActionUrl,
                     can_manual_complete: canManualComplete || (this.newStep.action_type === 'manual'),
+                    custom_fields: this.newStep.action_type === 'custom_fields' ? JSON.parse(JSON.stringify(this.newStep.custom_fields || [])) : null,
+                    field_group: this.newStep.action_type === 'custom_fields' ? (this.newStep.field_group || 'contact') : null,
+                    target_scope: this.newStep.action_type === 'custom_fields' ? (this.newStep.target_scope || 'user') : 'user',
                 };
 
                 if (dependsOn) {
