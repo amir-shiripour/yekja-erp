@@ -21,7 +21,7 @@
             @if($packages->isNotEmpty() && !empty($availablePeriods))
                 <div class="flex justify-center mb-12">
                     <div role="tablist" aria-label="دوره‌های اشتراک"
-                        class="inline-flex items-center p-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm gap-1.5 overflow-x-auto max-w-full hide-scrollbar">
+                         class="inline-flex items-center p-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm gap-1.5 overflow-x-auto max-w-full hide-scrollbar">
                         @foreach($availablePeriods as $pKey => $pData)
                             <button
                                 role="tab"
@@ -425,6 +425,17 @@
                     {{ $packages->links('resellerhub::partials.pagination') }}
                 </div>
             @endif
+
+            {{-- Plan Comparison Matrix --}}
+            @if($allPackages->count() > 1 && !empty($comparisonData['groups']))
+                @include('resellerhub::public.partials.pricing-comparison', [
+                    'packages'         => $allPackages,
+                    'comparisonData'   => $comparisonData,
+                    'availablePeriods' => $availablePeriods,
+                    'packagePeriods'   => $packagePeriods ?? [],
+                ])
+            @endif
+
         </div>
     </div>
 
