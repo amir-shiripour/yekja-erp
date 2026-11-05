@@ -16,13 +16,13 @@ class PublicPricingController extends Controller
      */
     public function index(): View
     {
-        $packages = ResellerPackage::active()->orderBy('monthly_price')->paginate(9);
+        $packages = ResellerPackage::active()->orderBy('sort_order')->orderBy('monthly_price')->get();
 
         $availablePeriods = ResellerHelper::getAllAvailablePeriods();
         $defaultPeriod = 'monthly_price';
 
-        // Fetch all active packages (un-paginated) for the comparison matrix
-        $allPackages = ResellerPackage::active()->orderBy('sort_order')->orderBy('monthly_price')->get();
+        // Fetch all active packages for the comparison matrix
+        $allPackages = $packages;
 
         // Pre-compute structured periods per package (for monthly rates, discounts, etc.)
         $packagePeriods = [];
@@ -122,8 +122,9 @@ class PublicPricingController extends Controller
             ];
         }
 
+        $quotaAndFeatureRows = [];
+
         if ($quotaRows->isNotEmpty()) {
-            $rows = [];
             foreach ($quotaRows as $quota) {
                 $values = [];
                 $numericVals = [];
@@ -138,7 +139,7 @@ class PublicPricingController extends Controller
                 $maxQuota = !empty($numericVals) ? max($numericVals) : 100;
                 $hasDiff = count(array_unique(array_values($values))) > 1;
 
-                $rows[] = [
+                $quotaAndFeatureRows[] = [
                     'slug' => $quota->value,
                     'label' => $quota->shortTitle(),
                     'description' => $quota->description(),
@@ -149,15 +150,9 @@ class PublicPricingController extends Controller
                     'values' => $values,
                 ];
             }
-            $groups[] = [
-                'category' => 'quotas',
-                'label' => __('resellerhub::messages.comparison.group_quotas'),
-                'rows' => $rows,
-            ];
         }
 
         if ($featureRows->isNotEmpty()) {
-            $rows = [];
             foreach ($featureRows as $feat) {
                 $values = [];
                 foreach ($packages as $pkg) {
@@ -166,7 +161,7 @@ class PublicPricingController extends Controller
 
                 $hasDiff = count(array_unique(array_values($values))) > 1;
 
-                $rows[] = [
+                $quotaAndFeatureRows[] = [
                     'slug' => $feat->value,
                     'label' => $feat->shortTitle(),
                     'description' => $feat->description(),
@@ -176,10 +171,15 @@ class PublicPricingController extends Controller
                     'values' => $values,
                 ];
             }
+        }
+
+        if (!empty($quotaAndFeatureRows)) {
             $groups[] = [
-                'category' => 'features',
-                'label' => __('resellerhub::messages.comparison.group_features'),
-                'rows' => $rows,
+                'category' => 'quotas_and_features',
+                'label' => __('resellerhub::messages.comparison.group_quotas_and_features') !== 'resellerhub::messages.comparison.group_quotas_and_features'
+                    ? __('resellerhub::messages.comparison.group_quotas_and_features')
+                    : 'ظرفیت‌ها و امکانات اختصاصی',
+                'rows' => $quotaAndFeatureRows,
             ];
         }
 
