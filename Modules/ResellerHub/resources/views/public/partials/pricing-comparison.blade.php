@@ -36,7 +36,7 @@
 @endphp
 
 <section class="w-full mt-28 sm:mt-36 pt-12 border-t border-gray-200/80 dark:border-gray-800 scroll-mt-20"
-         id="plan-comparison-section" aria-labelledby="comparison-heading"
+         aria-labelledby="comparison-heading"
          x-data="{
              searchQuery: '',
              onlyDifferences: false,
@@ -908,29 +908,4 @@
             </tfoot>
         </table>
     </div>
-
-
-    <style>
-        .top-horizontal-scrollbar::-webkit-scrollbar {
-            height: 7px;
-        }
-
-        .top-horizontal-scrollbar::-webkit-scrollbar-track {
-            background: rgba(243, 244, 246, 0.8);
-            border-radius: 9999px;
-        }
-
-        .dark .top-horizontal-scrollbar::-webkit-scrollbar-track {
-            background: rgba(31, 41, 55, 0.8);
-        }
-
-        .top-horizontal-scrollbar::-webkit-scrollbar-thumb {
-            background: #6366f1;
-            border-radius: 9999px;
-        }
-
-        .top-horizontal-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #4f46e5;
-        }
-    </style>
 </section>

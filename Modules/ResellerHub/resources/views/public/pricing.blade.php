@@ -382,12 +382,14 @@
 
             {{-- Plan Comparison Matrix --}}
             @if($allPackages->count() > 1 && !empty($comparisonData['groups']))
-                @include('resellerhub::public.partials.pricing-comparison', [
-                    'packages'         => $allPackages,
-                    'comparisonData'   => $comparisonData,
-                    'availablePeriods' => $availablePeriods,
-                    'packagePeriods'   => $packagePeriods ?? [],
-                ])
+                <div id="plan-comparison-section">
+                    @include('resellerhub::public.partials.pricing-comparison', [
+                        'packages'         => $allPackages,
+                        'comparisonData'   => $comparisonData,
+                        'availablePeriods' => $availablePeriods,
+                        'packagePeriods'   => $packagePeriods ?? [],
+                    ])
+                </div>
             @endif
 
         </div>
