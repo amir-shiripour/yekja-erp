@@ -5,7 +5,7 @@
 
     /**
      * @var Collection<int,ResellerPackage> $packages
-     * @var array $comparisonData   ['groups' => [...], 'periodRows' => [...]]
+     * @var array $comparisonData
      * @var array $availablePeriods
      * @var array $packagePeriods
      */
@@ -14,340 +14,758 @@
     $periodRows     = $comparisonData['periodRows'] ?? [];
     $packagePeriods = $packagePeriods ?? [];
 
-    // Determine the popular (recommended) package
-    $nonFree      = $packages->filter(fn($p) => !$p->isFree());
-    $popularPkgId = $nonFree->isNotEmpty()
-        ? ($nonFree->sortByDesc('monthly_price')->first()?->id)
-        : null;
-
     $currencyLabel = __('resellerhub::messages.comparison.currency');
 
     // Total features count across all groups
     $totalFeaturesCount = collect($groups)->sum(fn($g) => count($g['rows'] ?? []));
+
+    // Pre-calculate metadata for Alpine search, filtering & empty states
+    $groupsMeta = collect($groups)->mapWithKeys(function($g) {
+        $rows = collect($g['rows'])->map(fn($r) => [
+            'label'    => $r['label'],
+            'has_diff' => (bool)($r['has_difference'] ?? true),
+        ]);
+        return [$g['category'] => $rows];
+    })->toArray();
+
+    $categoryCounts = [
+        'all'                 => $totalFeaturesCount,
+        'modules'             => count($groupsMeta['modules'] ?? []),
+        'quotas_and_features' => count($groupsMeta['quotas_and_features'] ?? []),
+    ];
 @endphp
 
-<section class="w-full mt-24 scroll-mt-28" id="plan-comparison-section" aria-labelledby="comparison-heading"
+<section class="w-full mt-28 sm:mt-36 pt-12 border-t border-gray-200/80 dark:border-gray-800 scroll-mt-20"
+         aria-labelledby="comparison-heading"
          x-data="{
              searchQuery: '',
              onlyDifferences: false,
+             selectedCategory: 'all',
+             showQuickFilters: false,
+             showTopScroll: false,
+             selectedPkgIndex: 0,
+             scrollPercent: 0,
+             isProgrammaticScroll: false,
+             pkgList: @js($packages->map(fn($p) => ['id' => $p->id, 'name' => $p->name])->values()->toArray()),
+             tableScrollWidth: 0,
+             tableClientWidth: 0,
+             hasHorizontalOverflow: false,
+             scrollToRatio(ratio) {
+                 const el = this.$refs.tableContainer;
+                 if (!el) return;
+                 const maxScroll = el.scrollWidth - el.clientWidth;
+                 if (maxScroll <= 0) return;
+
+                 this.isProgrammaticScroll = true;
+                 const clampedRatio = Math.min(1, Math.max(0, ratio));
+                 this.scrollPercent = Math.round(clampedRatio * 100);
+
+                 const targetOffset = clampedRatio * maxScroll;
+
+                 // Detect if RTL scrollLeft is negative:
+                 const prev = el.scrollLeft;
+                 el.scrollLeft = -5;
+                 const isNegative = el.scrollLeft < 0;
+                 el.scrollLeft = prev;
+
+                 const targetLeft = isNegative ? -targetOffset : targetOffset;
+
+                 el.scrollTo({
+                     left: targetLeft,
+                     behavior: 'smooth'
+                 });
+
+                 setTimeout(() => {
+                     this.isProgrammaticScroll = false;
+                 }, 600);
+             },
+             selectPackage(index) {
+                 if (index < 0 || index >= this.pkgList.length) return;
+                 this.selectedPkgIndex = index;
+                 const pkg = this.pkgList[index];
+                 this.hoveredPkgId = pkg.id;
+
+                 if (this.pkgList.length <= 1) return;
+
+                 const ratio = index / (this.pkgList.length - 1);
+                 this.scrollToRatio(ratio);
+             },
+             nextPackage() {
+                 if (this.selectedPkgIndex < this.pkgList.length - 1) {
+                     this.selectPackage(this.selectedPkgIndex + 1);
+                 }
+             },
+             prevPackage() {
+                 if (this.selectedPkgIndex > 0) {
+                     this.selectPackage(this.selectedPkgIndex - 1);
+                 }
+             },
+             onTableScroll() {
+                 const el = this.$refs.tableContainer;
+                 if (!el) return;
+                 const maxScroll = el.scrollWidth - el.clientWidth;
+                 if (maxScroll > 0) {
+                     const currentScroll = Math.abs(el.scrollLeft);
+                     this.scrollPercent = Math.min(100, Math.max(0, Math.round((currentScroll / maxScroll) * 100)));
+                     if (!this.isProgrammaticScroll && this.pkgList.length > 1) {
+                         const nearestIndex = Math.min(
+                             this.pkgList.length - 1,
+                             Math.max(0, Math.round((currentScroll / maxScroll) * (this.pkgList.length - 1)))
+                         );
+                         this.selectedPkgIndex = nearestIndex;
+                         this.hoveredPkgId = this.pkgList[nearestIndex]?.id;
+                     }
+                 }
+             },
+             updateScrollMetrics() {
+                 if (!this.$refs.tableContainer) return;
+                 const el = this.$refs.tableContainer;
+                 this.tableScrollWidth = el.scrollWidth;
+                 this.tableClientWidth = el.clientWidth;
+                 this.hasHorizontalOverflow = this.tableScrollWidth > (this.tableClientWidth + 10);
+             },
+             syncFromTop() {
+                 if (this.isSyncingBottom) return;
+                 this.isSyncingTop = true;
+                 if (this.$refs.tableContainer && this.$refs.topScroll) {
+                     this.$refs.tableContainer.scrollLeft = this.$refs.topScroll.scrollLeft;
+                 }
+                 requestAnimationFrame(() => { this.isSyncingTop = false; });
+             },
+             syncFromBottom() {
+                 if (this.isSyncingTop) return;
+                 this.isSyncingBottom = true;
+                 if (this.$refs.topScroll && this.$refs.tableContainer) {
+                     this.$refs.topScroll.scrollLeft = this.$refs.tableContainer.scrollLeft;
+                 }
+                 requestAnimationFrame(() => { this.isSyncingBottom = false; });
+             },
              hoveredPkgId: null,
+             activeTooltip: null,
+             groupsMeta: @js($groupsMeta),
              openGroups: {
                  modules: true,
-                 quotas: true,
-                 features: true
+                 quotas_and_features: true
+             },
+             init() {
+                 this.$nextTick(() => {
+                     this.updateScrollMetrics();
+                     window.addEventListener('resize', () => this.updateScrollMetrics());
+                 });
+                 this.$watch('searchQuery', (val) => {
+                     if (val && val.trim().length > 0) {
+                         this.selectedCategory = 'all';
+                         for (const cat in this.groupsMeta) {
+                             if (this.groupHasMatches(cat)) {
+                                 this.openGroups[cat] = true;
+                             }
+                         }
+                     }
+                 });
+             },
+             normalizePersian(str) {
+                 if (!str) return '';
+                 return str.toString()
+                     .replace(/ي/g, 'ی')
+                     .replace(/ك/g, 'ک')
+                     .replace(/\u200c/g, ' ')
+                     .toLowerCase()
+                     .trim();
+             },
+             groupHasMatches(cat) {
+                 if (this.selectedCategory !== 'all' && this.selectedCategory !== cat) {
+                     return false;
+                 }
+                 const rows = this.groupsMeta[cat] || [];
+                 if (!this.searchQuery.trim() && !this.onlyDifferences) return true;
+                 return rows.some(r => this.rowMatches(r.label, r.has_diff));
+             },
+             get totalMatchesCount() {
+                 let count = 0;
+                 for (const cat in this.groupsMeta) {
+                     if (this.selectedCategory !== 'all' && this.selectedCategory !== cat) continue;
+                     const rows = this.groupsMeta[cat] || [];
+                     count += rows.filter(r => this.rowMatches(r.label, r.has_diff)).length;
+                 }
+                 return count;
              },
              toggleGroup(cat) {
                  this.openGroups[cat] = !this.openGroups[cat];
              },
              rowMatches(label, hasDiff) {
                  if (this.onlyDifferences && !hasDiff) return false;
-                 if (!this.searchQuery.trim()) return true;
-                 return label.toLowerCase().includes(this.searchQuery.trim().toLowerCase());
+                 const q = this.normalizePersian(this.searchQuery);
+                 if (!q) return true;
+                 const l = this.normalizePersian(label);
+                 return l.includes(q);
              }
          }">
 
-    <div class="text-center mb-8">
+    {{-- Section Header --}}
+    <div class="text-center mb-10">
         <h2 id="comparison-heading"
-            class="text-base font-semibold leading-7 text-indigo-600 dark:text-indigo-400">
-            {{ __('resellerhub::messages.comparison.section_title') }}
+            class="text-2xl sm:text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+            مقایسه تفصیلی و مشخصات فنی تمام پکیج ها
         </h2>
-        <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-            {{ __('resellerhub::messages.comparison.section_subtitle') }}
+        <p class="mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+            بررسی و مقایسه دقیق ماژول‌ها، سقف‌ها و امکانات به تفکیک هر پکیج
         </p>
     </div>
 
+    {{-- Modern Unified Toolbar with Search & Quick Filters --}}
     <div
-        class="mb-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm">
+        class="mb-6 p-2.5 sm:p-3 bg-white dark:bg-gray-900 border border-gray-200/90 dark:border-gray-800 rounded-2xl shadow-xs">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
 
-        <div class="relative flex-1 max-w-md">
-            <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-gray-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-            </div>
-            <input type="text"
-                   x-model="searchQuery"
-                   placeholder="{{ __('resellerhub::messages.comparison.search_placeholder') }}"
-                   class="w-full pr-10 pl-9 py-2 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/60 rounded-xl text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-            <button type="button"
-                    x-show="searchQuery.length > 0"
-                    x-cloak
-                    @click="searchQuery = ''"
-                    class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-
-        {{-- Only Differences Toggle --}}
-        <div class="flex items-center gap-2 self-end sm:self-auto">
-            <button type="button"
-                    @click="onlyDifferences = !onlyDifferences"
-                    :class="onlyDifferences
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
-                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer select-none">
-                <span class="w-4 h-4 rounded-full border flex items-center justify-center transition-all"
-                      :class="onlyDifferences ? 'border-white bg-white/20' : 'border-gray-400 bg-transparent'">
-                    <svg x-show="onlyDifferences" class="w-2.5 h-2.5 text-white" fill="currentColor"
-                         viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clip-rule="evenodd"/>
+            {{-- Right: Full-width Search Input --}}
+            <div class="relative flex-1 w-full">
+                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-gray-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                </span>
-                <span>{{ __('resellerhub::messages.comparison.only_differences') }}</span>
-            </button>
+                </div>
+                <input type="text"
+                       x-model="searchQuery"
+                       placeholder="جستجوی ویژگی یا ماژول در تمام پکیج ها..."
+                       class="w-full pr-10 pl-9 py-2.5 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/60 rounded-xl text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                <button type="button"
+                        x-show="searchQuery.length > 0"
+                        x-cloak
+                        @click="searchQuery = ''"
+                        class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
+                        aria-label="پاک کردن جستجو">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Left: Controls (Quick Filters Toggle + Only Differences + Collapse Toggle) --}}
+            <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
+                {{-- Quick Filters Toggle Button --}}
+                <button type="button"
+                        @click="showQuickFilters = !showQuickFilters"
+                        :aria-expanded="showQuickFilters ? 'true' : 'false'"
+                        :class="showQuickFilters || selectedCategory !== 'all'
+                            ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700 ring-2 ring-indigo-500/20'
+                            : 'bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700/60'"
+                        class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-black border transition-all cursor-pointer select-none">
+                    <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    <span class="whitespace-nowrap">فیلترهای سریع</span>
+                    <span x-show="selectedCategory !== 'all'" x-cloak class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                    <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200"
+                         :class="showQuickFilters ? 'rotate-180' : ''"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+
+                {{-- Top Scroll / Header Fast Navigation Toggle Button --}}
+                <button type="button"
+                        @click="showTopScroll = !showTopScroll; if(showTopScroll) { $nextTick(() => updateScrollMetrics()); }"
+                        :aria-expanded="showTopScroll ? 'true' : 'false'"
+                        :class="showTopScroll
+                            ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700 ring-2 ring-indigo-500/20'
+                            : 'bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700/60'"
+                        class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-black border transition-all cursor-pointer select-none">
+                    <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                    </svg>
+                    <span class="whitespace-nowrap">اسکرول هدر</span>
+                </button>
+
+                {{-- Only Differences Toggle --}}
+                <button type="button"
+                        @click="onlyDifferences = !onlyDifferences"
+                        :aria-pressed="onlyDifferences ? 'true' : 'false'"
+                        :class="onlyDifferences
+                            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25 ring-2 ring-indigo-500/30'
+                            : 'bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700/60 border'"
+                        class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer select-none">
+                    <span class="w-6 h-3.5 rounded-full p-0.5 transition-colors flex items-center"
+                          :class="onlyDifferences ? 'bg-white/30 justify-end' : 'bg-gray-300 dark:bg-gray-600 justify-start'">
+                        <span class="w-2.5 h-2.5 rounded-full bg-white shadow-xs"></span>
+                    </span>
+                    <span class="whitespace-nowrap">فقط تفاوت‌ها</span>
+                </button>
+
+                {{-- Quick Collapse/Expand Toggle --}}
+                <button type="button"
+                        @click="const allOpen = openGroups.modules && openGroups.quotas_and_features; openGroups.modules = !allOpen; openGroups.quotas_and_features = !allOpen;"
+                        class="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-700/60 transition-colors"
+                        :title="openGroups.modules && openGroups.quotas_and_features ? 'بستن همه بخش‌ها' : 'باز کردن همه بخش‌ها'">
+                    <svg class="w-4 h-4 transform transition-transform"
+                         :class="openGroups.modules && openGroups.quotas_and_features ? 'rotate-180' : ''"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+            </div>
+
         </div>
 
+        {{-- Expandable Quick Filters Sub-Row --}}
+        <div x-show="showQuickFilters"
+             x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-2"
+             class="pt-3 mt-3 border-t border-gray-100 dark:border-gray-800/80 flex items-center gap-2 flex-wrap"
+             role="tablist" aria-label="فیلترهای سریع دسته‌بندی امکانات">
+            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 ml-1">فیلتر بر اساس دسته‌بندی:</span>
+
+            <button type="button"
+                    role="tab"
+                    @click="selectedCategory = 'all'"
+                    :class="selectedCategory === 'all'
+                        ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-sm'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                    class="px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5">
+                <span>همه امکانات</span>
+                <span class="px-1.5 py-0.2 rounded-md text-[10px]"
+                      :class="selectedCategory === 'all' ? 'bg-white/20 dark:bg-black/20 text-white dark:text-gray-900' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                    {{ ResellerHelper::toPersianDigits($categoryCounts['all']) }}
+                </span>
+            </button>
+
+            <button type="button"
+                    role="tab"
+                    @click="selectedCategory = 'modules'"
+                    :class="selectedCategory === 'modules'
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                    class="px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                </svg>
+                <span>ماژول‌های فعال</span>
+                <span class="px-1.5 py-0.2 rounded-md text-[10px]"
+                      :class="selectedCategory === 'modules' ? 'bg-white/25 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                    {{ ResellerHelper::toPersianDigits($categoryCounts['modules']) }}
+                </span>
+            </button>
+
+            <button type="button"
+                    role="tab"
+                    @click="selectedCategory = 'quotas_and_features'"
+                    :class="selectedCategory === 'quotas_and_features'
+                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'"
+                    class="px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                <span>ظرفیت‌ها و امکانات اختصاصی</span>
+                <span class="px-1.5 py-0.2 rounded-md text-[10px]"
+                      :class="selectedCategory === 'quotas_and_features' ? 'bg-white/25 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                    {{ ResellerHelper::toPersianDigits($categoryCounts['quotas_and_features']) }}
+                </span>
+            </button>
+        </div>
     </div>
 
-    <div
-        class="w-full overflow-x-auto rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm relative"
-        style="-webkit-overflow-scrolling: touch;">
+    {{-- Dedicated Header Scroll & Package-by-Package Stepper Bar (Hidden by default, shown via toggle) --}}
+    <div x-show="showTopScroll"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-2"
+         class="mb-3.5 p-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/90 dark:border-gray-800 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
+
+        {{-- Package-by-Package Stepper Selector --}}
+        <div class="flex items-center justify-between md:justify-start gap-2.5">
+            <div
+                class="flex items-center gap-1.5 text-xs font-black text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                <span
+                    class="w-7 h-7 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-800/60">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </span>
+                <span>انتخاب پکیج:</span>
+            </div>
+
+            {{-- Stepper Buttons with Active Package Indicator --}}
+            <div class="flex items-center gap-1.5" dir="rtl">
+                <button type="button"
+                        @click="prevPackage()"
+                        :disabled="selectedPkgIndex === 0"
+                        :class="selectedPkgIndex === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer active:scale-95'"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-xs font-black border border-gray-200 dark:border-gray-700 shadow-2xs transition-all"
+                        title="مشاهده پکیج قبلی">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                    <span>پکیج قبلی</span>
+                </button>
+
+                {{-- Selected Package Badge --}}
+                <div
+                    class="px-2.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100 dark:border-indigo-800/60 text-xs font-black text-indigo-700 dark:text-indigo-300 flex items-center gap-1 max-w-[170px] sm:max-w-[220px] truncate"
+                    :title="pkgList[selectedPkgIndex]?.name">
+                    <span class="text-[10px] text-indigo-400 font-bold"
+                          x-text="`${selectedPkgIndex + 1}/${pkgList.length}:`"></span>
+                    <span class="truncate" x-text="pkgList[selectedPkgIndex]?.name"></span>
+                </div>
+
+                <button type="button"
+                        @click="nextPackage()"
+                        :disabled="selectedPkgIndex === pkgList.length - 1"
+                        :class="selectedPkgIndex === pkgList.length - 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer active:scale-95'"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-xs font-black border border-gray-200 dark:border-gray-700 shadow-2xs transition-all"
+                        title="مشاهده پکیج بعدی">
+                    <span>پکیج بعدی</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        {{-- Direct Interactive Synchronized Progress Track --}}
+        <div class="flex-1 w-full flex items-center gap-2.5 min-w-0" dir="rtl">
+            <span class="text-[11px] font-bold text-gray-400 dark:text-gray-500 whitespace-nowrap">پیشرفت:</span>
+            <div
+                @click="const rect = $el.getBoundingClientRect(); const ratio = (rect.right - $event.clientX) / rect.width; scrollToRatio(ratio); const nearest = Math.min(pkgList.length - 1, Math.max(0, Math.round(ratio * (pkgList.length - 1)))); selectedPkgIndex = nearest; hoveredPkgId = pkgList[nearest]?.id;"
+                class="flex-1 relative h-3 bg-gray-100 dark:bg-gray-800 rounded-full cursor-pointer overflow-hidden p-0.5 border border-gray-200/80 dark:border-gray-700/80 shadow-inner group"
+                title="کلیک روی نوار برای جابجایی سریع">
+                <div
+                    class="h-full bg-gradient-to-l from-indigo-500 via-indigo-600 to-indigo-700 rounded-full transition-all duration-300 shadow-sm relative"
+                    :style="`width: ${scrollPercent}%;`">
+                    <span
+                        class="absolute left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-xs opacity-90"></span>
+                </div>
+            </div>
+            <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 tabular-nums w-10 text-left shrink-0"
+                  x-text="`${scrollPercent}%`"></span>
+        </div>
+    </div>
+
+    {{-- Main Comparison Matrix Table with Vertical Sticky Header & Mobile-optimized Sticky Column --}}
+    <div x-ref="tableContainer"
+         @scroll="onTableScroll()"
+         class="w-full overflow-x-auto rounded-3xl border border-gray-200/90 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm relative"
+         style="-webkit-overflow-scrolling: touch;">
         <table class="w-full border-collapse text-sm text-right" role="table" dir="rtl">
-            <thead>
+
+            {{-- Sticky thead (Vertical Sticky Header) --}}
+            <thead class="sticky top-0 z-30 bg-white dark:bg-gray-900 shadow-sm">
             <tr class="border-b border-gray-200 dark:border-gray-800">
 
+                {{-- Corner Header: Structured Legend, Eliminates Awkward Empty White Box --}}
                 <th scope="col"
-                    class="sticky right-0 z-20 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.06)] dark:shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.4)] py-6 px-5 text-right align-bottom min-w-[200px] w-[240px]">
-                    <div class="text-xs font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
-                        {{ __('resellerhub::messages.comparison.feature') }}
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ __('resellerhub::messages.comparison.items_count', ['count' => ResellerHelper::toPersianDigits($totalFeaturesCount)]) }}
+                    class="sticky right-0 top-0 z-40 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-md border-l border-gray-200 dark:border-gray-800 shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.06)] dark:shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.4)] p-4 text-right align-top min-w-[140px] w-[140px] sm:min-w-[220px] sm:w-[240px]">
+                    <div class="flex flex-col justify-between h-full min-h-[220px]">
+                        <div>
+                            <div
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 text-[11px] font-black mb-1.5">
+                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <span>راهنمای مقایسه پکیج‌ها</span>
+                            </div>
+                            <div class="text-xs sm:text-sm font-black text-gray-900 dark:text-white leading-tight">
+                                مشخصات فنی و دسترسی
+                            </div>
+                            <div class="text-[11px] font-bold text-gray-500 dark:text-gray-400 mt-1">
+                                {{ ResellerHelper::toPersianDigits($totalFeaturesCount) }} مشخصه در ۲ بخش
+                            </div>
+                        </div>
+
+                        {{-- Structured Legend inside Corner Cell --}}
+                        <div
+                            class="p-2.5 rounded-xl bg-white/90 dark:bg-gray-800/70 border border-gray-200/80 dark:border-gray-700/60 flex flex-col gap-1.5 text-[10px] sm:text-xs">
+                            <div class="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
+                                <span
+                                    class="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black shrink-0 text-[10px]">✓</span>
+                                <span>شامل پکیج</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 font-medium">
+                                <span
+                                    class="w-4 h-4 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 flex items-center justify-center font-black shrink-0 text-[10px]">—</span>
+                                <span>عدم دسترسی</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold">
+                                <span
+                                    class="w-4 h-4 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center shrink-0 text-[10px]">∞</span>
+                                <span>سقف نامحدود</span>
+                            </div>
+                        </div>
                     </div>
                 </th>
 
-                {{-- Package Columns --}}
+                {{-- Package Columns: Enforce Exact Horizontal Baseline Alignment of CTA Buttons --}}
                 @foreach($packages as $pkg)
                     @php
-                        $isPopular = ($pkg->id === $popularPkgId);
                         $pkgStructuredPeriods = $packagePeriods[$pkg->id] ?? [];
                     @endphp
                     <th scope="col"
+                        id="package-col-{{ $pkg->id }}"
                         @mouseenter="hoveredPkgId = {{ $pkg->id }}"
                         @mouseleave="hoveredPkgId = null"
-                        class="relative py-6 px-4 text-center align-top min-w-[190px] transition-colors duration-150
-                                   {{ $isPopular
-                                       ? 'bg-indigo-50/70 dark:bg-indigo-950/30 border-t-4 border-indigo-600 dark:border-indigo-500'
-                                       : 'bg-white dark:bg-gray-900' }}"
-                        :class="hoveredPkgId === {{ $pkg->id }} ? 'bg-indigo-50/90 dark:bg-indigo-950/50' : ''">
+                        class="relative p-4 text-center align-top min-w-[160px] sm:min-w-[200px] transition-colors duration-150 bg-white dark:bg-gray-900"
+                        :class="hoveredPkgId === {{ $pkg->id }} ? 'bg-indigo-50/50 dark:bg-indigo-950/30' : ''">
 
-                        {{-- Popular Badge Bar --}}
-                        <div class="h-6 flex items-center justify-center mb-1">
-                            @if($isPopular)
-                                <span
-                                    class="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-indigo-600 text-white text-[11px] font-black tracking-wide shadow-sm shadow-indigo-600/30">
-                                        <svg class="w-3 h-3 shrink-0" fill="currentColor" viewBox="0 0 20 20"
-                                             aria-hidden="true">
-                                            <path
-                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                        </svg>
-                                        {{ __('resellerhub::messages.comparison.popular_badge') }}
-                                    </span>
-                            @endif
-                        </div>
-
-                        {{-- Package Icon --}}
-                        <div class="mx-auto mb-2 w-11 h-11 rounded-2xl flex items-center justify-center shadow-xs"
-                             style="{{ $pkg->light_bg_style }}"
-                             x-html="window.renderIndustryIcon ? window.renderIndustryIcon('{{ $pkg->icon }}', 'w-5 h-5 text-current') : ''">
-                        </div>
-
-                        {{-- Package Name --}}
-                        <div class="font-black text-gray-900 dark:text-white text-sm sm:text-base leading-tight">
-                            {{ $pkg->name }}
-                        </div>
-
-                        {{-- Price per Active Period with smooth transition and monthly breakdown --}}
-                        @if($pkg->isFree())
-                            <div class="mt-2 text-emerald-600 dark:text-emerald-400 font-black text-lg">
-                                {{ __('resellerhub::messages.comparison.free_badge') }}
-                            </div>
-                        @else
-                            @foreach($periodRows as $pRow)
-                                @php
-                                    $pKey         = $pRow['key'];
-                                    $months       = $pRow['months'] ?? 1;
-                                    $periodInfo   = $pkgStructuredPeriods[$pKey] ?? null;
-                                    $isActive     = $periodInfo !== null || $pkg->isPeriodActive($pKey);
-                                    $rawPrice     = $periodInfo['raw_price'] ?? ($isActive ? $pkg->getPriceForMonths($months) : 0);
-                                    $finPrice     = $periodInfo['final_price'] ?? ($isActive ? $pkg->getFinalPriceForMonths($months) : 0);
-                                    $monthlyRate  = $periodInfo['monthly_rate'] ?? ($months > 0 ? (int)round($finPrice / $months) : $finPrice);
-                                    $hasDiscount  = $periodInfo['has_discount'] ?? ($isActive && $pkg->hasActiveDiscountForMonths($months));
-                                    $discountPct  = $periodInfo['discount_percent'] ?? 0;
-                                @endphp
-                                <div x-show="currentPeriod === '{{ $pKey }}'"
-                                     x-cloak
-                                     x-transition:enter="transition-opacity duration-200 ease-out"
-                                     x-transition:enter-start="opacity-0"
-                                     x-transition:enter-end="opacity-100"
-                                     class="mt-2 min-h-[3.25rem] flex flex-col items-center justify-center gap-0.5">
-                                    @if($isActive)
-                                        <div class="flex items-baseline gap-1">
-                                            @if($hasDiscount)
-                                                <span
-                                                    class="text-xs text-gray-400 dark:text-gray-500 line-through tabular-nums">
-                                                        {{ ResellerHelper::toPersianDigits(number_format($rawPrice)) }}
-                                                    </span>
-                                            @endif
-                                            <span
-                                                class="font-black text-lg text-indigo-600 dark:text-indigo-400 tabular-nums">
-                                                    {{ ResellerHelper::toPersianDigits(number_format($finPrice)) }}
-                                                </span>
-                                            <span
-                                                class="text-xs font-bold text-gray-400 dark:text-gray-500">{{ $currencyLabel }}</span>
-                                        </div>
-
-                                        {{-- Monthly breakdown & Discount badge for multi-month periods --}}
-                                        @if($months > 1)
-                                            <div class="flex items-center gap-1.5 mt-0.5">
-                                                    <span
-                                                        class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
-                                                        {{ __('resellerhub::messages.comparison.monthly_equivalent', ['amount' => ResellerHelper::toPersianDigits(number_format($monthlyRate))]) }}
-                                                    </span>
-                                                @if($discountPct > 0)
-                                                    <span
-                                                        class="px-1.5 py-0.2 rounded-md bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-[10px] font-black border border-rose-200/60 dark:border-rose-800/40">
-                                                            {{ __('resellerhub::messages.comparison.discount_off', ['percent' => ResellerHelper::toPersianDigits($discountPct)]) }}
-                                                        </span>
-                                                @endif
-                                            </div>
-                                        @endif
-
-                                        @if($pkg->setup_fee > 0)
-                                            <span
-                                                class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold mt-0.5">
-                                                    + {{ ResellerHelper::toPersianDigits(number_format($pkg->setup_fee)) }} {{ $currencyLabel }} {{ __('resellerhub::messages.comparison.setup_fee_label') }}
-                                                </span>
-                                        @endif
-                                    @else
-                                        <span class="text-xs text-gray-400 dark:text-gray-500 italic">
-                                                {{ __('resellerhub::messages.comparison.not_in_period') }}
-                                            </span>
-                                    @endif
+                        <div class="flex flex-col justify-between h-full min-h-[220px]">
+                            {{-- Top Part: Icon & Package Name --}}
+                            <div>
+                                <div
+                                    class="mx-auto mb-2 w-11 h-11 rounded-2xl flex items-center justify-center shadow-xs"
+                                    style="{{ $pkg->light_bg_style }}"
+                                    x-html="window.renderIndustryIcon ? window.renderIndustryIcon('{{ $pkg->icon }}', 'w-5 h-5 text-current') : ''">
                                 </div>
-                            @endforeach
-                        @endif
+                                <div
+                                    class="font-black text-gray-900 dark:text-white text-xs sm:text-base leading-tight truncate px-1"
+                                    title="{{ $pkg->name }}">
+                                    {{ $pkg->name }}
+                                </div>
+                            </div>
 
-                        {{-- CTA Button in Header --}}
-                        @foreach($periodRows as $pRow)
-                            @php
-                                $pKey     = $pRow['key'];
-                                $isActive = isset($pkgStructuredPeriods[$pKey]) || $pkg->isPeriodActive($pKey);
-                            @endphp
-                            <div x-show="currentPeriod === '{{ $pKey }}'" x-cloak class="mt-3">
-                                @if($pkg->isFree() || $isActive)
-                                    <a href="{{ route('portal.get-started', ['package' => $pkg->id, 'period' => $pKey]) }}"
-                                       class="inline-flex items-center justify-center gap-1 w-full px-3 py-2.5 rounded-xl text-xs font-black transition-all transform cursor-pointer
-                                                  {{ $isPopular
-                                                     ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30'
-                                                     : 'bg-gray-100 dark:bg-gray-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-gray-700 dark:text-gray-300 hover:text-indigo-700 dark:hover:text-indigo-300' }}"
-                                       :class="hoveredPkgId === {{ $pkg->id }} ? 'scale-[1.02] shadow-lg ring-2 ring-indigo-500/40' : ''">
-                                        <span>{{ __('resellerhub::messages.comparison.get_started') }}</span>
-                                    </a>
+                            {{-- Middle Part: Uniform Price Block with Consistent Height --}}
+                            <div class="min-h-[85px] sm:min-h-[95px] flex flex-col justify-center items-center py-1">
+                                @if($pkg->isFree())
+                                    <div class="text-emerald-600 dark:text-emerald-400 font-black text-base sm:text-xl">
+                                        {{ __('resellerhub::messages.comparison.free_badge') }}
+                                    </div>
+                                    <div class="text-[11px] text-gray-400 font-medium mt-1">پکیج دائمی بدون هزینه</div>
                                 @else
-                                    <button disabled
-                                            class="inline-flex items-center justify-center gap-1 w-full px-3 py-2.5 rounded-xl text-xs font-black cursor-not-allowed bg-gray-50 dark:bg-gray-800/40 text-gray-400 dark:text-gray-500">
-                                        <span>{{ __('resellerhub::messages.comparison.not_in_period') }}</span>
-                                    </button>
+                                    @foreach($periodRows as $pRow)
+                                        @php
+                                            $pKey         = $pRow['key'];
+                                            $months       = $pRow['months'] ?? 1;
+                                            $periodInfo   = $pkgStructuredPeriods[$pKey] ?? null;
+                                            $isActive     = $periodInfo !== null || $pkg->isPeriodActive($pKey);
+                                            $rawPrice     = $periodInfo['raw_price'] ?? ($isActive ? $pkg->getPriceForMonths($months) : 0);
+                                            $finPrice     = $periodInfo['final_price'] ?? ($isActive ? $pkg->getFinalPriceForMonths($months) : 0);
+                                            $monthlyRate  = $periodInfo['monthly_rate'] ?? ($months > 0 ? (int)round($finPrice / $months) : $finPrice);
+                                            $hasDiscount  = $periodInfo['has_discount'] ?? ($isActive && $pkg->hasActiveDiscountForMonths($months));
+                                            $discountPct  = $periodInfo['discount_percent'] ?? 0;
+                                        @endphp
+                                        <div x-show="currentPeriod === '{{ $pKey }}'"
+                                             x-cloak
+                                             class="w-full flex flex-col items-center justify-center">
+                                            @if($isActive)
+                                                <div class="flex items-baseline gap-1">
+                                                    @if($hasDiscount)
+                                                        <span
+                                                            class="text-[10px] sm:text-xs text-gray-400 line-through tabular-nums">
+                                                            {{ ResellerHelper::toPersianDigits(number_format($rawPrice)) }}
+                                                        </span>
+                                                    @endif
+                                                    <span
+                                                        class="font-black text-base sm:text-lg text-gray-900 dark:text-white tabular-nums">
+                                                        {{ ResellerHelper::toPersianDigits(number_format($finPrice)) }}
+                                                    </span>
+                                                    <span
+                                                        class="text-[10px] sm:text-xs font-bold text-gray-400 dark:text-gray-500">{{ $currencyLabel }}</span>
+                                                </div>
+
+                                                @if($months > 1)
+                                                    <div class="flex items-center gap-1 mt-0.5">
+                                                        <span
+                                                            class="text-[10px] text-indigo-700 dark:text-indigo-400 font-bold tabular-nums">
+                                                            {{ ResellerHelper::toPersianDigits(number_format($monthlyRate)) }} {{ $currencyLabel }}/ماه
+                                                        </span>
+                                                        @if($discountPct > 0)
+                                                            <span
+                                                                class="px-1 py-0.2 rounded bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 text-[9px] font-black border border-rose-200/60">
+                                                                {{ ResellerHelper::toPersianDigits($discountPct) }}٪-
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                @endif
+
+                                                @if($pkg->setup_fee > 0)
+                                                    <span
+                                                        class="text-[10px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">
+                                                        + {{ ResellerHelper::toPersianDigits(number_format($pkg->setup_fee)) }} {{ $currencyLabel }} راه‌اندازی
+                                                    </span>
+                                                @endif
+                                            @else
+                                                <span class="text-xs text-gray-400 dark:text-gray-500 italic">
+                                                    {{ __('resellerhub::messages.comparison.not_in_period') }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endforeach
                                 @endif
                             </div>
-                        @endforeach
+
+                            {{-- Bottom Part: CTA Button (Pinned to Bottom for Perfect Horizontal Alignment) --}}
+                            <div class="mt-auto w-full pt-2">
+                                @foreach($periodRows as $pRow)
+                                    @php
+                                        $pKey     = $pRow['key'];
+                                        $isActive = isset($pkgStructuredPeriods[$pKey]) || $pkg->isPeriodActive($pKey);
+                                    @endphp
+                                    <div x-show="currentPeriod === '{{ $pKey }}'" x-cloak class="w-full">
+                                        @if($pkg->isFree() || $isActive)
+                                            <a href="{{ route('portal.get-started', ['package' => $pkg->id, 'period' => $pKey]) }}"
+                                               class="inline-flex items-center justify-center gap-1 w-full px-3 py-2 rounded-xl text-xs font-black transition-all transform cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-600/20 active:scale-[0.99]"
+                                               :class="hoveredPkgId === {{ $pkg->id }} ? 'scale-[1.02] shadow-md' : ''"
+                                               aria-label="{{ __('resellerhub::messages.comparison.get_started') }} - {{ $pkg->name }}">
+                                                <span>{{ __('resellerhub::messages.comparison.get_started') }}</span>
+                                            </a>
+                                        @else
+                                            <button disabled
+                                                    class="inline-flex items-center justify-center gap-1 w-full px-3 py-2 rounded-xl text-xs font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                                                <span>{{ __('resellerhub::messages.comparison.not_in_period') }}</span>
+                                            </button>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </th>
                 @endforeach
             </tr>
             </thead>
+
             <tbody>
+            {{-- Empty State Row if no search matches --}}
+            <tr x-show="totalMatchesCount === 0" x-cloak class="border-b border-gray-100 dark:border-gray-800">
+                <td colspan="{{ $packages->count() + 1 }}" class="py-16 text-center">
+                    <div class="max-w-xs mx-auto flex flex-col items-center">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 mb-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-sm font-bold text-gray-700 dark:text-gray-300">{{ __('resellerhub::messages.comparison.no_results') }}</p>
+                        <button type="button"
+                                @click="searchQuery = ''; onlyDifferences = false; selectedCategory = 'all';"
+                                class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors">
+                            <span>{{ __('resellerhub::messages.comparison.clear_search') }}</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+
             @foreach($groups as $group)
                 @php $cat = $group['category']; @endphp
-                <tr class="bg-gray-100/80 dark:bg-gray-800/80 border-y border-gray-200 dark:border-gray-700/80 cursor-pointer select-none"
+
+                {{-- Group Header Row (Styled beautifully with category theme) --}}
+                <tr class="border-y border-gray-200/80 dark:border-gray-700/80 cursor-pointer select-none transition-colors
+                           {{ $cat === 'modules' ? 'bg-indigo-50/70 hover:bg-indigo-100/70 dark:bg-indigo-950/40 dark:hover:bg-indigo-950/60' : 'bg-emerald-50/70 hover:bg-emerald-100/70 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60' }}"
+                    x-show="groupHasMatches('{{ $cat }}')"
+                    role="button"
+                    tabindex="0"
+                    :aria-expanded="openGroups['{{ $cat }}'] ? 'true' : 'false'"
+                    @keydown.enter.prevent="toggleGroup('{{ $cat }}')"
+                    @keydown.space.prevent="toggleGroup('{{ $cat }}')"
                     @click="toggleGroup('{{ $cat }}')">
-                    <td class="sticky right-0 z-10 bg-gray-100/90 dark:bg-gray-800/90 border-l border-gray-200 dark:border-gray-700 shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.06)] dark:shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.4)] py-3 px-5 text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-200">
+
+                    <th scope="row"
+                        class="sticky right-0 z-10 border-l border-gray-200 dark:border-gray-700 shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.06)] dark:shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.4)] py-3.5 px-4 text-xs font-black uppercase tracking-wider text-right
+                               {{ $cat === 'modules' ? 'bg-indigo-50/90 dark:bg-indigo-950/80 text-indigo-900 dark:text-indigo-200' : 'bg-emerald-50/90 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-200' }}">
                         <div class="flex items-center justify-between gap-2">
                             <div class="flex items-center gap-2">
                                 @if($cat === 'modules')
-                                    <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                                    </svg>
-                                @elseif($cat === 'quotas')
-                                    <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                                    </svg>
-                                @else
-                                    <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                @endif
-                                <span>{{ $group['label'] }}</span>
-                                <span
-                                    class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                                        {{ ResellerHelper::toPersianDigits(count($group['rows'])) }}
+                                    <span
+                                        class="w-6 h-6 rounded-lg bg-indigo-200/60 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shrink-0">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                             aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round"
+                                                                      stroke-width="2"
+                                                                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                                     </span>
+                                @else
+                                    <span
+                                        class="w-6 h-6 rounded-lg bg-emerald-200/60 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                             aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round"
+                                                                      stroke-width="2"
+                                                                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                    </span>
+                                @endif
+                                <span class="font-black text-xs sm:text-sm">{{ $group['label'] }}</span>
+                                <span
+                                    class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/70 dark:bg-black/30 border border-black/5 dark:border-white/10">
+                                    {{ ResellerHelper::toPersianDigits(count($group['rows'])) }}
+                                </span>
                             </div>
-                            <svg class="w-4 h-4 text-gray-400 transform transition-transform duration-200 shrink-0"
+                            <svg class="w-4 h-4 text-gray-500 transform transition-transform duration-200 shrink-0"
                                  :class="openGroups['{{ $cat }}'] ? 'rotate-180' : ''"
                                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M19 9l-7 7-7-7"/>
                             </svg>
                         </div>
-                    </td>
+                    </th>
 
                     <td colspan="{{ $packages->count() }}"
-                        class="bg-gray-100/80 dark:bg-gray-800/80 py-3 px-4">
+                        class="py-3 px-4 text-left text-xs font-bold text-gray-400">
                     </td>
                 </tr>
 
+                {{-- Feature Rows --}}
                 @foreach($group['rows'] as $rowIndex => $row)
                     @php
                         $rowLabel   = $row['label'];
-                        $hasDiff    = $row['has_difference'] ?? true;
+                        $hasDiff    = (bool)($row['has_difference'] ?? true);
                         $rowType    = $row['type'] ?? 'module';
                         $maxQuota   = $row['max_quota'] ?? 100;
                         $hasDesc    = !empty($row['description']);
+                        $rowSlug    = $row['slug'] ?? ('row_' . $loop->parent->index . '_' . $rowIndex);
                     @endphp
                     <tr class="group border-b border-gray-100 dark:border-gray-800/50 transition-colors duration-150
-                                   {{ $rowIndex % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-800/20' }}"
-                        x-show="openGroups['{{ $cat }}'] && rowMatches('{{ addslashes($rowLabel) }}', {{ $hasDiff ? 'true' : 'false' }})"
+                               {{ $rowIndex % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-800/20' }}"
+                        x-show="openGroups['{{ $cat }}'] && rowMatches(@js($rowLabel), {{ $hasDiff ? 'true' : 'false' }})"
                         x-cloak>
 
-                        {{-- Sticky first column: Label + Tooltip --}}
-                        <td class="sticky right-0 z-10 py-3.5 px-5 text-right text-sm text-gray-700 dark:text-gray-300 font-medium border-l border-gray-100 dark:border-gray-800/50 shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.06)] dark:shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.4)] transition-colors duration-150
-                                       {{ $rowIndex % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-800/20' }}
-                                       group-hover:bg-indigo-50/60 dark:group-hover:bg-indigo-950/30">
+                        {{-- Sticky first column: Semantic th for a11y, responsive width --}}
+                        <th scope="row"
+                            class="sticky right-0 z-10 py-3.5 px-3 sm:px-4 text-right text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-medium border-l border-gray-100 dark:border-gray-800/50 shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.06)] dark:shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.4)] transition-colors duration-150
+                                   min-w-[130px] w-[130px] sm:min-w-[210px] sm:w-[240px] whitespace-normal break-words
+                                   {{ $rowIndex % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-800/20' }}
+                                   group-hover:bg-indigo-50/60 dark:group-hover:bg-indigo-950/30">
 
                             <div class="flex items-center justify-between gap-1.5">
-                                <div class="flex items-center gap-1.5 min-w-0">
-                                    <span class="truncate">{{ $rowLabel }}</span>
+                                <div class="flex items-center gap-1 min-w-0">
+                                    <span class="leading-snug">{{ $rowLabel }}</span>
                                     @if(!empty($row['unit']))
-                                        <span class="text-xs text-gray-400 dark:text-gray-500 font-normal shrink-0">({{ $row['unit'] }})</span>
+                                        <span
+                                            class="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 font-normal shrink-0">({{ $row['unit'] }})</span>
                                     @endif
                                 </div>
 
                                 {{-- Tooltip info button --}}
                                 @if($hasDesc)
-                                    <div class="relative group/tip inline-flex items-center shrink-0">
+                                    <div class="relative inline-flex items-center shrink-0">
                                         <button type="button"
+                                                @click.stop="activeTooltip = (activeTooltip === '{{ $rowSlug }}' ? null : '{{ $rowSlug }}')"
+                                                @mouseenter="activeTooltip = '{{ $rowSlug }}'"
+                                                @mouseleave="activeTooltip = null"
                                                 class="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-0.5 rounded-full transition-colors cursor-help"
-                                                aria-label="اطلاعات بیشتر">
+                                                aria-label="اطلاعات بیشتر درباره {{ $rowLabel }}">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                  viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
                                         </button>
-                                        <div
-                                            class="absolute bottom-full right-0 mb-2 hidden group-hover/tip:block z-30 w-60 p-2.5 rounded-xl bg-gray-900 text-white text-[11px] leading-relaxed shadow-xl border border-gray-700 pointer-events-none">
+                                        <div x-show="activeTooltip === '{{ $rowSlug }}'"
+                                             x-cloak
+                                             class="absolute bottom-full right-0 mb-2 z-50 w-52 sm:w-60 p-2.5 rounded-xl bg-gray-900 text-white text-[11px] leading-relaxed shadow-xl border border-gray-700 pointer-events-none">
                                             {{ $row['description'] }}
                                             <div
                                                 class="absolute top-full right-2 border-4 border-transparent border-t-gray-900"></div>
@@ -355,82 +773,73 @@
                                     </div>
                                 @endif
                             </div>
-                        </td>
+                        </th>
 
                         {{-- Value Cells per Package --}}
                         @foreach($packages as $pkg)
                             @php
-                                $isPopular = ($pkg->id === $popularPkgId);
-                                $val       = $row['values'][$pkg->id] ?? null;
+                                $val = $row['values'][$pkg->id] ?? null;
                             @endphp
                             <td @mouseenter="hoveredPkgId = {{ $pkg->id }}"
                                 @mouseleave="hoveredPkgId = null"
-                                class="py-3.5 px-4 text-center align-middle transition-colors duration-150
-                                           group-hover:bg-indigo-50/40 dark:group-hover:bg-indigo-950/20
-                                           {{ $isPopular ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : '' }}"
-                                :class="hoveredPkgId === {{ $pkg->id }} ? 'bg-indigo-50/70 dark:bg-indigo-950/40' : ''">
+                                class="py-3.5 px-3 sm:px-4 text-center align-middle transition-colors duration-150 group-hover:bg-indigo-50/40 dark:group-hover:bg-indigo-950/20"
+                                :class="hoveredPkgId === {{ $pkg->id }} ? 'bg-indigo-50/60 dark:bg-indigo-950/30' : ''">
 
                                 @if($rowType === 'module' || $rowType === 'feature')
-                                    {{-- Boolean: included vs clean minimal dash --}}
                                     @if($val === true)
                                         <span title="{{ __('resellerhub::messages.comparison.included') }}"
                                               class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950/60 mx-auto">
-                                                <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
-                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                                     aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                                                </svg>
-                                            </span>
+                                            <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
+                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                 aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                      stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </span>
                                     @else
                                         <span title="{{ __('resellerhub::messages.comparison.not_included') }}"
                                               class="text-gray-300 dark:text-gray-600 text-base font-light select-none">—</span>
                                     @endif
 
                                 @elseif($rowType === 'quota')
-                                    {{-- Numeric Quota --}}
                                     @if($val === null)
                                         <span title="{{ __('resellerhub::messages.comparison.not_included') }}"
                                               class="text-gray-300 dark:text-gray-600 text-base font-light select-none">—</span>
                                     @elseif($val === -1)
-                                        {{-- Mathematical Real Infinity SVG --}}
                                         <div
                                             class="flex flex-col items-center justify-center gap-1 mx-auto max-w-[120px]">
-                                                <span
-                                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 text-xs font-black shadow-xs">
-                                                    <svg class="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400"
-                                                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                         stroke-width="2.5" stroke-linecap="round"
-                                                         stroke-linejoin="round" aria-label="نامحدود">
-                                                        <path
-                                                            d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z"/>
-                                                    </svg>
-                                                    <span>{{ __('resellerhub::messages.comparison.unlimited') }}</span>
-                                                </span>
-                                            {{-- 100% glowing progress bar --}}
+                                            <span
+                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 text-xs font-black shadow-xs">
+                                                <svg class="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+                                                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                     stroke-width="2.5" stroke-linecap="round"
+                                                     stroke-linejoin="round" aria-label="نامحدود">
+                                                    <path
+                                                        d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z"/>
+                                                </svg>
+                                                <span>{{ __('resellerhub::messages.comparison.unlimited') }}</span>
+                                            </span>
                                             <div
                                                 class="w-full h-[2.5px] bg-emerald-500 dark:bg-emerald-400 rounded-full shadow-[0_0_6px_rgba(16,185,129,0.5)]"></div>
                                         </div>
                                     @else
-                                        {{-- Numeric Value with Visual Quota Bar --}}
                                         @php
                                             $quotaPct = $maxQuota > 0 ? min(100, max(12, round(($val / $maxQuota) * 100))) : 50;
                                         @endphp
                                         <div
                                             class="flex flex-col items-center justify-center gap-1 mx-auto max-w-[120px]">
                                             <div class="flex items-baseline gap-1">
-                                                    <span
-                                                        class="text-sm font-black text-gray-900 dark:text-white tabular-nums">
-                                                        {{ ResellerHelper::toPersianDigits(number_format($val)) }}
-                                                    </span>
+                                                <span
+                                                    class="text-xs sm:text-sm font-black text-gray-900 dark:text-white tabular-nums">
+                                                    {{ ResellerHelper::toPersianDigits(number_format($val)) }}
+                                                </span>
                                                 @if(!empty($row['unit']))
                                                     <span
                                                         class="text-[10px] text-gray-500 dark:text-gray-400 font-normal">
-                                                            {{ $row['unit'] }}
-                                                        </span>
+                                                        {{ $row['unit'] }}
+                                                    </span>
                                                 @endif
                                             </div>
-                                            {{-- Proportional visual bar --}}
                                             <div
                                                 class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-[2.5px] overflow-hidden">
                                                 <div
@@ -446,27 +855,27 @@
                 @endforeach
             @endforeach
             </tbody>
+
+            {{-- Table Footer with Action Buttons --}}
             <tfoot>
             <tr class="border-t-2 border-gray-200 dark:border-gray-800 bg-gray-50/70 dark:bg-gray-900/80">
-                <td class="sticky right-0 z-10 bg-gray-50/90 dark:bg-gray-900/90 border-l border-gray-200 dark:border-gray-800 shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.06)] dark:shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.4)] py-6 px-5 text-right">
-                    <div class="font-black text-sm text-gray-900 dark:text-white leading-tight">
+                <td class="sticky right-0 z-10 bg-gray-50/90 dark:bg-gray-900/90 border-l border-gray-200 dark:border-gray-800 shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.06)] dark:shadow-[-6px_0_12px_-4px_rgba(0,0,0,0.4)] py-6 px-3 sm:px-4 text-right">
+                    <div class="font-black text-xs sm:text-sm text-gray-900 dark:text-white leading-tight">
                         {{ __('resellerhub::messages.comparison.cta_footer_title') }}
                     </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-[200px]">
+                    <div class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-[200px]">
                         {{ __('resellerhub::messages.comparison.cta_footer_desc') }}
                     </div>
                 </td>
 
                 @foreach($packages as $pkg)
                     @php
-                        $isPopular = ($pkg->id === $popularPkgId);
                         $pkgStructuredPeriods = $packagePeriods[$pkg->id] ?? [];
                     @endphp
                     <td @mouseenter="hoveredPkgId = {{ $pkg->id }}"
                         @mouseleave="hoveredPkgId = null"
-                        class="py-6 px-4 text-center align-middle transition-colors duration-150
-                                   {{ $isPopular ? 'bg-indigo-50/70 dark:bg-indigo-950/30' : '' }}"
-                        :class="hoveredPkgId === {{ $pkg->id }} ? 'bg-indigo-50/90 dark:bg-indigo-950/50' : ''">
+                        class="py-6 px-3 sm:px-4 text-center align-middle transition-colors duration-150"
+                        :class="hoveredPkgId === {{ $pkg->id }} ? 'bg-indigo-50/60 dark:bg-indigo-950/30' : ''">
 
                         <div class="font-black text-gray-900 dark:text-white text-xs mb-1">
                             {{ $pkg->name }}
@@ -480,11 +889,9 @@
                             <div x-show="currentPeriod === '{{ $pKey }}'" x-cloak class="mt-2">
                                 @if($pkg->isFree() || $isActive)
                                     <a href="{{ route('portal.get-started', ['package' => $pkg->id, 'period' => $pKey]) }}"
-                                       class="inline-flex items-center justify-center gap-1 w-full px-3.5 py-2.5 rounded-xl text-xs font-black transition-all transform cursor-pointer
-                                                  {{ $isPopular
-                                                     ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30'
-                                                     : 'bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300' }}"
-                                       :class="hoveredPkgId === {{ $pkg->id }} ? 'scale-[1.02] shadow-lg ring-2 ring-indigo-500/40' : ''">
+                                       class="inline-flex items-center justify-center gap-1 w-full px-3 py-2.5 rounded-xl text-xs font-black transition-all transform cursor-pointer bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 active:scale-[0.99]"
+                                       :class="hoveredPkgId === {{ $pkg->id }} ? 'scale-[1.02] shadow-md' : ''"
+                                       aria-label="{{ __('resellerhub::messages.comparison.get_started') }} - {{ $pkg->name }}">
                                         <span>{{ __('resellerhub::messages.comparison.get_started') }}</span>
                                     </a>
                                 @else
@@ -501,5 +908,4 @@
             </tfoot>
         </table>
     </div>
-
 </section>
