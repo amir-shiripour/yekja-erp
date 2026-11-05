@@ -45,6 +45,14 @@ class FortifyServiceProvider extends ServiceProvider
 
         // Allow login with email or mobile
         Fortify::authenticateUsing(function (Request $request) {
+            $smsEnabled = function_exists('get_setting') && get_setting('auth_sms_enabled', '0') === '1';
+            $passwordEnabled = function_exists('get_setting') && get_setting('auth_password_enabled', '1') === '1';
+
+            // اگر ورود پیامکی فعال بوده و ورود با رمز عبور توسط مدیریت غیرفعال شده باشد
+            if ($smsEnabled && !$passwordEnabled) {
+                return null;
+            }
+
             $input = trim((string)$request->email);
             $digitsOnly = preg_replace('/\D/', '', $input);
             $isMobile = (strlen($digitsOnly) === 11 && str_starts_with($digitsOnly, '09'))
@@ -89,7 +97,7 @@ class FortifyServiceProvider extends ServiceProvider
             $view = app(RegisteredUserController::class)->create($request);
 
             if ($view instanceof \Illuminate\View\View || $view instanceof \Illuminate\Contracts\View\View) {
-                $view->with('allCustomFields', CustomUserField::all()->groupBy('role_name'));
+                $view->with('allCustomFields', CustomUserField::where('show_in_register', true)->get()->groupBy('role_name'));
             }
 
             return $view;

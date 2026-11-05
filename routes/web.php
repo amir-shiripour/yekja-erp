@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\User\CalendarController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use Modules\Properties\Entities\PropertyAttribute;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\OtpLoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,18 +75,25 @@ Route::middleware(['web', 'auth'])->prefix('user')->name('user.')->group(functio
     Route::post('/dashboard/layout', [UserDashboardController::class, 'updateLayout'])->name('dashboard.update-layout');
 
     // روت‌های ویجت و صفحه تقویم
-    Route::get('/calendar', [\App\Http\Controllers\User\CalendarController::class, 'index'])->name('calendar');
-    Route::get('/calendar/events', [\App\Http\Controllers\User\CalendarController::class, 'events'])->name('calendar.events');
-    Route::post('/calendar/events', [\App\Http\Controllers\User\CalendarController::class, 'storeEvent'])->name('calendar.events.store');
-    Route::put('/calendar/events/{id}', [\App\Http\Controllers\User\CalendarController::class, 'updateEvent'])->name('calendar.events.update');
-    Route::delete('/calendar/events/{id}', [\App\Http\Controllers\User\CalendarController::class, 'deleteEvent'])->name('calendar.events.delete');
-    Route::get('/calendar/widget-data', [\App\Http\Controllers\User\CalendarController::class, 'widgetData'])->name('calendar.widget-data');
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
+    Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
+    Route::post('/calendar/events', [CalendarController::class, 'storeEvent'])->name('calendar.events.store');
+    Route::put('/calendar/events/{id}', [CalendarController::class, 'updateEvent'])->name('calendar.events.update');
+    Route::delete('/calendar/events/{id}', [CalendarController::class, 'deleteEvent'])->name('calendar.events.delete');
+    Route::get('/calendar/widget-data', [CalendarController::class, 'widgetData'])->name('calendar.widget-data');
 });
 
 // Override Fortify's default register routes
 Route::middleware(['web', 'guest'])->group(function () {
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store']);
+});
+
+// 2-Step & OTP Login routes
+Route::middleware(['web', 'guest'])->prefix('login')->name('login.')->group(function () {
+    Route::post('/check-identity', [OtpLoginController::class, 'checkIdentity'])->name('check-identity');
+    Route::post('/send-otp', [OtpLoginController::class, 'sendOtp'])->name('send-otp');
+    Route::post('/verify-otp', [OtpLoginController::class, 'verifyOtp'])->name('verify-otp');
 });
 
 

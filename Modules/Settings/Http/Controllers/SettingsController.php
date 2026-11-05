@@ -25,6 +25,7 @@ use Throwable;
 class SettingsController extends Controller
 {
     use FileUploadTrait;
+
     public function index()
     {
         $settingsCollection = Setting::all()->pluck('value', 'key');
@@ -222,6 +223,16 @@ class SettingsController extends Controller
             }
             if (!$request->has('prevent_public_indexing')) {
                 $data['prevent_public_indexing'] = '0';
+            }
+        }
+
+        if ($activeTab === 'registration') {
+            if (!$request->has('auth_sms_enabled')) {
+                $data['auth_sms_enabled'] = '0';
+            }
+            if (!$request->has('auth_password_enabled')) {
+                // اگر ورود پیامکی غیرفعال باشد، ورود با رمز عبور اجباراً فعال باقی می‌ماند
+                $data['auth_password_enabled'] = ($data['auth_sms_enabled'] === '1') ? '0' : '1';
             }
         }
 

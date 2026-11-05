@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -37,14 +38,19 @@ return new class extends Migration
 
         // 4. Missing composite index on tenants (TEN-05)
         if (Schema::hasTable('tenants')) {
-            Schema::table('tenants', function (Blueprint $table) {
-                // Check if index exists or create safely
-                try {
+            $connection = Schema::getConnection();
+            $dbName = $connection->getDatabaseName();
+            $exists = DB::select(
+                "SELECT COUNT(1) AS cnt FROM information_schema.statistics
+                 WHERE table_schema = ? AND table_name = ? AND index_name = ?",
+                [$dbName, 'tenants', 'idx_tenants_reseller_status_expiry']
+            );
+
+            if (empty($exists) || (int)$exists[0]->cnt === 0) {
+                Schema::table('tenants', function (Blueprint $table) {
                     $table->index(['reseller_id', 'status', 'plan_expires_at'], 'idx_tenants_reseller_status_expiry');
-                } catch (\Throwable $e) {
-                    // Index already exists
-                }
-            });
+                });
+            }
         }
     }
 

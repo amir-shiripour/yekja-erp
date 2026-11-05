@@ -53,6 +53,7 @@ Route::prefix('settings')->middleware(['auth'])->group(function () {
         Route::post('/toggle-group-counter', [\Modules\Settings\Http\Controllers\MenuManagerController::class, 'toggleGroupCounter'])->name('toggle-group-counter');
         Route::post('/groups', [\Modules\Settings\Http\Controllers\MenuManagerController::class, 'saveGroup'])->name('groups.save');
         Route::delete('/groups/{group}', [\Modules\Settings\Http\Controllers\MenuManagerController::class, 'deleteGroup'])->name('groups.delete');
+        Route::post('/sync-all-roles', [\Modules\Settings\Http\Controllers\MenuManagerController::class, 'syncAllRolesToGlobal'])->name('sync-all-roles');
     });
 });
 
@@ -70,4 +71,6 @@ Route::middleware(['web'])->group(function () {
     Route::match(['get', 'post'], '/settings/payment/verify/{gateway}', [PaymentController::class, 'verify'])->name('settings.payment.verify');
     Route::get('/settings/payment/redirect/behpardakht', [PaymentController::class, 'redirectBehpardakht'])->name('settings.payment.behpardakht.redirect');
     Route::get('/payment/redirect/behpardakht', [PaymentController::class, 'redirectBehpardakht'])->name('payment.behpardakht.redirect');
+    Route::get('/settings/payment/redirect/sep', [PaymentController::class, 'redirectSep'])->name('settings.payment.sep.redirect');
+    Route::get('/payment/redirect/sep', [PaymentController::class, 'redirectSep'])->name('payment.sep.redirect');
 });
