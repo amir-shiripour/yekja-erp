@@ -6,14 +6,15 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Modules\Settings\Entities\ApiKey;
+use Nwidart\Modules\Facades\Module;
 
 class ValidateApiKey
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param Request $request
+     * @param Closure $next
      * @param  string|null  $module
      * @return mixed
      */
@@ -46,6 +47,25 @@ class ValidateApiKey
             ], 401);
         }
 
+        // Check module active status in CRM system
+        if ($apiKey->module === 'booking') {
+            $isBookingActive = Module::has('Booking') && Module::isEnabled('Booking');
+            if (!$isBookingActive) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The Booking module is currently disabled or not installed.'
+                ], 503);
+            }
+        } elseif ($apiKey->module === 'properties') {
+            $isPropertiesActive = Module::has('Properties') && Module::isEnabled('Properties');
+            if (!$isPropertiesActive) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The Properties module is currently disabled or not installed.'
+                ], 503);
+            }
+        }
+
         // Check module restriction if specified in middleware parameters
         if ($module && strtolower($apiKey->module) !== strtolower($module)) {
             return response()->json([
@@ -57,7 +77,7 @@ class ValidateApiKey
         // Check Rate Limiting
         if ($apiKey->rate_limit_per_hour !== null) {
             $cacheKey = 'api_rate_limit:' . $apiKey->id . ':' . date('Y-m-d-H');
-            
+
             $currentUsage = Cache::get($cacheKey, 0);
 
             if ($currentUsage >= $apiKey->rate_limit_per_hour) {

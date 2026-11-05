@@ -87,7 +87,7 @@ class PaymentController extends Controller
 
             $dataToVerify = [
                 'Authority' => $authority,
-                'Status'    => $status,
+                'Status' => $status,
             ];
 
         } elseif ($gateway === 'zibal') {
@@ -110,7 +110,7 @@ class PaymentController extends Controller
             $dataToVerify = $request->all(); // Pass all query/post params
         } elseif ($gateway === 'behpardakht') {
             $authority = $request->input('RefId');
-            $resCode   = (string) $request->input('ResCode', '-1');
+            $resCode = (string)$request->input('ResCode', '-1');
 
             if (!$authority) {
                 return $this->redirectBackToSource('error', 'شناسه مرجع پرداخت (RefId) در کالبک بانک یافت نشد.');
@@ -125,12 +125,50 @@ class PaymentController extends Controller
             }
 
             $dataToVerify = $request->all();
+        } elseif ($gateway === 'sep' || $gateway === 'saman') {
+            $token = $request->input('Token');
+            $refNum = $request->input('RefNum');
+            $resNum = $request->input('ResNum');
+            $state = strtoupper((string)$request->input('State', ''));
+            $status = (int)$request->input('Status', -1);
+
+            $authority = $token ?: ($resNum ?: $refNum);
+
+            if (!$authority && !$refNum) {
+                return $this->redirectBackToSource('error', 'اطلاعات کالبک درگاه پرداخت سامان کیش (سپ) یافت نشد.');
+            }
+
+            if ($state !== 'OK' || $status !== 2 || empty($refNum)) {
+                $payment = Payment::where(function ($q) use ($token, $resNum, $refNum) {
+                    if ($token) $q->where('authority', $token);
+                    if ($resNum) $q->orWhere('authority', $resNum);
+                    if ($refNum) $q->orWhere('authority', $refNum);
+                })->where('status', 'pending')->first();
+
+                if ($payment) {
+                    $payment->update(['status' => 'failed']);
+                }
+
+                $statusMsg = (new PaymentService('sep'))->getSepStatusMessage($status, $state);
+                return $this->redirectBackToSource('error', 'پرداخت در درگاه سامان کیش با خطا مواجه شد یا توسط کاربر لغو شد: ' . $statusMsg);
+            }
+
+            $dataToVerify = $request->all();
         } else {
             return $this->redirectBackToSource('error', 'درگاه پرداخت ناشناخته است.');
         }
 
-        // Find the pending payment using the authority/trackId
-        $payment = Payment::where('authority', $authority)->where('status', 'pending')->first();
+        // Find the pending payment using the authority/trackId/Token
+        $payment = Payment::where(function ($q) use ($authority, $request, $gateway) {
+            if ($authority) {
+                $q->where('authority', $authority);
+            }
+            if ($gateway === 'sep' || $gateway === 'saman') {
+                if ($t = $request->input('Token')) $q->orWhere('authority', $t);
+                if ($r = $request->input('ResNum')) $q->orWhere('authority', $r);
+                if ($ref = $request->input('RefNum')) $q->orWhere('authority', $ref);
+            }
+        })->where('status', 'pending')->first();
 
         if (!$payment) {
             return $this->redirectBackToSource('error', 'تراکنش یافت نشد یا قبلاً بررسی شده است.');
@@ -176,8 +214,24 @@ class PaymentController extends Controller
         }
 
         return view('settings::partials.behpardakht_redirect', [
-            'refId'  => $refId,
+            'refId' => $refId,
             'mobile' => $mobile,
+        ]);
+    }
+
+    /**
+     * Intermediate redirect page to auto-submit POST form to Saman Electronic Payment (SEP).
+     */
+    public function redirectSep(Request $request)
+    {
+        $token = $request->query('token') ?: $request->input('token');
+
+        if (!$token) {
+            return redirect()->route('settings.index')->with('error', 'توکن درگاه سامان کیش (سپ) نامعتبر است.');
+        }
+
+        return view('settings::partials.sep_redirect', [
+            'token' => $token,
         ]);
     }
 

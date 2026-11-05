@@ -4,16 +4,19 @@ namespace Modules\Settings\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Modules\Booking\Entities\BookingCategory;
 use Modules\Settings\Entities\ApiKey;
 use Modules\Properties\Entities\PropertyStatus;
 use Modules\Properties\Entities\PropertyCategory;
+use Modules\Settings\Http\Controllers\Api\BookingApiController;
+use Modules\Settings\Http\Controllers\Api\PropertyApiController;
+use Nwidart\Modules\Facades\Module;
 
 class ApiKeyController extends Controller
 {
-    /**
-     * ثبت کلید API جدید
-     */
+
     public function store(Request $request)
     {
         $request->validate([
@@ -26,9 +29,9 @@ class ApiKeyController extends Controller
         $module = $request->input('module', 'properties');
 
         if ($module === 'properties') {
-            $isPropertiesActive = \Nwidart\Modules\Facades\Module::has('Properties') && \Nwidart\Modules\Facades\Module::isEnabled('Properties');
+            $isPropertiesActive = Module::has('Properties') && Module::isEnabled('Properties');
             if (!$isPropertiesActive) {
-                abort(403, 'امکان ثبت کلید API برای ماژول املاک وجود ندارد.');
+                return redirect()->back()->with('error', 'امکان ثبت کلید API برای ماژول املاک وجود ندارد زیرا این ماژول غیرفعال یا نصب نیست.');
             }
 
             $request->validate([
@@ -59,9 +62,9 @@ class ApiKeyController extends Controller
             $permissions['include_confidential_notes'] = filter_var($permissions['include_confidential_notes'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         } else {
-            $isBookingActive = \Nwidart\Modules\Facades\Module::has('Booking') && \Nwidart\Modules\Facades\Module::isEnabled('Booking');
+            $isBookingActive = Module::has('Booking') && Module::isEnabled('Booking');
             if (!$isBookingActive) {
-                abort(403, 'امکان ثبت کلید API برای ماژول نوبت‌دهی وجود ندارد.');
+                return redirect()->back()->with('error', 'امکان ثبت کلید API برای ماژول نوبت‌دهی وجود ندارد زیرا این ماژول غیرفعال یا نصب نیست.');
             }
 
             $request->validate([
@@ -103,15 +106,23 @@ class ApiKeyController extends Controller
 
         return redirect()->back()->with([
             'success' => 'کلید API با موفقیت ساخته شد.',
-            'new_api_key' => $key, // برای نمایش یکبار مصرف به کاربر
+            'new_api_key' => $key,
         ]);
     }
 
-    /**
-     * فعال/غیرفعال کردن کلید API
-     */
     public function toggleActive(ApiKey $apiKey)
     {
+        $isModuleActive = false;
+        if ($apiKey->module === 'booking') {
+            $isModuleActive = Module::has('Booking') && Module::isEnabled('Booking');
+        } elseif ($apiKey->module === 'properties') {
+            $isModuleActive = Module::has('Properties') && Module::isEnabled('Properties');
+        }
+
+        if (!$apiKey->is_active && !$isModuleActive) {
+            return redirect()->back()->with('error', 'امکان فعال‌سازی این کلید وجود ندارد زیرا ماژول مربوط به آن در سامانه غیرفعال یا نصب نیست.');
+        }
+
         $apiKey->update([
             'is_active' => !$apiKey->is_active
         ]);
@@ -119,9 +130,7 @@ class ApiKeyController extends Controller
         return redirect()->back()->with('success', 'وضعیت کلید API تغییر کرد.');
     }
 
-    /**
-     * حذف کلید API
-     */
+
     public function destroy(ApiKey $apiKey)
     {
         $apiKey->delete();
@@ -129,23 +138,27 @@ class ApiKeyController extends Controller
         return redirect()->back()->with('success', 'کلید API با موفقیت حذف شد.');
     }
 
-    /**
-     * پیش‌نمایش خروجی JSON کلید API
-     */
+
     public function preview(Request $request, ApiKey $apiKey)
     {
         $request->merge(['authenticated_api_key' => $apiKey]);
-        
+
         if ($apiKey->module === 'booking') {
-            return app(\Modules\Settings\Http\Controllers\Api\BookingApiController::class)->index($request);
+            $isBookingActive = Module::has('Booking') && Module::isEnabled('Booking');
+            if (!$isBookingActive) {
+                abort(404, 'ماژول نوبت‌دهی در سامانه فعال یا نصب نیست.');
+            }
+            return app(BookingApiController::class)->index($request);
         }
 
-        return app(\Modules\Settings\Http\Controllers\Api\PropertyApiController::class)->index($request);
+        $isPropertiesActive = Module::has('Properties') && Module::isEnabled('Properties');
+        if (!$isPropertiesActive) {
+            abort(404, 'ماژول املاک در سامانه فعال یا نصب نیست.');
+        }
+
+        return app(PropertyApiController::class)->index($request);
     }
 
-    /**
-     * نمایش صفحه مستندات API (عمومی)
-     */
     public function docs($token)
     {
         $apiKey = ApiKey::where('docs_token', $token)->first();
@@ -158,25 +171,25 @@ class ApiKeyController extends Controller
         $categories = collect();
         $bookingCategories = collect();
 
-        $isPropertiesActive = \Nwidart\Modules\Facades\Module::has('Properties') && \Nwidart\Modules\Facades\Module::isEnabled('Properties');
-        $isBookingActive = \Nwidart\Modules\Facades\Module::has('Booking') && \Nwidart\Modules\Facades\Module::isEnabled('Booking');
+        $isPropertiesActive = Module::has('Properties') && Module::isEnabled('Properties');
+        $isBookingActive = Module::has('Booking') && Module::isEnabled('Booking');
 
         if ($apiKey->module === 'booking') {
             if (!$isBookingActive) {
                 abort(404, 'ماژول نوبت‌دهی فعال نیست.');
             }
-            if (\Illuminate\Support\Facades\Schema::hasTable('booking_categories')) {
-                $bookingCategories = \Modules\Booking\Entities\BookingCategory::all();
+            if (Schema::hasTable('booking_categories')) {
+                $bookingCategories = BookingCategory::all();
             }
         } else {
             if (!$isPropertiesActive) {
                 abort(404, 'ماژول املاک فعال نیست.');
             }
-            if (\Illuminate\Support\Facades\Schema::hasTable('property_statuses')) {
-                $statuses = \Modules\Properties\Entities\PropertyStatus::all();
+            if (Schema::hasTable('property_statuses')) {
+                $statuses = PropertyStatus::all();
             }
-            if (\Illuminate\Support\Facades\Schema::hasTable('property_categories')) {
-                $categories = \Modules\Properties\Entities\PropertyCategory::all();
+            if (Schema::hasTable('property_categories')) {
+                $categories = PropertyCategory::all();
             }
         }
 

@@ -164,42 +164,81 @@ class MenuManagerController extends Controller
             ];
         }
 
-        // Fetch customizations for the requested scope
-        $customizations = MenuCustomization::where('scope', $scope)
-            ->when($scopeId, fn($q) => $q->where('scope_id', $scopeId))
+        // Fetch customizations for global scope and requested scope
+        $globalCustomizations = MenuCustomization::where('scope', 'global')
             ->get()
             ->keyBy('menu_key');
 
-        // Apply overrides to editor items
+        $localCustomizations = collect();
+        if ($scope !== 'global' && $scopeId) {
+            $localCustomizations = MenuCustomization::where('scope', $scope)
+                ->where('scope_id', $scopeId)
+                ->get()
+                ->keyBy('menu_key');
+        }
+
+        // Apply overrides to editor items: Global first (cascade), then local scope overrides
         foreach ($extractedItems as &$item) {
             $key = $item['menu_key'];
-            if (isset($customizations[$key])) {
-                $ov = $customizations[$key]->overrides ?? [];
-                $item['is_customized'] = true;
+            $hasGlobal = isset($globalCustomizations[$key]);
+            $hasLocal = isset($localCustomizations[$key]);
 
-                if (!empty($ov['title'])) {
-                    $item['title'] = $ov['title'];
-                }
-                if (isset($ov['icon']) && trim($ov['icon']) !== '') {
-                    $item['icon'] = $ov['icon'];
-                }
-                if (isset($ov['position']) && is_numeric($ov['position'])) {
-                    $item['position'] = (int) $ov['position'];
-                }
-                if (!empty($ov['group'])) {
-                    $item['group'] = $ov['group'];
-                }
-                $item['hidden'] = !empty($ov['hidden']);
-                $item['visibility_type'] = $ov['visibility_type'] ?? 'all';
-                $item['allowed_roles'] = $ov['allowed_roles'] ?? [];
-                $item['allowed_users'] = $ov['allowed_users'] ?? [];
+            $item['has_global_override'] = $hasGlobal;
+            $item['has_local_override'] = $hasLocal;
+            $item['is_inherited'] = ($scope !== 'global' && $hasGlobal && !$hasLocal);
+            $item['is_customized'] = ($scope === 'global') ? $hasGlobal : ($hasLocal || $hasGlobal);
+
+            // 1. First apply global overrides if any
+            if ($hasGlobal) {
+                $gov = $globalCustomizations[$key]->overrides ?? [];
+                if (!empty($gov['title'])) $item['title'] = $gov['title'];
+                if (isset($gov['icon']) && trim($gov['icon']) !== '') $item['icon'] = $gov['icon'];
+                if (isset($gov['position']) && is_numeric($gov['position'])) $item['position'] = (int)$gov['position'];
+                if (!empty($gov['group'])) $item['group'] = $gov['group'];
+                $item['hidden'] = !empty($gov['hidden']);
+                $item['visibility_type'] = $gov['visibility_type'] ?? 'all';
+                $item['allowed_roles'] = $gov['allowed_roles'] ?? [];
+                $item['allowed_users'] = $gov['allowed_users'] ?? [];
+            }
+
+            // 2. If in role/user scope and local override exists, overwrite with local
+            if ($scope !== 'global' && $hasLocal) {
+                $lov = $localCustomizations[$key]->overrides ?? [];
+                if (!empty($lov['title'])) $item['title'] = $lov['title'];
+                if (isset($lov['icon']) && trim($lov['icon']) !== '') $item['icon'] = $lov['icon'];
+                if (isset($lov['position']) && is_numeric($lov['position'])) $item['position'] = (int)$lov['position'];
+                if (!empty($lov['group'])) $item['group'] = $lov['group'];
+                $item['hidden'] = !empty($lov['hidden']);
+                $item['visibility_type'] = $lov['visibility_type'] ?? 'all';
+                $item['allowed_roles'] = $lov['allowed_roles'] ?? [];
+                $item['allowed_users'] = $lov['allowed_users'] ?? [];
+            }
+
+            if (!empty($item['icon'])) {
+                $item['icon'] = $this->customizationService->sanitizeSvg($item['icon']);
+            }
+            if (!empty($item['default_icon'])) {
+                $item['default_icon'] = $this->customizationService->sanitizeSvg($item['default_icon']);
             }
         }
         unset($item);
 
-        // Fetch custom groups from database
-        $customGroups = MenuCustomGroup::where('scope', $scope)
-            ->when($scopeId, fn($q) => $q->where('scope_id', $scopeId))
+        $dedupedItems = [];
+        foreach ($extractedItems as $it) {
+            $dedupedItems[$it['menu_key']] = $it;
+        }
+        $extractedItems = array_values($dedupedItems);
+
+        // Fetch custom groups from database: global custom groups + local custom groups
+        $customGroups = MenuCustomGroup::where(function ($q) use ($scope, $scopeId) {
+            $q->where('scope', 'global');
+            if ($scope !== 'global' && $scopeId) {
+                $q->orWhere(function ($sq) use ($scope, $scopeId) {
+                    $sq->where('scope', $scope)->where('scope_id', $scopeId);
+                });
+            }
+        })
+            ->where('is_active', true)
             ->orderBy('position', 'asc')
             ->get();
 
@@ -384,14 +423,14 @@ class MenuManagerController extends Controller
             [
                 'key' => 'settings',
                 'title' => $this->moduleMenuService->resolveModuleGroupTitle('settings', 'Settings'),
-                'icon' => '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z\" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>',
+                'icon' => '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>',
                 'position' => 900,
                 'is_custom' => false,
                 'is_collapsible' => true,
             ],
         ];
 
-        // Format group list and apply group customizations
+        // Format group list and apply group customizations (cascade: global first, then local scope)
         $allGroups = [];
         foreach ($defaultGroupList as $dg) {
             $gKey = $dg['key'];
@@ -401,85 +440,118 @@ class MenuManagerController extends Controller
             $gIcon = $dg['icon'];
             $gPosition = $dg['position'];
             $gHidden = false;
-            $isCustomized = false;
+            $hasGlobal = isset($globalCustomizations[$customKey]);
+            $hasLocal = isset($localCustomizations[$customKey]);
 
-            if (isset($customizations[$customKey])) {
-                $gov = $customizations[$customKey]->overrides ?? [];
-                $isCustomized = true;
+            // 1. Apply global override
+            if ($hasGlobal) {
+                $gov = $globalCustomizations[$customKey]->overrides ?? [];
                 if (!empty($gov['title'])) $gTitle = $gov['title'];
                 if (!empty($gov['icon'])) $gIcon = $gov['icon'];
-                if (isset($gov['position']) && is_numeric($gov['position'])) $gPosition = (int) $gov['position'];
+                if (isset($gov['position']) && is_numeric($gov['position'])) $gPosition = (int)$gov['position'];
                 if (!empty($gov['hidden'])) $gHidden = true;
             }
 
-            $allGroups[] = [
+            // 2. Apply local override if in role/user scope
+            if ($scope !== 'global' && $hasLocal) {
+                $lov = $localCustomizations[$customKey]->overrides ?? [];
+                if (!empty($lov['title'])) $gTitle = $lov['title'];
+                if (!empty($lov['icon'])) $gIcon = $lov['icon'];
+                if (isset($lov['position']) && is_numeric($lov['position'])) $gPosition = (int)$lov['position'];
+                if (!empty($lov['hidden'])) $gHidden = true;
+            }
+
+            $allGroups[$gKey] = [
                 'key' => $gKey,
                 'title' => $gTitle,
                 'default_title' => $dg['title'],
-                'icon' => $gIcon,
-                'default_icon' => $dg['icon'],
+                'icon' => $this->customizationService->sanitizeSvg($gIcon),
+                'default_icon' => $this->customizationService->sanitizeSvg($dg['icon']),
                 'position' => $gPosition,
                 'is_custom' => false,
                 'is_collapsible' => $dg['is_collapsible'],
                 'hidden' => $gHidden,
-                'is_customized' => $isCustomized,
+                'has_global_override' => $hasGlobal,
+                'has_local_override' => $hasLocal,
+                'is_inherited' => ($scope !== 'global' && $hasGlobal && !$hasLocal),
+                'is_customized' => ($scope === 'global') ? $hasGlobal : ($hasLocal || $hasGlobal),
             ];
         }
 
-        // Add custom created groups
+        // Add or merge custom created groups (preserves custom group properties)
         foreach ($customGroups as $cg) {
             $customKey = "group:{$cg->group_key}";
+            $gKey = $cg->group_key;
             $gTitle = $cg->title;
             $gIcon = $cg->icon ?: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l2 2h10a2 2 0 0 1 2 2v11a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /></svg>';
             $gPosition = $cg->position ?: 99;
             $gHidden = false;
-            $isCustomized = true;
+            $hasGlobal = isset($globalCustomizations[$customKey]);
+            $hasLocal = isset($localCustomizations[$customKey]);
 
-            if (isset($customizations[$customKey])) {
-                $gov = $customizations[$customKey]->overrides ?? [];
+            if ($hasGlobal) {
+                $gov = $globalCustomizations[$customKey]->overrides ?? [];
                 if (!empty($gov['title'])) $gTitle = $gov['title'];
                 if (!empty($gov['icon'])) $gIcon = $gov['icon'];
-                if (isset($gov['position']) && is_numeric($gov['position'])) $gPosition = (int) $gov['position'];
+                if (isset($gov['position']) && is_numeric($gov['position'])) $gPosition = (int)$gov['position'];
                 if (!empty($gov['hidden'])) $gHidden = true;
             }
 
-            $allGroups[] = [
+            if ($scope !== 'global' && $hasLocal) {
+                $lov = $localCustomizations[$customKey]->overrides ?? [];
+                if (!empty($lov['title'])) $gTitle = $lov['title'];
+                if (!empty($lov['icon'])) $gIcon = $lov['icon'];
+                if (isset($lov['position']) && is_numeric($lov['position'])) $gPosition = (int)$lov['position'];
+                if (!empty($lov['hidden'])) $gHidden = true;
+            }
+
+            $allGroups[$gKey] = [
                 'id' => $cg->id,
-                'key' => $cg->group_key,
+                'key' => $gKey,
                 'title' => $gTitle,
                 'default_title' => $cg->title,
-                'icon' => $gIcon,
-                'default_icon' => $cg->icon,
+                'icon' => $this->customizationService->sanitizeSvg($gIcon),
+                'default_icon' => $this->customizationService->sanitizeSvg($cg->icon),
                 'position' => $gPosition,
                 'is_custom' => true,
                 'is_collapsible' => true,
                 'hidden' => $gHidden,
-                'is_customized' => $isCustomized,
+                'has_global_override' => $hasGlobal,
+                'has_local_override' => $hasLocal,
+                'is_inherited' => ($scope !== 'global' && $hasGlobal && !$hasLocal),
+                'is_customized' => ($scope === 'global') ? $hasGlobal : ($hasLocal || $hasGlobal),
             ];
         }
 
         // Dynamic scanner: add any group present in extracted items that might be missing
-        $existingGroupKeys = collect($allGroups)->pluck('key')->toArray();
         foreach ($extractedItems as $item) {
             $gKey = $item['group'] ?? '';
-            if (!empty($gKey) && !in_array($gKey, $existingGroupKeys, true)) {
+            if (!empty($gKey) && !isset($allGroups[$gKey])) {
                 $customKey = "group:{$gKey}";
                 $gTitle = $item['group_title'] ?? $this->moduleMenuService->resolveModuleGroupTitle($gKey, $item['module'] ?? $gKey);
                 $gIcon = $item['icon'] ?? $item['default_icon'] ?? '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l2 2h10a2 2 0 0 1 2 2v11a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /></svg>';
                 $gPosition = 85;
                 $gHidden = false;
-                $isCustomized = false;
+                $hasGlobal = isset($globalCustomizations[$customKey]);
+                $hasLocal = isset($localCustomizations[$customKey]);
 
-                if (isset($customizations[$customKey])) {
-                    $gov = $customizations[$customKey]->overrides ?? [];
-                    $isCustomized = true;
+                if ($hasGlobal) {
+                    $gov = $globalCustomizations[$customKey]->overrides ?? [];
                     if (!empty($gov['title'])) $gTitle = $gov['title'];
                     if (!empty($gov['icon'])) $gIcon = $gov['icon'];
                     if (isset($gov['position']) && is_numeric($gov['position'])) $gPosition = (int)$gov['position'];
                     if (!empty($gov['hidden'])) $gHidden = true;
                 }
 
-                $allGroups[] = [
+                if ($scope !== 'global' && $hasLocal) {
+                    $lov = $localCustomizations[$customKey]->overrides ?? [];
+                    if (!empty($lov['title'])) $gTitle = $lov['title'];
+                    if (!empty($lov['icon'])) $gIcon = $lov['icon'];
+                    if (isset($lov['position']) && is_numeric($lov['position'])) $gPosition = (int)$lov['position'];
+                    if (!empty($lov['hidden'])) $gHidden = true;
+                }
+
+                $allGroups[$gKey] = [
                     'key' => $gKey,
                     'title' => $gTitle,
                     'default_title' => $gTitle,
@@ -489,13 +561,16 @@ class MenuManagerController extends Controller
                     'is_custom' => false,
                     'is_collapsible' => true,
                     'hidden' => $gHidden,
-                    'is_customized' => $isCustomized,
+                    'has_global_override' => $hasGlobal,
+                    'has_local_override' => $hasLocal,
+                    'is_inherited' => ($scope !== 'global' && $hasGlobal && !$hasLocal),
+                    'is_customized' => ($scope === 'global') ? $hasGlobal : ($hasLocal || $hasGlobal),
                 ];
-                $existingGroupKeys[] = $gKey;
             }
         }
 
-        // Sort groups by position
+        // Reindex groups array and sort by position
+        $allGroups = array_values($allGroups);
         usort($allGroups, fn($a, $b) => ($a['position'] ?? 999) <=> ($b['position'] ?? 999));
 
         // Fetch available roles and users for selection
@@ -508,11 +583,33 @@ class MenuManagerController extends Controller
 
         $isCustomMenuEnabled = $this->customizationService->isCustomMenuEnabled();
         $isTwoStepEnabled = $this->customizationService->isTwoStepMenuEnabled();
+        $isGroupCounterEnabled = $this->customizationService->isGroupCounterEnabled();
+
+        $authUser = Auth::user();
+        $authRoleIds = $authUser && method_exists($authUser, 'roles') ? $authUser->roles->pluck('id')->toArray() : [];
+        $authRoleNames = $authUser && method_exists($authUser, 'roles') ? $authUser->roles->pluck('name')->toArray() : [];
+
+        $userSpecificCount = $authUser ? MenuCustomization::where('scope', 'user')->where('scope_id', $authUser->id)->count() : 0;
+        $roleSpecificCount = (!empty($authRoleIds)) ? MenuCustomization::where('scope', 'role')->whereIn('scope_id', $authRoleIds)->count() : 0;
+        $globalCount = MenuCustomization::where('scope', 'global')->count();
+
+        $governingScope = 'global';
+        $governingReason = 'تنظیمات عمومی سراسری سیستم (Global)';
+
+        if ($userSpecificCount > 0) {
+            $governingScope = 'user';
+            $governingReason = "شخصی‌سازی اختصاصی کاربر ({$authUser->name}) - دارای {$userSpecificCount} تنظیم اختصاصی که بر تنظیمات عمومی غلبه کرده است";
+        } elseif ($roleSpecificCount > 0) {
+            $governingScope = 'role';
+            $roleNamesStr = implode('، ', $authRoleNames);
+            $governingReason = "شخصی‌سازی اختصاصی نقش ({$roleNamesStr}) - دارای {$roleSpecificCount} تنظیم اختصاصی که بر تنظیمات عمومی غلبه کرده است";
+        }
 
         return response()->json([
             'success' => true,
             'is_custom_menu_enabled' => $isCustomMenuEnabled,
             'is_two_step_enabled' => $isTwoStepEnabled,
+            'is_group_counter_enabled' => $isGroupCounterEnabled,
             'items' => $extractedItems,
             'groups' => $allGroups,
             'custom_groups' => $customGroups,
@@ -520,6 +617,16 @@ class MenuManagerController extends Controller
             'users' => $users,
             'scope' => $scope,
             'scope_id' => $scopeId,
+            'active_governance' => [
+                'user_name' => $authUser ? $authUser->name : null,
+                'user_roles' => $authRoleNames,
+                'governing_scope' => $governingScope,
+                'governing_reason' => $governingReason,
+                'user_overrides_count' => $userSpecificCount,
+                'role_overrides_count' => $roleSpecificCount,
+                'global_overrides_count' => $globalCount,
+                'has_blocking_overrides' => ($governingScope !== 'global'),
+            ],
         ]);
     }
 
@@ -541,22 +648,44 @@ class MenuManagerController extends Controller
             'scope_id' => 'nullable|integer',
             'items' => 'nullable|array',
             'groups' => 'nullable|array',
+            'sync_roles' => 'nullable|boolean',
         ]);
 
         $scope = $request->input('scope', 'global');
         $scopeId = $scope === 'global' ? null : $request->input('scope_id');
         $items = $request->input('items', []);
         $groups = $request->input('groups', []);
+        $syncRoles = (bool)$request->input('sync_roles', false);
 
         DB::beginTransaction();
         try {
+            if ($scope === 'global' && $syncRoles) {
+                // If requested, clean up all role and user overrides so everyone inherits cleanly from Global
+                MenuCustomization::whereIn('scope', ['role', 'user'])->delete();
+            }
+
             // Save item customizations
             foreach ($items as $itemData) {
-                $menuKey = $itemData['menu_key'];
+                $menuKey = $itemData['menu_key'] ?? '';
+                if (empty($menuKey)) continue;
+
+                // When saving for a role or user:
+                // Only save if the item actually has a local override or is marked dirty!
+                $hasLocalOverride = !empty($itemData['has_local_override']) || !empty($itemData['_dirty']);
+                $isInherited = !empty($itemData['is_inherited']) && empty($itemData['_dirty']);
+
+                if ($scope !== 'global' && (!$hasLocalOverride || $isInherited)) {
+                    // This item inherits from global! Remove any local override so it continuously inherits!
+                    MenuCustomization::where('scope', $scope)
+                        ->where('scope_id', $scopeId)
+                        ->where('menu_key', $menuKey)
+                        ->delete();
+                    continue;
+                }
 
                 $overrides = [
                     'title' => $itemData['title'] ?? null,
-                    'icon' => $itemData['icon'] ?? null,
+                    'icon' => isset($itemData['icon']) ? $this->customizationService->sanitizeSvg($itemData['icon']) : null,
                     'position' => isset($itemData['position']) ? (int)$itemData['position'] : 99,
                     'group' => $itemData['group'] ?? null,
                     'hidden' => !empty($itemData['hidden']),
@@ -584,10 +713,21 @@ class MenuManagerController extends Controller
                 $gKey = $groupData['key'] ?? '';
                 if (empty($gKey)) continue;
 
+                $hasLocalGroupOverride = !empty($groupData['has_local_override']) || !empty($groupData['_dirty']);
+                $isInheritedGroup = !empty($groupData['is_inherited']) && empty($groupData['_dirty']);
+
+                if ($scope !== 'global' && (!$hasLocalGroupOverride || $isInheritedGroup)) {
+                    MenuCustomization::where('scope', $scope)
+                        ->where('scope_id', $scopeId)
+                        ->where('menu_key', "group:{$gKey}")
+                        ->delete();
+                    continue;
+                }
+
                 $menuKey = "group:{$gKey}";
                 $overrides = [
                     'title' => $groupData['title'] ?? null,
-                    'icon' => $groupData['icon'] ?? null,
+                    'icon' => isset($groupData['icon']) ? $this->customizationService->sanitizeSvg($groupData['icon']) : null,
                     'position' => isset($groupData['position']) ? (int)$groupData['position'] : 99,
                     'hidden' => !empty($groupData['hidden']),
                 ];
@@ -609,11 +749,17 @@ class MenuManagerController extends Controller
                 if (!empty($groupData['is_custom']) && !empty($groupData['id'])) {
                     MenuCustomGroup::where('id', $groupData['id'])->update([
                         'title' => $groupData['title'],
-                        'icon' => $groupData['icon'] ?? null,
+                        'icon' => isset($groupData['icon']) ? $this->customizationService->sanitizeSvg($groupData['icon']) : null,
                         'position' => (int)($groupData['position'] ?? 99),
                     ]);
                 }
             }
+
+            // Ensure custom menu is globally active so saved changes take effect immediately in runtime
+            Setting::updateOrCreate(
+                ['key' => 'custom_menu_enabled'],
+                ['value' => '1']
+            );
 
             DB::commit();
 
@@ -637,12 +783,21 @@ class MenuManagerController extends Controller
 
     /**
      * Reset customizations to factory defaults.
+     * When scope is role or user, resetting to system default clears local overrides.
+     * If scope is global, clears global customizations.
      */
     public function reset(Request $request): JsonResponse
     {
         $scope = $request->input('scope', 'global');
         $scopeId = $scope === 'global' ? null : $request->input('scope_id');
         $menuKey = $request->input('menu_key');
+
+        if ($scope !== 'global' && empty($scopeId)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لطفاً ابتدا نقش یا کاربر مورد نظر را انتخاب کنید.',
+            ], 422);
+        }
 
         try {
             $query = MenuCustomization::where('scope', $scope)
@@ -653,7 +808,9 @@ class MenuManagerController extends Controller
                 $message = 'آیتم یا گروه مورد نظر به حالت پیش‌فرض بازگشت.';
             } else {
                 $query->delete();
-                $message = 'تمامی شخصی‌سازی‌های این بخش به حالت پیش‌فرض سیستم بازگردانده شد.';
+                $message = ($scope === 'global')
+                    ? 'تمامی شخصی‌سازی‌های عمومی سیستم بازنشانی شد.'
+                    : 'شخصی‌سازی‌های این بخش بازنشانی شدند.';
             }
 
             $this->customizationService->clearCache();
@@ -670,6 +827,125 @@ class MenuManagerController extends Controller
                 'message' => 'خطا در بازنشانی: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Inherit from global scope: Remove local overrides for role/user so it falls back to global settings.
+     */
+    public function inheritGlobal(Request $request): JsonResponse
+    {
+        $scope = $request->input('scope');
+        $scopeId = $request->input('scope_id');
+        $menuKey = $request->input('menu_key');
+
+        if (empty($scope) || $scope === 'global' || empty($scopeId)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ارث‌بری از تنظیمات عمومی فقط برای نقش‌ها یا کاربران خاص امکان‌پذیر است.',
+            ], 422);
+        }
+
+        try {
+            $query = MenuCustomization::where('scope', $scope)
+                ->where('scope_id', $scopeId);
+
+            if (!empty($menuKey)) {
+                $query->where('menu_key', $menuKey)->delete();
+                $message = 'آیتم مورد نظر با موفقیت به تنظیمات عمومی (Global) بازگشت و از آن ارث‌بری می‌کند.';
+            } else {
+                $query->delete();
+                $message = 'تمام آیتم‌های این بخش به تنظیمات عمومی بازگردانده شدند و از آن ارث‌بری می‌کنند.';
+            }
+
+            $this->customizationService->clearCache();
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        } catch (Throwable $e) {
+            Log::error('Error inheriting from global in menu customizations: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در بازگشت به تنظیمات عمومی: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Synchronize all roles and users to inherit cleanly from global settings.
+     * Removes blocking shadow overrides from role and user scopes.
+     */
+    public function syncAllRolesToGlobal(Request $request): JsonResponse
+    {
+        try {
+            $deletedCount = MenuCustomization::whereIn('scope', ['role', 'user'])->delete();
+            $this->customizationService->clearCache();
+
+            return response()->json([
+                'success' => true,
+                'deleted_count' => $deletedCount,
+                'message' => 'همگام‌سازی کامل انجام شد. تمام نقش‌ها و کاربران اکنون مستقیماً و بدون سایه‌انداز از منوی عمومی ارث‌بری می‌کنند.',
+            ]);
+        } catch (Throwable $e) {
+            Log::error('Error syncing roles to global in menu customizations: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در همگام‌سازی نقش‌ها: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Search users for the user scope switcher combobox.
+     */
+    public function searchUsers(Request $request): JsonResponse
+    {
+        $search = trim((string)$request->query('q', ''));
+
+        $tenantManager = app(TenantManager::class);
+        $users = User::select('id', 'name', 'email')
+            ->when($tenantManager->hasTenant(), fn($q) => $q->where('tenant_id', $tenantManager->getTenantId()))
+            ->when(!$tenantManager->hasTenant(), fn($q) => $q->whereNull('tenant_id'))
+            ->when(!empty($search), function ($q) use ($search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->limit(30)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'users' => $users,
+        ]);
+    }
+
+    /**
+     * Get statistics regarding global and local overrides for the current scope.
+     */
+    public function getStats(Request $request): JsonResponse
+    {
+        $scope = $request->query('scope', 'global');
+        $scopeId = $request->query('scope_id');
+
+        $globalCount = MenuCustomization::where('scope', 'global')->count();
+        $localCount = 0;
+
+        if ($scope !== 'global' && $scopeId) {
+            $localCount = MenuCustomization::where('scope', $scope)
+                ->where('scope_id', $scopeId)
+                ->count();
+        }
+
+        return response()->json([
+            'success' => true,
+            'global_count' => $globalCount,
+            'local_count' => $localCount,
+        ]);
     }
 
     /**
@@ -814,6 +1090,44 @@ class MenuManagerController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'خطا در تغییر وضعیت منوی دو مرحله‌ای: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Toggle item counters badge on menu groups.
+     */
+    public function toggleGroupCounter(Request $request): JsonResponse
+    {
+        $request->validate([
+            'enabled' => 'required|boolean',
+        ]);
+
+        $enabled = (bool)$request->input('enabled');
+
+        try {
+            Setting::updateOrCreate(
+                ['key' => 'user_menu_group_counter'],
+                ['value' => $enabled ? '1' : '0']
+            );
+
+            // Clear cache
+            Cache::forget('user_menu_group_counter_enabled');
+            $this->customizationService->clearCache();
+
+            $statusText = $enabled
+                ? 'نمایش شمارنده تعداد آیتم‌ها برای گروه‌های منو فعال شد.'
+                : 'نمایش شمارنده تعداد آیتم‌ها برای گروه‌های منو غیرفعال شد.';
+
+            return response()->json([
+                'success' => true,
+                'is_group_counter_enabled' => $enabled,
+                'message' => $statusText,
+            ]);
+        } catch (Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'خطا در تغییر وضعیت شمارنده آیتم‌های گروه: ' . $e->getMessage(),
             ], 500);
         }
     }
