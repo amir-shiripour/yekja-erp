@@ -372,8 +372,8 @@
                 </button>
             </div>
 
-            {{-- Left: Controls (Quick Filters Toggle + Only Differences + Collapse Toggle) --}}
-            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap shrink-0">
+            {{-- Left: Controls (Responsive Single-Row Toolbar for Mobile & Desktop) --}}
+            <div class="flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2 w-full sm:w-auto shrink-0">
                 {{-- Quick Filters Toggle Button --}}
                 <button type="button"
                         @click="showQuickFilters = !showQuickFilters"
@@ -381,15 +381,16 @@
                         :class="showQuickFilters || selectedCategory !== 'all'
                             ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700 ring-2 ring-indigo-500/20'
                             : 'bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700/60'"
-                        class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-black border transition-all cursor-pointer select-none">
-                    <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor"
+                        class="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-black border transition-all cursor-pointer select-none">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" stroke="currentColor"
                          viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                     </svg>
-                    <span class="whitespace-nowrap">فیلترهای سریع</span>
-                    <span x-show="selectedCategory !== 'all'" x-cloak class="w-2 h-2 rounded-full bg-indigo-600"></span>
-                    <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200"
+                    <span class="hidden sm:inline whitespace-nowrap">فیلترهای سریع</span>
+                    <span class="sm:hidden whitespace-nowrap">فیلترها</span>
+                    <span x-show="selectedCategory !== 'all'" x-cloak class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                    <svg class="w-3 h-3 text-gray-400 transition-transform duration-200 shrink-0"
                          :class="showQuickFilters ? 'rotate-180' : ''"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -420,9 +421,9 @@
                             :class="(packageSortMode !== 'price_asc' || rowSortMode !== 'smart')
                                 ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700 ring-2 ring-indigo-500/20'
                                 : 'bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700/60 border'"
-                            class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer select-none"
+                            class="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-black transition-all cursor-pointer select-none"
                             aria-label="تنظیمات مرتب‌سازی مقایسه">
-                        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor"
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" stroke="currentColor"
                              viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/>
@@ -579,20 +580,21 @@
                         :class="onlyDifferences
                             ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25 ring-2 ring-indigo-500/30'
                             : 'bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700/60 border'"
-                        class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer select-none">
-                    <span class="w-6 h-3.5 rounded-full p-0.5 transition-colors flex items-center"
+                        class="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-black transition-all cursor-pointer select-none">
+                    <span class="w-5 sm:w-6 h-3 sm:h-3.5 rounded-full p-0.5 transition-colors flex items-center"
                           :class="onlyDifferences ? 'bg-white/30 justify-end' : 'bg-gray-300 dark:bg-gray-600 justify-start'">
-                        <span class="w-2.5 h-2.5 rounded-full bg-white shadow-xs"></span>
+                        <span class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white shadow-xs"></span>
                     </span>
-                    <span class="whitespace-nowrap">فقط تفاوت‌ها</span>
+                    <span class="hidden sm:inline whitespace-nowrap">فقط تفاوت‌ها</span>
+                    <span class="sm:hidden whitespace-nowrap">تفاوت‌ها</span>
                 </button>
 
                 {{-- Quick Collapse/Expand Toggle --}}
                 <button type="button"
                         @click="const allOpen = openGroups.modules && openGroups.quotas_and_features; openGroups.modules = !allOpen; openGroups.quotas_and_features = !allOpen;"
-                        class="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-700/60 transition-colors"
+                        class="p-2 sm:p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-700/60 transition-colors shrink-0"
                         :title="openGroups.modules && openGroups.quotas_and_features ? 'بستن همه بخش‌ها' : 'باز کردن همه بخش‌ها'">
-                    <svg class="w-4 h-4 transform transition-transform"
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 transform transition-transform"
                          :class="openGroups.modules && openGroups.quotas_and_features ? 'rotate-180' : ''"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -678,14 +680,14 @@
          x-transition:leave-end="opacity-0 -translate-y-2"
          class="mb-3.5 p-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/90 dark:border-gray-800 shadow-xs">
 
-        {{-- MOBILE DEDICATED LAYOUT (Clean 3-tier structure) --}}
+        {{-- MOBILE DEDICATED LAYOUT (Ultra-Clean, Compact 2-Tier Structure) --}}
         <div class="md:hidden flex flex-col gap-2.5 w-full">
-            {{-- Tier 1: Stepper Navigation Buttons + Active Badge --}}
+            {{-- Tier 1: Stepper Navigation Buttons with Centered Active Package Card --}}
             <div class="flex items-center justify-between gap-2 w-full" dir="rtl">
                 <button type="button"
                         @click="prevPackage()"
                         :disabled="selectedPkgIndex === 0"
-                        :class="selectedPkgIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 cursor-pointer'"
+                        :class="selectedPkgIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 cursor-pointer text-gray-900 dark:text-white'"
                         class="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-xs font-black border border-gray-200 dark:border-gray-700 shadow-2xs transition-all shrink-0">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -694,8 +696,8 @@
                 </button>
 
                 <div
-                    class="flex-1 min-w-0 text-center px-2 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-100 dark:border-indigo-800/60 truncate">
-                    <span class="text-[10px] text-indigo-500 font-bold block leading-tight"
+                    class="flex-1 min-w-0 text-center px-3 py-1.5 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/80 border border-indigo-100 dark:border-indigo-800/70 shadow-2xs">
+                    <span class="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 block leading-tight"
                           x-text="`پکیج ${selectedPkgIndex + 1} از ${pkgList.length}`"></span>
                     <span
                         class="text-xs font-black text-indigo-700 dark:text-indigo-300 truncate block mt-0.5 leading-tight"
@@ -705,7 +707,7 @@
                 <button type="button"
                         @click="nextPackage()"
                         :disabled="selectedPkgIndex === pkgList.length - 1"
-                        :class="selectedPkgIndex === pkgList.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 cursor-pointer'"
+                        :class="selectedPkgIndex === pkgList.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 cursor-pointer text-gray-900 dark:text-white'"
                         class="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-xs font-black border border-gray-200 dark:border-gray-700 shadow-2xs transition-all shrink-0">
                     <span>پکیج بعدی</span>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -714,28 +716,16 @@
                 </button>
             </div>
 
-            {{-- Tier 2: Scrollable Package Pills List --}}
-            <div class="flex items-center gap-1.5 overflow-x-auto hide-scrollbar w-full py-0.5" dir="rtl">
-                <template x-for="(pkg, idx) in pkgList" :key="pkg.id">
-                    <button type="button"
-                            @click="selectPackage(idx)"
-                            :class="selectedPkgIndex === idx
-                                ? 'bg-indigo-600 text-white shadow-xs font-black ring-2 ring-indigo-500/30'
-                                : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200/80 dark:border-gray-700/80'"
-                            class="px-3 py-1.5 rounded-xl text-xs whitespace-nowrap transition-all shrink-0 cursor-pointer">
-                        <span x-text="pkg.name"></span>
-                    </button>
-                </template>
-            </div>
-
-            {{-- Tier 3: Sleek Progress Bar --}}
-            <div class="flex items-center gap-2 w-full pt-1" dir="rtl">
-                <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 shrink-0">موقعیت در جدول:</span>
+            {{-- Tier 2: Wide Responsive Table Position Bar --}}
+            <div class="flex items-center gap-2.5 w-full pt-0.5" dir="rtl">
+                <span class="text-[11px] font-bold text-gray-400 dark:text-gray-500 shrink-0">موقعیت:</span>
                 <div
                     @click="const rect = $el.getBoundingClientRect(); const ratio = Math.min(1, Math.max(0, (rect.right - $event.clientX) / rect.width)); const nearest = pkgList.length > 1 ? Math.min(pkgList.length - 1, Math.max(0, Math.round(ratio * (pkgList.length - 1)))) : 0; selectPackage(nearest);"
-                    class="flex-1 relative h-2 bg-gray-100 dark:bg-gray-800 rounded-full cursor-pointer overflow-hidden p-0.5 border border-gray-200/80 dark:border-gray-700/80">
-                    <div class="h-full bg-indigo-600 dark:bg-indigo-500 rounded-full transition-all duration-300"
-                         :style="`width: ${scrollPercent}%;`"></div>
+                    class="flex-1 relative h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full cursor-pointer overflow-hidden p-0.5 border border-gray-200/80 dark:border-gray-700/80 shadow-inner group">
+                    <div class="h-full bg-gradient-to-l from-indigo-500 to-indigo-600 dark:from-indigo-400 dark:to-indigo-500 rounded-full transition-all duration-300 relative shadow-xs"
+                         :style="`width: ${scrollPercent}%;`">
+                        <span class="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-white opacity-90"></span>
+                    </div>
                 </div>
                 <span
                     class="text-[11px] font-black text-indigo-600 dark:text-indigo-400 tabular-nums w-8 text-left shrink-0"
@@ -1183,11 +1173,12 @@
 
                                     {{-- Modern Tooltip Info Button: Fully Synced with Dark/Light Mode --}}
                                     @if($hasDesc)
-                                        <div class="relative inline-flex items-center shrink-0">
+                                        <div class="relative inline-flex items-center shrink-0"
+                                             @click.outside="if (activeTooltip === '{{ $rowSlug }}') activeTooltip = null">
                                             <button type="button"
                                                     @click.stop="activeTooltip = (activeTooltip === '{{ $rowSlug }}' ? null : '{{ $rowSlug }}')"
-                                                    @mouseenter="activeTooltip = '{{ $rowSlug }}'"
-                                                    @mouseleave="activeTooltip = null"
+                                                    @mouseenter="if (!isMobile) activeTooltip = '{{ $rowSlug }}'"
+                                                    @mouseleave="if (!isMobile) activeTooltip = null"
                                                     :class="activeTooltip === '{{ $rowSlug }}'
                                                     ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/80 ring-2 ring-indigo-500/20'
                                                     : 'text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/70'"
