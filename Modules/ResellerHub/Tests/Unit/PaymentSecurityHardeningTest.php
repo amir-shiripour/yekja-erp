@@ -165,6 +165,8 @@ class PaymentSecurityHardeningTest extends TestCase
     public function test_portal_checkout_rejects_missing_reported_amount(): void
     {
         $invoice = $this->makeInvoice(30, 250000, 'unpaid');
+        $invoice->meta = ['gateway' => 'zarinpal'];
+        $invoice->save();
 
         $paymentServiceMock = $this->createMock(PaymentService::class);
         $paymentServiceMock->method('verifyPayment')->willReturn([
@@ -183,6 +185,8 @@ class PaymentSecurityHardeningTest extends TestCase
         );
 
         $request = Request::create('/get-started/checkout/verify/30/zarinpal', 'GET', [
+            'invoice' => 30,
+            'gateway' => 'zarinpal',
             'Authority' => 'AUTH_123',
             'Status' => 'OK',
         ]);
@@ -201,6 +205,8 @@ class PaymentSecurityHardeningTest extends TestCase
     public function test_portal_checkout_rejects_underpaid_tampered_amount(): void
     {
         $invoice = $this->makeInvoice(31, 1000000, 'unpaid'); // Expected 1,000,000
+        $invoice->meta = ['gateway' => 'zarinpal'];
+        $invoice->save();
 
         $paymentServiceMock = $this->createMock(PaymentService::class);
         $paymentServiceMock->method('verifyPayment')->willReturn([
@@ -219,6 +225,8 @@ class PaymentSecurityHardeningTest extends TestCase
         );
 
         $request = Request::create('/get-started/checkout/verify/31/zarinpal', 'GET', [
+            'invoice' => 31,
+            'gateway' => 'zarinpal',
             'Authority' => 'AUTH_TAMPERED',
             'Status' => 'OK',
         ]);
@@ -236,6 +244,8 @@ class PaymentSecurityHardeningTest extends TestCase
     public function test_portal_checkout_rejects_duplicate_flag_on_fresh_invoice(): void
     {
         $invoice = $this->makeInvoice(32, 500000, 'unpaid');
+        $invoice->meta = ['gateway' => 'behpardakht'];
+        $invoice->save();
 
         $paymentServiceMock = $this->createMock(PaymentService::class);
         $paymentServiceMock->method('verifyPayment')->willReturn([
@@ -255,6 +265,8 @@ class PaymentSecurityHardeningTest extends TestCase
         );
 
         $request = Request::create('/get-started/checkout/verify/32/behpardakht', 'POST', [
+            'invoice' => 32,
+            'gateway' => 'behpardakht',
             'SaleReferenceId' => 'REF_DUP_43',
             'ResCode' => '0',
         ]);
@@ -301,5 +313,123 @@ class PaymentSecurityHardeningTest extends TestCase
 
         $invoice->refresh();
         $this->assertSame('unpaid', $invoice->status);
+    }
+
+    public function test_portal_checkout_rejects_cancelled_invoice(): void
+    {
+        $invoice = $this->makeInvoice(50, 100000, 'cancelled');
+        $invoice->meta = ['gateway' => 'zarinpal'];
+        $invoice->save();
+
+        $gatewayFactoryMock = $this->createMock(PaymentGatewayFactory::class);
+        $gatewayFactoryMock->expects($this->never())->method('make');
+
+        $controller = new PortalCheckoutController(
+            gatewayFactory: $gatewayFactoryMock,
+            amounts: new GatewayAmountResolver()
+        );
+
+        $request = Request::create('/get-started/checkout/verify/50/zarinpal', 'GET', [
+            'invoice' => 50,
+            'gateway' => 'zarinpal',
+            'Authority' => 'AUTH_CANCELLED_1',
+            'Status' => 'OK',
+        ]);
+
+        $response = $controller->verify($request, (string)$invoice->id, 'zarinpal');
+        $this->assertTrue($response->isRedirect());
+        $this->assertSame(route('portal.checkout.index'), $response->headers->get('Location'));
+    }
+
+    public function test_invoice_payment_service_rejects_cancelled_invoice(): void
+    {
+        $invoice = $this->makeInvoice(51, 150000, 'cancelled');
+
+        $service = new InvoicePaymentService(
+            workflowService: $this->createMock(ResellerWorkflowService::class),
+            amounts: new GatewayAmountResolver()
+        );
+
+        $result = $service->verifyOnlinePayment($invoice, ['Authority' => 'AUTH_CANCELLED_2'], 'zarinpal');
+        $this->assertFalse($result['success']);
+        $this->assertSame('این فاکتور لغو شده است و امکان تسویه آن وجود ندارد.', $result['message']);
+    }
+
+    public function test_portal_checkout_verifies_zibal_flow(): void
+    {
+        $this->app->instance(ResellerBillingService::class, $this->createMock(ResellerBillingService::class));
+
+        $invoice = $this->makeInvoice(60, 450000, 'unpaid');
+        $invoice->meta = ['gateway' => 'zibal'];
+        $invoice->save();
+
+        $paymentServiceMock = $this->createMock(PaymentService::class);
+        $paymentServiceMock->method('verifyPayment')->willReturn([
+            'success' => true,
+            'ref_id' => 'ZIBAL_REF_999',
+            'amount' => 450000,
+        ]);
+
+        $gatewayFactoryMock = $this->createMock(PaymentGatewayFactory::class);
+        $gatewayFactoryMock->method('make')->with('zibal')->willReturn($paymentServiceMock);
+
+        $controller = new PortalCheckoutController(
+            gatewayFactory: $gatewayFactoryMock,
+            amounts: new GatewayAmountResolver()
+        );
+
+        $request = Request::create('/get-started/checkout/verify/60/zibal', 'GET', [
+            'invoice' => $invoice->id,
+            'gateway' => 'zibal',
+            'trackId' => '12345678',
+            'success' => '1',
+            'status' => '2',
+        ]);
+
+        $response = $controller->verify($request, (string)$invoice->id, 'zibal');
+        $this->assertTrue($response->isRedirect());
+
+        $invoice->refresh();
+        $this->assertSame('paid', $invoice->status);
+        $this->assertSame('ZIBAL_REF_999', $invoice->transaction_ref);
+    }
+
+    public function test_portal_checkout_verifies_sep_saman_flow(): void
+    {
+        $this->app->instance(ResellerBillingService::class, $this->createMock(ResellerBillingService::class));
+
+        $invoice = $this->makeInvoice(61, 750000, 'unpaid');
+        $invoice->meta = ['gateway' => 'sep'];
+        $invoice->save();
+
+        $paymentServiceMock = $this->createMock(PaymentService::class);
+        $paymentServiceMock->method('verifyPayment')->willReturn([
+            'success' => true,
+            'ref_id' => 'SEP_REF_888',
+            'amount' => 750000,
+        ]);
+
+        $gatewayFactoryMock = $this->createMock(PaymentGatewayFactory::class);
+        $gatewayFactoryMock->method('make')->with('sep')->willReturn($paymentServiceMock);
+
+        $controller = new PortalCheckoutController(
+            gatewayFactory: $gatewayFactoryMock,
+            amounts: new GatewayAmountResolver()
+        );
+
+        $request = Request::create('/get-started/checkout/verify/61/sep', 'POST', [
+            'invoice' => $invoice->id,
+            'gateway' => 'sep',
+            'RefNum' => 'SEP_REF_888',
+            'State' => 'OK',
+            'Status' => 2,
+        ]);
+
+        $response = $controller->verify($request, (string)$invoice->id, 'sep');
+        $this->assertTrue($response->isRedirect());
+
+        $invoice->refresh();
+        $this->assertSame('paid', $invoice->status);
+        $this->assertSame('SEP_REF_888', $invoice->transaction_ref);
     }
 }

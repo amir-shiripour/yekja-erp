@@ -78,4 +78,42 @@ return [
     'logging' => [
         'channel' => env('RESELLERHUB_LOG_CHANNEL', 'daily'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Package Comparison & Module Presentation Priorities
+    |--------------------------------------------------------------------------
+    | Strategic buyer-oriented priority weighting for public comparison matrices.
+    | Core customer & financial modules appear first, followed by scheduling,
+    | inventory, communication, and infrastructure tools.
+    */
+    'comparison_module_priorities' => [
+        'crm' => 10,
+        'clients' => 20,
+        'contacts' => 30,
+        'clientcalls' => 40,
+        'followups' => 50,
+        'sales' => 60,
+        'invoices' => 70,
+        'contracts' => 80,
+        'accounting' => 90,
+        'wallet' => 100,
+        'appointments' => 110,
+        'booking' => 120,
+        'reminders' => 130,
+        'services' => 140,
+        'products' => 150,
+        'inventory' => 160,
+        'sms' => 170,
+        'smsreseller' => 180,
+        'notifications' => 190,
+        'smartbot' => 200,
+        'tasks' => 210,
+        'projects' => 220,
+        'workflows' => 230,
+        'market' => 240,
+        'contentforge' => 250,
+        'domainmanager' => 260,
+        'directadmin' => 270,
+    ],
 ];

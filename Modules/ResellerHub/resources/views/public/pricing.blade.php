@@ -10,12 +10,39 @@
         <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             <div class="mx-auto max-w-3xl text-center mb-12">
+                <div
+                    class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs mb-4">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                    <span>تعرفه‌ها و پلن‌های رسمی سامانه</span>
+                </div>
                 <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-gray-900 dark:text-white leading-tight">
-                    سامانه‌ای متناسب با نیاز کسب‌وکار شما
+                    سرمایه‌گذاری روی رشد کسب‌وکار، <span
+                        class="text-indigo-600 dark:text-indigo-400">با تعرفه‌های شفاف</span>
                 </h1>
                 <p class="mt-4 text-sm sm:text-base text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
                     شفاف، بدون هزینه‌های پنهان، با قابلیت ارتقاء و تغییر دوره در هر زمان.
                 </p>
+                <div
+                    class="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-bold text-gray-500 dark:text-gray-400">
+                    <span class="inline-flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round"
+                                                         stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        بدون هزینه‌های پنهان
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round"
+                                                         stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        فعال‌سازی آنی پس از پرداخت
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round"
+                                                         stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        امکان تغییر دوره یا ارتقاء پلن
+                    </span>
+                </div>
             </div>
 
             {{-- Subscription Period Tabs --}}
@@ -59,7 +86,7 @@
                             $limitsAll = is_array($pkg->limits ?? null) ? $pkg->limits : [];
                             $rawFeats = is_array($pkg->features) ? $pkg->features : [];
                             $pkgFeats = ResellerHelper::filterCommercialFeatures($rawFeats);
-                            $currencyLabel = 'تومان';
+                            $currencyLabel = ResellerHelper::currencyLabel();
                             $isFree = $pkg->isFree();
                             $keyHighlights = [];
                             foreach ($limitsAll as $lSlug => $lVal) {
@@ -104,7 +131,7 @@
                                                         تخفیف
                                                     @else
                                                         {{ ResellerHelper::toPersianDigits(number_format($pkg->discount_value)) }}
-                                                        تومان تخفیف
+                                                        {{ $currencyLabel }} تخفیف
                                                     @endif
                                                 </span>
                                             @endif
@@ -115,7 +142,7 @@
 
                                 {{-- Hero Pricing Box (Directly below header) --}}
                                 <div
-                                    class="p-5 rounded-2xl bg-gradient-to-b from-gray-50/90 to-gray-50/40 dark:from-gray-800/50 dark:to-gray-800/20 border border-gray-100 dark:border-gray-800/80 mb-6">
+                                    class="p-5 rounded-2xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800 mb-6">
                                     @if($isFree)
                                         <div class="flex flex-col gap-3.5">
                                             <div class="flex items-baseline justify-between">
@@ -259,7 +286,7 @@
                                                     {{-- Prominent Monthly Equivalent Box --}}
                                                     @if($monthlyEquivalent)
                                                         <div
-                                                            class="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-50/90 to-purple-50/90 dark:from-indigo-950/80 dark:to-purple-950/80 border border-indigo-200/90 dark:border-indigo-800/80 flex items-center justify-between shadow-xs">
+                                                            class="px-3.5 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/70 flex items-center justify-between shadow-xs">
                                                             <span
                                                                 class="text-indigo-900 dark:text-indigo-200 font-bold flex items-center gap-1.5 text-xs">
                                                                 <svg
@@ -332,9 +359,9 @@
                                 </div>
 
                                 {{-- Features Section --}}
-                                <div class="pt-2">
+                                <div class="pt-1.5">
                                     <div
-                                        class="text-xs font-black text-gray-800 dark:text-gray-200 mb-3.5 flex items-center gap-1.5">
+                                        class="text-xs mb-4 gap-1 font-black text-gray-800 dark:text-gray-200 flex items-center">
                                         <svg class="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd"
                                                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"

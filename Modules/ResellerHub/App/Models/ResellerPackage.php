@@ -47,6 +47,8 @@ use Modules\ResellerHub\App\Services\Pricing\PriceResolver;
  * @property-read string|null $discount_starts_at_jalali
  * @property-read string|null $discount_expires_at_jalali
  * @method static Builder|ResellerPackage query()
+ * @method static Builder|ResellerPackage active()
+ * @method static Builder|ResellerPackage inactive()
  * @method static ResellerPackage|null find(mixed $id, array $columns = ['*'])
  * @method static ResellerPackage findOrFail(mixed $id, array $columns = ['*'])
  * @method static ResellerPackage create(array $attributes = [])

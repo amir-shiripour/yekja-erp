@@ -103,8 +103,15 @@ class PortalCheckoutController extends Controller
             return redirect()->route('user.dashboard');
         }
 
+        if ($invoice->isCancelled()) {
+            Log::warning("[PortalCheckoutController] Invoice #$invoiceId is cancelled; rejecting gateway verification.");
+
+            return redirect()->route('portal.checkout.index')
+                ->with('error', __('resellerhub::messages.invoices.cannot_pay_cancelled'));
+        }
+
         $dataToVerify = array_merge($request->all(), [
-            'Amount' => $invoice->total,
+            'Amount' => (float)$this->amounts->forInvoice($invoice)['amount'],
             'invoice_id' => $invoice->id,
             'order_id' => $invoice->id,
         ]);
