@@ -249,27 +249,27 @@ enum QuotaKey: string
     public function description(): string
     {
         return match ($this) {
-            self::Appointments => 'حداکثر تعداد کل نوبت‌های قابل ثبت در بازه اشتراک (خالی = نامحدود)',
-            self::BookingProviders => 'حداکثر تعداد پزشکان یا اپراتورهای دارای تقویم نوبت‌دهی مجزا (خالی = نامحدود)',
+            self::Appointments => 'حداکثر تعداد کل نوبت‌های قابل ثبت در بازه اشتراک',
+            self::BookingProviders => 'حداکثر تعداد پزشکان یا اپراتورهای دارای تقویم نوبت‌دهی مجزا',
             self::OnlineBooking => 'امکان رزرو اینترنتی نوبت توسط بیماران از طریق لینک اختصاصی یا وبسایت',
             self::OnlinePayment => 'امکان اتصال به درگاه پرداخت برای دریافت بیعانه هنگام رزرو نوبت',
             self::SmsReminders => 'ارسال پیامک یادآوری خودکار به بیمار و پزشک قبل از فرا رسیدن موعد نوبت',
             self::WaitingList => 'سیستم هوشمند رزرو خودکار جایگزین در صورت انصراف یا لغو نوبت‌ها',
 
-            self::Clients => 'حداکثر تعداد پرونده‌های مشتریان یا بیماران قابل ثبت در سامانه (خالی = نامحدود)',
+            self::Clients => 'حداکثر تعداد پرونده‌های مشتریان یا بیماران قابل ثبت در سامانه',
             self::ClientPortal => 'امکان ورود مستقل بیماران با شماره موبایل به پنل خود و مشاهده سوابق',
             self::ClientImportExport => 'امکان استخراج یا ورود انبوه اطلاعات بیماران از طریق اکسل',
             self::ClientWallet => 'سیستم کیف پول و پس‌انداز اعتباری برای تسویه‌حساب‌های خدمات بعدی',
 
             self::MultiVendor => 'فعال بودن حالت چندفروشگاهی. در صورت غیرفعال بودن، سیستم صرفاً تک‌فروشگاهی اختصاصی است',
-            self::Products => 'حداکثر تعداد اقلام کالا و خدمات قابل تعریف در کاتالوگ فروشگاه (خالی = نامحدود)',
-            self::Warehouses => 'حداکثر تعداد انبارهای فیزیکی یا مجازی قابل مدیریت در سیستم (خالی = نامحدود)',
-            self::Stores => 'حداکثر تعداد فروشگاه‌های ثبت‌شده در حالت چندفروشگاهی (خالی = نامحدود)',
+            self::Products => 'حداکثر تعداد اقلام کالا و خدمات قابل تعریف در کاتالوگ فروشگاه',
+            self::Warehouses => 'حداکثر تعداد انبارهای فیزیکی یا مجازی قابل مدیریت در سیستم',
+            self::Stores => 'حداکثر تعداد فروشگاه‌های ثبت‌شده در حالت چندفروشگاهی',
             self::WmsEnabled => 'امکان ره‌گیری دقیق کاردکس کالا، انتقال بین انبارها و حسابداری موجودی',
             self::Coupons => 'امکان ساخت کدهای تخفیف درصدی و مبلغی برای سبدهای خرید مشتریان',
-            self::Orders => 'حداکثر تعداد سفارش‌های قابل ثبت در بازه اشتراک (خالی = نامحدود)',
+            self::Orders => 'حداکثر تعداد سفارش‌های قابل ثبت در بازه اشتراک',
 
-            self::Invoices => 'حداکثر تعداد فاکتورهای قابل صدور در بازه اشتراک (خالی = نامحدود)',
+            self::Invoices => 'حداکثر تعداد فاکتورهای قابل صدور در بازه اشتراک',
         };
     }
 
@@ -285,6 +285,27 @@ enum QuotaKey: string
             self::Stores => 'فروشگاه',
             self::Orders => 'سفارش',
             default => null,
+        };
+    }
+
+    /**
+     * Strategic buyer-oriented priority weighting for public comparison matrices.
+     * Lower values appear first among features with equal adoption counts.
+     */
+    public function priority(): int
+    {
+        return match ($this) {
+            self::Clients, self::OnlineBooking => 10,
+            self::Invoices, self::OnlinePayment => 20,
+            self::Appointments, self::SmsReminders => 30,
+            self::BookingProviders, self::ClientPortal => 40,
+            self::Orders, self::ClientWallet => 50,
+            self::Products, self::WaitingList => 60,
+            self::Warehouses, self::ClientImportExport => 70,
+            self::Stores, self::Coupons => 80,
+            self::WmsEnabled => 90,
+            self::MultiVendor => 100,
+            default => 999,
         };
     }
 
@@ -312,7 +333,7 @@ enum QuotaKey: string
         };
     }
 
-    public function default(): mixed
+    public function default(): ?bool
     {
         return match ($this) {
             self::OnlineBooking,
@@ -426,14 +447,12 @@ enum QuotaKey: string
     {
         return match ($this) {
             self::Invoices => 'services.invoices.index',
-            self::Clients => 'user.clients.index',
-            self::Appointments => 'user.booking.dashboard',
-            self::BookingProviders => 'user.booking.dashboard',
+            self::Clients, self::ClientImportExport => 'user.clients.index',
+            self::Appointments, self::BookingProviders => 'user.booking.dashboard',
             self::Products => 'user.market.master-products.index',
             self::Warehouses => 'user.market.dashboard',
             self::Stores => 'user.market.vendors.index',
             self::Orders => 'user.market.orders.index',
-            self::ClientImportExport => 'user.clients.index',
             default => 'user.dashboard',
         };
     }

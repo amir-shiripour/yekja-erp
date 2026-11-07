@@ -54,6 +54,18 @@ class InvoicePaymentService
             // Re-fetch fresh invoice status
             $invoice->refresh();
 
+            if ($invoice->isCancelled()) {
+                Log::warning("[InvoicePaymentService] Invoice #{$invoice->id} is cancelled; refusing gateway payment verification.");
+
+                return [
+                    'success' => false,
+                    'message' => __('resellerhub::messages.invoices.cannot_pay_cancelled'),
+                    'ref_id' => null,
+                    'already_paid' => false,
+                    'payment' => null,
+                ];
+            }
+
             $incomingAuthority = (string)(
                 $callbackData['Authority']
                 ?? $callbackData['authority']
