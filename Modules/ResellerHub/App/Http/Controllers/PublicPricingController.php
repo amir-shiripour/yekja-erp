@@ -16,15 +16,52 @@ class PublicPricingController extends Controller
      */
     public function index(): View
     {
-        $packages = ResellerPackage::active()->orderBy('sort_order')->orderBy('monthly_price')->get();
+        $validFeatureSlugs = collect(QuotaKey::cases())
+            ->filter(static fn(QuotaKey $q) => $q->isFeature())
+            ->map(static fn(QuotaKey $q) => $q->value)
+            ->all();
+
+        $allActive = ResellerPackage::active()->get();
+        $featureAdoption = [];
+        foreach ($validFeatureSlugs as $slug) {
+            $featureAdoption[$slug] = $allActive->filter(static fn(ResellerPackage $p) => in_array($slug, is_array($p->features) ? $p->features : [], true))->count();
+        }
+
+        // Rank packages: Rightmost (Column 0) has most green checks (Pyramid Apex/Base)
+        $packages = $allActive->sort(static function (ResellerPackage $a, ResellerPackage $b) use ($validFeatureSlugs, $featureAdoption) {
+            $aFeats = count(array_intersect(is_array($a->features) ? $a->features : [], $validFeatureSlugs));
+            $bFeats = count(array_intersect(is_array($b->features) ? $b->features : [], $validFeatureSlugs));
+
+            if ($aFeats !== $bFeats) {
+                return $bFeats <=> $aFeats; // DESC: 10 checks, 7 checks, 4 checks, 2 checks...
+            }
+
+            // Tie breaker: alignment with common features stack
+            $aScore = 0;
+            foreach ($a->features ?? [] as $f) {
+                $aScore += ($featureAdoption[$f] ?? 0);
+            }
+            $bScore = 0;
+            foreach ($b->features ?? [] as $f) {
+                $bScore += ($featureAdoption[$f] ?? 0);
+            }
+
+            if ($aScore !== $bScore) {
+                return $bScore <=> $aScore;
+            }
+
+            $aModules = is_array($a->modules) ? count($a->modules) : 0;
+            $bModules = is_array($b->modules) ? count($b->modules) : 0;
+            if ($aModules !== $bModules) {
+                return $bModules <=> $aModules;
+            }
+
+            return $b->id <=> $a->id;
+        })->values();
 
         $availablePeriods = ResellerHelper::getAllAvailablePeriods();
         $defaultPeriod = 'monthly_price';
-
-        // Fetch all active packages for the comparison matrix
         $allPackages = $packages;
-
-        // Pre-compute structured periods per package (for monthly rates, discounts, etc.)
         $packagePeriods = [];
         foreach ($allPackages as $pkg) {
             $packagePeriods[$pkg->id] = $pkg->getPackagePeriods();
@@ -92,7 +129,8 @@ class PublicPricingController extends Controller
 
         // 4. Build Quotas & Capabilities group rows
         $packageIds = $packages->pluck('id')->values()->all();
-        $sortRowsByAdoption = static function (array &$rows) use ($packageIds, $modulePriorities) {
+        $totalPackages = count($packageIds);
+        $sortRowsByAdoption = static function (array &$rows) use ($packageIds, $totalPackages, $modulePriorities) {
             foreach ($rows as &$r) {
                 $type = $r['type'] ?? 'module';
                 $slug = $r['slug'] ?? '';
@@ -105,7 +143,7 @@ class PublicPricingController extends Controller
                     $isActive = ($type === 'quota') ? ($val !== null) : ($val === true);
                     if ($isActive) {
                         $activeCount++;
-                        $patternScore += (1 << $idx);
+                        $patternScore += (1 << ($totalPackages - 1 - $idx));
                     }
                 }
 
@@ -122,12 +160,14 @@ class PublicPricingController extends Controller
             unset($r);
 
             usort($rows, static function ($a, $b) {
+                // 1. Number of active green icons across packages (DESC: 4 greens, 3 greens, 2 greens...)
                 if ($a['active_count'] !== $b['active_count']) {
                     return $b['active_count'] <=> $a['active_count']; // DESC
                 }
                 if ($a['pattern_score'] !== $b['pattern_score']) {
                     return $b['pattern_score'] <=> $a['pattern_score']; // DESC
                 }
+                // 2. Business priority
                 if ($a['priority'] !== $b['priority']) {
                     return $a['priority'] <=> $b['priority']; // ASC
                 }
@@ -188,7 +228,8 @@ class PublicPricingController extends Controller
             $sortRowsByAdoption($featureRowsList);
         }
 
-        $quotaAndFeatureRows = array_merge($quotaRowsList, $featureRowsList);
+        // Place green checkmark features first so the table descends like a stepped pyramid from the top
+        $quotaAndFeatureRows = array_merge($featureRowsList, $quotaRowsList);
 
         // 5. Build Modules group rows (sorted strictly by package adoption DESC)
         $moduleRows = [];
