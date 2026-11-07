@@ -261,6 +261,9 @@ Route::middleware(['web', 'throttle:' . $ssoRateLimit . ',1'])->prefix('reseller
 // Tenant Subscription & Reseller Quotas View (accessible by tenant users/admin)
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/user/subscription', [TenantSubscriptionController::class, 'show'])->name('tenant.subscription');
+    Route::get('/user/billing-history', function () {
+        return redirect()->route('profile.show', ['active_tab' => 'billing_history']);
+    })->name('tenant.billing-history');
     Route::post('/user/subscription/request', [TenantSubscriptionController::class, 'requestUpgrade'])->name('tenant.subscription.request');
     Route::post('/user/subscription/invoices/{invoice}/cancel', [TenantSubscriptionController::class, 'cancelInvoice'])->name('tenant.subscription.invoices.cancel');
     Route::get('/user/quota-check', [TenantSubscriptionController::class, 'checkQuota'])->name('tenant.quota.check');

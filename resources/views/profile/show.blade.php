@@ -10,7 +10,7 @@
 @section('content')
 
     <div class="mx-auto max-w-full space-y-6"
-         x-data="{ activeTab: '{{ session('active_tab', request('active_tab', 'profile')) }}' }">
+         x-data="{ activeTab: '{{ session('active_tab', request('active_tab', request()->has('invoices_page') ? 'billing_history' : 'profile')) }}' }">
         <div class="relative dark:bg-gray-900/30 border-b border-gray-200 dark:border-gray-700 p-6 sm:p-8">
             <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6">
 
@@ -76,6 +76,16 @@
                                 <span>اشتراک و پلن نمایندگی فروش</span>
                             </button>
 
+                            <button @click="activeTab = 'billing_history'"
+                                    :class="activeTab === 'billing_history' ? 'bg-white border-gray-200 text-indigo-600 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-indigo-300' : 'bg-transparent border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800/60'"
+                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all whitespace-nowrap">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                </svg>
+                                <span>سوابق مالی</span>
+                            </button>
+
                             <button @click="activeTab = 'domain_branding'"
                                     :class="activeTab === 'domain_branding' ? 'bg-white border-gray-200 text-indigo-600 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-indigo-300' : 'bg-transparent border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800/60'"
                                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all whitespace-nowrap">
@@ -129,7 +139,7 @@
             </div>
         </div>
         <div class="p-6 sm:p-8 bg-white dark:bg-gray-800"
-             :class="(activeTab === 'subscription' || activeTab === 'domain_branding') ? 'bg-gray-50/50 dark:bg-gray-900/40 rounded-3xl' : ''">
+             :class="(activeTab === 'subscription' || activeTab === 'billing_history' || activeTab === 'domain_branding') ? 'bg-gray-50/50 dark:bg-gray-900/40 rounded-3xl' : ''">
 
             {{-- اطلاعات کاربری --}}
             <div x-show="activeTab === 'profile'" x-cloak>
@@ -140,15 +150,26 @@
 
             {{-- اشتراک و پلن نمایندگی فروش --}}
             @if(app(TenantManager::class)->hasTenant())
+                @php
+                    $subData = app(TenantSubscriptionController::class)->getSubscriptionData();
+                @endphp
                 <div x-show="activeTab === 'subscription'" x-cloak class="pt-2">
-                    @php
-                        $subData = app(TenantSubscriptionController::class)->getSubscriptionData();
-                    @endphp
                     @if($subData)
                         @include('resellerhub::tenant.partials.subscription-content', $subData)
                     @else
                         <div class="text-center py-12 text-gray-500 dark:text-gray-400">
                             اطلاعات اشتراک برای این حساب در دسترس نمی‌باشد.
+                        </div>
+                    @endif
+                </div>
+
+                {{-- سوابق مالی --}}
+                <div x-show="activeTab === 'billing_history'" x-cloak class="pt-2">
+                    @if($subData)
+                        @include('resellerhub::tenant.partials.billing-history-content', $subData)
+                    @else
+                        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                            سوابق مالی برای این حساب در دسترس نمی‌باشد.
                         </div>
                     @endif
                 </div>

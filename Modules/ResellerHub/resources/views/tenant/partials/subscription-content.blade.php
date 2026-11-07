@@ -4,7 +4,6 @@
     @include('resellerhub::tenant.partials.subscription.hero-section')
     @include('resellerhub::tenant.partials.subscription.quotas-section')
     @include('resellerhub::tenant.partials.subscription.feature-matrix')
-    @include('resellerhub::tenant.partials.subscription.invoices-section')
     @include('resellerhub::tenant.partials.subscription.modals')
     @include('resellerhub::tenant.partials.subscription.scripts')
 </div>

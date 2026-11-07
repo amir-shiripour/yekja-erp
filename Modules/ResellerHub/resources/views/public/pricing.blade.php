@@ -248,7 +248,8 @@
                                                         $hasDiscount = $pkg->hasActiveDiscountForMonths($pData['months']) && $finalPriceForPeriod < $rawPriceForPeriod;
                                                         $discountExpJalali = $pkg->getDiscountExpiresAtJalaliForMonths($pData['months']);
                                                         $months = $pData['months'] ?? 1;
-                                                        $monthlyEquivalent = ($months > 1) ? round($finalPriceForPeriod / $months) : null;
+                                                        $days = ($months == 12) ? 365 : ($months * 30);
+                                                        $dailyEquivalent = ($days > 0 && $finalPriceForPeriod > 0) ? (int)round($finalPriceForPeriod / $days) : 0;
                                                     @endphp
 
                                                     <div class="flex items-center justify-between gap-2">
@@ -283,28 +284,29 @@
                                                         @endif
                                                     </div>
 
-                                                    {{-- Prominent Monthly Equivalent Box --}}
-                                                    @if($monthlyEquivalent)
+                                                    {{-- Prominent Daily & Monthly Equivalent Box for All Periods --}}
+                                                    @if($dailyEquivalent > 0)
                                                         <div
-                                                            class="px-3.5 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/70 flex items-center justify-between shadow-xs">
+                                                            class="px-3.5 py-2.5 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800/70 flex items-center justify-between shadow-2xs gap-2">
                                                             <span
-                                                                class="text-indigo-900 dark:text-indigo-200 font-bold flex items-center gap-1.5 text-xs">
+                                                                class="text-indigo-900 dark:text-indigo-200 font-bold flex items-center gap-1.5 text-xs shrink-0">
                                                                 <svg
                                                                     class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0"
                                                                     fill="none" stroke="currentColor"
                                                                     viewBox="0 0 24 24"><path stroke-linecap="round"
                                                                                               stroke-linejoin="round"
                                                                                               stroke-width="2"
-                                                                                              d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                                                معادل ماهانه:
+                                                                                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                                معادل روزانه:
                                                             </span>
                                                             <span
                                                                 class="font-black text-indigo-700 dark:text-indigo-300 tabular-nums text-xs sm:text-sm">
-                                                                {{ ResellerHelper::toPersianDigits(number_format($monthlyEquivalent)) }} {{ $currencyLabel }} <span
-                                                                    class="font-normal text-[11px] text-gray-500 dark:text-gray-400">/ ماه</span>
+                                                                {{ ResellerHelper::toPersianDigits(number_format($dailyEquivalent)) }} {{ $currencyLabel }} <span
+                                                                    class="font-normal text-[11px] text-gray-500 dark:text-gray-400">/ روز</span>
                                                             </span>
                                                         </div>
                                                     @endif
+
 
                                                     {{-- Meta: Expiry & Setup Fee --}}
                                                     @if(($hasDiscount && $discountExpJalali) || $pkg->setup_fee > 0)
