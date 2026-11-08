@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>پیش‌نمایش تب خرید و ارتقای پکیج</title>
+<link rel="stylesheet" href="/public/build/assets/app-B_xzuE6L.css">
+<script defer src="/node_modules/alpinejs/dist/cdn.min.js"></script>
+<style>
+[x-cloak]{display:none!important}
+body{background:#f9fafb}
+.dark body{background:#030712}
+</style>
+</head>
+<body>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="p-6 sm:p-8 bg-gray-50/50 dark:bg-gray-900/40 rounded-3xl">
+    <script>
+    window.resellerDurationOptions = [{"value":"1","months":1,"key":"monthly_price","label":"۱ ماهه (ماهانه)","badge":"پایه","badgeClass":"bg-blue-50 text-blue-700 dark:bg-blue-900\/30 dark:text-blue-300 border-blue-200 dark:border-blue-800\/50"},{"value":"2","months":2,"key":"period_2_price","label":"۲ ماهه","badge":"","badgeClass":""},{"value":"3","months":3,"key":"quarterly_price","label":"۳ ماهه (فصلی)","badge":"فصلی","badgeClass":"bg-purple-50 text-purple-700 dark:bg-purple-900\/30 dark:text-purple-300 border-purple-200 dark:border-purple-800\/50"},{"value":"4","months":4,"key":"period_4_price","label":"۴ ماهه","badge":"","badgeClass":""},{"value":"5","months":5,"key":"period_5_price","label":"۵ ماهه","badge":"","badgeClass":""},{"value":"6","months":6,"key":"semi_annual_price","label":"۶ ماهه (نیم‌سال)","badge":"نیم‌سال","badgeClass":"bg-cyan-50 text-cyan-700 dark:bg-cyan-900\/30 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800\/50"},{"value":"7","months":7,"key":"period_7_price","label":"۷ ماهه","badge":"","badgeClass":""},{"value":"8","months":8,"key":"period_8_price","label":"۸ ماهه","badge":"","badgeClass":""},{"value":"9","months":9,"key":"period_9_price","label":"۹ ماهه","badge":"","badgeClass":""},{"value":"10","months":10,"key":"period_10_price","label":"۱۰ ماهه","badge":"","badgeClass":""},{"value":"11","months":11,"key":"period_11_price","label":"۱۱ ماهه","badge":"","badgeClass":""},{"value":"12","months":12,"key":"yearly_price","label":"۱۲ ماهه (سالانه)","badge":"پیشنهادی","badgeClass":"bg-indigo-50 text-indigo-700 dark:bg-indigo-900\/30 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800\/50"},{"value":"18","months":18,"key":"period_18_price","label":"۱۸ ماهه (۱.۵ ساله)","badge":"۱.۵ ساله","badgeClass":"bg-amber-50 text-amber-700 dark:bg-amber-900\/30 dark:text-amber-300 border-amber-200 dark:border-amber-800\/50"},{"value":"24","months":24,"key":"period_24_price","label":"۲۴ ماهه (۲ ساله)","badge":"۲ ساله","badgeClass":"bg-emerald-50 text-emerald-700 dark:bg-emerald-900\/30 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800\/50"},{"value":"36","months":36,"key":"period_36_price","label":"۳۶ ماهه (۳ ساله)","badge":"۳ ساله","badgeClass":"bg-teal-50 text-teal-700 dark:bg-teal-900\/30 dark:text-teal-300 border-teal-200 dark:border-teal-800\/50"}];
+    window.resellerStandardDurations = [{"value":"1","months":1,"label":"۱ ماهه"},{"value":"3","months":3,"label":"۳ ماهه"},{"value":"6","months":6,"label":"۶ ماهه"},{"value":"12","months":12,"label":"۱ ساله (۱۲ ماهه)"},{"value":"24","months":24,"label":"۲ ساله (۲۴ ماهه)"},{"value":"36","months":36,"label":"۳ ساله (۳۶ ماهه)"}];
+    window.resellerColorPresets = [{"name":"نیلی کلاسیک","hex":"#4f46e5"},{"name":"فیروزه‌ای پزشکی","hex":"#0ea5e9"},{"name":"زمردی سلامت","hex":"#10b981"},{"name":"بنفش رویال","hex":"#8b5cf6"},{"name":"زرشکی سلامت","hex":"#e11d48"},{"name":"کهربایی مدرن","hex":"#f59e0b"},{"name":"آبی تیره سازمانی","hex":"#1e3a8a"},{"name":"دودی تیره","hex":"#334155"}];
+    window.resellerPackageColors = [{"key":"indigo","label":"نیلی","name":"نیلی","hex":"#4f46e5"},{"key":"purple","label":"بنفش","name":"بنفش","hex":"#9333ea"},{"key":"blue","label":"آبی","name":"آبی","hex":"#2563eb"},{"key":"cyan","label":"فیروزه‌ای","name":"فیروزه‌ای","hex":"#0891b2"},{"key":"teal","label":"کله‌غازی","name":"کله‌غازی","hex":"#0d9488"},{"key":"emerald","label":"زمردی","name":"زمردی","hex":"#059669"},{"key":"amber","label":"کهربایی","name":"کهربایی","hex":"#d97706"},{"key":"orange","label":"نارنجی","name":"نارنجی","hex":"#ea580c"},{"key":"rose","label":"رز","name":"رز","hex":"#e11d48"},{"key":"gray","label":"خاکستری","name":"خاکستری","hex":"#4b5563"}];
+    window.resellerPackageColorConfigs = {"indigo":{"name":"نیلی","bg":"bg-indigo-600","light":"bg-indigo-50 dark:bg-indigo-950\/60 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800","hex":"#4f46e5"},"purple":{"name":"بنفش","bg":"bg-purple-600","light":"bg-purple-50 dark:bg-purple-950\/60 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800","hex":"#9333ea"},"blue":{"name":"آبی","bg":"bg-blue-600","light":"bg-blue-50 dark:bg-blue-950\/60 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800","hex":"#2563eb"},"cyan":{"name":"فیروزه‌ای","bg":"bg-cyan-600","light":"bg-cyan-50 dark:bg-cyan-950\/60 text-cyan-600 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800","hex":"#0891b2"},"teal":{"name":"کله‌غازی","bg":"bg-teal-600","light":"bg-teal-50 dark:bg-teal-950\/60 text-teal-600 dark:text-teal-400 border-teal-200 dark:border-teal-800","hex":"#0d9488"},"emerald":{"name":"زمردی","bg":"bg-emerald-600","light":"bg-emerald-50 dark:bg-emerald-950\/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800","hex":"#059669"},"amber":{"name":"کهربایی","bg":"bg-amber-600","light":"bg-amber-50 dark:bg-amber-950\/60 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800","hex":"#d97706"},"orange":{"name":"نارنجی","bg":"bg-orange-600","light":"bg-orange-50 dark:bg-orange-950\/60 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-800","hex":"#ea580c"},"rose":{"name":"رز","bg":"bg-rose-600","light":"bg-rose-50 dark:bg-rose-950\/60 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800","hex":"#e11d48"},"gray":{"name":"خاکستری","bg":"bg-gray-600","light":"bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700","hex":"#4b5563"}};
+
+    window.industryIcons = [{"key":"tooth","label":"دندانپزشکی و کلینیک دندان"},{"key":"stethoscope","label":"پزشکی، مطب و درمانگاه"},{"key":"building","label":"املاک، مسکن و مستغلات"},{"key":"utensils","label":"رستوران، کافه و غذا"},{"key":"scales","label":"وکالت، حقوقی و داوری"},{"key":"scissors","label":"سالن زیبایی و آرایشگاه"},{"key":"shopping-cart","label":"فروشگاه و هایپرمارکت"},{"key":"car","label":"خودرو، نمایشگاه و تعمیرگاه"},{"key":"dumbbell","label":"باشگاه ورزشی و فیتنس"},{"key":"book","label":"آموزشگاه، مدارس و آکادمی"},{"key":"factory","label":"کارخانجات و صنایع تولیدی"},{"key":"calculator","label":"حسابداری، مالی و صرافی"},{"key":"hard-hat","label":"مهندسی، معماری و عمران"},{"key":"plane","label":"آژانس هواپیمایی و گردشگری"},{"key":"camera","label":"آتلیه، عکاسی و فیلمبرداری"},{"key":"laptop","label":"فناوری اطلاعات و نرم‌افزار"},{"key":"truck","label":"باربری، پخش و لجستیک"},{"key":"pill","label":"داروخانه و تجهیزات پزشکی"},{"key":"diamond","label":"طلا، جواهرات و لوکس"},{"key":"umbrella","label":"بیمه و خدمات حمایتی"},{"key":"briefcase","label":"شرکتی، اداری و بازرگانی"},{"key":"crown","label":"ویژه، VIP و ممتاز"},{"key":"star","label":"برتر و منتخب"},{"key":"heart","label":"سلامت، خیریه و مراقبتی"},{"key":"home","label":"خانگی، اقامتی و هتل"},{"key":"shop","label":"بوتیک و فروشگاه حضوری"},{"key":"shield","label":"امنیت، حراست و نظارت"},{"key":"sparkles","label":"خدمات ویژه و خلاقانه"},{"key":"academic","label":"دانشگاهی و پژوهشی"},{"key":"code","label":"توسعه، وب و برنامه‌نویسی"},{"key":"cube","label":"پکیج عمومی و سازمانی"}];
+    window.industryIconSvgs = {"tooth":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4.5 10.5c-.88-1.77-1.5-3.83-1.5-5.5a4 4 0 0 1 7.42-2.05L12 5l1.58-2.05A4 4 0 0 1 21 5c0 1.67-.62 3.73-1.5 5.5-1.34 2.68-2.5 6.5-4 10.5-1.25 0-1.88-1.5-2.5-3.5-.4-.25-.8-.25-1.2 0-.62 2-1.25 3.5-2.5 3.5-1.5-4-2.66-7.82-4-10.5z\"\/>","stethoscope":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4.5 3v5a4.5 4.5 0 009 0V3M6 3h-3M15 3h-3M9 12.5v3.5a4 4 0 004 4h1a4 4 0 004-4v-1.5M18 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z\"\/>","building":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3m6-14h.01M9 11h.01M9 15h.01M15 7h.01M15 11h.01M15 15h.01M12 21v-4h0\"\/>","utensils":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M18 4v7a2 2 0 01-2 2h-1a2 2 0 01-2-2V4M15 13v7M6 4v3a3 3 0 006 0V4M9 10v10\"\/>","scales":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3 6l3 7h-6l3-7zm15 0l3 7h-6l3-7zm-9-3h12M12 3v18m-4 0h8\"\/>","scissors":"<circle cx=\"6\" cy=\"6\" r=\"3\"\/><circle cx=\"6\" cy=\"18\" r=\"3\"\/><line x1=\"20\" y1=\"4\" x2=\"8.12\" y2=\"15.88\"\/><line x1=\"14.47\" y1=\"14.48\" x2=\"20\" y2=\"20\"\/><line x1=\"8.12\" y1=\"8.12\" x2=\"12\" y2=\"12\"\/>","shopping-cart":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z\"\/>","cart":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z\"\/>","car":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M5 17h14M5 17a2 2 0 01-2-2V9a2 2 0 012-2h1.5L8 4h8l1.5 3H19a2 2 0 012 2v6a2 2 0 01-2 2M5 17a2 2 0 104 0m6 0a2 2 0 104 0M7 11h.01M17 11h.01\"\/>","dumbbell":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 5v14M3 7v10M9 8v8m9-11v14m3-12v10m-6-9v8M9 12h6\"\/>","book":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253\"\/>","factory":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M19 21V9l-5 4V9l-5 4V3H3v18h16zM9 17h.01M14 17h.01\"\/>","calculator":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z\"\/>","hard-hat":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M2 18h20M4 18a8 8 0 0116 0M10 10V6a2 2 0 014 0v4\"\/>","plane":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M12 19l9 2-7-8V3a2 2 0 00-4 0v10l-7 8 9-2zm0 0v-5\"\/>","camera":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z\"\/><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15 13a3 3 0 11-6 0 3 3 0 016 0z\"\/>","laptop":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\"\/>","truck":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z\"\/><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10h10zm0 0h3.586a1 1 0 00.707-.293l2.414-2.414a1 1 0 00.293-.707V10a1 1 0 00-1-1h-5v7z\"\/>","pill":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M14.5 4.5l5 5a4.24 4.24 0 010 6l-5 5a4.24 4.24 0 01-6 0l-5-5a4.24 4.24 0 010-6l5-5a4.24 4.24 0 016 0zM8.5 10.5l5 5\"\/>","diamond":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 3h12l4 6-10 12L2 9l4-6zm-4 6h20M12 21L8 9M12 21l4-12M6 3l2 6M18 3l-2 6\"\/>","umbrella":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M12 3v2m0 0a9 9 0 019 9H3a9 9 0 019-9zm0 9v6a2 2 0 01-2 2h-1\"\/>","briefcase":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z\"\/>","crown":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3 18h18M4 14l3-7 5 5 5-5 3 7H4z\"\/>","star":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z\"\/>","heart":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z\"\/>","home":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6\"\/>","shop":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z\"\/>","shield":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z\"\/>","sparkles":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z\"\/>","academic":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5\"\/>","code":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4\"\/>","cube":"<path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4\"\/>"};
+
+    window.getColorHex = function (color) {
+        if (!color) return '#4f46e5';
+        if (color.startsWith('#')) return color;
+        const cfg = (window.resellerPackageColorConfigs || {})[color];
+        if (cfg && cfg.hex) return cfg.hex;
+        return color.length === 6 ? '#' + color : '#4f46e5';
+    };
+
+    window.getColorClass = function (color) {
+        const cfg = (window.resellerPackageColorConfigs || {})[color];
+        return (cfg && cfg.bg) ? cfg.bg : 'bg-indigo-600';
+    };
+
+    window.getColorLightClass = function (color) {
+        const cfg = (window.resellerPackageColorConfigs || {})[color];
+        return (cfg && cfg.light) ? cfg.light : 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800';
+    };
+
+    window.faNum = window.faNum || function (num) {
+        if (num === null || num === undefined) return '';
+        return num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+    };
+
+    window.formatAmount = function (amount) {
+        if (!amount && amount !== 0) return '۰';
+        return window.faNum(new Intl.NumberFormat('fa-IR').format(amount));
+    };
+
+    window.parsePriceInput = function (val) {
+        if (!val) return 0;
+        const clean = val.toString()
+            .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+            .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+            .replace(/[^0-9]/g, '');
+        return parseInt(clean, 10) || 0;
+    };
+
+    window.renderIndustryIcon = function (key, sizeClass) {
+        sizeClass = sizeClass || 'w-5 h-5';
+        const path = (window.industryIconSvgs || {})[key] || (window.industryIconSvgs || {})['cube'] || '';
+        return '<svg class="' + sizeClass + '" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">' + path + '</svg>';
+    };
+
+    window.suggestSubdomain = function (name) {
+        if (!name) return '';
+        const map = {
+            'ا': 'a', 'ب': 'b', 'پ': 'p', 'ت': 't', 'ث': 's',
+            'ج': 'j', 'چ': 'ch', 'ح': 'h', 'خ': 'kh', 'د': 'd',
+            'ذ': 'z', 'ر': 'r', 'ز': 'z', 'ژ': 'zh', 'س': 's',
+            'ش': 'sh', 'ص': 's', 'ض': 'z', 'ط': 't', 'ظ': 'z',
+            'ع': 'a', 'غ': 'gh', 'ف': 'f', 'ق': 'gh', 'ک': 'k',
+            'گ': 'g', 'ل': 'l', 'م': 'm', 'ن': 'n', 'و': 'v',
+            'ه': 'h', 'ی': 'y', 'آ': 'a', 'ي': 'y', 'ك': 'k', ' ': '-'
+        };
+        let slug = name.split('').map(c => map[c] ?? c).join('');
+        slug = slug.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+        return slug.slice(0, 30);
+    };
+
+    window.resolvePackageDurationOptions = function (pkg, options) {
+        options = options || {};
+        const fallback = options.fallback || window.resellerStandardDurations || [];
+        if (!pkg) return fallback;
+
+        const priceType = pkg.price_type || 'subscription';
+        if (priceType === 'free') {
+            return [];
+        }
+        if (priceType === 'one_time') {
+            const val = options.oneTimeValue !== undefined ? String(options.oneTimeValue) : '1200';
+            const lbl = options.oneTimeLabel || 'مادام‌العمر (یک‌بار پرداخت)';
+            return [{value: val, months: 1200, label: lbl}];
+        }
+
+        const standardOptions = window.resellerDurationOptions || [];
+        const active = Array.isArray(pkg.active_periods) ? pkg.active_periods : [];
+        const periodPrices = (pkg.period_prices && typeof pkg.period_prices === 'object') ? pkg.period_prices : {};
+        const opts = [];
+
+        standardOptions.forEach(item => {
+            const mStr = String(item.months);
+            const isAct = active.includes(item.key)
+                || active.includes(mStr)
+                || active.includes(item.months)
+                || (parseInt(periodPrices[mStr] || periodPrices[item.months]) > 0);
+            if (isAct) {
+                opts.push({value: mStr, months: item.months, key: item.key, label: item.label});
+            }
+        });
+
+        // Add any custom months found in active_periods or period_prices
+        const handled = new Set(opts.map(o => String(o.value)));
+        const checkAddMonth = (m) => {
+            const mNum = parseInt(m, 10);
+            if (mNum > 0 && !handled.has(String(mNum))) {
+                handled.add(String(mNum));
+                const optMatch = (window.resellerDurationOptions || []).find(o => o.months === mNum);
+                const label = optMatch ? optMatch.label : (window.faNum ? window.faNum(mNum) : mNum) + ' ماهه';
+                opts.push({value: String(mNum), months: mNum, label: label});
+            }
+        };
+
+        active.forEach(k => {
+            if (typeof k === 'string') {
+                const match = k.match(/^(?:period_)?(\d+)(?:_price)?$/);
+                if (match) checkAddMonth(match[1]);
+            } else if (typeof k === 'number') {
+                checkAddMonth(k);
+            }
+        });
+
+        Object.keys(periodPrices).forEach(k => {
+            if (parseInt(periodPrices[k]) > 0) {
+                checkAddMonth(k);
+            }
+        });
+
+        if (opts.length === 0 && priceType === 'subscription') {
+            if (parseInt(pkg.yearly_price) > 0 || parseInt(pkg.monthly_price) > 0) {
+                standardOptions.forEach(item => {
+                    if (item.months === 12 && parseInt(pkg.yearly_price) > 0) {
+                        opts.push({value: '12', months: 12, key: 'yearly_price', label: item.label});
+                    } else if (item.months === 1 && parseInt(pkg.monthly_price) > 0) {
+                        opts.push({value: '1', months: 1, key: 'monthly_price', label: item.label});
+                    }
+                });
+            }
+            if (opts.length === 0 && Array.isArray(fallback) && fallback.length > 0) {
+                return fallback;
+            } else if (opts.length === 0 && Array.isArray(standardOptions) && standardOptions.length > 0) {
+                return standardOptions;
+            }
+        }
+
+        opts.sort((a, b) => parseInt(a.value) - parseInt(b.value));
+        return opts;
+    };
+
+    window.getDurationLabel = function (months) {
+        if (!months || String(months) === 'null' || String(months) === 'undefined' || String(months) === '1200' || String(months) === '0') {
+            return 'دائمی (خرید یک‌باره - بدون انقضا)';
+        }
+        const opt = (window.resellerDurationOptions || []).find(o => String(o.months) === String(months) || String(o.value) === String(months));
+        return opt ? opt.label : ((window.faNum ? window.faNum(months) : months) + ' ماهه');
+    };
+
+    window.getDurationSubtitle = function (months) {
+        if (!months || String(months) === 'null' || String(months) === 'undefined' || String(months) === '1200' || String(months) === '0') {
+            return 'دسترسی همیشگی و بدون نیاز به تمدید';
+        }
+        if (String(months) === '12') {
+            return 'اشتراک ۱ ساله کامل';
+        }
+        const opt = (window.resellerDurationOptions || []).find(o => String(o.months) === String(months) || String(o.value) === String(months));
+        if (opt && opt.label) {
+            return 'اشتراک ' + opt.label;
+        }
+        return 'اشتراک ' + (window.faNum ? window.faNum(months) : months) + ' ماهه';
+    };
+
+    window.resolvePeriodKey = function (months) {
+        months = parseInt(months, 10);
+        const map = {
+            1: 'monthly_price',
+            3: 'quarterly_price',
+            6: 'semi_annual_price',
+            12: 'yearly_price',
+            18: 'period_18_price',
+            24: 'period_24_price',
+            36: 'period_36_price'
+        };
+        return map[months] || ('period_' + months + '_price');
+    };
+
+    window.resolvePeriodMonth = function (key) {
+        if (!key && key !== 0) return null;
+        if (typeof key === 'number') return key;
+        const str = String(key);
+        const map = {
+            'monthly_price': 1,
+            'quarterly_price': 3,
+            'semi_annual_price': 6,
+            'yearly_price': 12,
+            'period_18_price': 18,
+            'biennial_price': 24,
+            'period_24_price': 24,
+            'triennial_price': 36,
+            'period_36_price': 36
+        };
+        if (map[str]) return map[str];
+        const match = str.match(/\d+/);
+        return match ? parseInt(match[0], 10) : null;
+    };
+
+    window.resellerUiHelpers = function () {
+        return {
+            faNum: window.faNum,
+            formatAmount: window.formatAmount,
+            parsePriceInput: window.parsePriceInput,
+            getColorHex: window.getColorHex,
+            getColorClass: window.getColorClass,
+            getColorLightClass: window.getColorLightClass,
+            renderIcon: window.renderIndustryIcon,
+            suggestSubdomain: window.suggestSubdomain,
+            resolvePackageDurationOptions: window.resolvePackageDurationOptions,
+            resolvePeriodKey: window.resolvePeriodKey,
+            resolvePeriodMonth: window.resolvePeriodMonth,
+            standardDurationList: window.resellerStandardDurations,
+            durationOptions: window.resellerDurationOptions,
+            getDurationLabel: window.getDurationLabel,
+            getDurationSubtitle: window.getDurationSubtitle,
+        };
+    };
+</script>
+
+<div x-data="packageUpgradeManager()" class="space-y-4">
+
+    
+    
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 dark:border-gray-700/70 bg-white dark:bg-gray-900 px-4 py-3.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 shrink-0"></span>
+            <div class="min-w-0">
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white">خرید، ارتقا یا تمدید اشتراک</h3>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">پکیج و دوره مورد نظر را انتخاب کنید؛ پرداخت در همین صفحه انجام می‌شود.</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div class="inline-flex items-center justify-between sm:justify-start gap-2 px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/70 text-[11px] whitespace-nowrap">
+                <span class="text-gray-400">پلن جاری:</span>
+                <strong class="font-semibold text-indigo-600 dark:text-indigo-400">پلن پایه اشتراکی</strong>
+                                    <span class="text-gray-300 dark:text-gray-600">|</span>
+                    <span class="text-emerald-600 dark:text-emerald-400 font-medium">۴۲ روز باقی‌مانده</span>
+                            </div>
+
+            <button type="button" @click="activeTab = 'subscription'; window.scrollTo({top: 0, behavior: 'smooth'})"
+                    class="inline-flex items-center gap-1 self-start sm:self-auto text-[11px] font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer whitespace-nowrap">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+                اشتراک فعلی
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 dark:border-gray-700/70 bg-white dark:bg-gray-900 px-4 py-3">
+        <div class="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 shrink-0">
+            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            دوره پرداخت
+        </div>
+
+        <div class="w-full sm:w-auto">
+            <div class="grid grid-cols-4 sm:inline-flex sm:min-w-0 p-1 rounded-xl bg-gray-100 dark:bg-gray-800/70 gap-1">
+                <template x-for="duration in availableDurations" :key="duration.months">
+                    <button type="button"
+                            @click="selectedMonths = duration.months"
+                            :class="selectedMonths === duration.months
+                                ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 shadow-sm font-semibold'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium'"
+                            class="px-1.5 sm:px-3.5 py-1.5 rounded-lg text-[11px] transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer">
+                        <span class="sm:hidden" x-text="duration.short"></span>
+                        <span class="hidden sm:inline" x-text="duration.label"></span>
+                        <template x-if="duration.badge">
+                            <span class="hidden sm:inline px-1.5 py-0.5 rounded text-[10px] font-medium"
+                                  :class="selectedMonths === duration.months ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300' : 'bg-gray-200/70 text-gray-500 dark:bg-gray-700 dark:text-gray-400'"
+                                  x-text="duration.badge"></span>
+                        </template>
+                    </button>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+        <div class="lg:col-span-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                                            
+                        <div @click="selectedPackageId = 1"
+                             :class="selectedPackageId === 1
+                                 ? 'border-indigo-600 dark:border-indigo-500 ring-1 ring-indigo-600/20 dark:ring-indigo-500/20'
+                                 : 'border-gray-200/90 dark:border-gray-700/70 hover:border-gray-300 dark:hover:border-gray-600'"
+                             class="group flex flex-col rounded-2xl border bg-white dark:bg-gray-900 p-5 transition-colors duration-200 cursor-pointer">
+
+                            
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center"
+                                     style="background-color: rgba(79, 70, 229, 0.12); color: #4f46e5; border-color: rgba(79, 70, 229, 0.25);"
+                                     x-html="window.renderIndustryIcon ? window.renderIndustryIcon('cube', 'w-5 h-5 text-current') : ''"></div>
+
+                                <div class="flex-grow min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="text-sm font-bold text-gray-900 dark:text-white truncate" title="پلن پایه اشتراکی">پلن پایه اشتراکی</h3>
+
+                                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800/60">
+                                                پلن فعلی
+                                            </span>
+                                                                            </div>
+
+                                    <p class="text-[11.5px] text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed min-h-[34px]">
+                                        پکیج نرم‌افزاری با قابلیت‌های سازمانی و امکان ارتقای آنی
+                                    </p>
+                                </div>
+                            </div>
+
+                            
+                            <div class="mt-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 p-3.5">
+                                <div class="flex items-center justify-between gap-2 text-[11.5px] text-gray-500 dark:text-gray-400">
+                                    <span>پرداخت <span x-text="currentPeriodLabel"></span></span>
+                                    <template x-if="hasPackageDiscount(packages.find(p => p.id == 1))">
+                                        <span class="line-through tabular-nums text-gray-400 dark:text-gray-500"
+                                              x-text="formatFaNumber(getPackageRawPrice(packages.find(p => p.id == 1)))"></span>
+                                    </template>
+                                </div>
+
+                                <div class="mt-1 flex items-baseline gap-1.5">
+                                    <span class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums"
+                                          x-text="formatFaNumber(getPackageFinalPrice(packages.find(p => p.id == 1)))"></span>
+                                    <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">تومان</span>
+                                </div>
+
+                                <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                                    معادل روزانه
+                                    <span class="tabular-nums" x-text="formatFaNumber(getPackageDailyEquivalent(packages.find(p => p.id == 1)))"></span>
+                                    تومان
+                                </div>
+
+                                                            </div>
+
+                            
+                            <ul class="mt-4 space-y-1.5 flex-1">
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">سقف تعداد مشتریان / پرونده‌ها: ۵۰ پرونده</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">سقف تعداد فاکتورهای صادره: ۲۰۰ فاکتور</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">سقف تعداد نوبت‌ها: ۱۰۰ نوبت</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ماژول مشتریان</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ماژول Appointments</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ثبت نوبت آنلاین توسط مراجعین</span>
+                                    </li>
+                                                            </ul>
+
+                            
+                            <button type="button"
+                                    class="mt-4 w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-xs font-semibold transition-colors"
+                                    :class="selectedPackageId === 1
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-transparent text-indigo-600 dark:text-indigo-400 border border-gray-200 dark:border-gray-700 group-hover:border-indigo-300 dark:group-hover:border-indigo-700'">
+                                <svg x-show="selectedPackageId === 1" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span x-text="selectedPackageId === 1 ? 'انتخاب شده' : 'انتخاب این پکیج'"></span>
+                            </button>
+
+                                                    </div>
+                                            
+                        <div @click="selectedPackageId = 4"
+                             :class="selectedPackageId === 4
+                                 ? 'border-indigo-600 dark:border-indigo-500 ring-1 ring-indigo-600/20 dark:ring-indigo-500/20'
+                                 : 'border-gray-200/90 dark:border-gray-700/70 hover:border-gray-300 dark:hover:border-gray-600'"
+                             class="group flex flex-col rounded-2xl border bg-white dark:bg-gray-900 p-5 transition-colors duration-200 cursor-pointer">
+
+                            
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center"
+                                     style="background-color: rgba(79, 70, 229, 0.12); color: #4f46e5; border-color: rgba(79, 70, 229, 0.25);"
+                                     x-html="window.renderIndustryIcon ? window.renderIndustryIcon('tooth', 'w-5 h-5 text-current') : ''"></div>
+
+                                <div class="flex-grow min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="text-sm font-bold text-gray-900 dark:text-white truncate" title="پکیج تست ویزارد 1793699278768">پکیج تست ویزارد 1793699278768</h3>
+
+                                                                            </div>
+
+                                    <p class="text-[11.5px] text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed min-h-[34px]">
+                                        پکیج نرم‌افزاری با قابلیت‌های سازمانی و امکان ارتقای آنی
+                                    </p>
+                                </div>
+                            </div>
+
+                            
+                            <div class="mt-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 p-3.5">
+                                <div class="flex items-center justify-between gap-2 text-[11.5px] text-gray-500 dark:text-gray-400">
+                                    <span>پرداخت <span x-text="currentPeriodLabel"></span></span>
+                                    <template x-if="hasPackageDiscount(packages.find(p => p.id == 4))">
+                                        <span class="line-through tabular-nums text-gray-400 dark:text-gray-500"
+                                              x-text="formatFaNumber(getPackageRawPrice(packages.find(p => p.id == 4)))"></span>
+                                    </template>
+                                </div>
+
+                                <div class="mt-1 flex items-baseline gap-1.5">
+                                    <span class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums"
+                                          x-text="formatFaNumber(getPackageFinalPrice(packages.find(p => p.id == 4)))"></span>
+                                    <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">تومان</span>
+                                </div>
+
+                                <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                                    معادل روزانه
+                                    <span class="tabular-nums" x-text="formatFaNumber(getPackageDailyEquivalent(packages.find(p => p.id == 4)))"></span>
+                                    تومان
+                                </div>
+
+                                                            </div>
+
+                            
+                            <ul class="mt-4 space-y-1.5 flex-1">
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ماژول حسابداری</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ماژول نوبت‌دهی</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ماژول تماس‌های مشتریان</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ماژول مشتریان</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ماژول تولید محتوا</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ثبت نوبت آنلاین توسط مراجعین</span>
+                                    </li>
+                                                            </ul>
+
+                            
+                            <button type="button"
+                                    class="mt-4 w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-xs font-semibold transition-colors"
+                                    :class="selectedPackageId === 4
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-transparent text-indigo-600 dark:text-indigo-400 border border-gray-200 dark:border-gray-700 group-hover:border-indigo-300 dark:group-hover:border-indigo-700'">
+                                <svg x-show="selectedPackageId === 4" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span x-text="selectedPackageId === 4 ? 'انتخاب شده' : 'انتخاب این پکیج'"></span>
+                            </button>
+
+                                                    </div>
+                                            
+                        <div @click="selectedPackageId = 2"
+                             :class="selectedPackageId === 2
+                                 ? 'border-indigo-600 dark:border-indigo-500 ring-1 ring-indigo-600/20 dark:ring-indigo-500/20'
+                                 : 'border-gray-200/90 dark:border-gray-700/70 hover:border-gray-300 dark:hover:border-gray-600'"
+                             class="group flex flex-col rounded-2xl border bg-white dark:bg-gray-900 p-5 transition-colors duration-200 cursor-pointer">
+
+                            
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center"
+                                     style="background-color: rgba(5, 150, 105, 0.12); color: #059669; border-color: rgba(5, 150, 105, 0.25);"
+                                     x-html="window.renderIndustryIcon ? window.renderIndustryIcon('tooth', 'w-5 h-5 text-current') : ''"></div>
+
+                                <div class="flex-grow min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="text-sm font-bold text-gray-900 dark:text-white truncate" title="پکیج تخصصی دندانپزشکی">پکیج تخصصی دندانپزشکی</h3>
+
+                                                                            </div>
+
+                                    <p class="text-[11.5px] text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed min-h-[34px]">
+                                        پکیج ویژه مطب و دندانپزشکی با ماژول نوبت‌دهی و پرونده
+                                    </p>
+                                </div>
+                            </div>
+
+                            
+                            <div class="mt-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 p-3.5">
+                                <div class="flex items-center justify-between gap-2 text-[11.5px] text-gray-500 dark:text-gray-400">
+                                    <span>پرداخت <span x-text="currentPeriodLabel"></span></span>
+                                    <template x-if="hasPackageDiscount(packages.find(p => p.id == 2))">
+                                        <span class="line-through tabular-nums text-gray-400 dark:text-gray-500"
+                                              x-text="formatFaNumber(getPackageRawPrice(packages.find(p => p.id == 2)))"></span>
+                                    </template>
+                                </div>
+
+                                <div class="mt-1 flex items-baseline gap-1.5">
+                                    <span class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums"
+                                          x-text="formatFaNumber(getPackageFinalPrice(packages.find(p => p.id == 2)))"></span>
+                                    <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">تومان</span>
+                                </div>
+
+                                <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                                    معادل روزانه
+                                    <span class="tabular-nums" x-text="formatFaNumber(getPackageDailyEquivalent(packages.find(p => p.id == 2)))"></span>
+                                    تومان
+                                </div>
+
+                                                            </div>
+
+                            
+                            <ul class="mt-4 space-y-1.5 flex-1">
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">سقف تعداد مشتریان / پرونده‌ها: ۳۰۰ پرونده</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">سقف تعداد فاکتورهای صادره: ۱۰۰۰ فاکتور</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">سقف تعداد نوبت‌ها: ۸۰۰ نوبت</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ماژول مشتریان</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ماژول نوبت‌دهی</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ثبت نوبت آنلاین توسط مراجعین</span>
+                                    </li>
+                                                            </ul>
+
+                            
+                            <button type="button"
+                                    class="mt-4 w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-xs font-semibold transition-colors"
+                                    :class="selectedPackageId === 2
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-transparent text-indigo-600 dark:text-indigo-400 border border-gray-200 dark:border-gray-700 group-hover:border-indigo-300 dark:group-hover:border-indigo-700'">
+                                <svg x-show="selectedPackageId === 2" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span x-text="selectedPackageId === 2 ? 'انتخاب شده' : 'انتخاب این پکیج'"></span>
+                            </button>
+
+                                                    </div>
+                                            
+                        <div @click="selectedPackageId = 5"
+                             :class="selectedPackageId === 5
+                                 ? 'border-indigo-600 dark:border-indigo-500 ring-1 ring-indigo-600/20 dark:ring-indigo-500/20'
+                                 : 'border-gray-200/90 dark:border-gray-700/70 hover:border-gray-300 dark:hover:border-gray-600'"
+                             class="group flex flex-col rounded-2xl border bg-white dark:bg-gray-900 p-5 transition-colors duration-200 cursor-pointer">
+
+                            
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center"
+                                     style="background-color: rgba(99, 102, 241, 0.12); color: #6366f1; border-color: rgba(99, 102, 241, 0.25);"
+                                     x-html="window.renderIndustryIcon ? window.renderIndustryIcon('building-office', 'w-5 h-5 text-current') : ''"></div>
+
+                                <div class="flex-grow min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="text-sm font-bold text-gray-900 dark:text-white truncate" title="پکیج طلایی شرکتی (تخفیف زمان‌دار)">پکیج طلایی شرکتی (تخفیف زمان‌دار)</h3>
+
+                                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/70 dark:border-rose-800/60">
+                                                                                                    ۲۵٪ تخفیف
+                                                                                            </span>
+                                                                            </div>
+
+                                    <p class="text-[11.5px] text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed min-h-[34px]">
+                                        راهکار جامع سازمانی، مدیریت مشتریان، انبارداری و فروش با تخفیف ویژه محدود.
+                                    </p>
+                                </div>
+                            </div>
+
+                            
+                            <div class="mt-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 p-3.5">
+                                <div class="flex items-center justify-between gap-2 text-[11.5px] text-gray-500 dark:text-gray-400">
+                                    <span>پرداخت <span x-text="currentPeriodLabel"></span></span>
+                                    <template x-if="hasPackageDiscount(packages.find(p => p.id == 5))">
+                                        <span class="line-through tabular-nums text-gray-400 dark:text-gray-500"
+                                              x-text="formatFaNumber(getPackageRawPrice(packages.find(p => p.id == 5)))"></span>
+                                    </template>
+                                </div>
+
+                                <div class="mt-1 flex items-baseline gap-1.5">
+                                    <span class="text-2xl font-bold text-gray-900 dark:text-white tabular-nums"
+                                          x-text="formatFaNumber(getPackageFinalPrice(packages.find(p => p.id == 5)))"></span>
+                                    <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">تومان</span>
+                                </div>
+
+                                <div class="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                                    معادل روزانه
+                                    <span class="tabular-nums" x-text="formatFaNumber(getPackageDailyEquivalent(packages.find(p => p.id == 5)))"></span>
+                                    تومان
+                                </div>
+
+                                                                    <div class="mt-2 pt-2 border-t border-gray-200/70 dark:border-gray-700/50 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                                        <span>هزینه راه‌اندازی</span>
+                                        <span class="font-medium text-gray-700 dark:text-gray-300 tabular-nums">
+                                            ۵۰۰,۰۰۰ تومان
+                                        </span>
+                                    </div>
+                                                            </div>
+
+                            
+                            <ul class="mt-4 space-y-1.5 flex-1">
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">Storage mb: ۲۰۴۸۰</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">Monthly sms: ۱۰۰۰۰</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">سقف مصرف کاربران: ۱۵</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ماژول سامانه ارتباط با مشتری</span>
+                                    </li>
+                                                                    <li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <svg class="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span class="leading-relaxed">ماژول Invoices</span>
+                                    </li>
+                                                            </ul>
+
+                            
+                            <button type="button"
+                                    class="mt-4 w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-xs font-semibold transition-colors"
+                                    :class="selectedPackageId === 5
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-transparent text-indigo-600 dark:text-indigo-400 border border-gray-200 dark:border-gray-700 group-hover:border-indigo-300 dark:group-hover:border-indigo-700'">
+                                <svg x-show="selectedPackageId === 5" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span x-text="selectedPackageId === 5 ? 'انتخاب شده' : 'انتخاب این پکیج'"></span>
+                            </button>
+
+                                                    </div>
+                                    </div>
+                    </div>
+
+        
+        <div class="lg:col-span-4 space-y-4 lg:sticky lg:top-6">
+            <div class="rounded-2xl border border-gray-200/80 dark:border-gray-700/70 bg-white dark:bg-gray-900 p-5">
+
+                <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">خلاصه سفارش</h4>
+                    <span class="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">فعال‌سازی آنی</span>
+                </div>
+
+                <template x-if="selectedPackage">
+                    <div class="py-3.5 space-y-2.5 text-[11.5px]">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-gray-500 dark:text-gray-400">پکیج</span>
+                            <span class="font-semibold text-gray-900 dark:text-white truncate" x-text="selectedPackage.name"></span>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-gray-500 dark:text-gray-400">نوع عملیات</span>
+                            <span class="font-medium" :class="selectedPackage.is_current ? 'text-amber-600 dark:text-amber-400' : 'text-indigo-600 dark:text-indigo-400'"
+                                  x-text="selectedPackage.is_current ? 'تمدید اشتراک' : 'ارتقای اشتراک'"></span>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-gray-500 dark:text-gray-400">دوره</span>
+                            <span class="font-medium text-gray-800 dark:text-gray-200" x-text="currentPeriodLabel"></span>
+                        </div>
+
+                        <template x-if="hasDiscount">
+                            <div class="flex items-center justify-between gap-2 text-rose-600 dark:text-rose-400">
+                                <span>تخفیف دوره</span>
+                                <span class="font-medium tabular-nums" x-text="'- ' + formatFaNumber(discountAmount) + ' تومان'"></span>
+                            </div>
+                        </template>
+
+                        <div class="pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between gap-2">
+                            <span class="font-semibold text-gray-800 dark:text-gray-200">مبلغ قابل پرداخت</span>
+                            <span class="text-sm font-bold text-gray-900 dark:text-white tabular-nums">
+                                <span x-text="formatFaNumber(finalPrice)"></span>
+                                <span class="text-[10px] font-normal text-gray-500">تومان</span>
+                            </span>
+                        </div>
+                    </div>
+                </template>
+
+                
+                <div class="pt-3.5 border-t border-gray-100 dark:border-gray-800 space-y-2">
+                    <label class="block text-[11px] font-medium text-gray-600 dark:text-gray-300">درگاه پرداخت</label>
+
+                                            <div class="space-y-1.5">
+                                                            <label class="flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors"
+                                       :class="selectedGateway === 'zarinpal'
+                                           ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30'
+                                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
+                                    <input type="radio" name="payment_gateway" value="zarinpal"
+                                           x-model="selectedGateway"
+                                           class="w-3.5 h-3.5 text-indigo-600 border-gray-300 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-[11px] font-medium text-gray-800 dark:text-gray-200 truncate">زرین‌پال</div>
+                                        <div class="text-[10px] text-gray-400 dark:text-gray-500 truncate">کلیه کارت‌های عضو شتاب</div>
+                                    </div>
+                                </label>
+                                                            <label class="flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors"
+                                       :class="selectedGateway === 'zibal'
+                                           ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30'
+                                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
+                                    <input type="radio" name="payment_gateway" value="zibal"
+                                           x-model="selectedGateway"
+                                           class="w-3.5 h-3.5 text-indigo-600 border-gray-300 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-[11px] font-medium text-gray-800 dark:text-gray-200 truncate">زیبال</div>
+                                        <div class="text-[10px] text-gray-400 dark:text-gray-500 truncate">پرداخت مستقیم و سریع</div>
+                                    </div>
+                                </label>
+                                                    </div>
+                                    </div>
+
+                
+                <div x-show="errorMessage" x-cloak
+                     class="mt-3 px-3 py-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/60 text-[11px] text-rose-700 dark:text-rose-300">
+                    <p class="leading-relaxed" x-text="errorMessage"></p>
+                </div>
+
+                <template x-if="selectedPackage && selectedPackage.is_current && !selectedPackage.renewal_allowed">
+                    <div class="mt-3 px-3 py-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-800 dark:text-amber-300">
+                        <p class="leading-relaxed" x-text="selectedPackage.renewal_message || 'به دلیل محدودیت تنظیم‌شده توسط ارائه‌دهنده، در حال حاضر امکان تمدید بیش از این سقف وجود ندارد.'"></p>
+                    </div>
+                </template>
+
+                
+                <button type="button"
+                        @click="submitOrder()"
+                        :disabled="loading || (selectedPackage && selectedPackage.is_current && !selectedPackage.renewal_allowed)"
+                        class="mt-4 w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                    <template x-if="loading">
+                        <svg class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </template>
+
+                    <span x-text="loading ? 'در حال اتصال به درگاه...' : (selectedPackage && selectedPackage.is_current ? 'پرداخت و تمدید' : 'پرداخت و فعال‌سازی')"></span>
+                </button>
+
+                <p class="mt-3 text-[10px] text-gray-400 dark:text-gray-500 text-center leading-relaxed">
+                    پرداخت امن از طریق شاپرک · اعمال بلادرنگ اشتراک پس از پرداخت
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function packageUpgradeManager() {
+        return {
+            packages: [{"id":1,"reseller_id":1,"name":"\u067e\u0644\u0646 \u067e\u0627\u06cc\u0647 \u0627\u0634\u062a\u0631\u0627\u06a9\u06cc","description":null,"icon":"cube","color":"indigo","is_active":true,"price_type":"subscription","active_periods":null,"modules":["clients","appointments","invoices"],"features":["online_booking","sms_reminders"],"limits":{"clients":50,"invoices":200,"appointments":100},"monthly_price":100000,"quarterly_price":0,"semi_annual_price":0,"yearly_price":1000000,"period_prices":null,"period_discounts":null,"one_time_price":0,"setup_fee":0,"discount_type":"percent","discount_value":0,"discount_starts_at":null,"discount_expires_at":null,"sort_order":0,"created_at":"2026-11-01T13:17:12.000000Z","updated_at":"2026-11-04T11:16:17.000000Z","available_periods":[{"months":1,"label":"\u06f1 \u0645\u0627\u0647\u0647 (\u0645\u0627\u0647\u0627\u0646\u0647)","raw_price":500000,"final_price":500000,"price_formatted":"\u06f5\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f5\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":false,"discount_expires_at_jalali":null},{"months":3,"label":"\u06f3 \u0645\u0627\u0647\u0647 (\u0641\u0635\u0644\u06cc)","raw_price":1500000,"final_price":1425000,"price_formatted":"\u06f1,\u06f4\u06f2\u06f5,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f1,\u06f5\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null},{"months":6,"label":"\u06f6 \u0645\u0627\u0647\u0647 (\u0646\u06cc\u0645\u200c\u0633\u0627\u0644)","raw_price":3000000,"final_price":2700000,"price_formatted":"\u06f2,\u06f7\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f3,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null},{"months":12,"label":"\u06f1\u06f2 \u0645\u0627\u0647\u0647 (\u0633\u0627\u0644\u0627\u0646\u0647)","raw_price":6000000,"final_price":4800000,"price_formatted":"\u06f4,\u06f8\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f6,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null}],"raw_monthly_price":100000,"final_monthly_price":100000,"raw_yearly_price":1200000,"final_yearly_price":1000000,"is_current":true,"renewal_allowed":true,"renewal_message":null,"is_free":false,"discount_starts_at_jalali":null,"discount_expires_at_jalali":null},{"id":4,"reseller_id":1,"name":"\u067e\u06a9\u06cc\u062c \u062a\u0633\u062a \u0648\u06cc\u0632\u0627\u0631\u062f 1793699278768","description":null,"icon":"tooth","color":"#4f46e5","is_active":true,"price_type":"subscription","active_periods":["monthly_price"],"modules":["accounting","booking","clientcalls","clients","contentforge","directadmin","domainmanager","followups","market","notifications","projects","reminders","sales","services","smartbot","sms","smsreseller","tasks","wallet","workflows"],"features":["online_booking","online_payment","sms_reminders","waiting_list","client_portal","client_import_export","client_wallet","multi_vendor","wms_enabled","coupons"],"limits":null,"monthly_price":1000000,"quarterly_price":0,"semi_annual_price":0,"yearly_price":0,"period_prices":{"1":1000000},"period_discounts":null,"one_time_price":0,"setup_fee":0,"discount_type":"amount","discount_value":0,"discount_starts_at":null,"discount_expires_at":null,"sort_order":0,"created_at":"2026-11-03T09:48:02.000000Z","updated_at":"2026-11-07T09:16:14.000000Z","available_periods":[{"months":1,"label":"\u06f1 \u0645\u0627\u0647\u0647 (\u0645\u0627\u0647\u0627\u0646\u0647)","raw_price":1000000,"final_price":1000000,"price_formatted":"\u06f1,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f1,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":false,"discount_expires_at_jalali":null},{"months":3,"label":"\u06f3 \u0645\u0627\u0647\u0647 (\u0641\u0635\u0644\u06cc)","raw_price":3000000,"final_price":2850000,"price_formatted":"\u06f2,\u06f8\u06f5\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f3,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null},{"months":6,"label":"\u06f6 \u0645\u0627\u0647\u0647 (\u0646\u06cc\u0645\u200c\u0633\u0627\u0644)","raw_price":6000000,"final_price":5400000,"price_formatted":"\u06f5,\u06f4\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f6,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null},{"months":12,"label":"\u06f1\u06f2 \u0645\u0627\u0647\u0647 (\u0633\u0627\u0644\u0627\u0646\u0647)","raw_price":12000000,"final_price":9600000,"price_formatted":"\u06f9,\u06f6\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f1\u06f2,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null}],"raw_monthly_price":1000000,"final_monthly_price":1000000,"raw_yearly_price":12000000,"final_yearly_price":12000000,"is_current":false,"renewal_allowed":true,"renewal_message":null,"is_free":false,"discount_starts_at_jalali":null,"discount_expires_at_jalali":null},{"id":2,"reseller_id":1,"name":"\u067e\u06a9\u06cc\u062c \u062a\u062e\u0635\u0635\u06cc \u062f\u0646\u062f\u0627\u0646\u067e\u0632\u0634\u06a9\u06cc","description":"\u067e\u06a9\u06cc\u062c \u0648\u06cc\u0698\u0647 \u0645\u0637\u0628 \u0648 \u062f\u0646\u062f\u0627\u0646\u067e\u0632\u0634\u06a9\u06cc \u0628\u0627 \u0645\u0627\u0698\u0648\u0644 \u0646\u0648\u0628\u062a\u200c\u062f\u0647\u06cc \u0648 \u067e\u0631\u0648\u0646\u062f\u0647","icon":"tooth","color":"emerald","is_active":true,"price_type":"subscription","active_periods":null,"modules":["clients","booking","invoices"],"features":["online_booking","sms_reminders","waiting_list","client_portal"],"limits":{"clients":300,"invoices":1000,"appointments":800},"monthly_price":2500000,"quarterly_price":0,"semi_annual_price":0,"yearly_price":25000000,"period_prices":null,"period_discounts":null,"one_time_price":0,"setup_fee":0,"discount_type":"percent","discount_value":0,"discount_starts_at":null,"discount_expires_at":null,"sort_order":0,"created_at":"2026-11-03T09:05:27.000000Z","updated_at":"2026-11-04T11:16:17.000000Z","available_periods":[{"months":1,"label":"\u06f1 \u0645\u0627\u0647\u0647 (\u0645\u0627\u0647\u0627\u0646\u0647)","raw_price":2500000,"final_price":2500000,"price_formatted":"\u06f2,\u06f5\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f2,\u06f5\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":false,"discount_expires_at_jalali":null},{"months":3,"label":"\u06f3 \u0645\u0627\u0647\u0647 (\u0641\u0635\u0644\u06cc)","raw_price":7500000,"final_price":7125000,"price_formatted":"\u06f7,\u06f1\u06f2\u06f5,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f7,\u06f5\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null},{"months":6,"label":"\u06f6 \u0645\u0627\u0647\u0647 (\u0646\u06cc\u0645\u200c\u0633\u0627\u0644)","raw_price":15000000,"final_price":13500000,"price_formatted":"\u06f1\u06f3,\u06f5\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f1\u06f5,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null},{"months":12,"label":"\u06f1\u06f2 \u0645\u0627\u0647\u0647 (\u0633\u0627\u0644\u0627\u0646\u0647)","raw_price":30000000,"final_price":24000000,"price_formatted":"\u06f2\u06f4,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f3\u06f0,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null}],"raw_monthly_price":2500000,"final_monthly_price":2500000,"raw_yearly_price":30000000,"final_yearly_price":25000000,"is_current":false,"renewal_allowed":true,"renewal_message":null,"is_free":false,"discount_starts_at_jalali":null,"discount_expires_at_jalali":null},{"id":5,"reseller_id":1,"name":"\u067e\u06a9\u06cc\u062c \u0637\u0644\u0627\u06cc\u06cc \u0634\u0631\u06a9\u062a\u06cc (\u062a\u062e\u0641\u06cc\u0641 \u0632\u0645\u0627\u0646\u200c\u062f\u0627\u0631)","description":"\u0631\u0627\u0647\u06a9\u0627\u0631 \u062c\u0627\u0645\u0639 \u0633\u0627\u0632\u0645\u0627\u0646\u06cc\u060c \u0645\u062f\u06cc\u0631\u06cc\u062a \u0645\u0634\u062a\u0631\u06cc\u0627\u0646\u060c \u0627\u0646\u0628\u0627\u0631\u062f\u0627\u0631\u06cc \u0648 \u0641\u0631\u0648\u0634 \u0628\u0627 \u062a\u062e\u0641\u06cc\u0641 \u0648\u06cc\u0698\u0647 \u0645\u062d\u062f\u0648\u062f.","icon":"building-office","color":"#6366f1","is_active":true,"price_type":"subscription","active_periods":null,"modules":["crm","invoices","contracts","accounting","inventory","sms"],"features":["advanced_reporting","api_access","custom_domain","priority_support"],"limits":{"storage_mb":20480,"monthly_sms":10000,"users_count":15,"clients_count":5000},"monthly_price":2500000,"quarterly_price":0,"semi_annual_price":0,"yearly_price":20000000,"period_prices":null,"period_discounts":null,"one_time_price":0,"setup_fee":500000,"discount_type":"percentage","discount_value":25,"discount_starts_at":null,"discount_expires_at":"2026-11-12T08:04:20.000000Z","sort_order":0,"created_at":"2026-11-05T08:04:20.000000Z","updated_at":"2026-11-07T09:16:14.000000Z","available_periods":[{"months":1,"label":"\u06f1 \u0645\u0627\u0647\u0647 (\u0645\u0627\u0647\u0627\u0646\u0647)","raw_price":2500000,"final_price":2500000,"price_formatted":"\u06f2,\u06f5\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f2,\u06f5\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":false,"discount_expires_at_jalali":null},{"months":3,"label":"\u06f3 \u0645\u0627\u0647\u0647 (\u0641\u0635\u0644\u06cc)","raw_price":7500000,"final_price":7125000,"price_formatted":"\u06f7,\u06f1\u06f2\u06f5,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f7,\u06f5\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null},{"months":6,"label":"\u06f6 \u0645\u0627\u0647\u0647 (\u0646\u06cc\u0645\u200c\u0633\u0627\u0644)","raw_price":15000000,"final_price":13500000,"price_formatted":"\u06f1\u06f3,\u06f5\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f1\u06f5,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null},{"months":12,"label":"\u06f1\u06f2 \u0645\u0627\u0647\u0647 (\u0633\u0627\u0644\u0627\u0646\u0647)","raw_price":30000000,"final_price":24000000,"price_formatted":"\u06f2\u06f4,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","raw_price_formatted":"\u06f3\u06f0,\u06f0\u06f0\u06f0,\u06f0\u06f0\u06f0","has_discount":true,"discount_expires_at_jalali":null}],"raw_monthly_price":2500000,"final_monthly_price":1875000,"raw_yearly_price":30000000,"final_yearly_price":15000000,"is_current":false,"renewal_allowed":true,"renewal_message":null,"is_free":false,"discount_starts_at_jalali":null,"discount_expires_at_jalali":"1405\/08\/21"}],
+            gateways: {"zarinpal":{"title":"\u0632\u0631\u06cc\u0646\u200c\u067e\u0627\u0644","description":"\u06a9\u0644\u06cc\u0647 \u06a9\u0627\u0631\u062a\u200c\u0647\u0627\u06cc \u0639\u0636\u0648 \u0634\u062a\u0627\u0628"},"zibal":{"title":"\u0632\u06cc\u0628\u0627\u0644","description":"\u067e\u0631\u062f\u0627\u062e\u062a \u0645\u0633\u062a\u0642\u06cc\u0645 \u0648 \u0633\u0631\u06cc\u0639"}},
+            selectedPackageId: 4,
+            selectedMonths: 12,
+            selectedGateway: 'zarinpal',
+            notes: '',
+            loading: false,
+            errorMessage: null,
+
+            availableDurations: [
+                { months: 1, label: '۱ ماهه', short: '۱ ماه', badge: null },
+                { months: 3, label: '۳ ماهه', short: '۳ ماه', badge: null },
+                { months: 6, label: '۶ ماهه', short: '۶ ماه', badge: 'تخفیف ویژه' },
+                { months: 12, label: '۱۲ ماهه (یک‌ساله)', short: '۱۲ ماه', badge: 'بیشترین صرفه' },
+            ],
+
+            get selectedPackage() {
+                return this.packages.find(p => p.id == this.selectedPackageId) || null;
+            },
+
+            get currentPeriod() {
+                if (!this.selectedPackage || !this.selectedPackage.available_periods) return null;
+                const match = this.selectedPackage.available_periods.find(p => p.months == this.selectedMonths);
+                return match || this.selectedPackage.available_periods[0] || null;
+            },
+
+            get currentPeriodLabel() {
+                return this.currentPeriod ? this.currentPeriod.label : (this.selectedMonths + ' ماهه');
+            },
+
+            get finalPrice() {
+                return this.currentPeriod ? this.currentPeriod.final_price : 0;
+            },
+
+            get rawPrice() {
+                return this.currentPeriod ? this.currentPeriod.raw_price : 0;
+            },
+
+            get hasDiscount() {
+                return this.currentPeriod ? (this.currentPeriod.has_discount || this.rawPrice > this.finalPrice) : false;
+            },
+
+            get discountAmount() {
+                return Math.max(0, this.rawPrice - this.finalPrice);
+            },
+
+            getPackagePeriod(pkg) {
+                if (!pkg || !pkg.available_periods) return null;
+                return pkg.available_periods.find(p => p.months == this.selectedMonths) || pkg.available_periods[0] || null;
+            },
+
+            getPackageFinalPrice(pkg) {
+                const per = this.getPackagePeriod(pkg);
+                return per ? per.final_price : (this.selectedMonths === 12 ? (pkg.final_yearly_price || 0) : (pkg.final_monthly_price || 0));
+            },
+
+            getPackageRawPrice(pkg) {
+                const per = this.getPackagePeriod(pkg);
+                return per ? per.raw_price : (this.selectedMonths === 12 ? (pkg.raw_yearly_price || 0) : (pkg.raw_monthly_price || 0));
+            },
+
+            getPackageDailyEquivalent(pkg) {
+                const finalPrice = this.getPackageFinalPrice(pkg);
+                const months = this.selectedMonths || 1;
+                const days = (months === 12) ? 365 : (months * 30);
+                return (days > 0 && finalPrice > 0) ? Math.round(finalPrice / days) : 0;
+            },
+
+            hasPackageDiscount(pkg) {
+                const raw = this.getPackageRawPrice(pkg);
+                const fin = this.getPackageFinalPrice(pkg);
+                return raw > fin;
+            },
+
+            formatFaNumber(num) {
+                if (num === null || num === undefined) return '۰';
+                const formatted = Number(num).toLocaleString('en-US');
+                const faDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                return formatted.replace(/\d/g, d => faDigits[d]);
+            },
+
+            async submitOrder() {
+                if (!this.selectedPackageId) {
+                    this.errorMessage = 'لطفاً یک پکیج را جهت پرداخت انتخاب فرمایید.';
+                    return;
+                }
+
+                if (this.selectedPackage && this.selectedPackage.is_current && !this.selectedPackage.renewal_allowed) {
+                    this.errorMessage = this.selectedPackage.renewal_message || 'امکان تمدید این پلن در حال حاضر وجود ندارد.';
+                    return;
+                }
+
+                this.loading = true;
+                this.errorMessage = null;
+
+                try {
+                    const response = await fetch('http://127.0.0.1:8000/user/subscription/request', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': ''
+                        },
+                        body: JSON.stringify({
+                            package_id: this.selectedPackageId,
+                            duration_months: this.selectedMonths,
+                            gateway: this.selectedGateway,
+                            message: this.notes
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        if (data.pay_url) {
+                            window.location.href = data.pay_url;
+                            return;
+                        }
+                        if (data.redirect) {
+                            window.location.href = data.redirect;
+                            return;
+                        }
+                    } else {
+                        if (data.has_pending_invoice && data.pay_url) {
+                            window.location.href = data.pay_url;
+                            return;
+                        }
+                        this.errorMessage = data.message || 'خطا در ثبت سفارش ارتقا/تمدید پکیج.';
+                    }
+                } catch (e) {
+                    this.errorMessage = 'خطای ارتباط با سرور. لطفاً اتصال اینترنت خود را بررسی و مجدداً تلاش فرمایید.';
+                } finally {
+                    this.loading = false;
+                }
+            }
+        };
+    }
+</script>
+
+  </div>
+</div>
+</body>
+</html>

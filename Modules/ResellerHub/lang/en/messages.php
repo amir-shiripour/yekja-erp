@@ -63,6 +63,7 @@ return [
 
     'invoices' => [
         'title' => 'Invoices',
+        'all_statuses' => 'All',
         'invoice_number' => 'Invoice Number',
         'issue_date' => 'Issue Date',
         'due_date' => 'Due Date',

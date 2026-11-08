@@ -65,6 +65,7 @@ return array(
     'invoices' =>
         array(
             'title' => 'فاکتورها',
+            'all_statuses' => 'همه',
             'invoice_number' => 'شماره فاکتور',
             'issue_date' => 'تاریخ صدور',
             'due_date' => 'موعد سررسید',

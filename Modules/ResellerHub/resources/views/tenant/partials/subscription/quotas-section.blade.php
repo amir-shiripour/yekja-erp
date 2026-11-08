@@ -75,7 +75,8 @@
                         </p>
                     </div>
                 </div>
-                <button @click="upgradeModal = true" type="button"
+                <button @click="activeTab = 'package_upgrade'; window.scrollTo({top: 0, behavior: 'smooth'})"
+                        type="button"
                         class="shrink-0 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md shadow-amber-600/25 transition cursor-pointer">
                     {{ $hasNoPackage ? __('resellerhub::messages.subscription.views.select_package_btn') : __('resellerhub::messages.subscription.views.pay_and_activate_pkg') }}
                 </button>
@@ -134,10 +135,16 @@
                                     class="px-2 py-0.5 rounded-full text-xs font-black bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800">نامحدود ∞</span>
                             @elseif($qItem['is_exceeded'])
                                 <span
-                                    class="px-2 py-0.5 rounded-full text-xs font-black bg-rose-50 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800">تکمیل سقف</span>
+                                    class="px-2 py-0.5 rounded-full text-xs font-black bg-rose-50 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800 animate-pulse">تکمیل سقف</span>
+                            @elseif(($qItem['percent'] ?? 0) >= 85)
+                                <span
+                                    class="px-2 py-0.5 rounded-full text-xs font-black bg-rose-50 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800 animate-pulse">{{ reseller_fa_num($qItem['percent']) }}٪</span>
+                            @elseif(($qItem['percent'] ?? 0) >= 70)
+                                <span
+                                    class="px-2 py-0.5 rounded-full text-xs font-black bg-amber-50 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800">{{ reseller_fa_num($qItem['percent']) }}٪</span>
                             @else
                                 <span
-                                    class="px-2 py-0.5 rounded-full text-xs font-black {{ $qItem['percent_badge_class'] }}">{{ reseller_fa_num($qItem['percent']) }}٪</span>
+                                    class="px-2 py-0.5 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800">{{ reseller_fa_num($qItem['percent']) }}٪</span>
                             @endif
                         </div>
 
@@ -159,13 +166,18 @@
                             </div>
                         </div>
 
-                        {{-- Progress Bar --}}
+                        {{-- Progress Bar with 3-stage dynamic color --}}
                         <div class="mt-2.5">
                             @if(!$qItem['is_unlimited'])
-                                <div
-                                    class="w-full h-2 rounded-full bg-gray-100 dark:bg-gray-700/80 overflow-hidden">
+                                @php
+                                    $pVal = (int)($qItem['percent'] ?? 0);
+                                    $barGradient = ($pVal >= 85 || !empty($qItem['is_exceeded']))
+                                        ? 'bg-gradient-to-l from-rose-500 to-rose-600'
+                                        : ($pVal >= 70 ? 'bg-gradient-to-l from-amber-400 to-amber-500' : 'bg-gradient-to-l from-emerald-400 to-emerald-500');
+                                @endphp
+                                <div class="w-full h-2 rounded-full bg-gray-100 dark:bg-gray-700/80 overflow-hidden">
                                     <div
-                                        class="h-full rounded-full transition-all duration-700 ease-out {{ $qItem['progress_bar_class'] }}"
+                                        class="h-full rounded-full transition-all duration-700 ease-out {{ $barGradient }}"
                                         style="width: {{ min(100, $qItem['percent']) }}%;"></div>
                                 </div>
                             @else
@@ -174,6 +186,28 @@
                                 </div>
                             @endif
                         </div>
+
+                        {{-- Smart Upsell Trigger for Near-Capacity Quotas --}}
+                        @if((($qItem['percent'] ?? 0) >= 80 || !empty($qItem['is_exceeded'])) && !$qItem['is_unlimited'])
+                            <div
+                                class="mt-2.5 p-2 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/60 flex items-center justify-between text-[11px] text-amber-800 dark:text-amber-300">
+                                <span class="font-bold flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                                    ظرفیت رو به اتمام
+                                </span>
+                                <button
+                                    @click="activeTab = 'package_upgrade'; window.scrollTo({top: 0, behavior: 'smooth'})"
+                                    type="button"
+                                    class="font-black text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer inline-flex items-center gap-1 group">
+                                    <span>افزایش سقف</span>
+                                    <svg class="w-3 h-3 transition-transform duration-200 group-hover:-translate-x-0.5"
+                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                              d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Card Footer --}}
@@ -182,8 +216,10 @@
                         @if(!$qItem['is_unlimited'])
                             <span class="text-gray-400 font-medium">باقیمانده: <strong
                                     class="text-gray-700 dark:text-gray-300 font-bold">{{ reseller_fa_num(number_format($qItem['remaining'])) }}</strong> {{ $qItem['unit'] ?? '' }}</span>
-                            <button @click="upgradeModal = true" type="button"
-                                    class="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold hover:underline cursor-pointer group">
+                            <button
+                                @click="activeTab = 'package_upgrade'; window.scrollTo({top: 0, behavior: 'smooth'})"
+                                type="button"
+                                class="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-bold hover:underline cursor-pointer group">
                                 <span>ارتقای پکیج</span>
                                 <svg
                                     class="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-0.5"

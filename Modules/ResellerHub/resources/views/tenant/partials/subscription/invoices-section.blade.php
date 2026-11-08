@@ -1,5 +1,5 @@
 @php
-    $tenantInvoicesList = $tenantInvoices ?? collect();
+    use Modules\ResellerHub\App\Enums\InvoiceStatus;$tenantInvoicesList = $tenantInvoices ?? collect();
     $invoicesTotalSum = $invoicesTotalSum ?? (int)$tenantInvoicesList->sum('total');
     $invoicesPaidSum = $invoicesPaidSum ?? (int)$tenantInvoicesList->sum(fn($i) => (int)$i->paid_amount);
     $invoicesUnpaidSum = $invoicesUnpaidSum ?? (int)$tenantInvoicesList->sum(fn($i) => $i->remainingAmount());
@@ -50,6 +50,7 @@
     </div>
 
     <div x-show="sectionInvoicesOpen"
+         x-data="{ invoiceFilter: 'all' }"
          x-transition:enter="transition ease-out duration-300 origin-top"
          x-transition:enter-start="opacity-0 -translate-y-2 scale-y-95 max-h-0"
          x-transition:enter-end="opacity-100 translate-y-0 scale-y-100"
@@ -131,6 +132,59 @@
             </div>
         @endif
 
+        {{-- چیپ‌های فیلتر وضعیت فاکتورها مستقیماً از InvoiceStatus Enum و Model --}}
+        @php
+            $statusCases = InvoiceStatus::cases();
+            $statusCounts = [];
+            foreach ($statusCases as $sc) {
+                $statusCounts[$sc->value] = $tenantInvoicesList->filter(function($i) use ($sc) {
+                    $val = $i->status_enum?->value ?? (string)$i->status;
+                    return $val === $sc->value;
+                })->count();
+            }
+            $countAll = $tenantInvoicesList->count();
+        @endphp
+
+        @if($countAll > 0)
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap">فیلتر وضعیت:</span>
+                <button type="button" @click="invoiceFilter = 'all'"
+                        :class="invoiceFilter === 'all' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-xs' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-750'"
+                        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0">
+                    <span>{{ __('resellerhub::messages.invoices.all_statuses') }}</span>
+                    <span class="px-1.5 py-0.2 rounded-md text-[10px]"
+                          :class="invoiceFilter === 'all' ? 'bg-white/20 dark:bg-black/20 text-white dark:text-gray-900' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                        {{ reseller_fa_num($countAll) }}
+                    </span>
+                </button>
+                @foreach($statusCases as $statusEnum)
+                    @php
+                        $countForStatus = $statusCounts[$statusEnum->value] ?? 0;
+                    @endphp
+                    @if($countForStatus > 0 || in_array($statusEnum, [InvoiceStatus::UNPAID, InvoiceStatus::PAID]))
+                        @php
+                            $activeClass = match ($statusEnum->color()) {
+                                'emerald' => 'bg-emerald-600 text-white shadow-xs',
+                                'amber' => 'bg-amber-600 text-white shadow-xs',
+                                'rose' => 'bg-rose-600 text-white shadow-xs',
+                                'indigo' => 'bg-indigo-600 text-white shadow-xs',
+                                default => 'bg-gray-900 text-white shadow-xs',
+                            };
+                        @endphp
+                        <button type="button" @click="invoiceFilter = '{{ $statusEnum->value }}'"
+                                :class="invoiceFilter === '{{ $statusEnum->value }}' ? '{{ $activeClass }}' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-750'"
+                                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0">
+                            <span>{{ $statusEnum->label() }}</span>
+                            <span class="px-1.5 py-0.2 rounded-md text-[10px]"
+                                  :class="invoiceFilter === '{{ $statusEnum->value }}' ? 'bg-white/25 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                                {{ reseller_fa_num($countForStatus) }}
+                            </span>
+                        </button>
+                    @endif
+                @endforeach
+            </div>
+        @endif
+
         {{-- Invoice Cards List --}}
         <div class="space-y-3">
             @forelse($tenantInvoicesList as $inv)
@@ -152,7 +206,12 @@
                     $invPkgName = $inv->package?->name ?? ($inv->meta['to_package_name'] ?? ($inv->meta['package_name'] ?? null));
                 @endphp
 
+                @php
+                    $statusCode = $inv->status_enum?->value ?? (string)$inv->status;
+                @endphp
                 <div
+                    x-show="invoiceFilter === 'all' || invoiceFilter === '{{ $statusCode }}'"
+                    x-cloak
                     class="group relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/60 hover:border-indigo-300 dark:hover:border-indigo-700/70 transition-all duration-200 shadow-xs">
                     {{-- Edge Status Indicator --}}
                     <span class="absolute inset-y-0 start-0 w-1 {{ $barColor }}"></span>
@@ -286,16 +345,16 @@
                         {{-- Action Buttons --}}
                         <div class="flex items-center gap-2 shrink-0">
                             @if(!$isPaid && !$isCanceled && $remaining > 0)
-                                <button type="button"
-                                        @click="openPaymentModalForInvoice({{ $inv->id }}, '{{ $inv->invoice_number }}', '{{ $invPkgName ?: 'اشتراک سامانه' }}', {{ (int)$remaining }}, '{{ reseller_fa_num(number_format($remaining)) }} {{ $currLabel }}')"
-                                        class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer">
+                                <a href="{{ route('portal.invoices.pay', ['invoice' => $inv->id, 'gateway' => $defaultGateway ?? 'zarinpal']) }}"
+                                   class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                                   title="پرداخت آنلاین فاکتور">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                          stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                               d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                                     </svg>
-                                    <span>{{ __('resellerhub::messages.invoices.pay') }}</span>
-                                </button>
+                                    <span>پرداخت آنلاین شاپرک</span>
+                                </a>
 
                                 <button type="button"
                                         @click="confirmCancelInvoice({{ $inv->id }}, '{{ $inv->invoice_number }}', '{{ $invPkgName ?: 'اشتراک سامانه' }}', '{{ reseller_fa_num(number_format($remaining)) }} {{ $currLabel }}')"
@@ -309,7 +368,7 @@
                                     <span
                                         class="hidden sm:inline">{{ __('resellerhub::messages.invoices.cancel_invoice_button') }}</span>
                                 </button>
-                            @else
+                            @elseif($isPaid)
                                 <span
                                     class="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/60">
                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -317,7 +376,7 @@
                                               d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                               clip-rule="evenodd"/>
                                     </svg>
-                                    <span>تسویه شده</span>
+                                    <span>{{ $statusLabel }}</span>
                                 </span>
                             @endif
 

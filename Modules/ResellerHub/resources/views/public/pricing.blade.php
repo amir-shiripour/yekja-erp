@@ -2,7 +2,7 @@
 
 @extends('layouts.web')
 
-@section('title', 'تعرفه‌ها و پلن‌های قیمتی')
+@section('title', 'تعرفه‌ها و پکیج ها')
 
 @section('content')
     <div class="w-full min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-32"
@@ -13,7 +13,7 @@
                 <div
                     class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs mb-4">
                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                    <span>تعرفه‌ها و پلن‌های رسمی سامانه</span>
+                    <span>تعرفه‌ها و پکیج‌های رسمی سامانه</span>
                 </div>
                 <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-gray-900 dark:text-white leading-tight">
                     سرمایه‌گذاری روی رشد کسب‌وکار، <span
@@ -40,7 +40,7 @@
                         <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round"
                                                          stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        امکان تغییر دوره یا ارتقاء پلن
+                        امکان تغییر دوره یا ارتقاء پکیج
                     </span>
                 </div>
             </div>
@@ -409,15 +409,73 @@
                 </div>
             @endif
 
-            {{-- Plan Comparison Matrix --}}
+            {{-- Plan Comparison Matrix with Minimal Toggle Button --}}
             @if($allPackages->count() > 1 && !empty($comparisonData['groups']))
-                <div id="plan-comparison-section">
-                    @include('resellerhub::public.partials.pricing-comparison', [
-                        'packages'         => $allPackages,
-                        'comparisonData'   => $comparisonData,
-                        'availablePeriods' => $availablePeriods,
-                        'packagePeriods'   => $packagePeriods ?? [],
-                    ])
+                @php
+                    $totalComparisonFeatures = collect($comparisonData['groups'])->sum(fn($g) => count($g['rows'] ?? []));
+                @endphp
+                <div id="plan-comparison-section"
+                     x-data="{ showComparison: window.location.hash === '#plan-comparison-section' }"
+                     class="mt-16 sm:mt-24 scroll-mt-20">
+
+                    {{-- Minimalist Toggle Card --}}
+                    <div
+                        class="rounded-3xl p-6 sm:p-7 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 transition-all duration-300">
+                        <div class="flex items-center gap-4 text-right w-full sm:w-auto">
+                            <div
+                                class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-2xs">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">ماتریس
+                                        مقایسه دقیق امکانات و دسترسی‌ها</h3>
+                                    <span
+                                        class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80">
+                                        {{ ResellerHelper::toPersianDigits((string)$totalComparisonFeatures) }} مشخصه در تمام پکیج‌ها
+                                    </span>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    بررسی سرفصل‌های ماژولار، ظرفیت‌های عددی اختصاصی و دسترسی‌های دقیق هر پکیج
+                                </p>
+                            </div>
+                        </div>
+
+                        <button type="button"
+                                @click="showComparison = !showComparison"
+                                :class="showComparison
+                                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25 ring-2 ring-indigo-500/20'
+                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-750 dark:text-gray-200'"
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all duration-200 cursor-pointer shrink-0">
+                            <span x-text="showComparison ? 'بستن جدول مقایسه' : 'نمایش جدول مقایسه کامل'"></span>
+                            <svg class="w-4 h-4 transition-transform duration-300"
+                                 :class="showComparison ? 'rotate-180' : ''"
+                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                      d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- Collapsible Comparison Container --}}
+                    <div x-show="showComparison"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-2"
+                         x-cloak>
+                        @include('resellerhub::public.partials.pricing-comparison', [
+                            'packages'         => $allPackages,
+                            'comparisonData'   => $comparisonData,
+                            'availablePeriods' => $availablePeriods,
+                            'packagePeriods'   => $packagePeriods ?? [],
+                        ])
+                    </div>
                 </div>
             @endif
 
