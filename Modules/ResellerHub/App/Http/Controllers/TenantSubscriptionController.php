@@ -24,6 +24,7 @@ use Modules\ResellerHub\App\Models\ResellerInvoice;
 use Modules\ResellerHub\App\Models\ResellerOrder;
 use Modules\ResellerHub\App\Models\ResellerPackage;
 use Modules\ResellerHub\App\Models\ResellerSetting;
+use Modules\ResellerHub\App\Services\Pricing\PricingComparisonService;
 use Modules\ResellerHub\App\Services\ResellerBillingService;
 use Modules\ResellerHub\App\Services\TenantQuotaService;
 
@@ -123,13 +124,27 @@ class TenantSubscriptionController extends Controller
                 ];
             }, $currentModules);
 
+            $billingService = app(ResellerBillingService::class);
+            $currentPkgId = $package?->id;
+            $advanceRenewalLimit = ($package && $reseller)
+                ? $billingService->validateAdvanceRenewalLimit($tenant, 12, $reseller->id)
+                : ['allowed' => true, 'message' => null];
+
+
             $availableUpgradePackages = ResellerPackage::where('reseller_id', $reseller->id)
                 ->active()
-                ->when($package, fn($q) => $q->where('id', '!=', $package->id))
                 ->orderBy('monthly_price')
                 ->get()
-                ->filter(fn(ResellerPackage $candidate) => $candidate->isUpgradeOver($package))
-                ->map(function (ResellerPackage $candidate) use ($currentModules, $currentLimits, $currentMonthlyPrice, $currentYearlyPrice) {
+                ->filter(function (ResellerPackage $candidate) use ($package, $currentPkgId) {
+                    if (!$package) {
+                        return true;
+                    }
+                    if ((int)$candidate->id === (int)$currentPkgId) {
+                        return true; // Renewal of current package
+                    }
+                    return $candidate->isUpgradeOver($package);
+                })
+                ->map(function (ResellerPackage $candidate) use ($package, $currentPkgId, $advanceRenewalLimit, $currentModules, $currentLimits, $currentMonthlyPrice, $currentYearlyPrice) {
                     $candModules = is_array($candidate->modules) ? $candidate->modules : [];
                     $newModuleSlugs = array_values(array_diff($candModules, $currentModules));
                     $newModules = array_map(function ($slug) {
@@ -166,28 +181,38 @@ class TenantSubscriptionController extends Controller
                     $candRawYearly = (int)$candidate->getPriceForMonths(12);
                     $candFinalYearly = (int)$candidate->getFinalPriceForMonths(12);
 
-                    $candActiveMonths = $candidate->getActiveMonths();
-                    if (empty($candActiveMonths)) {
-                        $candActiveMonths = [1, 3, 6, 12];
-                    }
+                    $candActiveMonths = array_values(array_unique(array_merge([1, 3, 6, 12], $candidate->getActiveMonths())));
+                    sort($candActiveMonths, SORT_NUMERIC);
                     $candPeriods = [];
                     foreach ($candActiveMonths as $cm) {
                         $cRaw = $candidate->getPriceForMonths($cm);
                         $cFinal = $candidate->getFinalPriceForMonths($cm);
                         $cHasDiscount = $candidate->hasActiveDiscountForMonths($cm) && $cFinal < $cRaw;
+                        $days = ($cm === 12) ? 365 : ($cm * 30);
+                        $daily = ($days > 0 && $cFinal > 0) ? (int)round($cFinal / $days) : 0;
                         $candPeriods[] = [
                             'months' => $cm,
+                            'days' => $days,
                             'label' => ResellerHelper::durationLabel($cm, true),
+                            'short' => ResellerHelper::durationLabel($cm, false),
                             'raw_price' => $cRaw,
                             'final_price' => $cFinal,
                             'price_formatted' => ResellerHelper::toPersianDigits(number_format($cFinal)),
                             'raw_price_formatted' => ResellerHelper::toPersianDigits(number_format($cRaw)),
+                            'daily_equivalent' => $daily,
+                            'daily_equivalent_formatted' => ResellerHelper::toPersianDigits(number_format($daily)),
                             'has_discount' => $cHasDiscount,
                             'discount_expires_at_jalali' => $candidate->getDiscountExpiresAtJalaliForMonths($cm),
                         ];
                     }
 
+                    $monthlyForYear = $candRawMonthly * 12;
+                    $annualSavingsPercent = ($monthlyForYear > $candFinalYearly && $monthlyForYear > 0)
+                        ? (int)round((($monthlyForYear - $candFinalYearly) / $monthlyForYear) * 100)
+                        : 0;
+
                     $candidate->setAttribute('available_periods', $candPeriods);
+                    $candidate->setAttribute('annual_savings_percent', $annualSavingsPercent);
                     $candidate->setAttribute('new_modules', $newModules);
                     $candidate->setAttribute('new_modules_count', count($newModules));
                     $candidate->setAttribute('all_modules', $allCandidateModules);
@@ -204,6 +229,17 @@ class TenantSubscriptionController extends Controller
                     $candidate->setAttribute('discount_expires_at_jalali', $candidate->discount_expires_at_jalali);
                     $candidate->setAttribute('diff_monthly_price', max(0, $candFinalMonthly - (int)$currentMonthlyPrice));
                     $candidate->setAttribute('diff_yearly_price', max(0, $candFinalYearly - (int)$currentYearlyPrice));
+
+                    $isCurrent = $package && ((int)$candidate->id === (int)$currentPkgId);
+                    $candidate->setAttribute('is_current', $isCurrent);
+                    $candidate->setAttribute('is_renewal', $isCurrent);
+                    if ($isCurrent) {
+                        $candidate->setAttribute('renewal_allowed', (bool)($advanceRenewalLimit['allowed'] ?? true));
+                        $candidate->setAttribute('renewal_message', $advanceRenewalLimit['message'] ?? null);
+                    } else {
+                        $candidate->setAttribute('renewal_allowed', true);
+                        $candidate->setAttribute('renewal_message', null);
+                    }
 
                     return $candidate;
                 })
@@ -264,6 +300,14 @@ class TenantSubscriptionController extends Controller
 
         $currency = $resellerSettings['currency'] ?? 'toman';
         $currencyLabel = ResellerHelper::currencyLabel($currency);
+        $availableGateways = ResellerHelper::getAvailableGateways();
+        $defaultGateway = ResellerHelper::getDefaultGateway();
+        $advanceRenewalLimit = ($package && $reseller)
+            ? app(ResellerBillingService::class)->validateAdvanceRenewalLimit($tenant, 12, $reseller->id)
+            : ['allowed' => true, 'message' => null];
+
+
+        $comparisonData = app(PricingComparisonService::class)->buildComparisonData($availableUpgradePackages);
 
         return compact(
             'tenant',
@@ -286,7 +330,12 @@ class TenantSubscriptionController extends Controller
             'invoicesTotalSum',
             'invoicesPaidSum',
             'invoicesUnpaidSum',
-            'currencyLabel'
+            'currencyLabel',
+            'availableGateways',
+            'defaultGateway',
+            'advanceRenewalLimit',
+            'pendingUpgradeInvoices',
+            'comparisonData'
         );
     }
 
@@ -482,6 +531,8 @@ class TenantSubscriptionController extends Controller
             ->latest('id')
             ->first();
 
+        $requestedGateway = !empty($validated['gateway']) ? (string)$validated['gateway'] : null;
+
         if ($existingPendingInvoice) {
             $msg = __('resellerhub::messages.subscription.duplicate_pending', [
                 'invoice' => $existingPendingInvoice->invoice_number,
@@ -490,6 +541,10 @@ class TenantSubscriptionController extends Controller
             Log::info('[ResellerHub] Blocked duplicate upgrade invoice request for Tenant #' . $tenant->id . ' (Target Package: ' . $candidatePackage->name . ', Existing Invoice #' . $existingPendingInvoice->id . ')');
 
             if ($request->wantsJson() || $request->ajax()) {
+                $existingPayUrlParams = ['invoice' => $existingPendingInvoice->id];
+                if ($requestedGateway) {
+                    $existingPayUrlParams['gateway'] = $requestedGateway;
+                }
                 return response()->json([
                     'success' => false,
                     'has_pending_invoice' => true,
@@ -498,7 +553,7 @@ class TenantSubscriptionController extends Controller
                     'package_name' => $candidatePackage->name,
                     'invoice_due' => $existingPendingInvoice->total,
                     'invoice_due_formatted' => ResellerHelper::formatPrice($existingPendingInvoice->total, 'toman'),
-                    'pay_url' => route('portal.invoices.pay', $existingPendingInvoice->id),
+                    'pay_url' => route('portal.invoices.pay', $existingPayUrlParams),
                     'total' => $existingPendingInvoice->total,
                     'message' => $msg,
                 ], 422);
@@ -512,11 +567,20 @@ class TenantSubscriptionController extends Controller
         $durationMonths = !empty($validated['duration_months']) ? (int)$validated['duration_months'] : null;
         $billingCycle = !empty($validated['billing_cycle']) ? $validated['billing_cycle'] : ($durationMonths ? (string)$durationMonths : null);
 
-        $invoice = $billingService->createUpgradeInvoiceFromOrder($order, $candidatePackage->id, array_filter([
-            'notes' => $message ?: __('resellerhub::messages.subscription.upgrade_request_notes', ['name' => $candidatePackage->name]),
-            'duration_months' => $durationMonths,
-            'billing_cycle' => $billingCycle,
-        ]));
+        $isRenewal = ($currentPackage && (int)$candidatePackage->id === (int)$currentPackage->id);
+
+        if ($isRenewal) {
+            $invoice = $billingService->createRenewalInvoiceFromOrder($order, array_filter([
+                'notes' => $message ?: __('resellerhub::messages.subscription.renewal_request_notes', ['name' => $candidatePackage->name]),
+                'months' => $durationMonths ?: 12,
+            ]));
+        } else {
+            $invoice = $billingService->createUpgradeInvoiceFromOrder($order, $candidatePackage->id, array_filter([
+                'notes' => $message ?: __('resellerhub::messages.subscription.upgrade_request_notes', ['name' => $candidatePackage->name]),
+                'duration_months' => $durationMonths,
+                'billing_cycle' => $billingCycle,
+            ]));
+        }
 
         Log::info('[ResellerHub] Upgrade invoice #' . $invoice->id . ' created for Tenant #' . $tenant->id . ' (' . $tenant->name . ')', [
             'user' => $user?->name,
@@ -525,7 +589,12 @@ class TenantSubscriptionController extends Controller
             'invoice_status' => $invoice->status,
         ]);
 
-        $payUrl = route('portal.invoices.pay', $invoice->id);
+        $requestedGateway = !empty($validated['gateway']) ? (string)$validated['gateway'] : null;
+        $payUrlParams = ['invoice' => $invoice->id];
+        if ($requestedGateway) {
+            $payUrlParams['gateway'] = $requestedGateway;
+        }
+        $payUrl = route('portal.invoices.pay', $payUrlParams);
 
         if ($invoice->isPaid()) {
             $successMsg = __('resellerhub::messages.subscription.upgrade_success', ['name' => $candidatePackage->name]);

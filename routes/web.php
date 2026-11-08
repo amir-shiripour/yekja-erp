@@ -38,6 +38,8 @@ Route::prefix('install')->middleware(['web', 'prevent.if.installed'])->group(fun
 
 
 // --- بخش اصلی سایت (عمومی و داشبورد) ---
+
+
 // این روت‌ها دارای میدل‌ور 'redirect.if.not.installed' هستند تا قبل از نصب، در دسترس نباشند
 Route::middleware([
     'redirect.if.not.installed',

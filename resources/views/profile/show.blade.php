@@ -10,7 +10,51 @@
 @section('content')
 
     <div class="mx-auto max-w-full space-y-6"
-         x-data="{ activeTab: '{{ session('active_tab', request('active_tab', request()->has('invoices_page') ? 'billing_history' : 'profile')) }}' }">
+         x-data="{
+             activeTab: (function() {
+                 const validTabs = ['profile', 'subscription', 'package_upgrade', 'billing_history', 'domain_branding', 'security', 'sessions', 'doctor'];
+                 const urlParam = new URLSearchParams(window.location.search).get('active_tab');
+                 if (validTabs.includes(urlParam)) return urlParam;
+                 const hash = window.location.hash.replace('#', '');
+                 if (validTabs.includes(hash)) return hash;
+                 const saved = localStorage.getItem('crm_profile_active_tab');
+                 if (validTabs.includes(saved)) return saved;
+                 return '{{ session('active_tab', request('active_tab', request()->has('invoices_page') ? 'billing_history' : 'profile')) }}';
+             })(),
+             init() {
+                 const validTabs = ['profile', 'subscription', 'package_upgrade', 'billing_history', 'domain_branding', 'security', 'sessions', 'doctor'];
+                 const syncUrl = (val) => {
+                     try {
+                         if (!validTabs.includes(val)) return;
+                         localStorage.setItem('crm_profile_active_tab', val);
+                         const url = new URL(window.location.href);
+                         url.searchParams.set('active_tab', val);
+                         url.hash = val;
+                         history.replaceState(null, '', url.pathname + url.search + url.hash);
+                     } catch (e) {}
+                 };
+
+                 const hash = window.location.hash.replace('#', '');
+                 const urlParam = new URLSearchParams(window.location.search).get('active_tab');
+                 const saved = localStorage.getItem('crm_profile_active_tab');
+                 const target = (validTabs.includes(urlParam) ? urlParam : (validTabs.includes(hash) ? hash : (validTabs.includes(saved) ? saved : this.activeTab)));
+                 if (target && target !== this.activeTab) {
+                     this.activeTab = target;
+                 }
+                 syncUrl(this.activeTab);
+
+                 this.$watch('activeTab', (val) => {
+                     syncUrl(val);
+                 });
+
+                 window.addEventListener('hashchange', () => {
+                     const h = window.location.hash.replace('#', '');
+                     if (h && validTabs.includes(h) && h !== this.activeTab) {
+                         this.activeTab = h;
+                     }
+                 });
+             }
+         }">
         <div class="relative dark:bg-gray-900/30 border-b border-gray-200 dark:border-gray-700 p-6 sm:p-8">
             <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6">
 
@@ -73,7 +117,17 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
                                 </svg>
-                                <span>اشتراک و پلن نمایندگی فروش</span>
+                                <span>اشتراک فعلی</span>
+                            </button>
+
+                            <button @click="activeTab = 'package_upgrade'"
+                                    :class="activeTab === 'package_upgrade' ? 'bg-white border-gray-200 text-indigo-600 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-indigo-300' : 'bg-transparent border-transparent text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800/60'"
+                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all whitespace-nowrap">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                </svg>
+                                <span>خرید و ارتقای پکیج</span>
                             </button>
 
                             <button @click="activeTab = 'billing_history'"
@@ -139,7 +193,7 @@
             </div>
         </div>
         <div class="p-6 sm:p-8 bg-white dark:bg-gray-800"
-             :class="(activeTab === 'subscription' || activeTab === 'billing_history' || activeTab === 'domain_branding') ? 'bg-gray-50/50 dark:bg-gray-900/40 rounded-3xl' : ''">
+             :class="(activeTab === 'subscription' || activeTab === 'package_upgrade' || activeTab === 'billing_history' || activeTab === 'domain_branding') ? 'bg-gray-50/50 dark:bg-gray-900/40 rounded-3xl' : ''">
 
             {{-- اطلاعات کاربری --}}
             <div x-show="activeTab === 'profile'" x-cloak>
@@ -159,6 +213,17 @@
                     @else
                         <div class="text-center py-12 text-gray-500 dark:text-gray-400">
                             اطلاعات اشتراک برای این حساب در دسترس نمی‌باشد.
+                        </div>
+                    @endif
+                </div>
+
+                {{-- خرید و ارتقای پکیج --}}
+                <div x-show="activeTab === 'package_upgrade'" x-cloak class="pt-2">
+                    @if($subData)
+                        @include('resellerhub::tenant.partials.package-upgrade-content', $subData)
+                    @else
+                        <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+                            اطلاعات پکیج برای این حساب در دسترس نمی‌باشد.
                         </div>
                     @endif
                 </div>

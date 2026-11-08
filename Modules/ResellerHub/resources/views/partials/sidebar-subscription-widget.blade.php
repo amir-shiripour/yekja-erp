@@ -4,7 +4,7 @@
             $currentPkg = $currentTenant->package;
             $hasActivePlan = $currentPkg && (method_exists($currentTenant, 'hasActivePaidPlan') ? $currentTenant->hasActivePaidPlan() : true);
             $pkgName = $hasActivePlan ? $currentPkg->name : ($currentPkg?->name ?? 'بدون پکیج');
-            $upgradeUrl = route('profile.show', ['active_tab' => 'subscription']);
+            $upgradeUrl = route('profile.show', ['active_tab' => 'package_upgrade']);
             $buttonLabel = $hasActivePlan ? 'ارتقای پکیج' : 'انتخاب و فعال‌سازی پکیج';
         } catch (Throwable $e) {
             $hasActivePlan = false;
@@ -27,7 +27,7 @@
                     <span
                         class="w-2 h-2 rounded-full @if($hasActivePlan) bg-emerald-500 animate-pulse @else bg-amber-500 @endif shrink-0"></span>
                     <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate">
-                        {{ $hasActivePlan ? 'پلن جاری سامانه:' : 'وضعیت پلن:' }}
+                        {{ $hasActivePlan ? 'پکیج جاری سامانه:' : 'وضعیت پکیج:' }}
                     </span>
                 </div>
                 <span

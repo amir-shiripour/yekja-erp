@@ -17,6 +17,7 @@ class RequestTenantUpgradeRequest extends FormRequest
             'package_id' => ['nullable', 'integer', 'exists:reseller_packages,id'],
             'duration_months' => ['nullable', 'integer', 'min:1', 'max:1200'],
             'billing_cycle' => ['nullable', 'string', 'max:50'],
+            'gateway' => ['nullable', 'string', 'max:50'],
             'message' => ['nullable', 'string', 'max:1000'],
             'requested_quota' => ['nullable', 'string', 'max:100'],
         ];

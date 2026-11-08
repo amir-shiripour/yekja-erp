@@ -28,7 +28,7 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-            <button @click="upgradeModal = true" type="button"
+            <button @click="activeTab = 'package_upgrade'; window.scrollTo({top: 0, behavior: 'smooth'})" type="button"
                     class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline cursor-pointer group">
                 <span>{{ $hasActivePlan ? __('resellerhub::messages.subscription.views.upgrade_or_renew_btn') : __('resellerhub::messages.subscription.views.select_package_btn') }}</span>
                 <svg class="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" fill="none"
@@ -77,7 +77,7 @@
                     قابلیت‌های پیشرفته سامانه (پذیرش آنلاین، اتصال درگاه پرداخت، گزارش‌گیری هوشمند و ...) پس از
                     انتخاب و فعال‌سازی پکیج در دسترس قرار خواهند گرفت.
                 </p>
-                <button @click="upgradeModal = true" type="button"
+                <button @click="activeTab = 'package_upgrade'; window.scrollTo({top: 0, behavior: 'smooth'})" type="button"
                         class="mt-4 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition cursor-pointer">
                     {{ $hasNoPackage ? 'انتخاب و خرید پکیج' : 'فعال‌سازی اشتراک' }}
                 </button>
