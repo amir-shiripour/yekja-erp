@@ -33,7 +33,9 @@
         <div class="flex flex-col items-center sm:items-start">
             <h4 class="font-bold text-gray-900 dark:text-white mb-4 text-lg">نمادهای اعتماد</h4>
             <div class="flex gap-4 justify-center sm:justify-start">
-                <div class="w-20 h-24 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center justify-center text-xs text-gray-400 shadow-sm">ENAMAD</div>
+                <div class="p-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 flex items-center justify-center shadow-xs">
+                    <a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=8588364&Code=zqkZId2ZFv03YFoanALLpEcgCAUvqpve'><img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=8588364&Code=zqkZId2ZFv03YFoanALLpEcgCAUvqpve' alt='' style='cursor:pointer' code='zqkZId2ZFv03YFoanALLpEcgCAUvqpve'></a>
+                </div>
                 <div class="w-20 h-24 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center justify-center text-xs text-gray-400 shadow-sm">SAMANDEHI</div>
             </div>
         </div>

@@ -47,8 +47,13 @@
     {{-- بخش کپی رایت --}}
     {{--<div class="max-w-7xl mx-auto px-6 border-t border-teal-100 dark:border-teal-900/30 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">--}}
     <div class="max-w-7xl mx-auto px-6 border-t border-teal-100 dark:border-teal-900/30 pt-8 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4">
-        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium text-center sm:text-right w-full">
+        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium text-center sm:text-right">
             &copy; {{ date('Y') }} {{ $footerText }}
         </p>
+        <div class="inline-flex items-center">
+            <a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=8588364&Code=zqkZId2ZFv03YFoanALLpEcgCAUvqpve' class="inline-block p-1.5 bg-white dark:bg-gray-800 rounded-xl border border-teal-200/60 dark:border-teal-800/60 shadow-xs">
+                <img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=8588364&Code=zqkZId2ZFv03YFoanALLpEcgCAUvqpve' alt='نماد اعتماد الکترونیکی' style='cursor:pointer' code='zqkZId2ZFv03YFoanALLpEcgCAUvqpve' class="h-14 w-auto object-contain">
+            </a>
+        </div>
     </div>
 </footer>

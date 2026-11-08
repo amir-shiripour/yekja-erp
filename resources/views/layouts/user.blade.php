@@ -1,8 +1,15 @@
 @php
-    $currentTenant = $currentTenant ?? app(\App\Tenancy\TenantManager::class)->getTenant() ?? auth()->user()?->tenant;
-    $brandTitle = ($currentTenant && $currentTenant->getBranding('brand_title'))
-        ? $currentTenant->getBranding('brand_title')
-        : ($currentTenant?->name ?: config('app.name', 'Laravel'));
+    use App\Models\User;
+    use App\Tenancy\TenantManager;
+    use Illuminate\Support\Facades\View;
+
+    /** @var User|null $authUser */
+    $authUser = auth()->user();
+    $currentTenant = $currentTenant ?? app(TenantManager::class)->getTenant() ?? $authUser?->tenant;
+
+    $customTitle = $currentTenant?->getBranding('brand_title');
+    $brandTitle = $customTitle ?: ($currentTenant?->name ?? config('app.name', 'Laravel'));
+
     $brandLogo = $currentTenant?->getBranding('brand_logo');
     $brandFavicon = $currentTenant?->getBranding('brand_favicon');
     $brandPrimaryColor = $currentTenant?->getBranding('brand_primary_color');
@@ -10,13 +17,15 @@
     $supportPhone = $currentTenant?->getBranding('support_phone');
     $supportEmail = $currentTenant?->getBranding('support_email');
 
-    $hexToRgb = function(?string $hex) {
-        if (empty($hex)) return '79, 70, 229';
+    $hexToRgb = static function(?string $hex): string {
+        if (empty($hex)) {
+            return '79, 70, 229';
+        }
         $hex = ltrim($hex, '#');
         if (strlen($hex) === 3) {
-            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
-            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
-            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+            $r = hexdec($hex[0] . $hex[0]);
+            $g = hexdec($hex[1] . $hex[1]);
+            $b = hexdec($hex[2] . $hex[2]);
         } elseif (strlen($hex) === 6) {
             $r = hexdec(substr($hex, 0, 2));
             $g = hexdec(substr($hex, 2, 2));
@@ -24,7 +33,7 @@
         } else {
             return '79, 70, 229';
         }
-        return "{$r}, {$g}, {$b}";
+        return "$r, $g, $b";
     };
 @endphp
 
@@ -52,12 +61,19 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    <!--suppress CssUnknownElement -->
     <style>
+        :root {
+            --brand-primary: #4f46e5;
+            --brand-primary-rgb: 79, 70, 229;
+        }
+
         body {
             font-size: 14px;
         }
 
-        jdp-container {
+        /* noinspection CssUnknownElement */
+        :is(jdp-container), jdp-container {
             z-index: 9999 !important;
         }
 
@@ -67,56 +83,64 @@
     </style>
 
     @if(!empty($brandPrimaryColor))
+        <!--suppress CssUnresolvedCustomProperty, CssUnusedSymbol -->
         <style>
+            /* noinspection ALL */
             :root {
                 --brand-primary: {{ $brandPrimaryColor }};
                 --brand-primary-rgb: {{ $hexToRgb($brandPrimaryColor) }};
             }
 
+            /* noinspection CssUnusedSymbol */
             .bg-indigo-600, .bg-indigo-500, button.bg-indigo-600, a.bg-indigo-600 {
-                background-color: var(--brand-primary) !important;
+                background-color: var(--brand-primary, #4f46e5) !important;
             }
 
+            /* noinspection CssUnusedSymbol */
             .hover\:bg-indigo-700:hover, button.bg-indigo-600:hover, a.bg-indigo-600:hover {
                 filter: brightness(0.9) !important;
             }
 
+            /* noinspection CssUnusedSymbol */
             .text-indigo-600, .text-indigo-500, .text-indigo-700 {
-                color: var(--brand-primary) !important;
+                color: var(--brand-primary, #4f46e5) !important;
             }
 
+            /* noinspection CssUnusedSymbol */
             .border-indigo-500, .border-indigo-600 {
-                border-color: var(--brand-primary) !important;
+                border-color: var(--brand-primary, #4f46e5) !important;
             }
 
+            /* noinspection CssUnusedSymbol */
             .focus\:ring-indigo-500:focus, .ring-indigo-500:focus {
-                --tw-ring-color: var(--brand-primary) !important;
+                --tw-ring-color: var(--brand-primary, #4f46e5) !important;
             }
 
+            /* noinspection CssUnusedSymbol */
             .focus\:border-indigo-500:focus {
-                border-color: var(--brand-primary) !important;
+                border-color: var(--brand-primary, #4f46e5) !important;
             }
 
-            .from-indigo-500, .from-indigo-600 {
-                --tw-gradient-from: var(--brand-primary) var(--tw-gradient-from-position) !important;
-                --tw-gradient-to: rgb(var(--brand-primary-rgb) / 0) var(--tw-gradient-to-position) !important;
-                --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
-            }
-
+            /* noinspection CssUnusedSymbol */
             .bg-indigo-50, .dark .bg-indigo-950\/60, .dark .bg-indigo-900\/60 {
-                background-color: rgba(var(--brand-primary-rgb), 0.1) !important;
+                background-color: rgba(var(--brand-primary-rgb, 79, 70, 229), 0.1) !important;
             }
 
+            /* noinspection CssUnusedSymbol */
             .border-indigo-100, .border-indigo-200, .dark .border-indigo-800\/60 {
-                border-color: rgba(var(--brand-primary-rgb), 0.25) !important;
+                border-color: rgba(var(--brand-primary-rgb, 79, 70, 229), 0.25) !important;
             }
         </style>
     @endif
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     @if(function_exists('is_panel_indexing_blocked') && is_panel_indexing_blocked())
+        <!-- spell-checker: disable -->
+        <!--suppress SpellCheckingInspection -->
         <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+        <!--suppress SpellCheckingInspection -->
         <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+        <!-- spell-checker: enable -->
     @endif
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100">
@@ -127,22 +151,23 @@
             const id = Date.now() + Math.random();
             const detail = (e && e.detail !== undefined) ? e.detail : e;
             const validTypes = ['success', 'error', 'warning', 'info', 'danger'];
-            let type = 'info';
-            let text = '';
+            let type;
+            let text;
             let duration = 5000;
 
             if (typeof detail === 'string') {
                 text = detail;
             } else if (typeof detail === 'object' && detail !== null) {
-                let rawType = detail.type ? String(detail.type).toLowerCase() : '';
-                let rawText = detail.text || detail.message || detail.title || '';
+                const rawType = detail.type ? String(detail.type).toLowerCase() : '';
+                const rawText = detail.text || detail.message || detail.title || '';
                 duration = detail.duration || 5000;
 
                 if (validTypes.includes(rawType)) {
                     type = rawType === 'danger' ? 'error' : rawType;
                     text = rawText;
                 } else if (validTypes.includes(String(rawText).toLowerCase())) {
-                    type = String(rawText).toLowerCase() === 'danger' ? 'error' : String(rawText).toLowerCase();
+                    const norm = String(rawText).toLowerCase();
+                    type = norm === 'danger' ? 'error' : norm;
                     text = detail.type || '';
                 } else {
                     type = 'info';
@@ -186,12 +211,12 @@
     @endphp
     x-on:notify.window="notify($event)"
     x-init="
-        const initialMsgs = @js($initialFlashMessages);
+        const initialMsgs = @json($initialFlashMessages, JSON_THROW_ON_ERROR);
         if (Array.isArray(initialMsgs)) {
             initialMsgs.forEach(m => notify(m));
         }
     "
-    class="fixed top-5 right-5 sm:right-6 z-[99999] w-96 max-w-[calc(100vw-2.5rem)] space-y-3 pointer-events-none font-sans"
+    class="fixed top-5 right-5 sm:right-6 z-99999 w-96 max-w-[calc(100vw-2.5rem)] space-y-3 pointer-events-none font-sans"
     dir="rtl"
 >
     <template x-for="item in items" :key="item.id">
@@ -250,8 +275,8 @@
 
             {{-- Message text --}}
             <div class="flex-1 pt-0.5 min-w-0">
-                <p class="text-xs sm:text-sm font-semibold leading-relaxed break-words font-sans"
-                   x-text="item.text"></p>
+                <p class="text-xs sm:text-sm font-semibold leading-relaxed wrap-break-word font-sans"
+                    x-text="item.text"></p>
             </div>
 
             {{-- Close button --}}
@@ -451,14 +476,18 @@
             },
 
             themeTitle() {
-                return this.theme === 'dark' ? 'حالت تاریک'
-                    : this.theme === 'light' ? 'حالت روشن'
-                        : 'همسان با سیستم';
+                if (this.theme === 'dark') return 'حالت تاریک';
+                if (this.theme === 'light') return 'حالت روشن';
+                return 'همسان با سیستم';
             },
             updateThemeIcon() {
-                this.themeIcon = this.theme === 'dark' ? 'dark'
-                    : this.theme === 'light' ? 'light'
-                        : 'system';
+                if (this.theme === 'dark') {
+                    this.themeIcon = 'dark';
+                } else if (this.theme === 'light') {
+                    this.themeIcon = 'light';
+                } else {
+                    this.themeIcon = 'system';
+                }
             },
             applyTheme() {
                 const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -467,7 +496,12 @@
                 this.updateThemeIcon();
             },
             cycleTheme() {
-                this.theme = this.theme === 'system' ? 'dark' : this.theme === 'dark' ? 'light' : 'system';
+                const nextTheme = {
+                    'system': 'dark',
+                    'dark': 'light',
+                    'light': 'system'
+                };
+                this.theme = nextTheme[this.theme] || 'system';
                 localStorage.setItem('theme', this.theme);
                 this.applyTheme();
             },
@@ -477,12 +511,16 @@
 @livewireScripts
 @livewireScriptConfig
 @includeIf('partials.jalali-date-picker')
+{{-- spell-checker: disable --}}
+<!-- spell-checker: disable -->
 @includeIf('resellerhub::partials.impersonation-banner')
 @includeIf('resellerhub::partials.prevent-double-submit')
 @includeIf('resellerhub::partials.quota-exceeded-modal')
 @includeIf('resellerhub::partials.invoice-payment-modal')
 @includeIf('resellerhub::partials.renewal-limit-modal')
 @includeIf('resellerhub::partials.cancel-invoice-modal')
+<!-- spell-checker: enable -->
+{{-- spell-checker: enable --}}
 @stack('scripts')
 @stack('js')
 </body>

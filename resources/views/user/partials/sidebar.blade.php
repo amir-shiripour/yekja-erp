@@ -39,31 +39,28 @@
 
 {{-- Header section of the sidebar --}}
 <div
-    class="h-20 px-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/80 shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-10 transition-colors">
-    <div class="flex items-center gap-3 overflow-hidden">
+    :class="sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-4'"
+    class="h-20 flex items-center border-b border-gray-100 dark:border-gray-800/80 shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-10 transition-colors">
+    <div x-show="!sidebarCollapsed" class="flex items-center gap-3 overflow-hidden">
         <a href="{{ route('user.dashboard') }}" class="flex items-center gap-3 group">
             @if(isset($currentTenant) && $currentTenant && $currentTenant->getBranding('brand_logo'))
                 <img src="{{ asset('storage/' . $currentTenant->getBranding('brand_logo')) }}" alt="Logo"
-                     class="w-10 h-10 rounded-xl object-contain bg-white dark:bg-gray-800 p-1 border border-gray-100 dark:border-gray-700 shadow-xs">
+                     class="w-10 h-10 rounded-xl object-contain bg-white dark:bg-gray-800 p-1 border border-gray-100 dark:border-gray-700 shadow-xs shrink-0">
             @else
                 <div
-                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-md shadow-indigo-500/20 dark:shadow-indigo-900/40 group-hover:scale-105 transition-all duration-300">
-                    <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20 dark:shadow-indigo-900/40 group-hover:scale-105 transition-all duration-300 shrink-0">
+                    <svg class="w-5 h-5 shrink-0 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                         <polyline points="9 22 9 12 15 12 15 22"></polyline>
                     </svg>
                 </div>
             @endif
-            <div x-show="!sidebarCollapsed"
-                 x-transition:enter="transition ease-out duration-300 delay-75"
-                 x-transition:enter-start="opacity-0 translate-x-4"
-                 x-transition:enter-end="opacity-100 translate-x-0"
-                 class="flex flex-col min-w-0">
+            <div class="flex flex-col min-w-0">
                 <span class="font-black text-base truncate text-gray-900 dark:text-white tracking-tight leading-tight">
                     {{ (isset($currentTenant) && $currentTenant) ? ($currentTenant->getBranding('brand_title') ?: $currentTenant->name) : config('app.name', 'پنل کاربری') }}
                 </span>
-                <span class="text-[11px] text-gray-400 dark:text-gray-400 font-medium">
+                <span class="text-[11px] text-gray-400 dark:text-gray-400 font-medium truncate">
                     {{ (isset($currentTenant) && $currentTenant) ? $currentTenant->name : 'داشبورد مدیریت' }}
                 </span>
             </div>
@@ -71,7 +68,7 @@
     </div>
 
     <button @click="toggleSidebar()"
-            class="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-300 transition-all duration-200 hidden lg:flex items-center justify-center border border-gray-200/60 dark:border-gray-700/60"
+            class="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-300 transition-all duration-200 hidden lg:flex items-center justify-center border border-gray-200/60 dark:border-gray-700/60 shrink-0"
             :title="sidebarCollapsed ? 'باز کردن منو' : 'جمع کردن منو'">
         <svg x-show="!sidebarCollapsed" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
