@@ -39,7 +39,8 @@
 @endphp
 
 @if(!$activeTenant)
-    <div class="p-8 text-center rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-gray-500">
+    <div
+        class="p-8 text-center rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-gray-500">
         {{ __('resellerhub::messages.domain_branding.tenant_not_found') }}
     </div>
 @else
@@ -115,7 +116,8 @@
                         </span>
                     </div>
 
-                    <div class="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-800 flex items-center justify-between gap-3">
+                    <div
+                        class="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-800 flex items-center justify-between gap-3">
                         <div class="min-w-0">
                             <span
                                 class="text-xs font-bold text-gray-400 block">{{ __('resellerhub::messages.domain_branding.direct_login_url') }}</span>
@@ -252,12 +254,6 @@
                         <div class="flex items-center gap-3">
                             <span
                                 class="p-2.5 rounded-2xl {{ $allowsWhiteLabel ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/80 dark:border-gray-700' }}">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                     stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
-                                </svg>
-                            </span>
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                      stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -418,7 +414,7 @@
                                            x-model="supportPhone"
                                            dir="ltr"
                                            placeholder="02188888888"
-                                           class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/60 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-mono transition-all">
+                                           class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/60 px-3.5 py-2.5 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
                                 </div>
 
                                 <div>

@@ -47,11 +47,13 @@
 
     {{--    <div class="max-w-7xl mx-auto px-6 border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">--}}
     <div class="max-w-7xl mx-auto px-6 pt-8 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4">
-        <p class="text-sm font-medium text-slate-500 text-center sm:text-right w-full">
+        <p class="text-sm font-medium text-slate-500 text-center sm:text-right">
             &copy; {{ date('Y') }} {{ $footerText }}
         </p>
-        {{--<div class="flex items-center gap-4 mt-2 sm:mt-0">
-            <span class="text-sm text-slate-400 font-bold">۰۲۱-۹۱۰۰۰۰۰۰</span>
-        </div>--}}
+        <div class="inline-flex items-center">
+            <a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=8588364&Code=zqkZId2ZFv03YFoanALLpEcgCAUvqpve' class="inline-block p-1.5 bg-white rounded-xl border border-slate-700 shadow-xs">
+                <img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=8588364&Code=zqkZId2ZFv03YFoanALLpEcgCAUvqpve' alt='نماد اعتماد الکترونیکی' style='cursor:pointer' code='zqkZId2ZFv03YFoanALLpEcgCAUvqpve' class="h-14 w-auto object-contain">
+            </a>
+        </div>
     </div>
 </footer>
