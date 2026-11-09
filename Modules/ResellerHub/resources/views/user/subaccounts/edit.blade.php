@@ -3,7 +3,8 @@
 @section('title', 'ویرایش حساب زیرمجموعه: ' . $subAccount->name)
 
 @php
-    $tenantsCount = $subAccount->tenants()->count();
+    $tenantsCount = $tenantsCount ?? $subAccount->tenants()->count();
+    $recentTenants = $recentTenants ?? $subAccount->tenants()->take(5)->get();
 @endphp
 
 @section('content')
@@ -67,14 +68,14 @@
                                             class="text-rose-500 font-bold">*</span>
                                     </x-resellerhub::label>
                                     <div class="relative">
-                                        <x-resellerhub::input class="pl-10" type="text"
+                                        <x-resellerhub::input class="pe-10" type="text"
                                                               name="name"
                                                               x-model="form.name"
 
                                                               placeholder="{{ __('مثلاً: دکتر علی محمدی') }}"
                                                               required/>
                                         <div
-                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                                            class="absolute inset-y-0 end-0 pe-3.5 flex items-center pointer-events-none text-gray-400">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -108,7 +109,7 @@
                                         {{ __('شماره تلفن همراه') }} <span class="text-rose-500 font-bold">*</span>
                                     </x-resellerhub::label>
                                     <div class="relative">
-                                        <x-resellerhub::input class="pl-10 text-left tracking-wider" type="text"
+                                        <x-resellerhub::input class="pe-10 text-start tracking-wider" type="text"
                                                               name="mobile"
                                                               x-model="form.mobile"
                                                               dir="ltr"
@@ -116,7 +117,7 @@
                                                               placeholder="09123456789"
                                                               required/>
                                         <div
-                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                                            class="absolute inset-y-0 end-0 pe-3.5 flex items-center pointer-events-none text-gray-400">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -152,13 +153,13 @@
                                             class="text-xs text-gray-400 font-normal">({{ __('اختیاری') }})</span>
                                     </x-resellerhub::label>
                                     <div class="relative">
-                                        <x-resellerhub::input class="pl-10" type="text"
+                                        <x-resellerhub::input class="pe-10" type="text"
                                                               name="company_name"
                                                               x-model="form.company_name"
 
                                                               placeholder="{{ __('مثلاً: کلینیک تخصصی دندانپزشکی رازی') }}"/>
                                         <div
-                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                                            class="absolute inset-y-0 end-0 pe-3.5 flex items-center pointer-events-none text-gray-400">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
@@ -325,13 +326,13 @@
                         </div>
                         <span
                             class="px-2.5 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
-                        {{ $tenantsCount }} {{ __('سامانه') }}
+                        {{ reseller_fa_num($tenantsCount) }} {{ __('سامانه') }}
                     </span>
                     </div>
 
                     @if($tenantsCount > 0)
                         <div class="space-y-2">
-                            @foreach($subAccount->tenants()->take(5)->get() as $t)
+                            @foreach($recentTenants as $t)
                                 <div
                                     class="p-3 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
                                     <div class="truncate">

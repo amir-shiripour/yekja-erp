@@ -44,7 +44,7 @@
                                 </p>
                             </div>
                         </div>
-                        <button @click="upgradeModal = false"
+                        <button type="button" @click="upgradeModal = false"
                                 class="p-1 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -95,7 +95,7 @@
                                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2.5">
                                     {{ $hasNoPackage ? 'انتخاب پکیج مورد نظر:' : 'انتخاب پکیج مقصد جهت ارتقا:' }}
                                 </label>
-                                <div class="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                                <div class="space-y-2.5 max-h-56 overflow-y-auto pe-1">
                                     @foreach($availableUpgradePackages as $upPkg)
                                         @php
                                             $hasDiscount = $upPkg->has_active_discount ?? ($upPkg->isSubscription() ? ($upPkg->hasActiveDiscountForMonths(1) || $upPkg->hasActiveDiscountForMonths(12)) : $upPkg->hasActiveDiscount());

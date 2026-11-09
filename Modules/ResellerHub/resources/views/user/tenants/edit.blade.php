@@ -9,7 +9,7 @@
 @section('title', 'ویرایش سامانه CRM: ' . $tenant->name)
 
 @php
-    $subAccount = $tenant->subAccount ?: ResellerSubAccount::where('tenant_id', $tenant->id)->first();
+    $subAccount = $subAccount ?? ($tenant->subAccount ?: ResellerSubAccount::where('tenant_id', $tenant->id)->first());
     $initialActiveModules = $tenant->modules->pluck('module_slug')->toArray();
 
     $tenantBranding = is_array($tenant->branding) ? $tenant->branding : [];

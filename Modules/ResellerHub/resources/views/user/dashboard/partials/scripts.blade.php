@@ -1541,16 +1541,18 @@
 
         window.initResellerIntelligenceCharts = initResellerIntelligenceCharts;
 
-        // Lifecycle triggers identical to Modules/Projects
-        document.addEventListener('DOMContentLoaded', function () {
-            initResellerCharts();
-        });
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            setTimeout(initResellerCharts, 100);
+        function startCharts() {
+            if (typeof Chart !== 'undefined') {
+                initResellerCharts();
+            } else {
+                window.addEventListener('load', initResellerCharts, { once: true });
+            }
         }
-        // Safety retry in case deferred Vite module script loads slightly after HTML parse
-        setTimeout(initResellerCharts, 400);
-        setTimeout(initResellerCharts, 1200);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startCharts, { once: true });
+        } else {
+            startCharts();
+        }
 
         // Dynamic Dark/Light Theme Reactivity: Re-render charts when class on <html> changes
         let lastThemeIsDark = document.documentElement.classList.contains('dark');
@@ -1562,20 +1564,5 @@
             }
         });
         themeObserver.observe(document.documentElement, {attributes: true, attributeFilter: ['class']});
-
-        // Ambient Spotlight Mouse Tracker (Linear Style)
-        document.addEventListener('mousemove', function (e) {
-            const cards = document.querySelectorAll('.spotlight-card');
-            for (let i = 0; i < cards.length; i++) {
-                const card = cards[i];
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                if (x >= -50 && x <= rect.width + 50 && y >= -50 && y <= rect.height + 50) {
-                    card.style.setProperty('--mouse-x', x + 'px');
-                    card.style.setProperty('--mouse-y', y + 'px');
-                }
-            }
-        }, {passive: true});
     </script>
 @endpush

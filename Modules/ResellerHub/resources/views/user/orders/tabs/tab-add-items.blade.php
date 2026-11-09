@@ -262,7 +262,7 @@
                                                  x-transition:enter="transition ease-out duration-200"
                                                  x-transition:enter-start="opacity-0 -translate-y-2"
                                                  x-transition:enter-end="opacity-100 translate-y-0"
-                                                 class="space-y-1.5 max-h-52 overflow-y-auto pr-1 pt-1"
+                                                 class="space-y-1.5 max-h-52 overflow-y-auto pe-1 pt-1"
                                                  style="display: none;">
                                                 @foreach($mod['features'] as $feat)
                                                     @php
@@ -427,7 +427,7 @@
                             </div>
 
                             {{-- Selected Items Scrollable List --}}
-                            <div x-show="selectedItems.length > 0" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                            <div x-show="selectedItems.length > 0" class="space-y-2 max-h-56 overflow-y-auto pe-1">
                                 <template x-for="item in selectedItems" :key="item.slug">
                                     <div
                                         class="flex items-center justify-between p-3 rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800 text-xs transition">
@@ -596,7 +596,7 @@
                     </div>
 
                     {{-- Multi items preview --}}
-                    <div x-show="itemsToRemove.length > 1" class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                    <div x-show="itemsToRemove.length > 1" class="space-y-1.5 max-h-40 overflow-y-auto pe-1">
                         <template x-for="item in itemsToRemove" :key="item.slug">
                             <div
                                 class="flex items-center justify-between p-2 rounded-xl bg-gray-50 dark:bg-gray-800/80 text-xs border border-gray-100 dark:border-gray-700/60">

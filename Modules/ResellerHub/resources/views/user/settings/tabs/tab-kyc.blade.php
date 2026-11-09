@@ -58,7 +58,7 @@
                     فیلدهای پیکربندی‌شده برای مدیران زیرمجموعه
                 </h3>
                 <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                    {{ $subAccountCustomFields->count() }} فیلد فعال
+                    {{ reseller_fa_num($subAccountCustomFields->count()) }} فیلد فعال
                 </span>
             </div>
 

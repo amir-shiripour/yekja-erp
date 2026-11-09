@@ -98,7 +98,7 @@
             <div
                 class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-800 space-y-3">
                 <div class="flex items-center justify-between text-xs">
-                    <span class="text-gray-500 dark:text-gray-400">پلن اشتراک:</span>
+                    <span class="text-gray-500 dark:text-gray-400">پکیج:</span>
                     <div class="flex items-center gap-1.5">
                         <strong class="font-bold text-gray-900 dark:text-white"
                                 x-text="packageName || 'اشتراک سامانه'"></strong>

@@ -30,7 +30,7 @@
         class="space-y-6 sm:space-y-8 relative">
 
         <header
-            class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-700/60 p-5 sm:p-6 shadow-sm backdrop-blur-xl transition-all">
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-5 sm:p-6 shadow-xs transition-all">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div class="space-y-3 min-w-0">
                     <nav class="flex items-center gap-2 text-xs font-bold text-gray-400 dark:text-gray-500"
@@ -46,7 +46,7 @@
                              stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
-                        <span class="text-indigo-600 dark:text-indigo-400 font-black">مرکز عملیات نمایندگی فروش</span>
+                        <span class="text-indigo-600 dark:text-indigo-400 font-black">مرکز مدیریت نمایندگی فروش</span>
                     </nav>
 
                     <div class="flex items-start sm:items-center gap-3.5">
@@ -62,24 +62,7 @@
                                 <h1 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                                     مرکز مدیریت نمایندگی فروش
                                 </h1>
-                                @if($reseller)
-                                    <span
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800 text-xs font-bold">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                                        {{ $reseller->display_name }}
-                                    </span>
-                                @elseif($isSuperAdmin)
-                                    <span
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-purple-50 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border border-purple-100 dark:border-purple-800 text-xs font-bold">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-                                        دید فراگیر مدیر پلتفرم (Platform View)
-                                    </span>
-                                @endif
                             </div>
-                            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                                واگذاری و استقرار آنی سامانه‌های CRM، مدیریت لایسنس، نظارت بر جریان درآمدی و
-                                زیرمجموعه‌ها
-                            </p>
                         </div>
                     </div>
 
@@ -123,109 +106,11 @@
         </header>
 
         @include('resellerhub::user.dashboard.partials.kpi-cards')
-        <style>
-            .spotlight-card {
-                position: relative;
-                overflow: hidden;
-                transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.2s ease;
-            }
-
-            .spotlight-card:hover {
-                transform: translateY(-2px);
-            }
-
-            .spotlight-card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                border-radius: inherit;
-                background: radial-gradient(350px circle at 50% 0%, rgba(99, 102, 241, 0.08), transparent 70%);
-                opacity: 0;
-                transition: opacity 0.3s ease;
-                pointer-events: none;
-                z-index: 2;
-            }
-
-            .spotlight-card:hover::before {
-                opacity: 1;
-            }
-
-            html.dark .spotlight-card::before {
-                background: radial-gradient(350px circle at 50% 0%, rgba(129, 140, 248, 0.14), transparent 70%);
-            }
-
-            /* Dark Mode Seamless Cohesion: Eliminate stark white/light borders across cards, badges, and pipeline */
-            html.dark .border-gray-100,
-            html.dark .border-gray-200,
-            html.dark [class*="border-gray-100"],
-            html.dark [class*="border-gray-200"],
-            html.dark [class*="border-gray-700"] {
-                border-color: rgba(255, 255, 255, 0.08) !important;
-            }
-
-            html.dark [class*="border-gray-800"] {
-                border-color: rgba(255, 255, 255, 0.05) !important;
-            }
-
-            /* Eliminate all pastel light 100/200 borders that appear white in dark mode */
-            html.dark [class*="border-rose-100"],
-            html.dark [class*="border-rose-200"] {
-                border-color: rgba(244, 63, 94, 0.25) !important;
-            }
-
-            html.dark [class*="border-indigo-100"],
-            html.dark [class*="border-indigo-200"] {
-                border-color: rgba(99, 102, 241, 0.25) !important;
-            }
-
-            html.dark [class*="border-emerald-100"],
-            html.dark [class*="border-emerald-200"] {
-                border-color: rgba(16, 185, 129, 0.25) !important;
-            }
-
-            html.dark [class*="border-cyan-100"],
-            html.dark [class*="border-cyan-200"] {
-                border-color: rgba(6, 182, 212, 0.25) !important;
-            }
-
-            html.dark [class*="border-amber-100"],
-            html.dark [class*="border-amber-200"] {
-                border-color: rgba(245, 158, 11, 0.25) !important;
-            }
-
-            html.dark [class*="border-purple-100"],
-            html.dark [class*="border-purple-200"] {
-                border-color: rgba(168, 85, 247, 0.25) !important;
-            }
-
-            html.dark [class*="border-teal-100"],
-            html.dark [class*="border-teal-200"] {
-                border-color: rgba(20, 184, 166, 0.25) !important;
-            }
-
-            html.dark .pipeline-card-rose {
-                border-color: rgba(244, 63, 94, 0.22) !important;
-                background-color: rgba(17, 24, 39, 0.5) !important;
-            }
-
-            html.dark .pipeline-card-indigo {
-                border-color: rgba(99, 102, 241, 0.22) !important;
-                background-color: rgba(17, 24, 39, 0.5) !important;
-            }
-
-            html.dark .pipeline-card-emerald {
-                border-color: rgba(16, 185, 129, 0.22) !important;
-                background-color: rgba(17, 24, 39, 0.5) !important;
-            }
-        </style>
 
         <div class="space-y-3 pt-1">
             <div
                 role="tablist" aria-label="بخش‌های داشبورد نماینده"
-                class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 p-1.5 sm:p-2 bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/70 dark:border-gray-800/80 rounded-3xl backdrop-blur-xl shadow-xs">
+                class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 p-1.5 sm:p-2 bg-gray-100 dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700/60 rounded-2xl shadow-xs">
                 <button type="button" role="tab" id="tab-operations" aria-controls="tabpanel-operations"
                         :aria-selected="activeTab === 'operations' ? 'true' : 'false'"
                         @click="setTab('operations')"
@@ -292,21 +177,21 @@
                             :class="activeTab === 'intelligence' ? 'bg-amber-500 text-white shadow-xs shadow-amber-500/20' : 'bg-white dark:bg-gray-800 text-amber-600 dark:text-amber-400 border border-gray-200/60 dark:border-gray-700/60'">
                             <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                             </svg>
                         </span>
                         <div class="min-w-0">
-                            <div class="text-xs sm:text-sm font-black tracking-tight truncate">هوش تجاری و رفتار بازار
+                            <div class="text-xs sm:text-sm font-black tracking-tight truncate">تحلیل منابع و رفتار مشترکین
                             </div>
                             <div
                                 class="text-xs text-gray-400 dark:text-gray-500 font-medium truncate hidden md:block">
-                                سقف منابع و کوهورت
+                                سقف مصرف و روند استقرار
                             </div>
                         </div>
                     </div>
-                    <span class="px-2 py-0.5 rounded-lg text-xs font-black shrink-0"
+                    <span class="px-2 py-0.5 rounded-lg text-xs font-black tabular-nums shrink-0"
                           :class="activeTab === 'intelligence' ? 'bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40' : 'bg-gray-200/70 dark:bg-gray-800 text-gray-600 dark:text-gray-400'">
-                        هوشمند
+                        {{ reseller_fa_num($totalTenants) }} سامانه
                     </span>
                 </button>
             </div>

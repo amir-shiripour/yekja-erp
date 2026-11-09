@@ -1277,7 +1277,7 @@
                     </div>
 
                     {{-- Modal Body (Scrollable, Full Width) --}}
-                    <div class="space-y-4.5 overflow-y-auto pr-1 pl-1 -mr-1 -ml-1 text-right flex-1">
+                    <div class="space-y-4.5 overflow-y-auto px-1 -mx-1 text-right flex-1">
                         {{-- Presets Bar --}}
                         <div
                             class="p-4 bg-gradient-to-br from-indigo-50/70 via-purple-50/40 to-transparent dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-transparent rounded-2xl border border-indigo-100 dark:border-indigo-900/50 space-y-2.5">

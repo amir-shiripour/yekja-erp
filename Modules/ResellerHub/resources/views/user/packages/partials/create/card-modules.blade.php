@@ -185,7 +185,7 @@
                                 </div>
                             </div>
 
-                            <div class="space-y-1.5 max-h-56 overflow-y-auto custom-scrollbar pr-0.5">
+                            <div class="space-y-1.5 max-h-56 overflow-y-auto custom-scrollbar pe-0.5">
                                 <template x-for="feat in getModuleBooleanFeatures(mod.slug)"
                                           :key="feat.key">
                                     <label

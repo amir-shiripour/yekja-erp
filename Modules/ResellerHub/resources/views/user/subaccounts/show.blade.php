@@ -774,7 +774,7 @@
                         {{-- Invoices Quota --}}
                         @php
                             $invLimit = $subAccount->getLimit('invoices');
-                            $invUsed = $subAccount->invoices()->count();
+                            $invUsed = $subAccount->invoices_count ?? $subAccount->invoices()->count();
                             $invRemaining = $subAccount->remainingInvoiceQuota();
                         @endphp
                         <div

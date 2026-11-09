@@ -1,4 +1,39 @@
 @php
+    $colorStyles = [
+        'indigo' => [
+            'box' => 'bg-indigo-50 border-indigo-200 text-indigo-600 dark:bg-indigo-950/40 dark:border-indigo-800/60 dark:text-indigo-400',
+            'badge' => 'bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-950/60 dark:border-indigo-800/60 dark:text-indigo-300',
+        ],
+        'teal' => [
+            'box' => 'bg-teal-50 border-teal-200 text-teal-600 dark:bg-teal-950/40 dark:border-teal-800/60 dark:text-teal-400',
+            'badge' => 'bg-teal-50 border-teal-200 text-teal-700 dark:bg-teal-950/60 dark:border-teal-800/60 dark:text-teal-300',
+        ],
+        'violet' => [
+            'box' => 'bg-violet-50 border-violet-200 text-violet-600 dark:bg-violet-950/40 dark:border-violet-800/60 dark:text-violet-400',
+            'badge' => 'bg-violet-50 border-violet-200 text-violet-700 dark:bg-violet-950/60 dark:border-violet-800/60 dark:text-violet-300',
+        ],
+        'rose' => [
+            'box' => 'bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-950/40 dark:border-rose-800/60 dark:text-rose-400',
+            'badge' => 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-950/60 dark:border-rose-800/60 dark:text-rose-300',
+        ],
+        'sky' => [
+            'box' => 'bg-sky-50 border-sky-200 text-sky-600 dark:bg-sky-950/40 dark:border-sky-800/60 dark:text-sky-400',
+            'badge' => 'bg-sky-50 border-sky-200 text-sky-700 dark:bg-sky-950/60 dark:border-sky-800/60 dark:text-sky-300',
+        ],
+        'amber' => [
+            'box' => 'bg-amber-50 border-amber-200 text-amber-600 dark:bg-amber-950/40 dark:border-amber-800/60 dark:text-amber-400',
+            'badge' => 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/60 dark:border-amber-800/60 dark:text-amber-300',
+        ],
+        'cyan' => [
+            'box' => 'bg-cyan-50 border-cyan-200 text-cyan-600 dark:bg-cyan-950/40 dark:border-cyan-800/60 dark:text-cyan-400',
+            'badge' => 'bg-cyan-50 border-cyan-200 text-cyan-700 dark:bg-cyan-950/60 dark:border-cyan-800/60 dark:text-cyan-300',
+        ],
+        'fuchsia' => [
+            'box' => 'bg-fuchsia-50 border-fuchsia-200 text-fuchsia-600 dark:bg-fuchsia-950/40 dark:border-fuchsia-800/60 dark:text-fuchsia-400',
+            'badge' => 'bg-fuchsia-50 border-fuchsia-200 text-fuchsia-700 dark:bg-fuchsia-950/60 dark:border-fuchsia-800/60 dark:text-fuchsia-300',
+        ],
+    ];
+
     $shortcuts = [
         [
             'color' => 'indigo',
@@ -83,53 +118,10 @@
     ];
 @endphp
 
-<style>
-    /* Scoped styling to guarantee 100% dark mode fidelity and eliminate washed-out white backgrounds */
-    .hub-box-indigo { background-color: #eef2ff; border-color: #c7d2fe; color: #4f46e5; }
-    .hub-badge-indigo { background-color: #eef2ff; border-color: #c7d2fe; color: #4338ca; }
-    html.dark .hub-box-indigo { background-color: rgba(79, 70, 229, 0.16) !important; border-color: rgba(99, 102, 241, 0.35) !important; color: #818cf8 !important; }
-    html.dark .hub-badge-indigo { background-color: rgba(30, 27, 75, 0.7) !important; border-color: rgba(99, 102, 241, 0.35) !important; color: #a5b4fc !important; }
-
-    .hub-box-teal { background-color: #f0fdfa; border-color: #ccfbf1; color: #0d9488; }
-    .hub-badge-teal { background-color: #f0fdfa; border-color: #99f6e4; color: #0f766e; }
-    html.dark .hub-box-teal { background-color: rgba(20, 184, 166, 0.16) !important; border-color: rgba(20, 184, 166, 0.35) !important; color: #2dd4bf !important; }
-    html.dark .hub-badge-teal { background-color: rgba(4, 47, 46, 0.7) !important; border-color: rgba(20, 184, 166, 0.35) !important; color: #5eead4 !important; }
-
-    .hub-box-violet { background-color: #f5f3ff; border-color: #ddd6fe; color: #7c3aed; }
-    .hub-badge-violet { background-color: #f5f3ff; border-color: #ddd6fe; color: #6d28d9; }
-    html.dark .hub-box-violet { background-color: rgba(139, 92, 246, 0.16) !important; border-color: rgba(139, 92, 246, 0.35) !important; color: #a78bfa !important; }
-    html.dark .hub-badge-violet { background-color: rgba(46, 16, 101, 0.7) !important; border-color: rgba(139, 92, 246, 0.35) !important; color: #c4b5fd !important; }
-
-    .hub-box-rose { background-color: #fff1f2; border-color: #fecdd3; color: #e11d48; }
-    .hub-badge-rose { background-color: #fff1f2; border-color: #fecdd3; color: #be123c; }
-    html.dark .hub-box-rose { background-color: rgba(244, 63, 94, 0.16) !important; border-color: rgba(244, 63, 94, 0.35) !important; color: #fb7185 !important; }
-    html.dark .hub-badge-rose { background-color: rgba(76, 5, 25, 0.7) !important; border-color: rgba(244, 63, 94, 0.35) !important; color: #fda4af !important; }
-
-    .hub-box-sky { background-color: #f0f9ff; border-color: #bae6fd; color: #0284c7; }
-    .hub-badge-sky { background-color: #f0f9ff; border-color: #bae6fd; color: #0369a1; }
-    html.dark .hub-box-sky { background-color: rgba(14, 165, 233, 0.16) !important; border-color: rgba(14, 165, 233, 0.35) !important; color: #38bdf8 !important; }
-    html.dark .hub-badge-sky { background-color: rgba(8, 47, 73, 0.7) !important; border-color: rgba(14, 165, 233, 0.35) !important; color: #7dd3fc !important; }
-
-    .hub-box-amber { background-color: #fffbeb; border-color: #fde68a; color: #d97706; }
-    .hub-badge-amber { background-color: #fffbeb; border-color: #fde68a; color: #b45309; }
-    html.dark .hub-box-amber { background-color: rgba(245, 158, 11, 0.16) !important; border-color: rgba(245, 158, 11, 0.35) !important; color: #fbbf24 !important; }
-    html.dark .hub-badge-amber { background-color: rgba(69, 26, 3, 0.7) !important; border-color: rgba(245, 158, 11, 0.35) !important; color: #fde68a !important; }
-
-    .hub-box-cyan { background-color: #ecfeff; border-color: #cffafe; color: #0891b2; }
-    .hub-badge-cyan { background-color: #ecfeff; border-color: #cffafe; color: #0e7490; }
-    html.dark .hub-box-cyan { background-color: rgba(6, 182, 212, 0.16) !important; border-color: rgba(6, 182, 212, 0.35) !important; color: #22d3ee !important; }
-    html.dark .hub-badge-cyan { background-color: rgba(22, 78, 99, 0.7) !important; border-color: rgba(6, 182, 212, 0.35) !important; color: #67e8f9 !important; }
-
-    .hub-box-fuchsia { background-color: #fdf4ff; border-color: #f5d0fe; color: #c026d3; }
-    .hub-badge-fuchsia { background-color: #fdf4ff; border-color: #f5d0fe; color: #a21caf; }
-    html.dark .hub-box-fuchsia { background-color: rgba(217, 70, 239, 0.16) !important; border-color: rgba(217, 70, 239, 0.35) !important; color: #e879f9 !important; }
-    html.dark .hub-badge-fuchsia { background-color: rgba(74, 4, 78, 0.7) !important; border-color: rgba(217, 70, 239, 0.35) !important; color: #f0abfc !important; }
-</style>
-
 <section class="space-y-3">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-lg hub-box-indigo flex items-center justify-center border">
+            <span class="w-6 h-6 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-600 dark:bg-indigo-950/40 dark:border-indigo-800/60 dark:text-indigo-400 flex items-center justify-center">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
@@ -144,12 +136,18 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         @foreach($shortcuts as $item)
+            @php
+                $currentStyle = $colorStyles[$item['color']] ?? [
+                    'box' => 'bg-gray-100 border-gray-200 text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400',
+                    'badge' => 'bg-gray-100 border-gray-200 text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300'
+                ];
+            @endphp
             <a href="{{ $item['url'] }}"
-               class="spotlight-card group relative bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-100 dark:border-gray-700/60 p-3 sm:p-3.5 shadow-xs backdrop-blur-xl transition-all duration-200 hover:shadow-md {{ $item['hover_border'] }} hover:-translate-y-0.5 flex items-center gap-3 cursor-pointer">
+               class="group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-3 sm:p-3.5 shadow-xs transition-all duration-200 hover:shadow-md {{ $item['hover_border'] }} hover:-translate-y-0.5 flex items-center gap-3 cursor-pointer">
 
                 {{-- Colored Icon Box with Soft Vibrant Tint & Border in Dark Mode --}}
                 <span
-                    class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 border hub-box-{{ $item['color'] }}">
+                    class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 border {{ $currentStyle['box'] }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         {!! $item['icon'] !!}
                     </svg>
@@ -163,7 +161,7 @@
 
                         @if(!empty($item['badge']))
                             <span
-                                class="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-bold shrink-0 border hub-badge-{{ $item['color'] }}">
+                                class="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-bold shrink-0 border {{ $currentStyle['badge'] }}">
                                 {{ $item['badge'] }}
                             </span>
                         @endif

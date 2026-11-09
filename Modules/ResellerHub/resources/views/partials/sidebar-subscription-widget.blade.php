@@ -37,13 +37,9 @@
             </div>
 
             <a href="{{ $upgradeUrl }}"
-               class="relative w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl @if($hasActivePlan) bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20 hover:shadow-indigo-600/35 @else bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20 hover:shadow-emerald-600/35 @endif active:scale-95 text-white text-xs font-black shadow-md hover:-translate-y-0.5 transition-all duration-300 overflow-hidden group/btn cursor-pointer select-none">
-                {{-- Smooth Shimmer Light Sheen on hover --}}
-                <span
-                    class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-out pointer-events-none"></span>
-
+               class="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl @if($hasActivePlan) bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20 hover:shadow-indigo-600/35 @else bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20 hover:shadow-emerald-600/35 @endif active:scale-95 text-white text-xs font-bold shadow-sm transition-all duration-200 cursor-pointer select-none">
                 <svg
-                    class="w-4 h-4 transition-transform duration-300 group-hover/btn:-translate-y-0.5 group-hover/btn:scale-110 shrink-0"
+                    class="w-4 h-4 shrink-0"
                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3"
                           d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>

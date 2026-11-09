@@ -25,11 +25,15 @@
     $activeModuleSlugs = $activeModules->pluck('module_slug')->toArray();
     $totalActiveFeaturesCount = collect($features)->where('is_enabled', true)->count();
 
-    // System modules list for identifying inactive ones (Dynamically queried from active system modules)
-    $systemModulesList = \App\Models\Module::where('installed', true)
-        ->where('active', true)
-        ->whereNotIn('slug', ['resellerhub', 'settings', 'admin', 'core'])
-        ->get();
+    // System modules list for identifying inactive ones (Injected from Controller with Cache fallback)
+    $systemModulesList = $systemModulesList ?? \Illuminate\Support\Facades\Cache::remember(
+        'resellerhub_system_active_modules',
+        3600,
+        fn() => \App\Models\Module::where('installed', true)
+            ->where('active', true)
+            ->whereNotIn('slug', ['resellerhub', 'settings', 'admin', 'core'])
+            ->get()
+    );
     $allKnownModules = [];
     foreach ($systemModulesList as $sMod) {
         $sSlug = strtolower(trim($sMod->slug));

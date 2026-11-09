@@ -115,7 +115,7 @@
                             <div class="truncate">
                                 <span x-text="opt.name" class="font-medium"></span>
                                 <template x-if="opt.company_name">
-                                            <span class="ml-2 text-xs text-gray-500 dark:text-gray-400"
+                                            <span class="ms-2 text-xs text-gray-500 dark:text-gray-400"
                                                   x-text="'(' + opt.company_name + ')'"></span>
                                 </template>
                             </div>

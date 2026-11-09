@@ -19,62 +19,62 @@
      })"
      class="space-y-6">
 
-    {{-- Bento Hero Header & Live Stats --}}
+    {{-- Overview Stats --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {{-- Stat Card 1: Engine Health --}}
         <div
-            class="bg-gradient-to-br from-indigo-900/10 via-purple-900/5 to-transparent dark:from-indigo-950/40 dark:via-purple-950/20 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-900/50 shadow-sm relative overflow-hidden">
+            class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs relative overflow-hidden">
             <div class="flex items-center justify-between mb-3">
                 <span
-                    class="p-2.5 rounded-xl bg-indigo-500/10 dark:bg-indigo-400/10 text-indigo-600 dark:text-indigo-400">
+                    class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                     </svg>
                 </span>
                 <span
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>۱۰۰٪ فعال و پایدار</span>
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span>فعال و پایدار</span>
                 </span>
             </div>
-            <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400">موتور ایزولاسیون داده‌ها</h4>
-            <div class="text-base font-black text-gray-900 dark:text-white mt-1">Zero-Touch Tenancy</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">اسکوپ‌گذاری پویا بدون دستکاری سورس</p>
+            <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400">ایزولاسیون داده‌ها</h4>
+            <div class="text-base font-black text-gray-900 dark:text-white mt-1">تفکیک خودکار چندمستاجری</div>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">اسکوپ‌گذاری داده‌ها به تفکیک سامانه</p>
         </div>
 
         {{-- Stat Card 2: Total Guarded Entities --}}
         <div
-            class="bg-white dark:bg-gray-800/80 p-5 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm">
+            class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
             <div class="flex items-center justify-between mb-3">
                 <span
-                    class="p-2.5 rounded-xl bg-purple-500/10 dark:bg-purple-400/10 text-purple-600 dark:text-purple-400">
+                    class="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/60">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
                 </span>
-                <span class="text-xs font-bold text-gray-400">Guarded</span>
+                <span class="text-xs font-bold text-gray-400">محافظت‌شده</span>
             </div>
-            <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400">موجودیت‌های محافظت‌شده</h4>
+            <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400">مدل‌های محافظت‌شده</h4>
             <div class="text-2xl font-black text-gray-900 dark:text-white mt-1"
                  x-text="toPersianDigits(items.length)"></div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">مدل تجاری دارای مالکیت مستاجر</p>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">موجودیت‌های مقید به مستاجر</p>
         </div>
 
         {{-- Stat Card 3: Connected Modules --}}
         <div
-            class="bg-white dark:bg-gray-800/80 p-5 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm">
+            class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
             <div class="flex items-center justify-between mb-3">
-                <span class="p-2.5 rounded-xl bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400">
+                <span class="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/60">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                     </svg>
                 </span>
-                <span class="text-xs font-bold text-gray-400">Modules</span>
+                <span class="text-xs font-bold text-gray-400">ماژول‌ها</span>
             </div>
-            <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400">دامنه‌های ماژولار متصل</h4>
+            <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400">ماژول‌های متصل</h4>
             <div class="text-2xl font-black text-gray-900 dark:text-white mt-1"
                  x-text="toPersianDigits(availableModules.length) + ' ماژول'"></div>
             <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 truncate"
@@ -83,20 +83,20 @@
 
         {{-- Stat Card 4: Anti-Tampering Security Guard --}}
         <div
-            class="bg-white dark:bg-gray-800/80 p-5 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm">
+            class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
             <div class="flex items-center justify-between mb-3">
                 <span
-                    class="p-2.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400">
+                    class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/60">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                     </svg>
                 </span>
-                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Guarded</span>
+                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">فعال</span>
             </div>
-            <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400">سپر امنیتی ضد دستکاری</h4>
-            <div class="text-sm font-black text-emerald-700 dark:text-emerald-300 mt-1">Anti-Tampering Active</div>
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">مسدودسازی بلادرنگ تغییر شناسه مستاجر</p>
+            <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400">کنترل دسترسی مستاجر</h4>
+            <div class="text-sm font-black text-emerald-700 dark:text-emerald-300 mt-1">حفاظت از تغییر شناسه</div>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">جلوگیری از دستکاری شناسه سامانه</p>
         </div>
     </div>
 

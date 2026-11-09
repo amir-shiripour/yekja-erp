@@ -42,7 +42,7 @@
                             : 'border-gray-200 dark:border-gray-700/60 opacity-80'">
                         {{-- Card Header: Module Title + Status + Switch --}}
                         <div class="p-4 flex items-center justify-between gap-3 bg-gray-50/50 dark:bg-gray-800/50">
-                            <div class="min-w-0 pr-1 flex-1">
+                            <div class="min-w-0 pe-1 flex-1">
                                 <div class="flex items-center gap-2">
                                     <span
                                         class="text-xs sm:text-sm font-bold truncate text-gray-900 dark:text-white">{{ $mod->title }}</span>

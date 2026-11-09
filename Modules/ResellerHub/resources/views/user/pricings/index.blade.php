@@ -358,15 +358,7 @@
                         <div class="flex flex-wrap items-center gap-2.5 mb-1.5">
                             <h1 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">تعرفه ماژول‌ها و
                                 امکانات اشتراکی</h1>
-                            <span
-                                class="px-3 py-0.5 rounded-full text-xs font-black bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/50">
-                                واحد پولی: {{ $currencyLabel }}
-                            </span>
                         </div>
-                        <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 leading-relaxed">
-                            مدیریت و تعیین نرخ دوره‌های مختلف (ماهانه، ۳ ماهه، ۶ ماهه، سالانه و راه‌اندازی) برای هر
-                            ماژول CRM و قابلیت‌های تفکیک‌پذیر آن.
-                        </p>
                     </div>
                 </div>
 
@@ -448,17 +440,20 @@
                 <div class="space-y-2.5">
                     <div class="relative">
                         <svg
-                            class="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                            class="w-4 h-4 absolute start-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                         <input type="text" x-model="pricingSearch"
                                placeholder="جستجوی سریع ماژول یا قابلیت..."
-                               class="w-full bg-gray-50/80 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl pr-9 pl-7 py-2 text-xs font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                               class="w-full bg-gray-50/80 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl ps-9 pe-7 py-2 text-xs font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
                         <button type="button" x-show="pricingSearch" @click="pricingSearch = ''"
-                                class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                            ✕
+                                class="absolute end-2.5 top-1/2 -translate-y-1/2 p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
+                                aria-label="پاک کردن جستجو">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
                         </button>
                     </div>
 
@@ -651,7 +646,7 @@
                                         <div class="flex items-center justify-between">
                                             <span
                                                 class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ BillingCycle::SEMI_ANNUAL->label(true) }}</span>
-                                            
+
                                         </div>
                                         <div
                                             class="flex items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500 shadow-2xs transition">
@@ -780,11 +775,11 @@
                                                 class="py-3 px-2 text-center w-28 sm:w-32">{{ BillingCycle::QUARTERLY->label() }}</th>
                                             <th scope="col"
                                                 class="py-3 px-2 text-center w-28 sm:w-32">{{ BillingCycle::SEMI_ANNUAL->label() }}
-                                                
+
                                             </th>
                                             <th scope="col"
                                                 class="py-3 px-2 text-center w-28 sm:w-32">{{ BillingCycle::ANNUAL->label() }}
-                                                
+
                                             </th>
                                             <th scope="col" class="py-3 px-2 text-center w-28 sm:w-30">راه‌اندازی</th>
                                             <th scope="col" class="py-3 px-2 text-center w-10 shrink-0"></th>
@@ -902,13 +897,7 @@
             <x-resellerhub::card
                 class="p-4 shadow-xl border border-gray-200/80 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
             >
-                <div class="flex items-center gap-3">
-                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300">
-                        تغییرات شما تا زمان کلیک بر روی دکمه ذخیره، به صورت موقت در مرورگر نگهداری می‌شوند.
-                    </span>
-                </div>
-                <div class="flex items-center gap-3 justify-end">
+                <div class="flex items-center gap-3 justify-between">
                     <a href="{{ route('reseller.settings.index') }}"
                        class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                         بازگشت به تنظیمات

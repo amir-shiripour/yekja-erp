@@ -38,7 +38,7 @@
                 </span>
                 <span>{{ $successMessage }}</span>
             </div>
-            <button wire:click="$set('successMessage', '')"
+            <button type="button" wire:click="$set('successMessage', '')"
                     class="text-emerald-600 hover:text-emerald-800 dark:hover:text-emerald-100 p-1 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -67,10 +67,10 @@
                 <span
                     class="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                     راه‌اندازی گام‌به‌گام سامانه
-                    <span class="text-xs font-normal text-gray-500 dark:text-gray-400 mr-1.5">({{ reseller_fa_num($percentage) }}٪ تکمیل شده)</span>
+                    <span class="text-xs font-normal text-gray-500 dark:text-gray-400 ms-1.5">({{ reseller_fa_num($percentage) }}٪ تکمیل شده)</span>
                     @if(!empty($onlyOptionalRemaining))
                         <span
-                            class="mr-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">مراحل باقیمانده اختیاری است</span>
+                            class="ms-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">مراحل باقیمانده اختیاری است</span>
                     @endif
                 </span>
             </div>
@@ -90,7 +90,7 @@
         {{-- State 2: Finished Celebratory Banner --}}
     @elseif ($isFinished)
         <div
-            class="relative overflow-hidden rounded-3xl border border-emerald-200 dark:border-emerald-800/80 bg-gradient-to-l from-emerald-500/10 via-teal-500/5 to-white dark:to-gray-800 p-6 sm:p-7 shadow-sm bg-white dark:bg-gray-800">
+            class="relative overflow-hidden rounded-2xl border border-emerald-200 dark:border-emerald-800/80 bg-white dark:bg-gray-800 p-6 sm:p-7 shadow-xs">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
                 <div class="flex items-center gap-4">
                     <div
@@ -116,13 +116,13 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2 self-start sm:self-center">
-                    <button
+                    <button type="button"
                         wire:click="openPackageModal"
                         class="px-4 py-2.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-bold rounded-xl transition-all border border-indigo-200 dark:border-indigo-800 cursor-pointer"
                     >
                         مدیریت پکیج و تمدید
                     </button>
-                    <button
+                    <button type="button"
                         wire:click="dismiss"
                         class="px-4 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-xl transition-all cursor-pointer"
                     >
@@ -181,7 +181,7 @@
                             dir="rtl">
                             <div
                                 class="h-full rounded-full bg-indigo-600 transition-all duration-500 shadow-xs"
-                                style="width: {{ (int)$percentage }}%; min-width: {{ $percentage > 0 ? '6px' : '0' }}; background-color: #4f46e5 !important; background: linear-gradient(to left, #4f46e5, #6366f1) !important;"></div>
+                                style="width: {{ (int)$percentage }}%; min-width: {{ $percentage > 0 ? '6px' : '0' }};"></div>
                         </div>
                         <span class="text-xs font-bold text-gray-600 dark:text-gray-400 shrink-0">{{ reseller_fa_num($percentage) }}٪</span>
                     </div>
@@ -304,13 +304,11 @@
             </div>
         </div>
 
-        {{-- State 4: Expanded Full Enterprise 2026 Stepper --}}
+        {{-- State 4: Expanded Stepper --}}
     @else
         <div
-            class="relative overflow-hidden bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-md p-6 sm:p-8 space-y-7">
-            {{-- Background decorative subtle glow --}}
-            <div
-                class="absolute -top-24 -left-24 w-80 h-80 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            class="relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs p-6 sm:p-8 space-y-7">
+
 
             {{-- Header Row --}}
             <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -360,7 +358,7 @@
                         </button>
                     @endif
 
-                    <button
+                    <button type="button"
                         wire:click="toggleCollapse"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-all border border-gray-200/80 dark:border-gray-600 cursor-pointer"
                     >
@@ -370,7 +368,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
                         </svg>
                     </button>
-                    <button
+                    <button type="button"
                         wire:click="dismiss"
                         title="مخفی کردن موقت"
                         class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-200/80 dark:border-gray-600 cursor-pointer"
@@ -645,7 +643,7 @@
 
                         <div class="pt-4 mt-2 border-t border-gray-100 dark:border-gray-700/60">
                             @if ($sData->slug === 'complete_kyc')
-                                <button wire:click="openKycModal"
+                                <button type="button" wire:click="openKycModal"
                                         class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer {{ $isDone ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/25 active:scale-95' }}">
                                     <span>{{ $isDone ? 'ویرایش مشخصات هویتی' : 'ثبت و احراز هویت' }}</span>
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -654,7 +652,7 @@
                                     </svg>
                                 </button>
                             @elseif ($sData->slug === 'configure_domain')
-                                <button @if($isAccessible) wire:click="openDomainModal" @endif
+                                <button type="button" @if($isAccessible) wire:click="openDomainModal" @endif
                                 @disabled(!$isAccessible)
                                 class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ $btnClass }}">
                                     <span>{{ $isDone ? 'تغییر تنظیمات دامنه' : 'تنظیم دامین' }}</span>
@@ -664,7 +662,7 @@
                                     </svg>
                                 </button>
                             @elseif ($sData->slug === 'configure_branding')
-                                <button @if($isAccessible) wire:click="openBrandingModal" @endif
+                                <button type="button" @if($isAccessible) wire:click="openBrandingModal" @endif
                                 @disabled(!$isAccessible)
                                 class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ $btnClass }}">
                                     <span>{{ $isDone ? 'تغییر وایت‌لیبل' : 'تنظیم وایت‌لیبل' }}</span>
@@ -674,7 +672,7 @@
                                     </svg>
                                 </button>
                             @elseif ($sData->slug === 'select_package')
-                                <button @if($isAccessible) wire:click="openPackageModal" @endif
+                                <button type="button" @if($isAccessible) wire:click="openPackageModal" @endif
                                 @disabled(!$isAccessible)
                                 class="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all {{ $packageBtnClass }}">
                                     <span>{{ $isDone ? 'مدیریت و ارتقای پکیج' : 'انتخاب پکیج و پرداخت' }}</span>
@@ -860,7 +858,7 @@
                                 </p>
                             </div>
                         </div>
-                        <button wire:click="closeKycModal"
+                        <button type="button" wire:click="closeKycModal"
                                 class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -906,10 +904,10 @@
                                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
                                                 {{ $field->label }}
                                                 @if ($field->is_required)
-                                                    <span class="text-red-500 font-extrabold mr-0.5">*</span>
+                                                    <span class="text-red-500 font-extrabold ms-0.5">*</span>
                                                 @else
                                                     <span
-                                                        class="text-xs text-gray-400 font-normal mr-1">(اختیاری)</span>
+                                                        class="text-xs text-gray-400 font-normal ms-1">(اختیاری)</span>
                                                 @endif
                                             </label>
 
@@ -1022,7 +1020,7 @@
                                 </p>
                             </div>
                         </div>
-                        <button wire:click="closeDomainModal"
+                        <button type="button" wire:click="closeDomainModal"
                                 class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1255,7 +1253,7 @@
                                 </p>
                             </div>
                         </div>
-                        <button wire:click="closeBrandingModal"
+                        <button type="button" wire:click="closeBrandingModal"
                                 class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1436,7 +1434,7 @@
                                 </p>
                             </div>
                         </div>
-                        <button wire:click="closePackageModal"
+                        <button type="button" wire:click="closePackageModal"
                                 class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1527,7 +1525,7 @@
                                             @if ($pkg->isFree())
                                                 <span
                                                     class="text-xl font-black text-emerald-600 dark:text-emerald-400">رایگان</span>
-                                                <span class="text-xs text-gray-500 mr-1">/ بدون هزینه</span>
+                                                <span class="text-xs text-gray-500 ms-1">/ بدون هزینه</span>
                                             @else
                                                 @if ($hasDiscount)
                                                     <div class="flex items-center gap-2 mb-1">
@@ -1672,7 +1670,7 @@
                                 </p>
                             </div>
                         </div>
-                        <button wire:click="closeCustomFieldsModal"
+                        <button type="button" wire:click="closeCustomFieldsModal"
                                 class="p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

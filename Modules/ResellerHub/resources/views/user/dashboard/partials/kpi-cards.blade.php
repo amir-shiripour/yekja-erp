@@ -9,19 +9,14 @@
 
         {{-- Card 1: Active Fleet & Operational Health --}}
         <div
-            class="spotlight-card relative overflow-hidden bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-700/60 p-5 sm:p-6 shadow-sm backdrop-blur-xl transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 flex flex-col justify-between">
-            {{-- Ambient Depth Glow --}}
-            <div
-                class="pointer-events-none absolute -top-12 -start-12 w-36 h-36 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 blur-2xl"></div>
-
+            class="relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-5 sm:p-6 shadow-xs transition-all duration-200 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 flex flex-col justify-between">
             <div class="relative z-10">
                 <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
                         سامانه‌های فعال CRM
                     </span>
                     <span
-                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/60 tabular-nums"
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700/60 tabular-nums"
                         x-text="faNum(activeRatio) + '٪ پایداری'">
                         {{ reseller_fa_num($activeRatio) }}٪ پایداری
                     </span>
@@ -60,11 +55,7 @@
 
         {{-- Card 2: Period Realized Revenue & Growth --}}
         <div
-            class="spotlight-card relative overflow-hidden bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-700/60 p-5 sm:p-6 shadow-sm backdrop-blur-xl transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 flex flex-col justify-between">
-            {{-- Ambient Depth Glow --}}
-            <div
-                class="pointer-events-none absolute -top-12 -start-12 w-36 h-36 rounded-full bg-indigo-500/10 dark:bg-indigo-500/15 blur-2xl"></div>
-
+            class="relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-5 sm:p-6 shadow-xs transition-all duration-200 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 flex flex-col justify-between">
             <div class="relative z-10">
                 <div class="flex items-center justify-between gap-2">
                     <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
@@ -73,8 +64,7 @@
 
                     <template x-if="revenueGrowthPercent !== null && revenueGrowthPercent != 0">
                         <span
-                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-black tabular-nums"
-                            :class="revenueGrowthPercent > 0 ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/60' : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-100 dark:border-rose-800/60'">
+                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold tabular-nums bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700/60">
                             <svg x-show="revenueGrowthPercent > 0"
                                  class="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="none"
                                  stroke="currentColor" viewBox="0 0 24 24">
@@ -119,11 +109,7 @@
 
         {{-- Card 3: Receivables & Liquidity --}}
         <div
-            class="spotlight-card relative overflow-hidden bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-700/60 p-5 sm:p-6 shadow-sm backdrop-blur-xl transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 flex flex-col justify-between">
-            {{-- Ambient Depth Glow --}}
-            <div
-                class="pointer-events-none absolute -top-12 -start-12 w-36 h-36 rounded-full {{ $overdueInvoicesCount > 0 ? 'bg-rose-500/10 dark:bg-rose-500/15' : 'bg-emerald-500/10 dark:bg-emerald-500/15' }} blur-2xl"></div>
-
+            class="relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-5 sm:p-6 shadow-xs transition-all duration-200 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 flex flex-col justify-between">
             <div class="relative z-10">
                 <div class="flex items-center justify-between gap-2">
                     <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
@@ -132,13 +118,12 @@
 
                     @if($overdueInvoicesCount > 0)
                         <a href="{{ route('reseller.invoices.index', ['status' => 'overdue']) }}"
-                           class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 transition">
-                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
+                           class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/40 hover:bg-rose-100 transition">
                             {{ reseller_fa_num($overdueInvoicesCount) }} معوق
                         </a>
                     @else
                         <span
-                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/50">
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60">
                             جریان نقدینگی پایدار
                         </span>
                     @endif
@@ -165,11 +150,7 @@
 
         {{-- Card 4: New Fleet Acquisition & Ecosystem --}}
         <div
-            class="spotlight-card relative overflow-hidden bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-700/60 p-5 sm:p-6 shadow-sm backdrop-blur-xl transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 flex flex-col justify-between">
-            {{-- Ambient Depth Glow --}}
-            <div
-                class="pointer-events-none absolute -top-12 -start-12 w-36 h-36 rounded-full bg-violet-500/10 dark:bg-violet-500/15 blur-2xl"></div>
-
+            class="relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-5 sm:p-6 shadow-xs transition-all duration-200 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 flex flex-col justify-between">
             <div class="relative z-10">
                 <div class="flex items-center justify-between gap-2">
                     <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
@@ -177,15 +158,15 @@
                     </span>
 
                     <span
-                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/60">
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60">
                         {{ reseller_fa_num($subAccountsCount) }} مشتری
                     </span>
                 </div>
 
                 <div class="mt-3 flex items-baseline gap-2">
                     <span class="text-3xl font-black text-gray-900 dark:text-white tabular-nums tracking-tight"
-                          x-text="'+' + faNum(periodTenantsCreated)">
-                        +{{ reseller_fa_num($periodTenantsCreated) }}
+                          x-text="faNum(periodTenantsCreated)">
+                        {{ reseller_fa_num($periodTenantsCreated) }}
                     </span>
                     <span class="text-xs font-medium text-gray-400">CRM مستقر شده</span>
                 </div>

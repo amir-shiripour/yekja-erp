@@ -593,9 +593,12 @@ class TenantProvisioningController extends Controller
             'footer' => (string)($resellerSettings['invoice_footer_note'] ?? ''),
         ];
 
+        $subAccount = $tenant->subAccount ?: ResellerSubAccount::where('tenant_id', $tenant->id)->first();
+
         return view('resellerhub::user.tenants.edit', compact(
             'reseller',
             'tenant',
+            'subAccount',
             'availableModules',
             'baseDomain',
             'resellerPrimaryColor',

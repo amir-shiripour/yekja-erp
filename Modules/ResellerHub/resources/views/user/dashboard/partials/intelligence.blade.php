@@ -1,17 +1,16 @@
 <div class="space-y-6 sm:space-y-8" x-data="{ quotaTab: 'features' }">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <div
-            class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-800/80 p-5 shadow-xs backdrop-blur-xl relative overflow-hidden spotlight-card group">
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-5 shadow-xs relative overflow-hidden transition-all duration-200 hover:shadow-md group">
             <div class="flex items-center justify-between">
                 <span
                     class="text-xs font-bold text-gray-500 dark:text-gray-400">تراکم قابلیت‌های تجاری در سامانه‌ها</span>
-                <span
-                    class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100/80 dark:border-indigo-900/40 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                     </svg>
-                </span>
+                </div>
             </div>
             <div class="mt-4 flex items-baseline gap-2">
                 <span class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tabular-nums tracking-tight">
@@ -19,9 +18,8 @@
                 </span>
                 <span class="text-xs font-bold text-gray-400">قابلیت / سامانه</span>
             </div>
-            <p class="mt-2 text-xs font-semibold text-gray-400 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                <span>مجموع {{ reseller_fa_num($totalFeaturesActiveCount) }} قابلیت فعال تخصصی</span>
+            <p class="mt-2 text-xs font-medium text-gray-400">
+                مجموع {{ reseller_fa_num($totalFeaturesActiveCount) }} قابلیت فعال تخصصی
             </p>
         </div>
 
@@ -30,17 +28,15 @@
             $topPkgColor = $topCommercialPackage ? ($topCommercialPackage['color'] ?? '#f59e0b') : '#f59e0b';
         @endphp
         <div
-            class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-800/80 p-5 shadow-xs backdrop-blur-xl relative overflow-hidden spotlight-card group">
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-5 shadow-xs relative overflow-hidden transition-all duration-200 hover:shadow-md group">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-gray-500 dark:text-gray-400">پلن تجاری برتر بازار</span>
-                <span
-                    class="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform"
-                    style="background-color: {{ $topPkgColor }}18; color: {{ $topPkgColor }}; border: 1px solid {{ $topPkgColor }}33;">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                </span>
+                </div>
             </div>
             <div class="mt-4 flex items-baseline gap-2">
                 <span class="text-lg sm:text-xl font-black text-gray-900 dark:text-white truncate max-w-[190px]"
@@ -48,24 +44,22 @@
                     {{ $topCommercialPackage ? $topCommercialPackage['name'] : '—' }}
                 </span>
             </div>
-            <p class="mt-2 text-xs font-semibold text-gray-400 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full" style="background-color: {{ $topPkgColor }};"></span>
-                <span>{{ reseller_fa_num(number_format($topCommercialPackage ? $topCommercialPackage['ratio'] : 0, 1)) }}٪ سهم تقاضای تجاری</span>
+            <p class="mt-2 text-xs font-medium text-gray-400">
+                {{ reseller_fa_num(number_format($topCommercialPackage ? $topCommercialPackage['ratio'] : 0, 1)) }}٪ سهم تقاضای تجاری
             </p>
         </div>
 
         {{-- KPI 3: Fleet Vitality Rate --}}
         <div
-            class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-800/80 p-5 shadow-xs backdrop-blur-xl relative overflow-hidden spotlight-card group">
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-5 shadow-xs relative overflow-hidden transition-all duration-200 hover:shadow-md group">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-gray-500 dark:text-gray-400">شاخص سلامت و پایداری</span>
-                <span
-                    class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100/80 dark:border-emerald-900/40 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                </span>
+                </div>
             </div>
             <div class="mt-4 flex items-baseline gap-2">
                 <span class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tabular-nums tracking-tight">
@@ -73,24 +67,22 @@
                 </span>
                 <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">فعال و عملیاتی</span>
             </div>
-            <p class="mt-2 text-xs font-semibold text-gray-400 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>{{ reseller_fa_num($activeTenants) }} از {{ reseller_fa_num($totalTenants) }} سامانه فعال</span>
+            <p class="mt-2 text-xs font-medium text-gray-400">
+                {{ reseller_fa_num($activeTenants) }} از {{ reseller_fa_num($totalTenants) }} سامانه فعال
             </p>
         </div>
 
         {{-- KPI 4: Fleet Maturity & Average Age --}}
         <div
-            class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-800/80 p-5 shadow-xs backdrop-blur-xl relative overflow-hidden spotlight-card group">
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-5 shadow-xs relative overflow-hidden transition-all duration-200 hover:shadow-md group">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-gray-500 dark:text-gray-400">میانگین سابقه مشترکین</span>
-                <span
-                    class="w-10 h-10 rounded-2xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 border border-cyan-100/80 dark:border-cyan-900/40 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                </span>
+                </div>
             </div>
             <div class="mt-4 flex items-baseline gap-2">
                 <span class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tabular-nums tracking-tight">
@@ -98,9 +90,8 @@
                 </span>
                 <span class="text-xs font-bold text-gray-400">روز استقرار</span>
             </div>
-            <p class="mt-2 text-xs font-semibold text-gray-400 flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
-                <span>حدود {{ reseller_fa_num(number_format($avgFleetAgeMonths, 1)) }} ماه میانگین عمر مفید</span>
+            <p class="mt-2 text-xs font-medium text-gray-400">
+                حدود {{ reseller_fa_num(number_format($avgFleetAgeMonths, 1)) }} ماه میانگین عمر مفید
             </p>
         </div>
 
@@ -108,18 +99,17 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         <div
-            class="lg:col-span-7 bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-800/80 shadow-sm backdrop-blur-xl overflow-hidden flex flex-col justify-between spotlight-card">
+            class="lg:col-span-7 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs overflow-hidden flex flex-col justify-between transition-all duration-200 hover:shadow-md">
             <div
                 class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-800/80 flex flex-wrap items-center justify-between gap-4">
                 <div class="space-y-1">
                     <div class="flex items-center gap-2.5">
-                        <span
-                            class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100/80 dark:border-indigo-900/40 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
                             </svg>
-                        </span>
+                        </div>
                         <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white"
                             x-text="quotaTab === 'features' ? 'تحلیل ضریب نفوذ قابلیت‌های تجاری' : 'تحلیل وضعیت سقف‌ها و سهمیه‌های مصرفی'">
                             تحلیل ضریب نفوذ قابلیت‌های تجاری
@@ -134,16 +124,14 @@
                     class="inline-flex p-1 rounded-xl bg-gray-100/80 dark:bg-gray-900/60 border border-gray-200/50 dark:border-gray-800/80 text-xs font-bold">
                     <button type="button"
                             @click="quotaTab = 'features'; switchCapabilitiesView('features')"
-                            :class="quotaTab === 'features' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-300 shadow-2xs' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                            class="px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                            :class="quotaTab === 'features' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-2xs' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                            class="px-3 py-1.5 rounded-lg transition-all cursor-pointer">
                         <span>قابلیت‌های تجاری</span>
                     </button>
                     <button type="button"
                             @click="quotaTab = 'limits'; switchCapabilitiesView('limits')"
-                            :class="quotaTab === 'limits' ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-300 shadow-2xs' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                            class="px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            :class="quotaTab === 'limits' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-2xs' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                            class="px-3 py-1.5 rounded-lg transition-all cursor-pointer">
                         <span>سقف‌ها و سهمیه‌ها</span>
                     </button>
                 </div>
@@ -214,20 +202,19 @@
             </div>
         </div>
         <div
-            class="lg:col-span-5 bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-800/80 shadow-sm backdrop-blur-xl overflow-hidden flex flex-col justify-between spotlight-card">
+            class="lg:col-span-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs overflow-hidden flex flex-col justify-between transition-all duration-200 hover:shadow-md">
             <div
                 class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-800/80 flex flex-wrap items-center justify-between gap-4">
                 <div class="space-y-1">
                     <div class="flex items-center gap-2.5">
-                        <span
-                            class="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-100/80 dark:border-purple-900/40 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
                             </svg>
-                        </span>
+                        </div>
                         <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
                             سهم بازار پکیج‌ها و پلن‌ها
                         </h2>
@@ -303,7 +290,7 @@
     </div>
 
     <div
-        class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-800/80 shadow-sm backdrop-blur-xl overflow-hidden flex flex-col justify-between spotlight-card">
+        class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs overflow-hidden flex flex-col justify-between transition-all duration-200 hover:shadow-md">
         <div
             class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-800/80 flex flex-wrap items-center justify-between gap-4">
             <div class="space-y-1">

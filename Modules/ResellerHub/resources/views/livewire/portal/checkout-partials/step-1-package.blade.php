@@ -136,7 +136,7 @@
                 <div role="tablist" aria-label="دوره‌های صورتحساب"
                      class="inline-flex items-center p-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm gap-1.5 overflow-x-auto max-w-full hide-scrollbar">
                     @foreach($availablePeriods as $pKey => $pData)
-                        <button role="tab" :aria-selected="currentPeriod === '{{ $pKey }}' ? 'true' : 'false'"
+                        <button type="button" role="tab" :aria-selected="currentPeriod === '{{ $pKey }}' ? 'true' : 'false'"
                                 @click.prevent="currentPeriod = '{{ $pKey }}'; $wire.set('billingPeriod', '{{ $pKey }}')"
                                 :class="currentPeriod === '{{ $pKey }}' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50'"
                                 class="rounded-xl py-2 px-5 text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 cursor-pointer shrink-0"
@@ -246,7 +246,7 @@
                             <div class="text-xs font-bold text-gray-900 dark:text-white mb-3">امکانات
                                 پکیج:
                             </div>
-                            <ul class="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                            <ul class="space-y-2.5 max-h-48 overflow-y-auto pe-1">
                                 @foreach($limitsAll as $lSlug => $lVal)
                                     @php
                                         $quotaTitle = ResellerHelper::getQuotaTitle($lSlug);

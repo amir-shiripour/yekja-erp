@@ -490,7 +490,7 @@
 
 <div class="no-print"
      style="position: fixed; bottom: 1.5rem; right: 1.5rem; display: flex; align-items: center; gap: 0.75rem; z-index: 9999;">
-    <button onclick="window.print()"
+    <button type="button" onclick="window.print()"
             class="print-fab"
             style="position: static !important; display: flex !important; margin: 0 !important;">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"

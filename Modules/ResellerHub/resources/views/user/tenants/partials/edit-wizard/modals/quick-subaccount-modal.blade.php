@@ -27,11 +27,13 @@
             </div>
 
             <form @submit.prevent="submitQuickSubAccount()" class="p-6 space-y-4">
-                <div
-                    class="p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 text-xs text-indigo-900 dark:text-indigo-300 leading-relaxed">
-                    💡 فقط نام و شماره تماس مشتری را وارد کنید؛ ایمیل سازمانی و گذرواژه امن ورود به CRM به صورت هوشمند
-                    توسط سامانه تولید خواهد شد.
-                </div>
+            <div
+                class="p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 text-xs text-indigo-900 dark:text-indigo-300 leading-relaxed flex items-start gap-2">
+                <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>فقط نام و شماره تماس مشتری را وارد کنید؛ مشخصات دسترسی و گذرواژه امن ورود به سامانه به صورت خودکار توسط سامانه تولید خواهد شد.</span>
+            </div>
 
                 <div>
                     <x-resellerhub::label >
