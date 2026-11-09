@@ -50,18 +50,12 @@
     </style>
 </head>
 <body
-    class="bg-gradient-to-br from-slate-50 via-gray-100 to-indigo-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950/20 text-gray-800 dark:text-gray-100 min-h-screen flex items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
+    class="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 min-h-screen flex items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
 
 <div class="relative w-full max-w-md">
-    {{-- Decorative Ambient Glows --}}
+    {{-- Main Card --}}
     <div
-        class="absolute -top-12 -right-12 w-48 h-48 bg-indigo-500/10 dark:bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
-    <div
-        class="absolute -bottom-12 -left-12 w-48 h-48 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
-
-    {{-- Main Glass Card --}}
-    <div
-        class="relative bg-white/95 dark:bg-gray-850/95 backdrop-blur-xl rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-2xl shadow-indigo-950/5 dark:shadow-black/40 p-6 sm:p-8 space-y-6">
+        class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl p-6 sm:p-8 space-y-6">
 
         {{-- Top Brand & Status Bar --}}
         <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/60">

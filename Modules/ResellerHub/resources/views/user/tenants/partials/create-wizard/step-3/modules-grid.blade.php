@@ -128,7 +128,7 @@
                 </template>
 
                 <template x-if="getModuleFeatures(mod.slug).length > 0">
-                    <div class="max-h-48 overflow-y-auto custom-scrollbar space-y-1.5 pr-0.5">
+                    <div class="max-h-48 overflow-y-auto custom-scrollbar space-y-1.5 pe-0.5">
                         <template x-for="feat in getModuleFeatures(mod.slug)" :key="feat.key">
                             <div
                                 class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/60 transition text-xs hover:border-indigo-200 dark:hover:border-indigo-800">

@@ -5,7 +5,7 @@
 @endphp
 @extends('layouts.user')
 
-@section('title', 'مدیریت پکیج‌های ماژول')
+@section('title', 'مدیریت پکیج‌ها')
 
 @php
     $resellerId = $reseller->id ?? (auth()->user()?->reseller?->id ?? 0);
@@ -1050,13 +1050,8 @@
                               d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
                 </span>
-                    <span>مدیریت پکیج‌های ماژول</span>
+                    <span>مدیریت پکیج‌ها</span>
                 </h1>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2 ms-1">
-                    ماژول‌های مورد نیاز هر صنف یا مشتری (مانند دندانپزشکان، املاک یا شرکت‌ها) را با آیکون و رنگ اختصاصی
-                    پکیج
-                    کنید تا هنگام ساخت CRM صرفاً با یک کلیک فعال شوند.
-                </p>
             </div>
 
             <div class="flex items-center gap-3">
@@ -1070,7 +1065,7 @@
 
                 <a href="{{ route('reseller.tenants.create') }}"
                    class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                    <span>ساخت آزاد CRM</span>
+                    <span>ساخت سامانه</span>
                     <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M14 5l7 7m0 0l-7 7m7-7H3"/>
@@ -1101,7 +1096,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    <span>ساخت اولین پکیج (مثلاً پکیج دندانپزشکی)</span>
+                    <span>ساخت اولین پکیج</span>
                 </a>
             </x-resellerhub::card>
         @else
@@ -1184,7 +1179,7 @@
                         <div class="flex flex-wrap items-baseline gap-1">
                             <span
                                 class="text-xl xl:text-2xl font-black text-gray-900 dark:text-white tabular-nums break-all">{{ reseller_fa_num($connectedTenantsCount ?? 0) }}</span>
-                            <span class="text-xs font-medium text-gray-400 ms-1">سامانه CRM</span>
+                            <span class="text-xs font-medium text-gray-400 ms-1">سامانه</span>
                         </div>
                     </div>
                 </div>
@@ -1554,7 +1549,7 @@
                                                         class="text-xs font-medium text-gray-400">{{ $currencyLabel }}</span>
                                                 </div>
                                             @else
-                                                <div class="text-xs text-gray-400 font-bold">قیمت‌گذاری انعطاف‌پذیر
+                                                <div class="text-xs text-gray-400 font-bold">قیمت‌ گذاری انعطاف ‌پذیر
                                                 </div>
                                             @endif
                                         </div>
@@ -1605,7 +1600,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
                                               d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                     </svg>
-                                    <span>ساخت سریع CRM با این پکیج</span>
+                                    <span>ساخت سریع سامانه با این پکیج</span>
                                 </button>
                             </div>
                         </x-resellerhub::card>

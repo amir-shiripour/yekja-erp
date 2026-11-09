@@ -21,7 +21,7 @@
 
     {{-- Tour Stepper Card --}}
     <div
-        class="mt-6 sm:mt-7 relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-gray-200/80 dark:border-gray-800/80 rounded-3xl p-5 sm:p-6 shadow-xl shadow-gray-200/50 dark:shadow-none select-none">
+        class="mt-6 sm:mt-7 relative bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800/80 rounded-2xl p-5 sm:p-6 shadow-sm select-none">
 
         {{-- Progress Bar Header Strip --}}
         <div

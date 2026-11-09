@@ -6,7 +6,7 @@
 
     /** @var TenantManager $tenantManager */
     $tenantManager = app(TenantManager::class);
-    $activeTenant = $activeTenant ?? ($tenantManager->getTenant() ?: \App\Models\Tenant::find(auth()->user()?->tenant_id));
+    $activeTenant = $activeTenant ?? ($tenantManager->getTenant() ?: auth()->user()?->tenant);
 
     if ($activeTenant) {
         $activeTenant->loadMissing(['reseller.user', 'package']);
@@ -17,7 +17,7 @@
 
     $branding = is_array($activeTenant?->branding) ? $activeTenant->branding : [];
     $reseller = $activeTenant?->reseller;
-    $resellerSettings = $reseller ? ResellerSetting::allForReseller($reseller->id) : [];
+    $resellerSettings = $resellerSettings ?? ($reseller ? ResellerSetting::allForReseller($reseller->id) : []);
 
     $domainService = app(DomainVerificationService::class);
     $cnameTarget = $domainService->getTargetCname();

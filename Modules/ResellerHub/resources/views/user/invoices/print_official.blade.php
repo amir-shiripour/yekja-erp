@@ -218,7 +218,7 @@
 
 {{-- Print floating button (Hidden on print) --}}
 <div class="fixed bottom-8 right-8 no-print z-50 flex items-center gap-3">
-    <button onclick="window.print()"
+    <button type="button" onclick="window.print()"
             class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center gap-2 transition-transform transform hover:scale-105 cursor-pointer">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

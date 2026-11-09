@@ -353,7 +353,7 @@
 
             {{-- Right: Full-width Search Input --}}
             <div class="relative flex-1 w-full">
-                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-gray-400">
+                <div class="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none text-gray-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -362,12 +362,12 @@
                 <input type="text"
                        x-model="searchQuery"
                        placeholder="جستجوی ویژگی یا ماژول در تمام پکیج ها..."
-                       class="w-full pr-10 pl-9 py-2.5 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/60 rounded-xl text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                       class="w-full ps-10 pe-9 py-2.5 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/60 rounded-xl text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
                 <button type="button"
                         x-show="searchQuery.length > 0"
                         x-cloak
                         @click="searchQuery = ''"
-                        class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
+                        class="absolute inset-y-0 end-0 pe-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer"
                         aria-label="پاک کردن جستجو">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -1008,7 +1008,7 @@
                                                     <span>{{ __('resellerhub::messages.comparison.get_started') }}</span>
                                                 </a>
                                             @else
-                                                <button disabled
+                                                <button type="button" disabled
                                                         class="inline-flex items-center justify-center gap-1 w-full px-3 py-2 rounded-xl text-xs font-bold cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
                                                     <span>{{ __('resellerhub::messages.comparison.not_in_period') }}</span>
                                                 </button>
@@ -1347,7 +1347,7 @@
                                             <span>{{ __('resellerhub::messages.comparison.get_started') }}</span>
                                         </a>
                                     @else
-                                        <button disabled
+                                        <button type="button" disabled
                                                 class="inline-flex items-center justify-center gap-1 w-full px-3 py-2 rounded-xl text-xs font-black cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
                                             <span>{{ __('resellerhub::messages.comparison.not_in_period') }}</span>
                                         </button>

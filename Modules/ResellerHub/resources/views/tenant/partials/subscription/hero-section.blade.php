@@ -1,11 +1,5 @@
 <div
-    class="w-full rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900 border border-indigo-100/90 dark:border-gray-700/70 shadow-xs relative overflow-hidden flex flex-col justify-between">
-    {{-- Ambient background glow --}}
-    <div
-        class="absolute -top-24 -left-24 w-72 h-72 bg-indigo-500/10 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div
-        class="absolute -bottom-24 -right-24 w-60 h-60 bg-purple-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
-
+    class="w-full rounded-2xl p-6 sm:p-8 bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/60 shadow-xs relative overflow-hidden flex flex-col justify-between">
     <div class="relative z-10 space-y-6">
         {{-- Top Badge Row --}}
         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -67,11 +61,11 @@
                 $progressPercent = min(100, max(5, round(($passedDaysEst / $totalDaysEst) * 100)));
             @endphp
             <div
-                class="p-4 rounded-2xl bg-white/90 dark:bg-gray-900/60 border border-indigo-100/90 dark:border-gray-700/60 shadow-xs backdrop-blur-md space-y-2.5">
+                class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200/80 dark:border-gray-700/60 shadow-2xs space-y-2.5">
                 <div class="flex items-center justify-between text-xs font-bold">
                     <span class="flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
                         <span
-                            class="w-2 h-2 rounded-full {{ $daysRemaining <= 7 ? 'bg-amber-500 animate-ping' : 'bg-emerald-500 animate-pulse' }}"></span>
+                            class="w-2 h-2 rounded-full {{ $daysRemaining <= 7 ? 'bg-amber-500' : 'bg-emerald-500' }} animate-pulse"></span>
                         پیشرفت دوره اشتراک جاری:
                     </span>
                     <span class="text-indigo-600 dark:text-indigo-400 font-black tabular-nums">

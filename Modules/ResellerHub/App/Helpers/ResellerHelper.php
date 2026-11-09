@@ -751,6 +751,8 @@ class ResellerHelper
                 'months' => $m,
                 'key' => $key,
                 'label' => $match ? $match['label'] : self::durationLabel($m, true),
+                'short' => self::durationLabel($m, false),
+                'badge' => $m === 12 ? 'بیشترین صرفه' : ($match['badge'] ?? ''),
             ];
         }
 

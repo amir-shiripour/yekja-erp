@@ -665,10 +665,9 @@
                 <x-resellerhub::card
                     class="border border-indigo-100 dark:border-indigo-500/20 shadow-md relative overflow-hidden"
                 >
+
                     <div
-                        class="absolute -top-12 -left-12 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
-                    <div
-                        class="p-6 sm:p-7 border-b border-gray-100 dark:border-gray-700/50 bg-gradient-to-l from-indigo-50/70 via-transparent to-transparent dark:from-indigo-500/10 flex items-center justify-between flex-wrap gap-3">
+                        class="p-6 sm:p-7 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/60 dark:bg-gray-800/60 flex items-center justify-between flex-wrap gap-3">
                         <h3 class="text-lg font-black text-gray-800 dark:text-gray-100 flex items-center gap-3">
                             <div class="p-2.5 bg-indigo-600 text-white rounded-xl shadow-md shadow-indigo-500/30">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"

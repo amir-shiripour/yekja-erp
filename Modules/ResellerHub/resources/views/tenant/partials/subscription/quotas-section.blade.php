@@ -192,7 +192,7 @@
                             <div
                                 class="mt-2.5 p-2 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/60 flex items-center justify-between text-[11px] text-amber-800 dark:text-amber-300">
                                 <span class="font-bold flex items-center gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                                     ظرفیت رو به اتمام
                                 </span>
                                 <button

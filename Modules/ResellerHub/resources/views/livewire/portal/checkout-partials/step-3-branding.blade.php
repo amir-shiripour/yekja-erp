@@ -399,16 +399,17 @@
                 {{-- High-Fidelity Mockup Window Frame --}}
                 <div
                     class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-900 text-white shadow-xl overflow-hidden">
-                    {{-- macOS Style Browser Chrome Bar --}}
+                    {{-- Clean Browser Chrome Bar --}}
                     <div
-                        class="px-3.5 py-2.5 bg-gray-800/90 border-b border-gray-700/80 flex items-center justify-between gap-2.5">
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                        class="px-3.5 py-2.5 bg-gray-800 border-b border-gray-700/80 flex items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-1.5 text-gray-400">
+                            <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                            <span class="text-[10px] font-medium text-gray-300">اتصال امن (SSL)</span>
                         </div>
                         <div
-                            class="flex-1 max-w-[210px] bg-gray-900/90 rounded-lg px-2.5 py-1 text-xs text-gray-400 text-center truncate border border-gray-700/60 dir-ltr flex items-center justify-center gap-1.5">
+                            class="flex-1 max-w-[240px] bg-gray-900 rounded-lg px-2.5 py-1 text-xs text-gray-400 text-center truncate border border-gray-700/60 dir-ltr flex items-center justify-center gap-1.5">
                             @if($faviconPreview)
                                 <img src="{{ $faviconPreview }}"
                                      class="w-3 h-3 object-contain shrink-0">
@@ -420,14 +421,14 @@
                                       style="background-color: {{ $brandPrimaryColor }}"></span>
                             @endif
                             <span class="truncate">
-                                                @if($domainType === 'custom_domain' && !empty($customDomain))
+                                @if($domainType === 'custom_domain' && !empty($customDomain))
                                     {{ $urlScheme }}{{ $customDomain }}
                                 @else
                                     {{ $urlScheme }}{{ $baseDomain }}/{{ $subdomain ?: 'portal' }}
                                 @endif
-                                            </span>
+                            </span>
                         </div>
-                        <span class="text-[9px] font-bold text-gray-400 shrink-0">CRM Live</span>
+                        <span class="text-[10px] font-bold text-gray-400 shrink-0">پیش‌نمایش</span>
                     </div>
 
                     {{-- Realistic RTL CRM Portal Dashboard Interface --}}

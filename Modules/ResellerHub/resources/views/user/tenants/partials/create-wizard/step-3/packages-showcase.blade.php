@@ -1,11 +1,6 @@
 <div
-    class="relative overflow-hidden rounded-3xl border border-indigo-100 dark:border-indigo-900/40 bg-white dark:bg-gray-800/90 shadow-sm">
-    <div
-        class="absolute -top-20 -left-16 w-56 h-56 rounded-full bg-indigo-100/70 dark:bg-indigo-500/10 blur-3xl pointer-events-none"></div>
-    <div
-        class="absolute -bottom-24 -right-10 w-72 h-72 rounded-full bg-violet-100/50 dark:bg-violet-500/10 blur-3xl pointer-events-none"></div>
-    <div
-        class="absolute top-1/2 left-1/3 w-40 h-40 rounded-full bg-indigo-50/80 dark:bg-indigo-400/5 blur-2xl pointer-events-none"></div>
+    class="relative overflow-hidden rounded-2xl border border-gray-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 shadow-xs">
+
 
     <div class="relative p-5 sm:p-7 space-y-5">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">

@@ -96,7 +96,7 @@
                     <label class="block text-xs font-black text-gray-700 dark:text-gray-300 mb-2">
                         ۱. انتخاب پکیج جدید جهت ارتقا <span class="text-rose-500">*</span>
                     </label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-56 overflow-y-auto pr-1">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-56 overflow-y-auto pe-1">
                         <template x-for="pkg in packagesData" :key="pkg.id">
                             <div @click="canSelectPackage(pkg) && selectUpgradePackage(pkg.id)"
                                  class="p-4 rounded-2xl border transition-all text-right flex flex-col justify-between"

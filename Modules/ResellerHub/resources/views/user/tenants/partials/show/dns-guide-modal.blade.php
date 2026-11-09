@@ -39,8 +39,11 @@
                     </div>
                 </div>
                 <button type="button" @click="dnsModalOpen = false"
-                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                    ✕
+                        class="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer"
+                        aria-label="بستن">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
                 </button>
             </div>
 

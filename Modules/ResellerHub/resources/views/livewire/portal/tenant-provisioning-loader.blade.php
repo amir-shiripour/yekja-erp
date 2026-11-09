@@ -35,11 +35,7 @@
      }">
 
     <div
-        class="w-full max-w-lg bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl rounded-3xl border border-gray-100 dark:border-gray-800/80 shadow-2xl shadow-indigo-600/10 dark:shadow-none p-6 sm:p-9 relative overflow-hidden transition-all duration-300">
-
-        {{-- Ambient Top Glow --}}
-        <div
-            class="absolute -top-24 start-1/2 -translate-x-1/2 w-64 h-32 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        class="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/90 dark:border-gray-800 shadow-xl p-6 sm:p-8 relative overflow-hidden transition-all duration-300">
 
         {{-- Top Ribbon Bar --}}
         <div class="flex items-center justify-between pb-4 mb-6 border-b border-gray-100 dark:border-gray-800/80">
@@ -51,7 +47,7 @@
             <template x-if="!completed">
                 <span
                     class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60 shadow-2xs">
-                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
                     <span>در حال استقرار خودکار</span>
                 </span>
             </template>
@@ -67,27 +63,16 @@
         {{-- Center Hero Icon & Status Message --}}
         <div class="text-center mb-6">
             <template x-if="!completed">
-                <div class="relative mx-auto w-16 h-16 mb-4 flex items-center justify-center">
-                    {{-- Outer Orbital Ring --}}
-                    <div
-                        class="absolute inset-0 rounded-2xl border-2 border-dashed border-indigo-300 dark:border-indigo-700/60 animate-[spin_8s_linear_infinite]"></div>
-                    {{-- Inner Pulse Core --}}
-                    <div
-                        class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                        <svg class="animate-spin w-6 h-6 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="3"></circle>
-                            <path class="opacity-75" fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </div>
+                <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40 flex items-center justify-center mx-auto mb-4 shadow-xs">
+                    <svg class="animate-spin w-7 h-7 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
                 </div>
             </template>
             <template x-if="completed">
-                <div
-                    class="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mb-4 shadow-xl shadow-emerald-500/30 transform scale-105 transition-transform duration-300">
-                    <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                         stroke-width="2.5">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40 flex items-center justify-center mx-auto mb-4 shadow-xs">
+                    <svg class="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
                     </svg>
                 </div>

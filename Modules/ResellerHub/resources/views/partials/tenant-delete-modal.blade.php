@@ -6,6 +6,7 @@
      class="fixed inset-0 z-[99999] overflow-y-auto"
      role="dialog"
      aria-modal="true"
+     aria-labelledby="tenant-delete-title"
      dir="rtl"
      @keydown.escape.window="closeModal()">
 
@@ -20,7 +21,7 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"></div>
 
-        {{-- Dialog Panel (dqnamo style enhanced) --}}
+        {{-- Dialog Panel --}}
         <div @click.stop
              class="relative w-full max-w-md sm:max-w-lg origin-center rounded-2xl border border-gray-200/90 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 sm:p-7 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.06),0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.4),0_25px_50px_-12px_rgba(0,0,0,0.7)] my-8 text-start space-y-5 z-10 transition-all"
              x-transition:enter="transition ease-out duration-200"
@@ -41,7 +42,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between gap-3">
-                        <h2 class="font-bold text-gray-900 dark:text-gray-100 text-base sm:text-lg leading-snug">
+                        <h2 id="tenant-delete-title" class="font-bold text-gray-900 dark:text-gray-100 text-base sm:text-lg leading-snug">
                             {{ __('resellerhub::messages.tenants.delete_title') }}
                         </h2>
                         <span

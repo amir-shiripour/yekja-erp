@@ -1,4 +1,4 @@
-{{-- SubAccount Hard Delete Modal inspired by dqnamo.com/experiments/hold-to-confirm --}}
+{{-- SubAccount Deletion Confirmation Modal --}}
 <div id="subaccount-delete-modal"
      x-data="subAccountDeleteModalComponent()"
      x-show="open"
@@ -7,6 +7,7 @@
      class="fixed inset-0 z-[99999] overflow-y-auto"
      role="dialog"
      aria-modal="true"
+     aria-labelledby="subaccount-delete-title"
      dir="rtl"
      @keydown.escape.window="closeModal()">
 
@@ -42,7 +43,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between gap-3">
-                        <h2 class="font-bold text-gray-900 dark:text-gray-100 text-base sm:text-lg leading-snug">
+                        <h2 id="subaccount-delete-title" class="font-bold text-gray-900 dark:text-gray-100 text-base sm:text-lg leading-snug">
                             <template x-if="subAccount && subAccount.tenants_count > 0">
                                 <span>{{ __('resellerhub::messages.subaccounts.delete_title_with_tenants') }}</span>
                             </template>

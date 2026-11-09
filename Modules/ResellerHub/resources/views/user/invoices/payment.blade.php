@@ -51,9 +51,7 @@
 @endphp
 
 @section('content')
-    <style>[x-cloak] {
-            display: none !important;
-        }</style>
+    
 
     <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8" x-data="paymentWizard()">
 

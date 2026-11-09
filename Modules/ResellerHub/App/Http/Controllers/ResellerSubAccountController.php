@@ -204,7 +204,10 @@ class ResellerSubAccountController extends Controller
 
         $availableModules = $this->getAvailableModules($reseller);
         $packages = ResellerPackage::forReseller($reseller->id)->get();
-        return view('resellerhub::user.subaccounts.edit', compact('reseller', 'subAccount', 'availableModules', 'packages'));
+        $recentTenants = $subAccount->tenants()->take(5)->get();
+        $tenantsCount = $subAccount->tenants()->count();
+
+        return view('resellerhub::user.subaccounts.edit', compact('reseller', 'subAccount', 'availableModules', 'packages', 'recentTenants', 'tenantsCount'));
     }
 
     public function update(UpdateResellerSubAccountRequest $request, ResellerSubAccount $subAccount): JsonResponse|RedirectResponse
@@ -289,6 +292,7 @@ class ResellerSubAccountController extends Controller
             'user',
             'tenants'
         ]);
+        $subAccount->loadCount('invoices');
 
         $allTenants = $subAccount->tenants->isNotEmpty()
             ? $subAccount->tenants

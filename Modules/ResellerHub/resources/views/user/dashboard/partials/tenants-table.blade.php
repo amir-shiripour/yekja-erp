@@ -28,16 +28,13 @@
                     </svg>
                 </span>
                 <h2 class="text-base font-black text-gray-900 dark:text-white">
-                    سامانه‌های CRM و مشتریان
+                    سامانه‌ها و کاربران
                 </h2>
                 <span
                     class="px-2.5 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/50 text-xs font-black tabular-nums">
                     {{ reseller_fa_num($tenants->total()) }} سامانه
                 </span>
             </div>
-            <p class="text-xs text-gray-400 font-medium ms-11">
-                پایش لحظه‌ای لایسنس‌ها، وضعیت اتصال، آدرس‌های دسترسی ابری و مدیریت کامل خریداران زیرمجموعه
-            </p>
         </div>
     </div>
 
@@ -62,7 +59,7 @@
                     <input type="text"
                            name="search"
                            value="{{ request('search', request('q')) }}"
-                           placeholder="جستجو بر اساس نام CRM، خریدار، سابدامین، شماره تماس..."
+                           placeholder="جستجو بر اساس نام سامانه، کاربر، سابدامین، شماره تماس..."
                            class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 ps-10 pe-18 py-2.5 text-xs sm:text-sm font-medium text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all dark:text-white">
                     <div class="absolute inset-y-0 end-0 pe-1.5 flex items-center gap-1">
                         @if(request()->hasAny(['search', 'q', 'status', 'sort_by', 'sort_order']))
@@ -149,9 +146,9 @@
                         </a>
                     </div>
                 @else
-                    <h3 class="text-base font-bold text-gray-900 dark:text-white">هنوز هیچ سامانه CRM ثبت نشده است</h3>
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white">هنوز هیچ سامانه ثبت نشده است</h3>
                     <p class="text-xs text-gray-400 leading-relaxed">
-                        با زدن دکمه زیر می‌توانید در عرض چند ثانیه، اولین سامانه CRM اختصاصی مشتری خود را راه‌اندازی و
+                        با زدن دکمه زیر می‌توانید در عرض چند ثانیه، اولین سامانه اختصاصی مشتری خود را راه‌اندازی و
                         واگذار نمایید.
                     </p>
                     <div class="pt-2">
@@ -161,7 +158,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M12 4v16m8-8H4"/>
                             </svg>
-                            <span>راه‌اندازی اولین سامانه CRM</span>
+                            <span>راه‌اندازی اولین سامانه</span>
                         </a>
                     </div>
                 @endif
@@ -224,23 +221,6 @@
                                    class="font-bold text-xs sm:text-sm text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors truncate block">
                                     {{ $tenant->name ?: $tenant->subdomain }}
                                 </a>
-                                @if($tenant->subAccount)
-                                    <div
-                                        class="mt-1 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-                                        <svg class="w-3.5 h-3.5 text-purple-500 shrink-0" fill="none"
-                                             stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                        </svg>
-                                        <span class="text-gray-400">خریدار:</span>
-                                        <a href="{{ route('reseller.sub-accounts.show', $tenant->subAccount->id) }}"
-                                           class="font-medium text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition truncate max-w-[150px]">
-                                            {{ $tenant->subAccount->company_name ?: $tenant->subAccount->name }}
-                                        </a>
-                                    </div>
-                                @else
-                                    <span class="inline-block mt-0.5 text-[11px] text-gray-400">مستقیم نماینده</span>
-                                @endif
                             </div>
                         </td>
                         <td class="py-4 px-4 sm:px-5" id="tenant-status-{{ $tenant->id }}">
@@ -381,7 +361,7 @@
                                     <div class="min-w-0">
                                         <span
                                             class="font-bold text-xs sm:text-sm text-gray-800 dark:text-gray-200 block truncate">
-                                            طرح پایه CRM
+                                            طرح پایه
                                         </span>
                                         <span class="text-[11px] font-medium text-gray-400 block">
                                             پکیج استاندارد
@@ -544,7 +524,7 @@
                                                                   stroke-width="2"
                                                                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                                         </svg>
-                                                        <span>مشاهده پرونده خریدار</span>
+                                                        <span>مشاهده پرونده کاربر زیرمجموعه</span>
                                                     </a>
                                                 @endif
                                             </div>
@@ -601,7 +581,7 @@
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                         </svg>
-                                                        <span>حذف این سامانه CRM</span>
+                                                        <span>حذف این سامانه</span>
                                                     </button>
                                                 @endcan
 
@@ -632,7 +612,7 @@
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                   d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM16 11h6m-3-3v6"/>
                                                         </svg>
-                                                        <span>حذف خریدار زیرمجموعه</span>
+                                                        <span>حذف کاربر زیرمجموعه</span>
                                                     </button>
                                                 @endif
                                             </div>
@@ -656,7 +636,7 @@
                                         </a>
                                         <span
                                             class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 ring-1 ring-inset ring-purple-600/20">
-                                            خریدار زیرمجموعه
+                                            کاربر زیرمجموعه
                                         </span>
                                     </div>
                                     <div
@@ -666,7 +646,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                         </svg>
-                                        <span>در انتظار تعریف یا تخصیص سامانه CRM</span>
+                                        <span>در انتظار تعریف یا تخصیص سامانه</span>
                                     </div>
                                 </div>
                             </td>
@@ -719,7 +699,7 @@
                                     @can('resellerhub.tenants.create')
                                         <a href="{{ route('reseller.tenants.create', ['sub_account_id' => $unassigned->id]) }}"
                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs"
-                                           title="ساخت سامانه CRM برای این خریدار">
+                                           title="ساخت سامانه برای این کاربر">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                  viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -741,7 +721,7 @@
                                                     delete_url: '{{ route('reseller.sub-accounts.destroy', $unassigned->id) }}'
                                                 })"
                                                 class="p-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-600 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 dark:text-purple-400 transition cursor-pointer"
-                                                title="حذف این خریدار زیرمجموعه">
+                                                title="حذف این کاربر زیرمجموعه">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -772,10 +752,8 @@
                         از
                         <strong
                             class="text-gray-900 dark:text-gray-100 tabular-nums">{{ reseller_fa_num($tenants->total()) }}</strong>
-                        سامانه CRM
+                        سامانه
                     </span>
-
-                    <span class="text-gray-300 dark:text-gray-600">•</span>
 
                     <form method="GET" class="inline-flex items-center gap-1.5 m-0">
                         @if(request('search'))

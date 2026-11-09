@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'مدیریت سامانه‌ها و مشتریان CRM')
+@section('title', 'مدیریت سامانه‌ها و کاربران')
 
 @section('content')
     <div x-data="resellerDashboard({
@@ -31,7 +31,7 @@
                         <svg class="w-3.5 h-3.5 rtl:rotate-180 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
-                        <span class="text-indigo-600 dark:text-indigo-400 font-black">مدیریت سامانه‌ها و مشتریان</span>
+                        <span class="text-indigo-600 dark:text-indigo-400 font-black">مدیریت سامانه‌ها و کاربران</span>
                     </nav>
 
                     <div class="flex items-center gap-3.5">
@@ -45,11 +45,8 @@
                         </span>
                         <div>
                             <h1 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
-                                <span>مدیریت سامانه‌ها و مشتریان CRM</span>
+                                <span>مدیریت سامانه‌ها و کاربران</span>
                             </h1>
-                            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                مشاهده و مدیریت یکپارچه سامانه‌های ابری، وضعیت لایسنس‌ها، آدرس‌های دسترسی و خریداران زیرمجموعه
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -71,7 +68,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                             </svg>
-                            <span>ایجاد خریدار جدید</span>
+                            <span>ایجاد کاربر جدید</span>
                         </a>
                     @endcan
 
@@ -81,7 +78,7 @@
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                             </svg>
-                            <span>ساخت سامانه CRM جدید</span>
+                            <span>ساخت سامانه جدید</span>
                         </a>
                     @endcan
                 </div>
@@ -109,7 +106,7 @@
             {{-- Card 2: Total Sub-Accounts --}}
             <x-resellerhub::card class="p-5 flex items-center justify-between gap-3">
                 <div class="min-w-0">
-                    <span class="text-xs font-bold text-gray-400 dark:text-gray-400 block truncate">خریداران و زیرمجموعه‌ها</span>
+                    <span class="text-xs font-bold text-gray-400 dark:text-gray-400 block truncate">کاربران</span>
                     <p class="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1.5">{{ reseller_fa_num($totalSubAccounts ?? 0) }}</p>
                 </div>
                 <div class="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-2xs">

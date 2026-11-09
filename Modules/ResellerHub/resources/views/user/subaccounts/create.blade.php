@@ -63,7 +63,7 @@
                                         {{ __('نام و نام خانوادگی') }} <span class="text-rose-500 font-bold">*</span>
                                     </x-resellerhub::label>
                                     <div class="relative">
-                                        <x-resellerhub::input class="pl-10" type="text"
+                                        <x-resellerhub::input class="pe-10" type="text"
                                                               name="name"
                                                               x-model="form.name"
 
@@ -71,7 +71,7 @@
                                                               required
                                                               autofocus/>
                                         <div
-                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                                            class="absolute inset-y-0 end-0 pe-3.5 flex items-center pointer-events-none text-gray-400">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
@@ -106,7 +106,7 @@
                                         {{ __('شماره تلفن همراه') }} <span class="text-rose-500 font-bold">*</span>
                                     </x-resellerhub::label>
                                     <div class="relative">
-                                        <x-resellerhub::input class="pl-10 text-left tracking-wider" type="text"
+                                        <x-resellerhub::input class="pe-10 text-start tracking-wider" type="text"
                                                               name="mobile"
                                                               x-model="form.mobile"
                                                               dir="ltr"
@@ -114,7 +114,7 @@
                                                               placeholder="09123456789"
                                                               required/>
                                         <div
-                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                                            class="absolute inset-y-0 end-0 pe-3.5 flex items-center pointer-events-none text-gray-400">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>

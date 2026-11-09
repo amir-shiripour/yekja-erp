@@ -11,7 +11,7 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-black text-gray-900 dark:text-white">سامانه CRM با موفقیت ساخته شد!</h3>
+                    <h3 class="text-lg font-black text-gray-900 dark:text-white">سامانه با موفقیت ساخته شد!</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">پایگاه داده اختصاصی، ماژول‌ها و اطلاعات
                         ورود
                         مدیر با موفقیت پیکربندی شدند.</p>
@@ -77,7 +77,7 @@
             <div class="flex flex-wrap items-center gap-3 pt-2">
                 <a :href="createdTenant?.url" target="_blank"
                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition shadow-sm">
-                    <span>ورود به CRM</span>
+                    <span>ورود به سامانه</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>

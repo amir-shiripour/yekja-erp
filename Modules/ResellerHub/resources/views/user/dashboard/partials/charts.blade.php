@@ -5,18 +5,17 @@
 <section class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
 
     <div
-        class="lg:col-span-2 bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-800/80 shadow-sm backdrop-blur-xl overflow-hidden flex flex-col justify-between spotlight-card">
+        class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs overflow-hidden flex flex-col justify-between transition-all duration-200 hover:shadow-md">
         <div
             class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-800/80 flex flex-wrap items-center justify-between gap-4">
             <div class="space-y-1">
                 <div class="flex items-center gap-2.5">
-                    <span
-                        class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100/80 dark:border-indigo-900/40 flex items-center justify-center shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                         </svg>
-                    </span>
+                    </div>
                     <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
                         تحلیل روند رشد مشترکین و گردش درآمدی
                     </h2>
@@ -82,12 +81,11 @@
         <div
             class="px-5 sm:px-6 py-4 border-t border-gray-100 dark:border-gray-800/80 bg-gray-50/50 dark:bg-gray-900/30 grid grid-cols-2 gap-4">
             <div class="flex items-center gap-3">
-                <span
-                    class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                </span>
+                </div>
                 <div>
                     <div class="text-sm font-black text-gray-900 dark:text-white tabular-nums">
                         <span x-text="faNum(periodTenantsCreated)">{{ reseller_fa_num($periodTenantsCreated) }}</span>
@@ -99,13 +97,12 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <span
-                    class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                </span>
+                </div>
                 <div>
                     <div class="text-sm font-black text-gray-900 dark:text-white tabular-nums"
                          x-text="periodRevenueFormatted">
@@ -118,16 +115,16 @@
         </div>
     </div>
     <div
-        class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-800/80 shadow-sm backdrop-blur-xl overflow-hidden flex flex-col justify-between spotlight-card">
+        class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs overflow-hidden flex flex-col justify-between transition-all duration-200 hover:shadow-md">
         <div class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-800/80">
             <div class="flex items-center gap-2.5">
-                <span
-                    class="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-100/80 dark:border-purple-900/40 flex items-center justify-center shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div
+                    class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                     </svg>
-                </span>
+                </div>
                 <div>
                     <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
                         کانال‌های ثبت و مبدا سفارشات
@@ -154,7 +151,6 @@
                     <div
                         class="flex items-center justify-between text-xs font-bold p-2.5 rounded-xl bg-gray-50/70 dark:bg-gray-900/30 border border-gray-100/80 dark:border-gray-800/60">
                         <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
                             <span class="text-gray-700 dark:text-gray-300">خرید آنلاین از سایت</span>
                         </div>
                         <div class="text-end">
@@ -170,7 +166,6 @@
                     <div
                         class="flex items-center justify-between text-xs font-bold p-2.5 rounded-xl bg-gray-50/70 dark:bg-gray-900/30 border border-gray-100/80 dark:border-gray-800/60">
                         <div class="flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
                             <span class="text-gray-700 dark:text-gray-300">ثبت دستی نماینده</span>
                         </div>
                         <div class="text-end">
@@ -217,7 +212,7 @@
 
 <section class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch mt-6">
     <div
-        class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-800/80 shadow-sm backdrop-blur-xl overflow-hidden flex flex-col justify-between spotlight-card">
+        class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs overflow-hidden flex flex-col justify-between transition-all duration-200 hover:shadow-md">
         <div
             class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-800/80 flex flex-wrap items-center justify-between gap-4">
             <div class="space-y-1">
@@ -230,21 +225,12 @@
                         </svg>
                     </span>
                     <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
-                        پیش‌بینی سررسید لایسنس‌ها و جریان نقدینگی
+                        پیش‌بینی سررسید سفارشات و جریان نقدینگی
                     </h2>
                 </div>
                 <p class="text-xs text-gray-400 font-medium ms-10">
                     برآورد سامانه‌های در آستانه انقضا و گردش حاصل از تمدید در ۳ ماه آتی
                 </p>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <span
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-cyan-50/70 dark:bg-cyan-950/40 border border-cyan-100/80 dark:border-cyan-900/40 text-xs font-black text-cyan-700 dark:text-cyan-300">
-                    <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
-                    <span>مجموع ۳ ماهه:</span>
-                    <span class="tabular-nums">{{ reseller_price($totalPipelineRevenue) }}</span>
-                </span>
             </div>
         </div>
         <div class="p-6 flex-1 flex flex-col justify-center">
@@ -265,7 +251,6 @@
                     <div class="flex items-center justify-between gap-1">
                         <span
                             class="inline-flex items-center gap-1.5 text-xs font-black text-gray-800 dark:text-gray-200">
-                            <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
                             <span>۳۰ روز آینده</span>
                         </span>
                         <span
@@ -293,7 +278,6 @@
                     <div class="flex items-center justify-between gap-1">
                         <span
                             class="inline-flex items-center gap-1.5 text-xs font-black text-gray-800 dark:text-gray-200">
-                            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
                             <span>۳۱ تا ۶۰ روز</span>
                         </span>
                         <span
@@ -321,7 +305,6 @@
                     <div class="flex items-center justify-between gap-1">
                         <span
                             class="inline-flex items-center gap-1.5 text-xs font-black text-gray-800 dark:text-gray-200">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                             <span>۶۱ تا ۹۰ روز</span>
                         </span>
                         <span
@@ -348,7 +331,7 @@
         </div>
     </div>
     <div
-        class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-800/80 shadow-sm backdrop-blur-xl overflow-hidden flex flex-col justify-between spotlight-card">
+        class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs overflow-hidden flex flex-col justify-between transition-all duration-200 hover:shadow-md">
         <div
             class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-800/80 flex flex-wrap items-center justify-between gap-4">
             <div class="space-y-1">
@@ -372,7 +355,6 @@
             <div class="flex items-center gap-2">
                 <span
                     class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-100/80 dark:border-emerald-900/40 text-xs font-black text-emerald-700 dark:text-cyan-300">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <span>نرخ وصول نقدی:</span>
                     <span class="tabular-nums">{{ reseller_fa_num(number_format($collectionRate, 1)) }}٪</span>
                 </span>
@@ -459,7 +441,6 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <span>وضعیت وصولی پایدار: کلیه صورتحساب‌ها تسویه شده‌اند</span>
                 @else
-                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                     <span>اقدام تسویه: <span
                             class="tabular-nums font-black text-amber-600 dark:text-amber-400">{{ reseller_fa_num($unpaidInvoicesCount) }}</span> فاکتور در انتظار پیگیری</span>
                 @endif

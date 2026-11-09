@@ -13,9 +13,9 @@
                 <span>{{ __('resellerhub::messages.packages.form.cancel') }}</span>
             </a>
 
-            <button x-show="currentStep > 1"
+            <button type="button"
+                    x-show="currentStep > 1"
                     x-cloak
-                    type="button"
                     @click="prevStep()"
                     class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all active:scale-95 cursor-pointer">
                 <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">

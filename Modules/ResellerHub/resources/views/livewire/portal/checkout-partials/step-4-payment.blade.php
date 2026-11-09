@@ -102,7 +102,7 @@
                         @endif
                     </div>
                     <div
-                        class="grid grid-cols-1 sm:grid-cols-2 {{ count($pkgPeriods) > 4 ? 'lg:grid-cols-3' : '' }} gap-3 {{ count($pkgPeriods) > 6 ? 'max-h-[380px] overflow-y-auto pr-1' : '' }} select-none">
+                        class="grid grid-cols-1 sm:grid-cols-2 {{ count($pkgPeriods) > 4 ? 'lg:grid-cols-3' : '' }} gap-3 {{ count($pkgPeriods) > 6 ? 'max-h-[380px] overflow-y-auto pe-1' : '' }} select-none">
                         @foreach($pkgPeriods as $pKey => $pData)
                             @php
                                 $periodMonths = (int)($pData['months'] ?? ResellerPackage::resolveMonthFromPeriodKey($pKey));

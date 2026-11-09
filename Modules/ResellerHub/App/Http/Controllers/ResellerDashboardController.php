@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\ResellerHub\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Module;
 use App\Models\Tenant;
 use App\Models\TenantModule;
 use Carbon\Carbon;
@@ -231,6 +232,10 @@ class ResellerDashboardController extends Controller
             ->get();
 
         $quotasSummary = app(TenantQuotaService::class)->getQuotasSummary($tenant);
+        $systemModulesList = Module::where('installed', true)
+            ->where('active', true)
+            ->whereNotIn('slug', ['resellerhub', 'settings', 'admin', 'core'])
+            ->get();
 
         return view('resellerhub::user.tenants.show', compact(
             'reseller',
@@ -239,7 +244,8 @@ class ResellerDashboardController extends Controller
             'currencyLabel',
             'availablePeriods',
             'tenantInvoices',
-            'quotasSummary'
+            'quotasSummary',
+            'systemModulesList'
         ));
     }
 

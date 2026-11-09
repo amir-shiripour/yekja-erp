@@ -27,7 +27,7 @@
                                placeholder="۰۹۱۲۳۴۵۶۷۸۹"
                                class="block w-full rounded-xl border border-gray-200 bg-gray-50/60 py-3.5 px-4 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all dark:border-gray-800 dark:bg-gray-800/60 dark:text-white dark:focus:bg-gray-850 text-left font-semibold"/>
                         <div
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400">
+                            class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3.5 text-gray-400">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                       d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>

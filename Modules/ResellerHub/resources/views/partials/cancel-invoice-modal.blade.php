@@ -54,7 +54,7 @@
                         </div>
                         <h2 id="cancel-invoice-modal-title"
                             class="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight">
-                            تأیید لغو صورتحساب سفارش
+                            تأیید لغو صورت حساب سفارش
                         </h2>
                         <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                             آیا از لغو این فاکتور و انصراف از سفارش در انتظار پرداخت اطمینان دارید؟
@@ -85,7 +85,7 @@
 
                 <div class="flex items-center justify-between pb-2 border-b border-gray-200/60 dark:border-gray-700/60"
                      x-show="packageName">
-                    <span class="text-gray-500 dark:text-gray-400 font-medium">پلن انتخابی:</span>
+                    <span class="text-gray-500 dark:text-gray-400 font-medium">پکیج انتخابی:</span>
                     <span class="font-bold text-gray-900 dark:text-white" x-text="packageName"></span>
                 </div>
 

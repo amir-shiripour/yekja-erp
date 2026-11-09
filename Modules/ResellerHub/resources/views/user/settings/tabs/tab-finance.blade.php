@@ -12,7 +12,7 @@
                         </span>
                 شماره‌گذاری فاکتور
             </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-13">الگوی تولید شماره برای فاکتورهای
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 ms-13">الگوی تولید شماره برای فاکتورهای
                 جدید
                 را تعیین کنید.</p>
         </div>
@@ -114,7 +114,7 @@
                         </span>
                 تنظیمات مالیات پیش‌فرض
             </h2>
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2 mr-15">این درصد مالیات به
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2 ms-15">این درصد مالیات به
                 صورت
                 اتوماتیک در فاکتورهای جدید لحاظ می‌گردد.</p>
         </div>
@@ -174,7 +174,7 @@
                         </span>
                 واحد پول سیستم
             </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-13">واحد پولی پایه برای محاسبات و
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 ms-13">واحد پولی پایه برای محاسبات و
                 نمایش
                 در تمام بخش‌های سیستم.</p>
         </div>
@@ -232,7 +232,7 @@
                     </span>
                     تنظیمات رند کردن مبالغ
                 </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-13">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 ms-13">
                     نحوه رند شدن مبالغ کل فاکتورها و پرداخت‌های نمایندگی را مشخص کنید.
                 </p>
             </div>
@@ -384,7 +384,7 @@
                         </span>
                 همگام‌سازی روش‌های پرداخت
             </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-13">اتصال به درگاه‌های آنلاین،
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 ms-13">اتصال به درگاه‌های آنلاین،
                 حساب‌های
                 بانکی و کارتخوان‌های تعریف‌شده در ماژول تنظیمات اصلی سیستم</p>
         </div>
@@ -429,7 +429,7 @@
                         </span>
                 شرایط، قوانین و یادداشت پایین فاکتور
             </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-13">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 ms-13">
                 این متن به صورت یکپارچه در پاورقی فاکتور و نسخه چاپی برای مشتریان درج می‌شود.
             </p>
         </div>
@@ -647,7 +647,7 @@
                         <label @click="$refs.sealInput.click()"
                                :class="isDraggingSeal ? 'border-amber-500 bg-amber-50/80 dark:bg-amber-950/50 ring-2 ring-amber-500/20' : 'border-gray-300 dark:border-gray-600 hover:border-amber-500 dark:hover:border-amber-500 bg-gray-50 dark:bg-gray-900/50'"
                                class="flex items-center justify-center w-full px-4 py-2.5 border-2 border-dashed rounded-xl cursor-pointer transition-colors text-xs sm:text-sm text-gray-500 dark:text-gray-400 select-none">
-                            <svg class="w-5 h-5 ml-2 text-gray-400 dark:text-gray-500 shrink-0" fill="none"
+                            <svg class="w-5 h-5 me-2 text-gray-400 dark:text-gray-500 shrink-0" fill="none"
                                  viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>

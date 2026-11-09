@@ -22,12 +22,6 @@
                     <p class="text-xs text-gray-400 font-medium">نیاز به تمدید لایسنس در ۳۰ روز آینده</p>
                 </div>
             </div>
-
-            <span
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-200/60 dark:border-amber-800/50">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                {{ reseller_fa_num($expiringTenants->count()) }} سامانه
-            </span>
         </div>
         <div class="flex-1 relative">
             @if($expiringTenants->isEmpty())

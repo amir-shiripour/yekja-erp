@@ -740,7 +740,7 @@
                                 <label @click="$refs.logoInput.click()"
                                        :class="isDraggingLogo ? 'border-indigo-500 bg-indigo-50/80 dark:bg-indigo-950/50 ring-2 ring-indigo-500/20' : 'border-gray-300 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-500 bg-white dark:bg-gray-800'"
                                        class="flex items-center justify-center w-full px-4 py-2.5 border-2 border-dashed rounded-xl cursor-pointer transition-colors text-xs sm:text-sm text-gray-500 dark:text-gray-400 select-none">
-                                    <svg class="w-5 h-5 ml-2 text-gray-400 dark:text-gray-500 shrink-0"
+                                    <svg class="w-5 h-5 me-2 text-gray-400 dark:text-gray-500 shrink-0"
                                          fill="none"
                                          viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -830,7 +830,7 @@
                                 <label @click="$refs.faviconInput.click()"
                                        :class="isDraggingFavicon ? 'border-indigo-500 bg-indigo-50/80 dark:bg-indigo-950/50 ring-2 ring-indigo-500/20' : 'border-gray-300 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-500 bg-white dark:bg-gray-800'"
                                        class="flex items-center justify-center w-full px-4 py-2.5 border-2 border-dashed rounded-xl cursor-pointer transition-colors text-xs sm:text-sm text-gray-500 dark:text-gray-400 select-none">
-                                    <svg class="w-5 h-5 ml-2 text-gray-400 dark:text-gray-500 shrink-0"
+                                    <svg class="w-5 h-5 me-2 text-gray-400 dark:text-gray-500 shrink-0"
                                          fill="none"
                                          viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round"

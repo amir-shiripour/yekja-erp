@@ -1684,7 +1684,7 @@
                                 {{-- Capabilities Chips Body --}}
                                 <div class="p-3.5 space-y-2">
                                     @if($activeModFeatures->isNotEmpty())
-                                        <div class="max-h-48 overflow-y-auto custom-scrollbar space-y-1.5 pr-0.5">
+                                        <div class="max-h-48 overflow-y-auto custom-scrollbar space-y-1.5 pe-0.5">
                                             @foreach($activeModFeatures as $feat)
                                                 <div
                                                     class="flex items-center justify-between gap-2 p-2 rounded-xl bg-gray-50/70 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700/60 text-xs">
@@ -1796,7 +1796,7 @@
                         @foreach($excludedModules as $m)
                             <div
                                 class="p-3.5 rounded-2xl border bg-gray-50/40 dark:bg-gray-900/20 border-gray-100 dark:border-gray-800 flex items-center justify-between opacity-70">
-                                <div class="min-w-0 pr-1">
+                                <div class="min-w-0 pe-1">
                                 <span class="text-xs font-bold text-gray-700 dark:text-gray-300 block truncate">
                                     {{ $m->title }}
                                 </span>
