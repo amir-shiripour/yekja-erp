@@ -259,7 +259,7 @@
                                                 <span
                                                     class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
                                                     <span
-                                                        class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                                        class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                                                     @if($pkg->discount_type === 'percentage')
                                                         {{ ResellerHelper::toPersianDigits($pkg->discount_value) }}٪
                                                         تخفیف
@@ -575,7 +575,7 @@
                                 @click="showComparison = !showComparison"
                                 :class="showComparison
                                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25 ring-2 ring-indigo-500/20'
-                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-200'"
+                                    : 'bg-gray-100 hover:bg-gray-600 text-gray-700 dark:bg-gray-800 dark:text-gray-200'"
                                 class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all duration-200 cursor-pointer shrink-0">
                             <span x-text="showComparison ? 'بستن جدول مقایسه' : 'نمایش جدول مقایسه کامل'"></span>
                             <svg class="w-4 h-4 transition-transform duration-300"
