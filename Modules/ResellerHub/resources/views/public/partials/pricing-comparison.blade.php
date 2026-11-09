@@ -1,6 +1,7 @@
 @php
     use Illuminate\Database\Eloquent\Collection;
     use Modules\ResellerHub\App\Enums\QuotaKey;
+    use Modules\ResellerHub\App\Enums\PackageIcon;
     use Modules\ResellerHub\App\Helpers\ResellerHelper;
     use Modules\ResellerHub\App\Models\ResellerPackage;
 
@@ -347,7 +348,7 @@
     </div>
 
     {{-- Modern Unified Toolbar with Search & Quick Filters --}}
-        <div
+    <div
         class="mb-6 p-2.5 sm:p-3 bg-white dark:bg-gray-900 border border-gray-200/90 dark:border-gray-800 rounded-2xl shadow-xs">
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
 
@@ -385,14 +386,16 @@
                             ? 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700 ring-2 ring-indigo-500/20'
                             : 'bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700/60'"
                         class="flex-1 sm:flex-initial h-9.5 sm:h-auto inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs font-black border transition-all cursor-pointer select-none">
-                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" stroke="currentColor"
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none"
+                         stroke="currentColor"
                          viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                     </svg>
                     <span class="hidden sm:inline whitespace-nowrap">فیلترهای سریع</span>
                     <span class="sm:hidden whitespace-nowrap">فیلترها</span>
-                    <span x-show="selectedCategory !== 'all'" x-cloak class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                    <span x-show="selectedCategory !== 'all'" x-cloak
+                          class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
                     <svg class="w-3 h-3 text-gray-400 transition-transform duration-200 shrink-0"
                          :class="showQuickFilters ? 'rotate-180' : ''"
                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -426,7 +429,8 @@
                                 : 'bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700/60 border'"
                             class="w-full sm:w-auto h-9.5 sm:h-auto inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer select-none"
                             aria-label="تنظیمات مرتب‌سازی مقایسه">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" stroke="currentColor"
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none"
+                             stroke="currentColor"
                              viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/>
@@ -530,7 +534,8 @@
                             <div
                                 class="flex items-center justify-between text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase px-2 mb-1.5">
                                 <span>مرتب‌سازی امکانات (عمودی)</span>
-                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">ردیف‌ها</span>
+                                <span
+                                    class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">ردیف‌ها</span>
                             </div>
                             <div class="space-y-1">
                                 <button type="button"
@@ -580,8 +585,9 @@
                             ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25 ring-2 ring-indigo-500/30'
                             : 'bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-700/60 border'"
                         class="flex-1 sm:flex-initial h-9.5 sm:h-auto inline-flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer select-none">
-                    <span class="w-5 sm:w-6 h-3 sm:h-3.5 rounded-full p-0.5 transition-colors flex items-center shrink-0"
-                          :class="onlyDifferences ? 'bg-white/30 justify-end' : 'bg-gray-300 dark:bg-gray-600 justify-start'">
+                    <span
+                        class="w-5 sm:w-6 h-3 sm:h-3.5 rounded-full p-0.5 transition-colors flex items-center shrink-0"
+                        :class="onlyDifferences ? 'bg-white/30 justify-end' : 'bg-gray-300 dark:bg-gray-600 justify-start'">
                         <span class="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white shadow-xs"></span>
                     </span>
                     <span class="hidden sm:inline whitespace-nowrap">فقط تفاوت‌ها</span>
@@ -722,9 +728,11 @@
                 <div
                     @click="const rect = $el.getBoundingClientRect(); const ratio = Math.min(1, Math.max(0, (rect.right - $event.clientX) / rect.width)); const nearest = pkgList.length > 0 ? Math.min(pkgList.length - 1, Math.max(0, Math.floor(ratio * pkgList.length))) : 0; selectPackage(nearest);"
                     class="flex-1 relative h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full cursor-pointer overflow-hidden p-0.5 border border-gray-200/80 dark:border-gray-700/80 shadow-inner group">
-                    <div class="h-full bg-gradient-to-l from-indigo-500 to-indigo-600 dark:from-indigo-400 dark:to-indigo-500 rounded-full transition-all duration-300 relative shadow-xs"
-                         :style="`width: ${pkgProgressPercent}%;`">
-                        <span class="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-white opacity-90"></span>
+                    <div
+                        class="h-full bg-gradient-to-l from-indigo-500 to-indigo-600 dark:from-indigo-400 dark:to-indigo-500 rounded-full transition-all duration-300 relative shadow-xs"
+                        :style="`width: ${pkgProgressPercent}%;`">
+                        <span
+                            class="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-white opacity-90"></span>
                     </div>
                 </div>
                 <span
@@ -908,8 +916,8 @@
                                 <div>
                                     <div
                                         class="mx-auto mb-2 w-11 h-11 rounded-2xl flex items-center justify-center shadow-xs"
-                                        style="{{ $pkg->light_bg_style }}"
-                                        x-html="window.renderIndustryIcon ? window.renderIndustryIcon('{{ $pkg->icon }}', 'w-5 h-5 text-current') : ''">
+                                        style="{{ $pkg->light_bg_style }}">
+                                        {!! PackageIcon::fromOrDefault($pkg->icon)->svg('w-5 h-5 text-current') !!}
                                     </div>
                                     <div
                                         class="font-black text-gray-900 dark:text-white text-xs sm:text-base leading-tight truncate px-1"
@@ -965,7 +973,7 @@
                                                         <div class="flex items-center gap-1 mt-0.5">
                                                         <span
                                                             class="text-[10px] text-indigo-700 dark:text-indigo-400 font-bold tabular-nums">
-                                                            {{ ResellerHelper::toPersianDigits(number_format($dailyRate)) }} {{ $currencyLabel }}/روز
+                                                            {{ ResellerHelper::toPersianDigits(number_format($dailyRate)) }} {{ $currencyLabel }}
                                                         </span>
                                                             @if($discountPct > 0)
                                                                 <span
