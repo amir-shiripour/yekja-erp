@@ -56,9 +56,6 @@
 </div>
 
 @stack('modals')
-@includeIf('resellerhub::partials.quota-exceeded-modal')
-@includeIf('resellerhub::partials.invoice-payment-modal')
-@includeIf('resellerhub::partials.renewal-limit-modal')
 
 @livewireScripts
 </body>

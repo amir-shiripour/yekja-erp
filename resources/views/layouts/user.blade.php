@@ -216,7 +216,8 @@
             initialMsgs.forEach(m => notify(m));
         }
     "
-    class="fixed top-5 right-5 sm:right-6 z-99999 w-96 max-w-[calc(100vw-2.5rem)] space-y-3 pointer-events-none font-sans"
+    class="fixed top-5 right-4 left-4 sm:left-auto sm:right-6 z-[99999] sm:w-96 max-w-[calc(100vw-2rem)] sm:max-w-md space-y-3 pointer-events-none font-sans"
+    style="z-index: 99999;"
     dir="rtl"
 >
     <template x-for="item in items" :key="item.id">
@@ -511,16 +512,6 @@
 @livewireScripts
 @livewireScriptConfig
 @includeIf('partials.jalali-date-picker')
-{{-- spell-checker: disable --}}
-<!-- spell-checker: disable -->
-@includeIf('resellerhub::partials.impersonation-banner')
-@includeIf('resellerhub::partials.prevent-double-submit')
-@includeIf('resellerhub::partials.quota-exceeded-modal')
-@includeIf('resellerhub::partials.invoice-payment-modal')
-@includeIf('resellerhub::partials.renewal-limit-modal')
-@includeIf('resellerhub::partials.cancel-invoice-modal')
-<!-- spell-checker: enable -->
-{{-- spell-checker: enable --}}
 @stack('scripts')
 @stack('js')
 </body>

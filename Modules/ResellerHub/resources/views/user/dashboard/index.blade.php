@@ -29,6 +29,8 @@
         })"
         class="space-y-6 sm:space-y-8 relative">
 
+        @include('resellerhub::partials.toast')
+
         <header
             class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-5 sm:p-6 shadow-xs transition-all">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -99,7 +101,7 @@
                              stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                         </svg>
-                        <span>ساخت CRM جدید</span>
+                        <span>ساخت سامانه جدید</span>
                     </a>
                 </div>
             </div>

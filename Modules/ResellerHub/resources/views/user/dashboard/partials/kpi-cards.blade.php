@@ -168,7 +168,7 @@
                           x-text="faNum(periodTenantsCreated)">
                         {{ reseller_fa_num($periodTenantsCreated) }}
                     </span>
-                    <span class="text-xs font-medium text-gray-400">CRM مستقر شده</span>
+                    <span class="text-xs font-medium text-gray-400">سامانه مستقر شده</span>
                 </div>
             </div>
 

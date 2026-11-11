@@ -1,4 +1,7 @@
-@php use Modules\ResellerHub\App\Services\DomainVerificationService;use Morilog\Jalali\Jalalian; @endphp
+@php
+    use Modules\ResellerHub\App\Services\DomainVerificationService;
+    use Morilog\Jalali\Jalalian;
+ @endphp
 <script>
     window.tenantPageConfig = {
         tenantId: {{ (int)$tenant->id }},
@@ -39,8 +42,16 @@
             activeTab: (window.location.hash && ['overview', 'modules', 'quotas', 'branding', 'invoices'].includes(window.location.hash.substring(1)))
                 ? window.location.hash.substring(1)
                 : 'overview',
+            otherTabsOpen: false,
+            secondaryTabLabel() {
+                if (this.activeTab === 'quotas') return 'سهمیه‌ها';
+                if (this.activeTab === 'branding') return 'برندینگ';
+                if (this.activeTab === 'invoices') return 'فاکتورها';
+                return 'سایر بخش‌ها';
+            },
             setTab(tab) {
                 this.activeTab = tab;
+                this.otherTabsOpen = false;
                 if (window.history && window.history.replaceState) {
                     window.history.replaceState(null, null, '#' + tab);
                 } else {
@@ -364,7 +375,7 @@
                             window.location.reload();
                         }, 1200);
                     } else {
-                        this.showToast(data.message || 'خطا در تمدید لایسنس.', 'error');
+                        this.showToast(data.message || 'خطا در تمدید سفارش.', 'error');
                         this.renewLoading = false;
                     }
                 } catch (e) {

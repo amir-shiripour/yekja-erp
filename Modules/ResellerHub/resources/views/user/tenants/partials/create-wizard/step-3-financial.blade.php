@@ -12,9 +12,6 @@
                         <div>
                             <h2 class="text-base font-black text-gray-900 dark:text-white">انتخاب ماژول‌های فعال و
                                 راه‌اندازی نهایی</h2>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ماژول‌های مورد نیاز مشتری را
-                                انتخاب
-                                فرمایید (فیلترشده بر اساس سهمیه و ماژول‌های مجاز نماینده منتخب).</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3 text-xs">

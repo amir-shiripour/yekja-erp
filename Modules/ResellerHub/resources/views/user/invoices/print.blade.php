@@ -117,27 +117,249 @@
         }
 
         @media screen {
-            .print-fab {
-                display: flex;
+            .print-actions-bar {
                 position: fixed;
                 bottom: 1.5rem;
                 right: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                z-index: 9999;
+            }
+
+            .print-fab {
+                display: flex;
                 background-color: #4f46e5;
                 color: white;
                 padding: 0.75rem 1.25rem;
                 border-radius: 9999px;
                 box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
                 align-items: center;
+                justify-content: center;
                 gap: 0.5rem;
                 font-weight: 700;
                 cursor: pointer;
                 transition: transform 0.2s;
-                z-index: 50;
+                border: none;
+                text-decoration: none;
+                font-size: 13px;
+                white-space: nowrap;
             }
 
             .print-fab:hover {
                 transform: scale(1.05);
                 background-color: #4338ca;
+            }
+
+            .print-fab--pay {
+                background-color: #059669;
+                box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.35);
+            }
+
+            .print-fab--pay:hover {
+                background-color: #047857;
+            }
+        }
+
+        .mobile-only-view {
+            display: none;
+        }
+
+        @media screen and (max-width: 639px) {
+            .page-standard {
+                width: calc(100% - 16px) !important;
+                margin: 10px auto 84px !important;
+                padding: 16px 14px !important;
+                border-radius: 16px;
+                border: 1px solid #e2e8f0;
+                font-size: 12px;
+            }
+
+            .print-actions-bar {
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                padding: 10px 12px !important;
+                background: rgba(255, 255, 255, 0.94);
+                backdrop-filter: blur(8px);
+                border-top: 1px solid #e2e8f0;
+                box-shadow: 0 -4px 18px rgba(15, 23, 42, 0.08);
+                gap: 8px !important;
+            }
+
+            .print-fab {
+                flex: 1;
+                padding: 10px 12px !important;
+                border-radius: 12px !important;
+                font-size: 12px !important;
+                box-shadow: none !important;
+            }
+
+            .print-fab:hover {
+                transform: none;
+            }
+
+            .invoice-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                padding-bottom: 12px;
+                margin-bottom: 14px;
+            }
+
+            .invoice-header .brand-logo {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .invoice-header .invoice-meta-card {
+                min-width: 0 !important;
+                width: 100%;
+                padding: 10px 12px;
+                border-radius: 12px;
+            }
+
+            .invoice-meta-header {
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .invoice-meta-dates {
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 6px 12px;
+                font-size: 11px;
+            }
+
+            .parties-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+                margin-bottom: 16px;
+            }
+
+            .party-block {
+                background-color: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 10px 12px;
+            }
+
+            .party-block h2 {
+                font-size: 12px;
+            }
+
+            .party-block p {
+                font-size: 11.5px;
+                line-height: 1.7;
+                word-break: break-word;
+            }
+
+            .items-section-title,
+            .section-title {
+                font-size: 12.5px;
+            }
+
+            .desktop-table-view {
+                display: none !important;
+            }
+
+            .mobile-only-view {
+                display: block !important;
+            }
+
+            .m-items-list {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 14px;
+            }
+
+            .m-item-card {
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 10px 12px;
+                background: #ffffff;
+                box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+            }
+
+            .m-item-head {
+                display: flex;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+
+            .m-item-num {
+                width: 22px;
+                height: 22px;
+                border-radius: 6px;
+                background: #eef2ff;
+                color: #4f46e5;
+                font-size: 11px;
+                font-weight: 700;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+
+            .m-item-title {
+                font-size: 12px;
+                font-weight: 700;
+                color: #0f172a;
+                line-height: 1.5;
+            }
+
+            .m-item-desc {
+                font-size: 11px;
+                color: #475569;
+                margin-top: 2px;
+                line-height: 1.5;
+            }
+
+            .m-item-meta {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
+                gap: 6px 10px;
+                padding-top: 8px;
+                border-top: 1px dashed #e2e8f0;
+                font-size: 11px;
+            }
+
+            .m-summary-box {
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 10px 12px;
+                margin-bottom: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+                font-size: 11.5px;
+            }
+
+            .m-summary-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+                color: #334155;
+            }
+
+            .m-summary-row--total {
+                padding-top: 7px;
+                border-top: 1px dashed #cbd5e1;
+                font-weight: 700;
+                color: #0f172a;
+                font-size: 12.5px;
+            }
+
+            .invoice-footer {
+                justify-content: center;
             }
         }
 
@@ -449,7 +671,7 @@
                 padding: 4mm 6mm !important;
             }
 
-            .print-fab, .no-print {
+            .print-actions-bar, .print-fab, .no-print, .mobile-only-view {
                 display: none !important;
             }
 
@@ -488,13 +710,10 @@
 </head>
 <body>
 
-<div class="no-print"
-     style="position: fixed; bottom: 1.5rem; right: 1.5rem; display: flex; align-items: center; gap: 0.75rem; z-index: 9999;">
-    <button type="button" onclick="window.print()"
-            class="print-fab"
-            style="position: static !important; display: flex !important; margin: 0 !important;">
+<div class="no-print print-actions-bar">
+    <button type="button" onclick="window.print()" class="print-fab">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-             style="width: 1.25rem; height: 1.25rem;">
+             style="width: 1.15rem; height: 1.15rem; flex-shrink: 0;">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
         </svg>
@@ -502,10 +721,9 @@
     </button>
     @if(!$isFullyPaid && !$isCanceled && $due > 0)
         <a href="{{ route('portal.invoices.pay', $invoice->id) }}"
-           class="print-fab"
-           style="position: static !important; display: flex !important; margin: 0 !important; background-color: #059669 !important; text-decoration: none; box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.4) !important;">
+           class="print-fab print-fab--pay">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"
-                 style="width: 1.25rem; height: 1.25rem;">
+                 style="width: 1.15rem; height: 1.15rem; flex-shrink: 0;">
                 <path stroke-linecap="round" stroke-linejoin="round"
                       d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
             </svg>
@@ -584,7 +802,96 @@
 
         {{-- Items Table --}}
         <h3 class="items-section-title">اقلام صورت حساب</h3>
-        <table class="items-table mb-8">
+        @php
+            $hasTaxOrDiscount = ($invoice->tax_amount > 0) || ($invoice->discount_amount > 0);
+        @endphp
+
+        {{-- Mobile Cards View (Hidden on >= 640px and print) --}}
+        <div class="mobile-only-view">
+            <div class="m-items-list">
+                @forelse($invoice->items as $index => $item)
+                    @php
+                        $itemQty = (float) ($item->quantity ?? 1);
+                        $displayQty = fmod($itemQty, 1.0) === 0.0 ? (int) $itemQty : $itemQty;
+                        $rowBasePrice = $item->unit_price;
+                        $rowDiscount = (float) ($item->discount_amount ?? 0);
+                        $rowTotal = (float) ($item->total_price ?? ($rowBasePrice * $itemQty - $rowDiscount));
+                        $durationLabel = !empty($item->duration_months) ? reseller_duration_label($item->duration_months) : '';
+                    @endphp
+                    <div class="m-item-card">
+                        <div class="m-item-head">
+                            <span class="m-item-num">{{ $faNum($index + 1) }}</span>
+                            <div>
+                                <div class="m-item-title">{{ $item->title ?: 'آیتم فاکتور' }}</div>
+                                @if($item->description)
+                                    <div class="m-item-desc">{{ $item->description }}</div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="m-item-meta">
+                            <span style="color: #64748b;">
+                                مدت / تعداد:
+                                <strong style="color: #0f172a;">{{ $durationLabel ?: ($faNum($displayQty) . ' عدد') }}</strong>
+                            </span>
+                            @if($rowDiscount > 0)
+                                <span style="color: #dc2626;">تخفیف: {{ $faNum(number_format($rowDiscount)) }}</span>
+                            @endif
+                            <span style="font-weight: 700; color: #0f172a; margin-right: auto;">
+                                {{ $faNum(number_format($rowTotal)) }} {{ $currencyLabel }}
+                            </span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="m-item-card" style="text-align: center; color: #64748b;">هیچ ردیف خدمتی ثبت نشده است.</div>
+                @endforelse
+            </div>
+
+            <div class="m-summary-box">
+                @if($hasTaxOrDiscount)
+                    <div class="m-summary-row">
+                        <span>جمع مبالغ پایه:</span>
+                        <strong>{{ $faNum(number_format($subtotal ?: $invoice->items->sum('total_price'))) }} {{ $currencyLabel }}</strong>
+                    </div>
+                    @if($invoice->tax_amount > 0)
+                        <div class="m-summary-row">
+                            <span>مالیات @if((float) ($invoice->tax_percent ?? 0) > 0)({{ $faNum((float) $invoice->tax_percent) }}٪)@endif:</span>
+                            <strong>+ {{ $faNum(number_format($invoice->tax_amount)) }} {{ $currencyLabel }}</strong>
+                        </div>
+                    @endif
+                    @if($invoice->discount_amount > 0)
+                        <div class="m-summary-row" style="color: #dc2626;">
+                            <span>مجموع تخفیف‌ها:</span>
+                            <strong>− {{ $faNum(number_format($invoice->discount_amount)) }} {{ $currencyLabel }}</strong>
+                        </div>
+                    @endif
+                    @if(!empty($invoice->meta['rounding']['is_rounded']))
+                        @php $roundDiff = (int)($invoice->meta['rounding']['diff'] ?? 0); @endphp
+                        <div class="m-summary-row" style="{{ $roundDiff > 0 ? 'color: #059669;' : 'color: #dc2626;' }}">
+                            <span>تعدیل رندسازی:</span>
+                            <strong>{{ $roundDiff > 0 ? '+ ' : '− ' }}{{ $faNum(number_format(abs($roundDiff))) }} {{ $currencyLabel }}</strong>
+                        </div>
+                    @endif
+                @endif
+                @if($paid > 0)
+                    <div class="m-summary-row" style="color: #059669;">
+                        <span>پرداخت شده:</span>
+                        <strong>{{ $faNum(number_format($paid)) }} {{ $currencyLabel }}</strong>
+                    </div>
+                @endif
+                <div class="m-summary-row">
+                    <span>جمع کل فاکتور:</span>
+                    <strong>{{ $faNum(number_format($total)) }} {{ $currencyLabel }}</strong>
+                </div>
+                <div class="m-summary-row m-summary-row--total">
+                    <span>{{ $due > 0 ? 'مانده قابل پرداخت:' : 'وضعیت:' }}</span>
+                    <span style="{{ $due > 0 ? 'color: #4f46e5;' : 'color: #059669;' }}">
+                        {{ $due > 0 ? ($faNum(number_format($due)) . ' ' . $currencyLabel) : 'تسویه شده' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <table class="items-table mb-8 desktop-table-view">
             <thead>
             <tr>
                 <th scope="col" class="col-row">ردیف</th>
@@ -711,7 +1018,23 @@
 
         @if($validPayments->isNotEmpty())
             <h3 class="section-title mt-3 mb-1">تاریخچه پرداخت‌ها</h3>
-            <table class="payments-table mb-3">
+            <div class="mobile-only-view">
+                <div class="m-items-list">
+                    @foreach($validPayments as $payment)
+                        <div class="m-item-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 11px;">
+                                <span style="color: #64748b;">{{ $toJalali($payment->paid_at ?: $payment->created_at) }}</span>
+                                <strong style="color: #059669; font-size: 12px;">{{ $faNum(number_format($payment->amount)) }} {{ $currencyLabel }}</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: #334155;">
+                                <span>{{ $getPaymentMethodName($payment->payment_method ?? $payment->method, $payment->gateway ?? null) }}</span>
+                                <span dir="ltr" style="color: #64748b;">{{ $faNum($payment->transaction_id) ?: '---' }}</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            <table class="payments-table mb-3 desktop-table-view">
                 <thead>
                 <tr>
                     <th scope="col" class="text-right">تاریخ</th>

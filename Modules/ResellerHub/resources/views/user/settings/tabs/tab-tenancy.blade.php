@@ -20,20 +20,20 @@
      class="space-y-6">
 
     {{-- Overview Stats --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {{-- Stat Card 1: Engine Health --}}
         <div
-            class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs relative overflow-hidden">
+            class="bg-white dark:bg-gray-800/90 p-4 sm:p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs relative overflow-hidden">
             <div class="flex items-center justify-between mb-3">
                 <span
-                    class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/60">
+                    class="p-2.5 rounded-xl bg-gray-100/90 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 border border-gray-200/70 dark:border-gray-600/50">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                     </svg>
                 </span>
                 <span
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60">
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50/70 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/40">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                     <span>فعال و پایدار</span>
                 </span>
@@ -45,10 +45,10 @@
 
         {{-- Stat Card 2: Total Guarded Entities --}}
         <div
-            class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
+            class="bg-white dark:bg-gray-800/90 p-4 sm:p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
             <div class="flex items-center justify-between mb-3">
                 <span
-                    class="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/60">
+                    class="p-2.5 rounded-xl bg-gray-100/90 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 border border-gray-200/70 dark:border-gray-600/50">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
@@ -64,9 +64,9 @@
 
         {{-- Stat Card 3: Connected Modules --}}
         <div
-            class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
+            class="bg-white dark:bg-gray-800/90 p-4 sm:p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
             <div class="flex items-center justify-between mb-3">
-                <span class="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/60">
+                <span class="p-2.5 rounded-xl bg-gray-100/90 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 border border-gray-200/70 dark:border-gray-600/50">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
@@ -83,10 +83,10 @@
 
         {{-- Stat Card 4: Anti-Tampering Security Guard --}}
         <div
-            class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
+            class="bg-white dark:bg-gray-800/90 p-4 sm:p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
             <div class="flex items-center justify-between mb-3">
                 <span
-                    class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/60">
+                    class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/40">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
@@ -95,14 +95,14 @@
                 <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">فعال</span>
             </div>
             <h4 class="text-xs font-bold text-gray-500 dark:text-gray-400">کنترل دسترسی مستاجر</h4>
-            <div class="text-sm font-black text-emerald-700 dark:text-emerald-300 mt-1">حفاظت از تغییر شناسه</div>
+            <div class="text-sm font-black text-gray-900 dark:text-white mt-1">حفاظت از تغییر شناسه</div>
             <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">جلوگیری از دستکاری شناسه سامانه</p>
         </div>
     </div>
 
     {{-- Controls & Actions Bar --}}
     <div
-        class="bg-white dark:bg-gray-800/80 p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-4">
+        class="bg-white dark:bg-gray-800/80 p-4 sm:p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {{-- Search Input --}}
             <div class="relative flex-1 max-w-md">
@@ -120,11 +120,11 @@
             </div>
 
             {{-- Action Buttons --}}
-            <div class="flex items-center gap-2 shrink-0">
+            <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0">
                 <button type="button"
                         @click="showAddForm = !showAddForm"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-bold transition-all active:scale-95 cursor-pointer">
-                    <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-bold transition-all active:scale-95 cursor-pointer">
+                    <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                          stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -134,8 +134,8 @@
                 {{-- Open Sync Modal Button --}}
                 <button type="button"
                         @click="openSyncModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm shadow-indigo-500/20 transition-all cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer">
+                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
@@ -169,7 +169,7 @@
          x-transition:enter-end="opacity-100 translate-y-0"
          x-transition:leave="transition ease-in duration-150 transform opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-2"
-         class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-800/90 rounded-2xl p-5 border border-indigo-200 dark:border-indigo-800/60 shadow-md space-y-4">
+         class="bg-slate-50/80 dark:bg-gray-800/90 rounded-2xl p-4 sm:p-5 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs space-y-4">
         <div class="flex items-center justify-between">
             <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
                 <span class="p-1 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
@@ -343,11 +343,11 @@
         </form>
     </div>
 
-    {{-- Entities Table with Secure Presentation --}}
+    {{-- Entities Table & Mobile Cards --}}
     <div
-        class="bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm overflow-hidden">
-        <div class="p-5 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
-            <div class="space-y-0.5">
+        class="bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-2.5">
+            <div class="space-y-0.5 min-w-0">
                 <h3 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
                     موجودیت‌های تجاری تحت پایش چندمستاجری
                 </h3>
@@ -356,12 +356,106 @@
                 </p>
             </div>
             <span
-                class="px-3 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold">
+                class="px-3 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold shrink-0">
                 <span x-text="toPersianDigits(filteredItems.length)"></span> مورد
             </span>
         </div>
 
-        <div class="overflow-x-auto">
+        {{-- Mobile Stacked Cards --}}
+        <div class="lg:hidden divide-y divide-gray-100 dark:divide-gray-700/60">
+            <template x-for="item in paginatedItems" :key="'m-' + item.raw_class">
+                <div class="p-4 space-y-3">
+                    <div class="flex items-start justify-between gap-2.5">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span
+                                class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0"
+                                :class="getModuleAvatarClass(item.module)">
+                                <span
+                                    x-text="item.entity_label ? item.entity_label.substring(0, 1) : item.model.substring(0, 1)"></span>
+                            </span>
+                            <div class="min-w-0">
+                                <div class="font-bold text-sm text-gray-900 dark:text-white truncate"
+                                     x-text="item.entity_label || item.model"></div>
+                                <div class="text-[11px] font-mono text-gray-400 dark:text-gray-500 mt-0.5 truncate text-right"
+                                     dir="ltr" x-text="item.raw_class"></div>
+                            </div>
+                        </div>
+
+                        <template x-if="!item.is_system">
+                            <button type="button"
+                                    @click="openDeleteModal(item)"
+                                    title="حذف از کاتالوگ"
+                                    class="shrink-0 p-1.5 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200/70 dark:border-gray-700 transition-colors cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </template>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold"
+                              :class="getModuleBadgeClass(item.module)"
+                              x-text="item.module_label || item.module"></span>
+
+                        <template x-if="item.is_system">
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-gray-100/80 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700/60">
+                                <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                     stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                                <span>پیش‌فرض هسته</span>
+                            </span>
+                        </template>
+                        <template x-if="!item.is_system">
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-50 dark:bg-gray-800/80 text-slate-600 dark:text-gray-300 border border-slate-200/80 dark:border-gray-700">
+                                <span>سفارشی</span>
+                            </span>
+                        </template>
+
+                        <template x-if="item.status === 'active'">
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50/70 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/40">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                <span>ایزوله و فعال</span>
+                            </span>
+                        </template>
+                        <template x-if="item.status !== 'active'">
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50/80 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200/50 dark:border-amber-800/40">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                <span>نیاز به بررسی</span>
+                            </span>
+                        </template>
+                    </div>
+
+                    <div class="pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                        <span class="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400 font-medium">
+                            <svg class="w-3.5 h-3.5 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                            <span>اسکوپ خودکار + گارد ضد دستکاری</span>
+                        </span>
+                    </div>
+                </div>
+            </template>
+
+            <template x-if="filteredItems.length === 0">
+                <div class="p-8 text-center text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
+                    هیچ موجودیتی مطابق با فیلتر یا جستجوی شما یافت نشد.
+                </div>
+            </template>
+        </div>
+
+        {{-- Desktop Table --}}
+        <div class="hidden lg:block overflow-x-auto">
             <table class="w-full text-right text-sm">
                 <thead>
                 <tr class="bg-gray-50/70 dark:bg-gray-900/40 text-gray-500 dark:text-gray-400 text-xs font-bold border-b border-gray-100 dark:border-gray-700/60">
@@ -404,8 +498,8 @@
                         {{-- Protection Mechanism & Guards (No DB Column Leaks) --}}
                         <td class="px-5 py-3.5">
                             <div
-                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/40">
-                                <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24"
+                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium bg-gray-50 dark:bg-gray-800/70 text-gray-600 dark:text-gray-300 border border-gray-200/70 dark:border-gray-700/60">
+                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24"
                                      stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                           d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
@@ -418,7 +512,7 @@
                         <td class="px-5 py-3.5 text-center">
                             <template x-if="item.is_system">
                                     <span
-                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100/80 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700/60"
                                         title="موجودیت الزامی و پیش‌فرض هسته سامانه CRM">
                                         <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24"
                                              stroke="currentColor" stroke-width="2">
@@ -430,7 +524,7 @@
                             </template>
                             <template x-if="!item.is_system">
                                     <span
-                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50">
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-50 dark:bg-gray-800/80 text-slate-600 dark:text-gray-300 border border-slate-200/80 dark:border-gray-700">
                                         <span>سفارشی</span>
                                     </span>
                             </template>
@@ -440,8 +534,8 @@
                         <td class="px-5 py-3.5 text-center">
                             <template x-if="item.status === 'active'">
                                     <span
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/40">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50/70 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/40">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                         <span>ایزوله و فعال</span>
                                     </span>
                             </template>
@@ -522,7 +616,7 @@
                     <button type="button"
                             @click="currentPage = p"
                             class="inline-flex items-center justify-center w-9 h-9 rounded-xl font-bold text-xs transition-all shadow-2xs cursor-pointer select-none"
-                            :class="currentPage === p ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-black shadow-md shadow-indigo-500/25' : 'bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-gray-700 active:scale-95'">
+                            :class="currentPage === p ? 'bg-indigo-600 text-white font-black shadow-xs' : 'bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-gray-700 active:scale-95'">
                         <span x-text="toPersianDigits(p)"></span>
                     </button>
                 </template>
@@ -789,37 +883,11 @@
             },
 
             getModuleBadgeClass(module) {
-                switch (module) {
-                    case 'Booking':
-                        return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300';
-                    case 'Clients':
-                        return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300';
-                    case 'Services':
-                        return 'bg-sky-50 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300';
-                    case 'Market':
-                        return 'bg-purple-50 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300';
-                    case 'Accounting':
-                        return 'bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
-                    default:
-                        return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
-                }
+                return 'bg-gray-100/80 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700/60';
             },
 
             getModuleAvatarClass(module) {
-                switch (module) {
-                    case 'Booking':
-                        return 'bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400';
-                    case 'Clients':
-                        return 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400';
-                    case 'Services':
-                        return 'bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400';
-                    case 'Market':
-                        return 'bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400';
-                    case 'Accounting':
-                        return 'bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400';
-                    default:
-                        return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300';
-                }
+                return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200/70 dark:border-gray-700';
             },
 
             toPersianDigits(num) {

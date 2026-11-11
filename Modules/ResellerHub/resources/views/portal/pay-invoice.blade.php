@@ -22,10 +22,6 @@
                     </svg>
                     <span>بازگشت به پیشخوان</span>
                 </a>
-
-                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500">
-                    پرداخت امن بانکی
-                </span>
             </div>
             <div
                 class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 sm:p-7 shadow-xs space-y-6">
@@ -41,7 +37,6 @@
                     <div class="space-y-1">
                         <div
                             class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60">
-                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                             <span>در انتظار پرداخت</span>
                         </div>
                         <h1 class="text-lg font-black text-gray-900 dark:text-white tracking-tight">
@@ -176,14 +171,6 @@
                         </form>
                     @endif
                 @endauth
-                <div class="flex items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500 pt-1">
-                    <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                    </svg>
-                    <span>پرداخت امن از طریق شبکه شاپرک و درگاه‌های رسمی بانکی</span>
-                </div>
             </div>
         </div>
     </div>

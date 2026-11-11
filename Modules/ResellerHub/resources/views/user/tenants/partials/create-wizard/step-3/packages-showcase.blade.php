@@ -1,7 +1,5 @@
 <div
     class="relative overflow-hidden rounded-2xl border border-gray-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 shadow-xs">
-
-
     <div class="relative p-5 sm:p-7 space-y-5">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div class="flex items-start gap-4">
@@ -15,17 +13,9 @@
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight">
-                            {{ __('resellerhub::messages.wizard.step3.showcase_title') }}</h3>
-                        <span
-                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-black border border-indigo-100 dark:border-indigo-900/50">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                                            {{ __('resellerhub::messages.wizard.step3.shortcut_badge') }}
-                                        </span>
+                            {{ __('resellerhub::messages.wizard.step3.showcase_title') }}
+                        </h3>
                     </div>
-                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1.5 leading-6 max-w-xl">
-                        با یک کلیک، ترکیب آمادهٔ ماژول‌ها روی سامانه اعمال می‌شود.
-                        مناسب برای مشاغل پرتکرار مثل دندانپزشکی، املاک، فروشگاه و …
-                    </p>
                 </div>
             </div>
 
@@ -49,6 +39,26 @@
             </div>
         </div>
 
+        {{-- Mobile Toggle for Packages Showcase --}}
+        <div class="sm:hidden flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700/60">
+            <div class="text-xs font-bold text-gray-600 dark:text-gray-300">
+                <template x-if="getActivePackage()">
+                    <span>پکیج: <strong class="text-indigo-600 dark:text-indigo-400" x-text="getActivePackage().name"></strong></span>
+                </template>
+                <template x-if="!getActivePackage()">
+                    <span class="text-gray-400">بدون پکیج (سفارشی)</span>
+                </template>
+            </div>
+            <button type="button" @click="mobileSectionOpen.packages = !mobileSectionOpen.packages"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 cursor-pointer">
+                <span x-text="mobileSectionOpen.packages ? 'بستن پکیج‌ها' : 'مشاهده و انتخاب پکیج'"></span>
+                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="mobileSectionOpen.packages ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+        </div>
+
+        <div :class="{'hidden sm:block': !mobileSectionOpen.packages}" class="space-y-4">
         <template x-if="packages.length === 0">
             <div
                 class="rounded-2xl bg-gray-50/80 dark:bg-gray-900/40 border border-dashed border-indigo-200 dark:border-indigo-900/50 p-6 sm:p-8 text-center">
@@ -284,6 +294,7 @@
                 </template>
             </div>
         </template>
+        </div>
     </div>
 </div>
 
@@ -300,21 +311,21 @@
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </span>
             <div>
-                <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">مدت زمان لایسنس اولیه
-                    سامانه</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">قیمت و بازه زمانی لایسنس به صورت مستقیم از
-                    تعرفه پکیج انتخابی استخراج و در فاکتور نهایی اعمال می‌گردد.</p>
+                <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">مدت زمان اعتبار سامانه</h3>
             </div>
         </div>
-        <template x-if="getActivePackage()">
-            <span
-                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-black border border-emerald-200/60">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>تعرفه فعال: <span x-text="getActivePackage().name"></span></span>
-            </span>
-        </template>
+        <div class="flex items-center w-full">
+            <button type="button" @click="mobileSectionOpen.duration = !mobileSectionOpen.duration"
+                    class="sm:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 cursor-pointer">
+                <span x-text="mobileSectionOpen.duration ? 'بستن دوره‌ها' : 'تغییر دوره (' + durationLabel + ')'"></span>
+                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="mobileSectionOpen.duration ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+        </div>
     </div>
 
+    <div :class="{'hidden sm:block': !mobileSectionOpen.duration}" class="space-y-3">
     {{-- State 1: Package is One-Time (Lifetime) --}}
     <template x-if="getActivePackage() && getActivePackage().price_type === 'one_time'">
         <div
@@ -328,7 +339,7 @@
                     </svg>
                 </span>
                 <div>
-                    <h4 class="text-xs sm:text-sm font-black text-purple-900 dark:text-purple-100">لایسنس دائمی (یک‌بار
+                    <h4 class="text-xs sm:text-sm font-black text-purple-900 dark:text-purple-100">اعتبار دائمی (یک‌بار
                         پرداخت - مادام‌العمر)</h4>
                     <p class="text-xs text-purple-700/80 dark:text-purple-300/80 mt-0.5">این سامانه به صورت نامحدود و
                         بدون نیاز به تمدید سالانه یا ماهانه فعال می‌گردد.</p>
@@ -356,7 +367,7 @@
                     </svg>
                 </span>
                 <div>
-                    <h4 class="text-xs sm:text-sm font-black text-emerald-900 dark:text-emerald-100">لایسنس رایگان
+                    <h4 class="text-xs sm:text-sm font-black text-emerald-900 dark:text-emerald-100">اعتبار رایگان
                         (دائمی)</h4>
                     <p class="text-xs text-emerald-700/80 dark:text-emerald-300/80 mt-0.5">این پکیج به صورت رایگان و
                         بدون نیاز به تمدید برای استفاده در نظر گرفته شده است.</p>
@@ -458,6 +469,7 @@
             </template>
         </div>
     </template>
+    </div>
 </div>
 
 {{-- Modules & Capabilities Section Header with Toggle --}}
@@ -473,15 +485,8 @@
                         </span>
         <div>
             <div class="flex items-center gap-2">
-                <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">فهرست ماژول‌ها و
-                    دسترسی‌های تفکیکی</h3>
-                <span
-                    class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50"
-                    x-text="faNum(selectedModules.length) + ' ماژول {{ __('resellerhub::messages.wizard.step3.active_package_badge') }}'"></span>
+                <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">فهرست ماژول‌ها و دسترسی‌ها</h3>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                مشاهده، سفارشی‌سازی جزئیات ماژول‌ها و تنظیم قابلیت‌ها و لیمیت‌ها
-            </p>
         </div>
     </div>
     <div class="flex items-center gap-2 shrink-0">

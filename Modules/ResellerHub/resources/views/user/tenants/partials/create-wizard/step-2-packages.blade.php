@@ -4,16 +4,12 @@
      x-transition:enter-end="opacity-100 translate-y-0"
      class="p-6 sm:p-8 space-y-8 min-h-[420px]">
 
-    <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/60">
+    <div class="flex items-center justify-between pb-4 dark:border-gray-700/60">
         <div class="flex items-center gap-3">
                     <span
                         class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black text-sm flex items-center justify-center">۲</span>
             <div>
-                <h2 class="text-base font-black text-gray-900 dark:text-white">انتخاب خریدار سامانه (حساب
-                    زیرمجموعه)</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">حساب خریدار این سامانه CRM را از
-                    لیست
-                    زیرمجموعه‌های فعال خود انتخاب فرمایید یا سریعاً یک زیرمجموعه جدید بسازید.</p>
+                <h2 class="text-base font-black text-gray-900 dark:text-white">اطلاعات کاربری سامانه</h2>
             </div>
         </div>
     </div>
@@ -23,19 +19,7 @@
     <input type="hidden" name="admin_email" x-bind:value="form.admin_email">
     <input type="hidden" name="admin_mobile" x-bind:value="form.admin_mobile">
 
-    {{-- Sub-Account Selector & Cards --}}
-    <div class="space-y-5">
-        <div
-            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-gray-100 dark:border-gray-800">
-            <div class="flex items-center gap-2.5">
-                        <span
-                            class="w-2.5 h-2.5 rounded-full bg-indigo-600 ring-4 ring-indigo-100 dark:ring-indigo-950"></span>
-                <h3 class="text-sm font-black text-gray-900 dark:text-white">حساب خریدار (زیرمجموعه
-                    نماینده)</h3>
-                <span class="text-xs text-gray-400">یک خریدار می‌تواند مالک چندین CRM باشد</span>
-            </div>
-        </div>
-
+    <div class="space-y-4">
         <!-- Sub-Account Dropdown -->
         <div x-data="{
                     open: false,
@@ -70,7 +54,7 @@
                         if (!found && typeof selectedSubAccount !== 'undefined' && selectedSubAccount) {
                             found = selectedSubAccount;
                         }
-                        if (!found) return 'انتخاب خریدار...';
+                        if (!found) return 'انتخاب کاربر...';
                         let title = found.name;
                         if (found.company_name) title += ' (' + found.company_name + ')';
                         return title;
@@ -99,7 +83,7 @@
                  class="absolute z-[9999] left-0 right-0 top-full mt-2 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl p-2 max-h-64 overflow-y-auto">
                 <div class="p-1 border-b border-gray-100 dark:border-gray-700 mb-1">
                     <input type="text" x-model="search"
-                           placeholder="جستجوی خریدار بر اساس نام، شماره موبایل یا نام مرکز/برند..."
+                           placeholder="جستجوی کاربر بر اساس نام، شماره موبایل یا..."
                            class="w-full text-xs p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
                 </div>
 
@@ -124,7 +108,7 @@
                 </template>
 
                 <div x-show="filteredOptions.length === 0" class="p-3 text-xs text-gray-400 text-center">
-                    هیچ زیرمجموعه‌ای یافت نشد
+                    هیچ کاربر زیرمجموعه‌ای یافت نشد
                 </div>
             </div>
         </div>
@@ -139,15 +123,15 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            <span>افزودن زیرمجموعه جدید</span>
+            <span>افزودن کاربر زیرمجموعه جدید</span>
         </button>
     </div>
 
     {{-- Step 2 Navigation Buttons --}}
-    <div class="pt-6 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+    <div class="pt-6 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between gap-2.5 sm:gap-3">
         <button type="button" @click="prevStep()"
-                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer">
-            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer shrink-0">
+            <svg class="w-4 h-4 rtl:rotate-180 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
@@ -156,13 +140,12 @@
 
         <button type="button" @click="nextStep()"
                 :disabled="!form.sub_account_id"
-                class="inline-flex items-center gap-2 px-7 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-black rounded-xl transition shadow-lg shadow-indigo-600/25 cursor-pointer">
+                class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-7 py-2.5 sm:py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-black rounded-xl transition shadow-lg shadow-indigo-600/25 cursor-pointer shrink-0">
             <span>مرحله بعدی: انتخاب پکیج و لایسنس</span>
-            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 rtl:rotate-180 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
         </button>
     </div>
 </div>
-

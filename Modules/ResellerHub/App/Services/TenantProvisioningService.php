@@ -374,37 +374,55 @@ class TenantProvisioningService
                 if (!empty($financialData['should_issue_invoice'])) {
                     $items = $financialData['invoice_items'] ?? [];
 
-                    if (empty($items) && !empty($financialData['package_id'])) {
+                    if (!empty($financialData['package_id'])) {
                         $pkg = ResellerPackage::where('reseller_id', $reseller->id)->where('is_active', true)->find($financialData['package_id']);
                         if (!$pkg) {
                             throw new ResellerHubException(__('resellerhub::messages.errors.package_invalid'));
                         }
                         $months = (int)($tenantData['expires_in_months'] ?? 12);
-                        $unitPrice = $pkg->getPriceForMonths($months);
+                        $packageUnitPrice = $pkg->getPriceForMonths($months);
                         $durationLabel = reseller_duration_label($months);
-                        $items[] = [
-                            'item_type' => 'package',
-                            'item_id' => 'package_' . $pkg->id,
-                            'title' => "اشتراک {$durationLabel} پکیج «{$pkg->name}»",
-                            'description' => "اشتراک {$durationLabel} سامانه CRM با پکیج {$pkg->name}",
-                            'duration_months' => $months,
-                            'quantity' => 1,
-                            'unit_price' => $unitPrice,
-                            'discount_amount' => 0,
-                            'tax_rate' => 0,
-                        ];
-                        if ((int)$pkg->setup_fee > 0) {
+
+                        if (empty($items)) {
                             $items[] = [
-                                'item_type' => 'setup_fee',
-                                'item_id' => 'package_' . $pkg->id . '_setup',
-                                'title' => "هزینه راه‌اندازی اولیه پکیج «{$pkg->name}»",
-                                'description' => 'هزینه راه‌اندازی و کانفیگ اولیه سامانه',
-                                'duration_months' => 0,
+                                'item_type' => 'package',
+                                'item_id' => 'package_' . $pkg->id,
+                                'title' => "اشتراک {$durationLabel} پکیج «{$pkg->name}»",
+                                'description' => "اشتراک {$durationLabel} سامانه CRM با پکیج {$pkg->name}",
+                                'duration_months' => $months,
                                 'quantity' => 1,
-                                'unit_price' => (int)$pkg->setup_fee,
+                                'unit_price' => $packageUnitPrice,
                                 'discount_amount' => 0,
                                 'tax_rate' => 0,
                             ];
+                            if ((int)$pkg->setup_fee > 0) {
+                                $items[] = [
+                                    'item_type' => 'setup_fee',
+                                    'item_id' => 'package_' . $pkg->id . '_setup',
+                                    'title' => "هزینه راه‌اندازی اولیه پکیج «{$pkg->name}»",
+                                    'description' => 'هزینه راه‌اندازی و کانفیگ اولیه سامانه',
+                                    'duration_months' => 0,
+                                    'quantity' => 1,
+                                    'unit_price' => (int)$pkg->setup_fee,
+                                    'discount_amount' => 0,
+                                    'tax_rate' => 0,
+                                ];
+                            }
+                        } else {
+                            foreach ($items as &$item) {
+                                $itType = $item['item_type'] ?? '';
+                                if ($itType === 'package') {
+                                    $item['unit_price'] = $packageUnitPrice;
+                                    $item['duration_months'] = $months;
+                                    $item['item_id'] = 'package_' . $pkg->id;
+                                    $item['title'] = "اشتراک {$durationLabel} پکیج «{$pkg->name}»";
+                                } elseif ($itType === 'setup_fee') {
+                                    $item['unit_price'] = (int)$pkg->setup_fee;
+                                    $item['item_id'] = 'package_' . $pkg->id . '_setup';
+                                    $item['title'] = "هزینه راه‌اندازی اولیه پکیج «{$pkg->name}»";
+                                }
+                            }
+                            unset($item);
                         }
                     }
 

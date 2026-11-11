@@ -30,7 +30,7 @@
         <div
             class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 p-5 shadow-xs relative overflow-hidden transition-all duration-200 hover:shadow-md group">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-gray-500 dark:text-gray-400">پلن تجاری برتر بازار</span>
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400">پکیج تجاری برتر بازار</span>
                 <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -216,11 +216,11 @@
                             </svg>
                         </div>
                         <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
-                            سهم بازار پکیج‌ها و پلن‌ها
+                            سهم بازار پکیج‌ها
                         </h2>
                     </div>
                     <p class="text-xs text-gray-400 font-medium ms-10">
-                        ترکیب پلن‌های فعال در سامانه‌های مشترکین
+                        ترکیب پکیج های فعال در سامانه‌های کاربران زیرمجموعه
                     </p>
                 </div>
             </div>
@@ -275,12 +275,12 @@
             <div
                 class="px-5 sm:px-6 py-3.5 border-t border-gray-100 dark:border-gray-800/80 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between text-xs font-bold">
                 <span class="text-gray-500 dark:text-gray-400">
-                    تعداد پلن‌های تعریف‌شده: <strong
+                    تعداد پکیج های تعریف‌شده: <strong
                         class="text-gray-900 dark:text-white tabular-nums font-black">{{ reseller_fa_num($packagesCount) }}</strong>
                 </span>
                 <a href="{{ route('reseller.packages.index') }}"
                    class="text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1">
-                    <span>مدیریت پلن‌ها</span>
+                    <span>مدیریت پکیج ها</span>
                     <svg class="w-3.5 h-3.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
@@ -303,27 +303,16 @@
                         </svg>
                     </span>
                     <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
-                        ماتریس ماندگاری و کوهورت طول عمر سامانه‌ها
+                         طول عمر سامانه‌ها
                     </h2>
                 </div>
-                <p class="text-xs text-gray-400 font-medium ms-10">
-                    دسته‌بندی مشترکین بر مبنای سابقه پیوستن به پلتفرم و بررسی نرخ وفاداری
-                </p>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <span
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-teal-50/70 dark:bg-teal-950/40 border border-teal-100/80 dark:border-teal-900/40 text-xs font-black text-teal-700 dark:text-teal-300">
-                    <span class="w-2 h-2 rounded-full bg-teal-500"></span>
-                    <span>۵ رده سابقه مشترکین</span>
-                </span>
             </div>
         </div>
 
         <div class="p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
             <div class="lg:col-span-7">
                 <div class="relative h-60 sm:h-64 w-full">
-                    <canvas id="resellerRetentionChart" aria-label="نمودار ماتریس ماندگاری" role="img"></canvas>
+                    <canvas id="resellerRetentionChart" aria-label="نمودار طول عمر سامانه" role="img"></canvas>
                 </div>
             </div>
             <div class="lg:col-span-5 space-y-3">
@@ -358,7 +347,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span>تحلیل هوشمند نگه‌داشت (Retention Insight)</span>
+                        <span>تحلیل هوشمند</span>
                     </div>
                     <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
                         @if(($retentionCohorts['new']['ratio'] ?? 0) > 50)
@@ -367,7 +356,7 @@
                             ۳۰ روز نخست جهت افزایش ضریب تمدید است.
                         @else
                             توزیع سابقه مشترکین در وضعیت پایداری قرار دارد. تمرکز بر ارتقای ماژول‌ها و فروش مکمل
-                            (Cross-sell) به مشترکین کهنه‌کار توصیه می‌شود.
+                            به مشترکین قدیمی توصیه می‌شود.
                         @endif
                     </p>
                 </div>

@@ -7,24 +7,21 @@
      x-transition:enter-end="opacity-100 translate-y-0"
      class="p-6 sm:p-8 space-y-8">
 
-    <div class="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-gray-700/60">
+    <div class="flex items-center gap-3 pb-1.5 dark:border-gray-700/60">
                 <span
                     class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black text-sm flex items-center justify-center">۱</span>
         <div>
-            <h2 class="text-base font-black text-gray-900 dark:text-white">نحوه اتصال آدرس و ظاهر سامانه
-                CRM</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">نوع آدرس ورود به سامانه و قالب
-                اختصاصی (وایت‌لیبل) را تعیین فرمایید.</p>
+            <h2 class="text-base font-black text-gray-900 dark:text-white">
+                نحوه اتصال آدرس و ظاهر سامانه
+            </h2>
         </div>
     </div>
 
     <div class="space-y-6">
-        {{-- Domain Configuration Unified Card --}}
         <div
             class="rounded-3xl border border-gray-200/90 dark:border-gray-700/80 bg-gray-50/60 dark:bg-gray-900/40 p-5 sm:p-7 space-y-6">
-            {{-- Section Header --}}
             <div
-                class="flex items-center justify-between pb-4 border-b border-gray-200/70 dark:border-gray-700/60">
+                class="flex items-center justify-between pb-4 dark:border-gray-700/60">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
@@ -34,11 +31,9 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-black text-gray-900 dark:text-white">نوع آدرس ورود مشتری به
-                            سامانه <span class="text-red-500">*</span></h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">یکی از دو شیوه زیر را
-                            برای
-                            اتصال و دسترسی مشتری به سامانه CRM انتخاب نمایید.</p>
+                        <h3 class="text-sm font-black text-gray-900 dark:text-white">نوع آدرس ورود مشتری به سامانه
+                             <span class="text-red-500">*</span>
+                        </h3>
                     </div>
                 </div>
             </div>
@@ -46,7 +41,7 @@
             {{-- Exclusive Option Cards --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                 {{-- Option 1: Shared Subdomain --}}
-                <div tabindex="0" role="button" aria-label="سابدامین اشتراکی"
+                <div tabindex="0" role="button" aria-label="زیردامنه اشتراکی"
                      @click="domainType = 'subdomain'; syncInvoiceItemsFromModules();"
                      :class="domainType === 'subdomain'
                                  ? 'border-indigo-600 bg-white dark:bg-gray-800 shadow-md shadow-indigo-600/10 ring-2 ring-indigo-500/30'
@@ -64,8 +59,8 @@
                             </div>
                             <div class="space-y-1.5">
                                 <div class="flex items-center gap-2 flex-wrap">
-                                    <h4 class="text-sm font-black text-gray-900 dark:text-white">سابدامین
-                                        اشتراکی پلتفرم</h4>
+                                    <h4 class="text-sm font-black text-gray-900 dark:text-white">زیردامنه
+                                        اشتراکی سامانه</h4>
                                     <span
                                         class="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold border border-blue-200/50">پیش‌فرض</span>
                                 </div>
@@ -209,7 +204,7 @@
                                 آدرس مستقیم ورود مشتری به سامانه:
                             </span>
                     <span
-                        class="font-bold text-indigo-600 dark:text-indigo-400 dir-ltr text-xs sm:text-sm bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-indigo-100 dark:border-indigo-900/60 select-all"
+                        class="font-bold text-left text-indigo-600 dark:text-indigo-400 dir-ltr text-xs sm:text-sm bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-indigo-100 dark:border-indigo-900/60 select-all"
                         x-text="'{{ request()->isSecure() ? 'https://' : 'http://' }}{{ $wizardBaseDomain }}/' + (form.subdomain || '').toLowerCase().trim()"></span>
                 </div>
             </div>
@@ -223,10 +218,10 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                         <x-resellerhub::label class="!mb-0">
-                            دامنه یا سابدامین اختصاصی مشتری <span class="text-red-500 font-bold">*</span>
+                            دامنه یا زیرامین اختصاصی مشتری <span class="text-red-500 font-bold">*</span>
                         </x-resellerhub::label>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            دامنه یا سابدامین اختصاصی خریدار را وارد نمایید (مانند <span
+                            دامنه یا زیردامین اختصاصی خریدار را وارد نمایید (مانند <span
                                 class="font-bold text-indigo-600 dark:text-indigo-400">crm.parsa-clinic.ir</span>).
                         </p>
                     </div>
@@ -413,7 +408,7 @@
                     <div
                         class="p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 space-y-2.5">
                         <div class="flex items-center justify-between">
-                            <span class="font-bold text-gray-800 dark:text-gray-200 text-xs">رکورد CNAME جهت اتصال مستقیم دامنه / سابدامین</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-200 text-xs">رکورد CNAME جهت اتصال مستقیم دامنه / زیردامنه</span>
                             <span
                                 class="text-xs px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold">CNAME Record</span>
                         </div>
@@ -456,7 +451,7 @@
             class="rounded-3xl border border-gray-200/90 dark:border-gray-700/80 bg-gray-50/60 dark:bg-gray-900/40 p-5 sm:p-7 space-y-6">
             {{-- Section Header --}}
             <div
-                class="flex items-center justify-between pb-4 border-b border-gray-200/70 dark:border-gray-700/60">
+                class="flex items-center justify-between pb-4 dark:border-gray-700/60">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
@@ -466,52 +461,37 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-black text-gray-900 dark:text-white">برندینگ و ظاهر اختصاصی
-                            سامانه (وایت‌لیبل)</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">مشخص کنید این CRM با نشان
-                            تجاری پیش‌فرض نماینده راه‌اندازی شود یا دارای وایت‌لیبل و تم کاملاً اختصاصی
-                            باشد.</p>
+                        <h3 class="text-sm font-black text-gray-900 dark:text-white"> ظاهر اختصاصی سامانه </h3>
                     </div>
                 </div>
             </div>
 
             {{-- Mode Switchers --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-5">
                 {{-- Option 1: Default Reseller Branding --}}
-                <div tabindex="0" role="button" aria-label="برندینگ پیش‌فرض نماینده"
+                <div tabindex="0" role="button" aria-label="ظاهر پیش‌فرض نماینده"
                      @click="whiteLabelType = 'default'; syncInvoiceItemsFromModules();"
                      :class="whiteLabelType === 'default'
                                  ? 'border-indigo-600 bg-white dark:bg-gray-800 shadow-md shadow-indigo-600/10 ring-2 ring-indigo-500/30'
                                  : 'border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-white dark:hover:bg-gray-800'"
-                     class="relative p-5 sm:p-6 rounded-2xl border cursor-pointer transition-all duration-200 select-none group">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="flex items-start gap-3.5">
+                     class="relative p-3.5 sm:p-5 rounded-2xl border cursor-pointer transition-all duration-200 select-none group">
+                    <div class="flex items-center justify-between gap-3 sm:gap-4">
+                        <div class="flex items-center gap-3 sm:gap-3.5 min-w-0">
                             <div
                                 :class="whiteLabelType === 'default' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25' : 'bg-gray-100 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200'"
-                                class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-200 mt-0.5">
+                                class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-200">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                 </svg>
                             </div>
-                            <div class="space-y-1.5">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <h4 class="text-sm font-black text-gray-900 dark:text-white">برندینگ
-                                        پیش‌فرض
-                                        نماینده</h4>
-                                    <span
-                                        class="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold border border-blue-200/50">پیش‌فرض سیستم</span>
-                                </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                    سامانه با لوگو، رنگ سازمانی و عنوان تجاری شما به عنوان نماینده
-                                    پیکربندی
-                                    می‌شود.
-                                </p>
+                            <div class="flex items-center gap-2 min-w-0">
+                                <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white whitespace-nowrap">ظاهر پیش‌فرض نماینده</h4>
                             </div>
                         </div>
                         <div
                             :class="whiteLabelType === 'default' ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'"
-                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all">
+                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all">
                             <div x-show="whiteLabelType === 'default'"
                                  class="w-2 h-2 rounded-full bg-white"></div>
                         </div>
@@ -519,44 +499,34 @@
                 </div>
 
                 {{-- Option 2: Custom White-Label --}}
-                <div tabindex="0" role="button" aria-label="برندینگ اختصاصی وایت‌لیبل"
+                <div tabindex="0" role="button" aria-label="ظاهر اختصاصی"
                      @click="whiteLabelType = 'custom'; syncInvoiceItemsFromModules();"
                      :class="whiteLabelType === 'custom'
                                  ? 'border-indigo-600 bg-white dark:bg-gray-800 shadow-md shadow-indigo-600/10 ring-2 ring-indigo-500/30'
                                  : 'border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-white dark:hover:bg-gray-800'"
-                     class="relative p-5 sm:p-6 rounded-2xl border cursor-pointer transition-all duration-200 select-none group">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="flex items-start gap-3.5">
+                     class="relative p-3.5 sm:p-5 rounded-2xl border cursor-pointer transition-all duration-200 select-none group">
+                    <div class="flex items-center justify-between gap-3 sm:gap-4">
+                        <div class="flex items-center gap-3 sm:gap-3.5 min-w-0">
                             <div
                                 :class="whiteLabelType === 'custom' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25' : 'bg-gray-100 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200'"
-                                class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-200 mt-0.5">
+                                class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-200">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
                                 </svg>
                             </div>
-                            <div class="space-y-1.5">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <h4 class="text-sm font-black text-gray-900 dark:text-white">برندینگ
-                                        اختصاصی
-                                        وایت‌لیبل</h4>
-                                    <span
-                                        class="text-xs px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-bold border border-purple-200/50">وایت‌لیبل مستقل</span>
-                                    <template
-                                        x-if="financialSettings.white_label_yearly_price > 0 || financialSettings.white_label_monthly_price > 0 || financialSettings.white_label_setup_fee > 0">
-                                                <span
-                                                    class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-200/50">تعرفه‌دار</span>
-                                    </template>
-                                </div>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                    لوگو، فاوآیکون، رنگ تم سازمانی و عنوان تجاری کاملاً سفارشی و بدون نام
-                                    نماینده.
-                                </p>
+                            <div class="flex items-center gap-2 min-w-0">
+                                <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white whitespace-nowrap">ظاهر اختصاصی</h4>
+                                <template
+                                    x-if="financialSettings.white_label_yearly_price > 0 || financialSettings.white_label_monthly_price > 0 || financialSettings.white_label_setup_fee > 0">
+                                            <span
+                                                class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-200/50">تعرفه‌دار</span>
+                                </template>
                             </div>
                         </div>
                         <div
                             :class="whiteLabelType === 'custom' ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'"
-                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-all">
+                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all">
                             <div x-show="whiteLabelType === 'custom'"
                                  class="w-2 h-2 rounded-full bg-white"></div>
                         </div>
@@ -586,11 +556,8 @@
                                     </span>
                             <div>
                                 <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">
-                                    تعرفه‌گذاری وایت‌لیبل برای این CRM</h4>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">قیمت‌های
-                                    پیش‌فرض
-                                    از تنظیمات نمایندگی فراخوانی شده‌اند؛ می‌توانید برای این مشتری قیمت را
-                                    اختصاصی تغییر دهید (صفر = رایگان)</p>
+                                    تعرفه‌گذاری ویژگی های ظاهری برای این سامانه
+                                </h4>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
@@ -606,7 +573,7 @@
                         <div>
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-200 mb-1.5 ms-1">
-                                هزینه سالانه وایت‌لیبل (۱۲ ماه)
+                                هزینه سالانه ویژگی های ظاهری (۱۲ ماه)
                             </label>
                             <div class="relative">
                                 <input type="text"
@@ -624,7 +591,7 @@
                         <div>
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-200 mb-1.5 ms-1">
-                                هزینه ماهانه وایت‌لیبل
+                                هزینه ماهانه ویژگی های ظاهری
                             </label>
                             <div class="relative">
                                 <input type="text"
@@ -933,17 +900,7 @@
                             </div>
                         </div>
 
-                        <div
-                            class="p-3.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 text-xs text-indigo-700 dark:text-indigo-300 space-y-1">
-                            <div class="font-bold flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                                <span>انعکاس آنی رنگ در کل سامانه:</span>
-                            </div>
-                            <p class="text-indigo-600/90 dark:text-indigo-300/80 leading-relaxed">
-                                رنگ انتخاب شده فوراً در دکمه‌ها، آیتم منوی فعال، نشان‌ها و المان‌های تعاملی
-                                پورتال اعمال می‌شود.
-                            </p>
-                        </div>
+                        
                     </div>
 
                     {{-- Right: Live Interactive Mockup Window (7 Columns) --}}
@@ -952,14 +909,14 @@
                             class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-900/90 text-white shadow-xl overflow-hidden">
                             {{-- Mock Browser Chrome --}}
                             <div
-                                class="px-4 py-3 bg-gray-800/90 border-b border-gray-700/80 flex items-center justify-between gap-4">
+                                class="px-3 sm:px-4 py-2 sm:py-3 bg-gray-800/90 border-b border-gray-700/80 flex items-center justify-between gap-2 sm:gap-4">
                                 <div class="flex items-center gap-2">
                                     <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
                                     <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
                                     <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
                                 </div>
                                 <div
-                                    class="flex-1 max-w-xs mx-auto bg-gray-900/80 rounded-lg px-3 py-1 text-xs text-gray-400 text-center truncate border border-gray-700/60 dir-ltr flex items-center justify-center gap-1.5">
+                                    class="flex-1 max-w-[160px] sm:max-w-xs mx-auto bg-gray-900/80 rounded-lg px-2 sm:px-3 py-1 text-[11px] sm:text-xs text-gray-400 text-center truncate border border-gray-700/60 dir-ltr flex items-center justify-center gap-1.5">
                                     <template x-if="whiteLabelFaviconPreview">
                                         <img :src="whiteLabelFaviconPreview"
                                              class="w-3 h-3 object-contain shrink-0">
@@ -968,15 +925,15 @@
                                           x-text="domainType === 'custom' && form.custom_domain ? ('https://' + form.custom_domain) : ('https://{{ $wizardBaseDomain }}/' + (form.subdomain || 'crm'))"></span>
                                 </div>
                                 <span
-                                    class="text-xs font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50 shrink-0">پیش‌نمایش زنده</span>
+                                    class="text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50 shrink-0">پیش‌نمایش</span>
                             </div>
 
                             {{-- Mock Portal Interface --}}
                             <div
-                                class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4 min-h-[300px] flex gap-3 text-xs">
+                                class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-2.5 sm:p-4 min-h-[260px] sm:min-h-[300px] flex gap-2 sm:gap-3 text-xs overflow-hidden">
                                 {{-- Mock Sidebar --}}
                                 <div
-                                    class="w-36 sm:w-44 bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200/80 dark:border-gray-700/80 space-y-3 shrink-0 flex flex-col justify-between shadow-2xs">
+                                    class="w-11 sm:w-44 bg-white dark:bg-gray-800 rounded-xl p-2 sm:p-3 border border-gray-200/80 dark:border-gray-700/80 space-y-2 sm:space-y-3 shrink-0 flex flex-col justify-between shadow-2xs">
                                     <div class="space-y-3">
                                         {{-- Mock Brand Logo / Title --}}
                                         <div
@@ -987,14 +944,14 @@
                                             </template>
                                             <template x-if="!whiteLabelLogoPreview">
                                                         <span
-                                                            class="w-6 h-6 rounded-flex items-center justify-center font-black text-white text-xs shrink-0"
+                                                            class="w-6 h-6 rounded flex items-center justify-center font-black text-white text-xs shrink-0"
                                                             :style="'background-color: ' + whiteLabelPrimaryColor">
                                                             <span
                                                                 x-text="(whiteLabelBrandTitle || (selectedSubAccount ? (selectedSubAccount.company_name || selectedSubAccount.name) : '') || 'P').charAt(0)"></span>
                                                         </span>
                                             </template>
                                             <span
-                                                class="font-black text-xs text-gray-900 dark:text-white truncate"
+                                                class="hidden sm:inline font-black text-xs text-gray-900 dark:text-white truncate"
                                                 x-text="whiteLabelBrandTitle || (selectedSubAccount ? (selectedSubAccount.company_name || selectedSubAccount.name) : '') || 'سامانه اختصاصی'"></span>
                                         </div>
 
@@ -1002,110 +959,110 @@
                                         <div class="space-y-1">
                                             {{-- Active Item in Brand Color --}}
                                             <div
-                                                class="px-2.5 py-1.5 rounded-lg font-bold text-xs text-white flex items-center gap-2 shadow-2xs"
+                                                class="px-2 sm:px-2.5 py-1.5 rounded-lg font-bold text-xs text-white flex items-center justify-center sm:justify-start gap-2 shadow-2xs"
                                                 :style="'background-color: ' + whiteLabelPrimaryColor">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor"
                                                      viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                           stroke-width="2"
                                                           d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                                                 </svg>
-                                                <span>پیشخوان</span>
+                                                <span class="hidden sm:inline">پیشخوان</span>
                                             </div>
                                             <div
-                                                class="px-2.5 py-1.5 rounded-lg text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                class="px-2 sm:px-2.5 py-1.5 rounded-lg text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center sm:justify-start gap-2">
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor"
                                                      viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                           stroke-width="2"
                                                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                                 </svg>
-                                                <span>پرونده‌ها</span>
+                                                <span class="hidden sm:inline">پرونده‌ها</span>
                                             </div>
                                             <div
-                                                class="px-2.5 py-1.5 rounded-lg text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                class="px-2 sm:px-2.5 py-1.5 rounded-lg text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center sm:justify-start gap-2">
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor"
                                                      viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                           stroke-width="2"
                                                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                 </svg>
-                                                <span>نوبت‌دهی</span>
+                                                <span class="hidden sm:inline">نوبت‌دهی</span>
                                             </div>
                                             <div
-                                                class="px-2.5 py-1.5 rounded-lg text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                class="px-2 sm:px-2.5 py-1.5 rounded-lg text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center sm:justify-start gap-2">
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor"
                                                      viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                           stroke-width="2"
                                                           d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                                 </svg>
-                                                <span>گزارش‌ها</span>
+                                                <span class="hidden sm:inline">گزارش‌ها</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {{-- Mock Support Badge --}}
                                     <div
-                                        class="p-2 rounded-lg bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700 text-xs text-gray-400 truncate">
+                                        class="hidden sm:block p-2 rounded-lg bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700 text-xs text-gray-400 truncate">
                                         پشتیبانی: <span class="text-gray-700 dark:text-gray-200 font-bold"
                                                         x-text="whiteLabelSupportPhone ? faNum(whiteLabelSupportPhone) : '۰۲۱...'"></span>
                                     </div>
                                 </div>
 
                                 {{-- Mock Main Content Area --}}
-                                <div class="flex-1 space-y-3">
+                                <div class="flex-1 min-w-0 space-y-2 sm:space-y-3">
                                     {{-- Mock Header Bar --}}
                                     <div
-                                        class="bg-white dark:bg-gray-800 rounded-xl p-2.5 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-2 shadow-2xs">
-                                        <div class="flex items-center gap-2">
-                                                    <span class="font-black text-gray-900 dark:text-white text-xs"
+                                        class="bg-white dark:bg-gray-800 rounded-xl p-2 sm:p-2.5 border border-gray-200/80 dark:border-gray-700/80 flex items-center justify-between gap-1.5 sm:gap-2 shadow-2xs min-w-0">
+                                        <div class="flex items-center gap-1 sm:gap-2 min-w-0">
+                                                    <span class="font-black text-gray-900 dark:text-white text-[10px] sm:text-xs truncate"
                                                           x-text="whiteLabelBrandTitle || (selectedSubAccount ? (selectedSubAccount.company_name || selectedSubAccount.name) : '') || 'سامانه اختصاصی'"></span>
                                         </div>
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex items-center gap-1 sm:gap-2 shrink-0">
                                                     <span
-                                                        class="inline-flex items-center gap-1 text-xs text-white px-2.5 py-1 rounded-lg font-bold shadow-2xs"
+                                                        class="inline-flex items-center gap-1 text-[10px] sm:text-xs text-white px-2 sm:px-2.5 py-1 rounded-lg font-bold shadow-2xs shrink-0"
                                                         :style="'background-color: ' + whiteLabelPrimaryColor">
                                                         <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24"
                                                              stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                   stroke-width="2.5" d="M12 4v16m8-8H4"/>
                                                         </svg>
-                                                        <span>ثبت نوبت</span>
+                                                        <span class="hidden xs:inline sm:inline">ثبت نوبت</span>
                                                     </span>
                                             <div
-                                                class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                                                class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-200 dark:bg-gray-700 shrink-0"></div>
                                         </div>
                                     </div>
 
                                     {{-- Mock Stat Cards --}}
-                                    <div class="grid grid-cols-2 gap-2">
+                                    <div class="grid grid-cols-2 gap-1.5 sm:gap-2">
                                         <div
-                                            class="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/80 space-y-1">
+                                            class="p-2 sm:p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/80 space-y-0.5 sm:space-y-1 min-w-0">
                                                         <span
-                                                            class="text-xs text-gray-400 block">بیماران امروز</span>
+                                                            class="text-[10px] sm:text-xs text-gray-400 block truncate">بیماران امروز</span>
                                             <div class="flex items-center justify-between">
                                                             <span
-                                                                class="font-bold text-gray-900 dark:text-white text-xs">۲۴ نفر</span>
-                                                <span class="w-2 h-2 rounded-full"
+                                                                class="font-bold text-gray-900 dark:text-white text-[11px] sm:text-xs">۲۴ نفر</span>
+                                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shrink-0"
                                                       :style="'background-color: ' + whiteLabelPrimaryColor"></span>
                                             </div>
                                         </div>
                                         <div
-                                            class="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/80 space-y-1">
+                                            class="p-2 sm:p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/80 space-y-0.5 sm:space-y-1 min-w-0">
                                                         <span
-                                                            class="text-xs text-gray-400 block">نوبت‌های فعال</span>
+                                                            class="text-[10px] sm:text-xs text-gray-400 block truncate">نوبت‌های فعال</span>
                                             <div class="flex items-center justify-between">
                                                             <span
-                                                                class="font-bold text-gray-900 dark:text-white text-xs">۵ نوبت</span>
-                                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                                                class="font-bold text-gray-900 dark:text-white text-[11px] sm:text-xs">۵ نوبت</span>
+                                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 shrink-0"></span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {{-- Mock Footer --}}
                                     <div
-                                        class="pt-2 text-center text-xs text-gray-400 border-t border-gray-200/60 dark:border-gray-800 truncate"
+                                        class="pt-1.5 sm:pt-2 text-center text-[10px] sm:text-xs text-gray-400 border-t border-gray-200/60 dark:border-gray-800 truncate"
                                         x-text="whiteLabelFooterText || ('تمامی حقوق متعلق به ' + (whiteLabelBrandTitle || (selectedSubAccount ? (selectedSubAccount.company_name || selectedSubAccount.name) : '') || 'سامانه') + ' است.')"></div>
                                 </div>
                             </div>
@@ -1116,11 +1073,11 @@
         </div>
     </div>
 
-    <div class="pt-6 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
-        <span class="text-xs text-gray-400">مرحله ۱ از ۳: آدرس و ظاهر سامانه</span>
+    <div class="pt-4 sm:pt-6 border-t border-gray-100 dark:border-gray-700/60 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sticky bottom-0 sm:static bg-white/95 dark:bg-gray-800/95 backdrop-blur-md -mx-4 sm:mx-0 px-4 sm:px-0 py-3 sm:py-0 z-20">
+        <span class="text-xs text-gray-400 text-center sm:text-right">مرحله ۱ از ۳: آدرس و ظاهر سامانه</span>
         <button type="button" @click="nextStep()"
                 :disabled="domainType === 'subdomain' ? (!form.subdomain || subdomainStatus === 'unavailable') : (!form.custom_domain || domainStatus === 'unavailable')"
-                class="inline-flex items-center gap-2 px-7 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-black rounded-xl transition shadow-lg shadow-indigo-600/25 cursor-pointer">
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-black rounded-xl transition shadow-lg shadow-indigo-600/25 cursor-pointer">
             <span>مرحله بعدی: انتخاب خریدار سامانه</span>
             <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

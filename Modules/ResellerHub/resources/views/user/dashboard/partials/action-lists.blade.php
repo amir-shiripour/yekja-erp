@@ -19,7 +19,7 @@
                     <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
                         سامانه‌های در آستانه انقضا
                     </h2>
-                    <p class="text-xs text-gray-400 font-medium">نیاز به تمدید لایسنس در ۳۰ روز آینده</p>
+                    <p class="text-xs text-gray-400 font-medium">نیاز به تمدید سفارش در ۳۰ روز آینده</p>
                 </div>
             </div>
         </div>
@@ -33,7 +33,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200">وضعیت لایسنس‌ها پایدار است</h3>
+                        <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200">وضعیت اعتباری سفارشات پایدار است</h3>
                         <p class="text-xs text-gray-400 mt-1">هیچ اشتراکی در ۳۰ روز آینده منقضی نخواهد شد.</p>
                     </div>
                 </div>
@@ -136,9 +136,8 @@
                 </span>
                 <div>
                     <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
-                        صورتحساب‌های معوق و در انتظار تسویه
+                        فاکتورهای معوقه و در انتظار تسویه
                     </h2>
-                    <p class="text-xs text-gray-400 font-medium">فاکتورهای نیازمند پیگیری مالی</p>
                 </div>
             </div>
 
@@ -160,8 +159,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200">تسویه کامل حساب‌ها</h3>
-                        <p class="text-xs text-gray-400 mt-1">هیچ صورتحساب پرداخت‌نشده‌ای در این بخش وجود ندارد.</p>
+                        <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200">تسویه کامل فاکتورها</h3>
+                        <p class="text-xs text-gray-400 mt-1">هیچ فاکتور درانتظار پرداخت یا معوقه در این بخش وجود ندارد.</p>
                     </div>
                 </div>
             @else
@@ -187,7 +186,7 @@
                                     <div class="flex items-center gap-2 text-xs text-gray-400 mt-0.5 truncate">
                                         <span>مشتری: {{ $inv->sub_account_name ?: '—' }}</span>
                                         @if($inv->due_date)
-                                            <span>مهلت: {{ reseller_format_jalali($inv->due_date) }}</span>
+                                            <span>سررسید: {{ reseller_format_jalali($inv->due_date) }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -230,7 +229,7 @@
             </span>
             <a href="{{ route('reseller.invoices.create') }}"
                class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
-                <span>+ صدور صورتحساب جدید</span>
+                <span> صدور فاکتور جدید+</span>
             </a>
         </div>
     </div>

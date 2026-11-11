@@ -1,5 +1,5 @@
 <div
-    class="bg-white dark:bg-gray-800/80 p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700/60 flex flex-col justify-between backdrop-blur-xl h-full">
+    class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-xs border border-gray-200/80 dark:border-gray-700/60 flex flex-col justify-between h-full">
     <h2 class="text-base font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-100 dark:border-gray-700/60 min-h-[44px] flex items-center justify-between">
         <span>مشخصات فنی و اشتراک</span>
     </h2>
@@ -109,8 +109,8 @@
 
                 <button type="button"
                         @click="openDomainModal()"
-                        class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700/60 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        class="px-3.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                    <svg class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                     </svg>
@@ -186,7 +186,7 @@
                     وایت‌ لیبل اختصاصی ({{ $brandTitle ?: $tenant->name }})
                 </span>
             @else
-                <span class="font-medium text-gray-700 dark:text-gray-300 text-xs">برندینگ پیش‌فرض نماینده</span>
+                <span class="font-medium text-gray-700 dark:text-gray-300 text-xs">برندینگ پیش‌ فرض نماینده</span>
             @endif
         </div>
 
@@ -210,7 +210,6 @@
         @if($tenant->isPendingPayment())
             <div
                 class="w-full h-12 px-5 bg-amber-50 dark:bg-amber-950/60 border border-amber-200/60 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-xs font-bold rounded-xl flex items-center justify-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                 <span>سامانه در انتظار پرداخت و تسویه فاکتور است</span>
             </div>
         @elseif($tenant->package && !$tenant->package->getPriceTypeEnum()->hasRenewal())
@@ -229,7 +228,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <span>تمدید لایسنس و افزایش مدت اعتبار</span>
+                <span>تمدید سفارش</span>
             </button>
         @endif
     </div>

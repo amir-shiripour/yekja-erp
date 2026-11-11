@@ -8,7 +8,7 @@
      @keydown.escape.window="if (typeof quickSubModalOpen !== 'undefined' && quickSubModalOpen) { quickSubModalOpen = false; } else { closeQuickProvision(); }">
 
     <div @click.away="if (typeof quickSubModalOpen === 'undefined' || !quickSubModalOpen) closeQuickProvision()"
-         class="relative bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-2xl max-w-3xl w-full my-6 overflow-hidden flex flex-col max-h-[92vh]">
+         class="relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xl max-w-3xl w-full my-6 overflow-hidden flex flex-col max-h-[92vh]">
         <div
             class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between shrink-0 bg-gray-50/50 dark:bg-gray-900/40">
             <div class="flex items-center gap-3.5 min-w-0">
@@ -20,20 +20,13 @@
                     @if($mode === 'subaccount')
                         <div class="flex items-center gap-2 flex-wrap">
                             <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white truncate">
-                                ساخت سریع CRM برای این خریدار
+                                ساخت سریع سامانه برای این کاربر
                             </h3>
-                            <span
-                                class="px-2.5 py-0.5 rounded-lg text-xs font-black bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
-                                {{ $subAccount->name ?? '' }}
-                            </span>
                         </div>
-                        <p class="text-xs text-gray-400 mt-1 truncate">
-                            سامانه اختصاصی این خریدار در چند ثانیه همراه با فاکتور و لایسنس فعال خواهد شد.
-                        </p>
                     @else
                         <div class="flex items-center gap-2 flex-wrap">
                             <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white truncate">
-                                راه‌اندازی سریع CRM با این پکیج
+                                راه‌اندازی سریع سامانه با این پکیج
                             </h3>
                             <span
                                 class="px-2.5 py-0.5 rounded-lg text-xs font-black bg-indigo-600 text-white shadow-xs transition-colors"
@@ -82,7 +75,7 @@
             <template x-if="createdTenant">
                 <div class="py-6 text-center space-y-6">
                     <div
-                        class="w-20 h-20 rounded-3xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20 ring-8 ring-emerald-500/10">
+                        class="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto ring-4 ring-emerald-500/10 shadow-xs">
                         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                         </svg>
@@ -90,7 +83,7 @@
 
                     <div class="space-y-2">
                         <h4 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white">
-                            تبریک! سامانه CRM با موفقیت راه‌اندازی شد
+                            تبریک! سامانه با موفقیت راه‌اندازی شد
                         </h4>
                         <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                             سامانه اختصاصی <span class="font-bold text-gray-900 dark:text-white"
@@ -239,7 +232,7 @@
                                 <span
                                     class="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black text-xs flex items-center justify-center">۱</span>
                                 <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">
-                                    خریدار سامانه (حساب زیرمجموعه)
+                                    کاربر سامانه
                                 </h4>
                             </div>
 
@@ -270,7 +263,7 @@
                                 </div>
                                 <span
                                     class="px-2.5 py-1 rounded-xl text-xs font-bold bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 self-start sm:self-auto shrink-0">
-                                    خریدار ثبت‌شده
+                                    کاربر ثبت‌ شده
                                 </span>
                             </div>
                         </div>
@@ -336,12 +329,12 @@
                                         <span
                                             class="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black text-xs flex items-center justify-center">۱</span>
                                         <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">
-                                            انتخاب خریدار سامانه (حساب زیرمجموعه) <span class="text-rose-500">*</span>
+                                            انتخاب کاربر سامانه  <span class="text-rose-500">*</span>
                                         </h4>
                                     </div>
                                     <p class="text-xs text-gray-400 mt-0.5 ms-8">
-                                        خریدار این سامانه CRM را از لیست زیرمجموعه‌های فعال خود انتخاب کنید یا سریعاً یک
-                                        خریدار جدید ثبت نمایید.
+                                        کاربر این سامانه را از لیست زیرمجموعه‌های فعال خود انتخاب کنید یا سریعاً یک
+                                        کاربر جدید ثبت نمایید.
                                     </p>
                                 </div>
                                 <button type="button" @click="openQuickSubModal()"
@@ -350,7 +343,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                               d="M12 4v16m8-8H4"/>
                                     </svg>
-                                    <span>تعریف خریدار جدید</span>
+                                    <span>ایجاد کاربر جدید</span>
                                 </button>
                             </div>
 
@@ -378,7 +371,7 @@
                                             </div>
                                         </template>
                                         <template x-if="!selectedSubAccount">
-                                            <span class="text-gray-400 text-xs sm:text-sm">انتخاب یا جستجوی حساب خریدار (زیرمجموعه)...</span>
+                                            <span class="text-gray-400 text-xs sm:text-sm">انتخاب یا جستجوی حساب کاربری...</span>
                                         </template>
                                     </div>
                                     <svg class="w-4 h-4 text-gray-400 shrink-0 ms-2 transition-transform duration-200"
@@ -394,7 +387,7 @@
                                      class="absolute z-50 left-0 right-0 top-full mt-2 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl p-2 max-h-60 overflow-y-auto custom-scrollbar">
                                     <div class="p-1 border-b border-gray-100 dark:border-gray-700 mb-1">
                                         <x-resellerhub::input type="text" x-model="subAccountSearchQuery"
-                                                              placeholder="جستجوی خریدار بر اساس نام، شماره موبایل یا نام شرکت..."
+                                                              placeholder="جستجوی کاربران بر اساس نام، شماره موبایل یا نام شرکت..."
                                                               class="!text-xs !p-2"/>
                                     </div>
 
@@ -422,7 +415,7 @@
 
                                     <div x-show="filteredSubAccounts().length === 0"
                                          class="p-3 text-xs text-gray-400 text-center">
-                                        هیچ خریدار یا زیرمجموعه‌ای یافت نشد
+                                        هیچ کاربر زیرمجموعه‌ای یافت نشد
                                     </div>
                                 </div>
                             </div>
@@ -468,8 +461,7 @@
                                 class="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black text-xs flex items-center justify-center">
                                 {{ $mode === 'subaccount' ? '۳' : '۲' }}
                             </span>
-                            <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">نام و نشانی سامانه
-                                CRM</h4>
+                            <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">نام و نشانی سامانه</h4>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -936,83 +928,6 @@
     </div>
 
     @if($mode === 'package')
-        {{-- Quick Sub-Account Creation Modal (Nested) --}}
-        <div x-show="quickSubModalOpen" x-cloak @click.stop="$event.stopPropagation()"
-             class="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <div @click.away="quickSubModalOpen = false" @click.stop="$event.stopPropagation()"
-                 class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-2xl max-w-md w-full overflow-hidden">
-                <div class="p-5 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span
-                            class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-xs">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                            </svg>
-                        </span>
-                        <div>
-                            <h4 class="text-sm font-black text-gray-900 dark:text-white">تعریف سریع حساب زیرمجموعه</h4>
-                            <p class="text-xs text-gray-400 mt-0.5">افزودن خریدار جدید به عنوان زیرمجموعه</p>
-                        </div>
-                    </div>
-                    <button type="button" @click="quickSubModalOpen = false"
-                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <form @submit.prevent="submitQuickSubAccount()" class="p-5 space-y-4">
-                    <div
-                        class="p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 text-xs text-indigo-900 dark:text-indigo-300 leading-relaxed">
-                        فقط نام و شماره همراه زیرمجموعه را وارد کنید؛ اطلاعات ورود به سامانه به صورت خودکار ایجاد و
-                        پیامک خواهد
-                        شد.
-                    </div>
-
-                    <div>
-                        <x-resellerhub::label>نام و نام خانوادگی مدیر زیرمجموعه <span class="text-rose-500">*</span>
-                        </x-resellerhub::label>
-                        <x-resellerhub::input type="text" x-model="quickSubForm.name" required
-                                              placeholder="مثال: علی رضایی"/>
-                        <template x-if="quickSubErrors.name">
-                            <p class="text-xs text-rose-500 mt-1 font-bold" x-text="quickSubErrors.name[0]"></p>
-                        </template>
-                    </div>
-
-                    <div>
-                        <x-resellerhub::label>شماره تلفن همراه <span class="text-rose-500">*</span>
-                        </x-resellerhub::label>
-                        <x-resellerhub::input class="text-left" type="text" x-model="quickSubForm.mobile" required
-                                              dir="ltr" inputmode="numeric" placeholder="09123456789"/>
-                        <p class="text-xs text-gray-400 mt-1">شماره همراه ۱۱ رقمی مدیر زیرمجموعه</p>
-                        <template x-if="quickSubErrors.mobile">
-                            <p class="text-xs text-rose-500 mt-1 font-bold" x-text="quickSubErrors.mobile[0]"></p>
-                        </template>
-                    </div>
-
-                    <div
-                        class="pt-3 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-700/60">
-                        <button type="button" @click="quickSubModalOpen = false"
-                                class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition cursor-pointer">
-                            انصراف
-                        </button>
-                        <button type="submit" :disabled="quickSubSaving"
-                                class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-black shadow-md transition cursor-pointer flex items-center gap-2">
-                            <template x-if="quickSubSaving">
-                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                            stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                </svg>
-                            </template>
-                            <span>ثبت و انتخاب آنی زیرمجموعه</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        @include('resellerhub::partials.quick-subaccount-modal')
     @endif
 </div>

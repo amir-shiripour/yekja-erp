@@ -636,15 +636,13 @@
                     <div class="space-y-2">
                         <h3 class="text-xl font-black text-gray-900 dark:text-white"
                             x-text="toggleTarget?.current_status === 'active' ? ('تعلیق دسترسی «' + (toggleTarget?.name || '') + '»') : ('فعال‌سازی مجدد حساب «' + (toggleTarget?.name || '') + '»')"></h3>
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed"
-                           x-text="toggleTarget?.current_status === 'active' ? 'با تعلیق حساب، دسترسی اولیه ورود خریدار و مدیر این زیرمجموعه موقتاً مسدود شده و امکان ورود به غیرفعال خواهد شد.' : 'با رفع تعلیق، دسترسی کامل ورود خریدار به سامانه CRM اختصاصی بلافاصله فعال می‌گردد.'"></p>
                     </div>
 
                     {{-- Summary Preview Card --}}
                     <div
                         class="p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800 text-xs space-y-2.5 text-start">
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-400 font-bold">نام خریدار / زیرمجموعه:</span>
+                            <span class="text-gray-400 font-bold">نام کاربری زیرمجموعه:</span>
                             <span class="font-black text-gray-800 dark:text-gray-200"
                                   x-text="toggleTarget?.name || '—'"></span>
                         </div>

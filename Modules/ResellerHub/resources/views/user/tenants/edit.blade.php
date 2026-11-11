@@ -6,7 +6,7 @@
 
 @extends('layouts.user')
 
-@section('title', 'ویرایش سامانه CRM: ' . $tenant->name)
+@section('title', 'ویرایش سامانه: ' . $tenant->name)
 
 @php
     $subAccount = $subAccount ?? ($tenant->subAccount ?: ResellerSubAccount::where('tenant_id', $tenant->id)->first());
@@ -57,26 +57,35 @@
         @include('resellerhub::partials.toast')
 
         {{-- Header & Title --}}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-            <div>
-                <h1 class="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-4 tracking-tight">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
+                <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
                     <span
-                        class="flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 text-white shadow-sm shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-indigo-600 text-white shadow-sm shrink-0">
+                        <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                         </svg>
                     </span>
-                    <span>ویزارد ویرایش سامانه CRM</span>
-                </h1>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2 ms-1">
-                    اطلاعات کلینیک یا سازمان «<span
-                        class="font-bold text-gray-700 dark:text-gray-200">{{ $tenant->name }}</span>» را ویرایش و به
-                    صورت آنی ذخیره کنید.
-                </p>
+                    <h1 class="text-base sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight truncate">
+                        <span>ویرایش سامانه: {{ $tenant->name }}</span>
+                    </h1>
+                </div>
+
+                {{-- Mobile Back Button (Top-Left) --}}
+                <a href="{{ route('reseller.dashboard') }}"
+                   class="sm:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shrink-0 mt-0.5">
+                    <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    <span class="hidden xs:inline">بازگشت به </span>
+                    <span>داشبورد</span>
+                </a>
             </div>
 
-            <div class="flex items-center gap-3">
+            {{-- Desktop Action Buttons --}}
+            <div class="hidden sm:flex items-center gap-3 shrink-0">
                 <a href="{{ route('reseller.tenants.show', $tenant->id) }}"
                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,16 +94,16 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
-                    <span>مشاهده جزییات سامانه</span>
+                    <span>مشاهده جزییات</span>
                 </a>
 
                 <a href="{{ route('reseller.dashboard') }}"
                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
-                    <span>داشبورد</span>
+                    <span>بازگشت به داشبورد</span>
                 </a>
             </div>
         </div>
@@ -110,7 +119,7 @@
               @submit.prevent="submitForm($el)"
               method="POST"
               action="{{ route('reseller.tenants.update', $tenant->id) }}"
-              class="bg-white dark:bg-gray-800/80 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700/60 divide-y divide-gray-100 dark:divide-gray-700/60 overflow-hidden backdrop-blur-xl">
+              class="bg-white dark:bg-gray-800 rounded-2xl shadow-xs border border-gray-200/80 dark:border-gray-700/60 divide-y divide-gray-100 dark:divide-gray-700/60 overflow-hidden">
             @csrf
             @method('PUT')
 

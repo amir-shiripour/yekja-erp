@@ -1,4 +1,4 @@
-<div class="bg-white dark:bg-gray-800/80 p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700/60 space-y-6 backdrop-blur-xl">
+<div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-xs border border-gray-200/80 dark:border-gray-700/60 space-y-6">
     <div
         class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
         <div class="flex items-center gap-3">
@@ -13,7 +13,7 @@
                 <h2 class="text-base font-black text-gray-900 dark:text-white">برندینگ و ظاهر اختصاصی سامانه
                     (وایت‌ لیبل)</h2>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">مشخصات هویت بصری، لوگو، رنگ سازمانی و اطلاعات
-                    تماس این CRM</p>
+                    تماس این سامانه</p>
             </div>
         </div>
 
@@ -27,14 +27,13 @@
             @else
                 <span
                     class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 rounded-full text-xs font-bold border border-blue-200/60 dark:border-blue-800/40">
-                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                     برندینگ پیش‌ فرض نماینده
                 </span>
             @endif
 
             <a href="{{ route('reseller.tenants.edit', $tenant->id) }}"
-               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-xl transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 hover:text-amber-800 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-xl transition border border-amber-200/80 dark:border-amber-800/60">
+                <svg class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
@@ -103,7 +102,7 @@
         {{-- 3. Support Contacts Card --}}
         <div
             class="p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/60 space-y-2 flex flex-col justify-between">
-            <span class="text-xs font-bold text-gray-400 block">پشتیبانی اختصاصی مشتریان</span>
+            <span class="text-xs font-bold text-gray-400 block">پشتیبانی اختصاصی کاربران زیرمجموعه</span>
             <div class="space-y-1.5 text-xs">
                 <div class="flex items-center justify-between">
                     <span class="text-gray-400">تلفن:</span>

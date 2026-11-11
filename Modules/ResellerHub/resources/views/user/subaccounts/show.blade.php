@@ -1,7 +1,7 @@
 @php use App\Tenancy\TenantManager; @endphp
 @extends('layouts.user')
 
-@section('title', 'جزئیات حساب خریدار: ' . $subAccount->name)
+@section('title', 'جزئیات حساب کاربر زیرمجموعه: ' . $subAccount->name)
 
 @php
     $modulesMap = ($availableModules ?? collect())->keyBy('slug');
@@ -91,65 +91,99 @@
     </script>
 
     <div x-data="subAccountDetailManager()"
-         class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative">
+         class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 relative">
 
         @include('resellerhub::partials.toast')
 
-        {{-- Top Navigation & Breadcrumbs --}}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <nav class="flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-gray-400">
-                <a href="{{ route('reseller.dashboard') }}"
-                   class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                    </svg>
-                    <span>پیشخوان نمایندگی</span>
-                </a>
-                <svg class="w-3.5 h-3.5 rtl:rotate-180 text-gray-400" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-                <a href="{{ route('reseller.sub-accounts.index') }}"
-                   class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                    مدیریت زیرمجموعه‌ها
-                </a>
-                <svg class="w-3.5 h-3.5 rtl:rotate-180 text-gray-400" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-                <span class="text-gray-800 dark:text-gray-200">{{ $subAccount->name }}</span>
-            </nav>
+        {{-- Header & Quick Actions (Matching Tenant Show 1:1) --}}
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{{ $subAccount->name }}</h1>
+                        @if($subAccount->isOnlinePurchase())
+                            <span
+                                class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/80">
+                                <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                </svg>
+                                <span>خرید آنلاین</span>
+                            </span>
+                        @endif
+                    </div>
+                </div>
 
-            <div class="flex items-center gap-2.5">
+                {{-- Sleek Back to List Button (Prominent & standard at top corner) --}}
                 <a href="{{ route('reseller.sub-accounts.index') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-bold transition-all cursor-pointer">
-                    <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                   class="h-10 inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-200 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-slate-200/70 dark:border-gray-700 whitespace-nowrap shrink-0">
+                    <svg class="w-4 h-4 text-slate-500 shrink-0 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
-                    <span>بازگشت به لیست</span>
+                    <span class="sm:inline hidden">بازگشت به لیست</span>
+                    <span class="sm:hidden inline">بازگشت</span>
                 </a>
+            </div>
 
+            {{-- Action Bar: Single horizontal row with unified h-10 height (Zero 2-tier stacking!) --}}
+            <div class="flex items-center gap-2 w-full lg:w-auto">
+                {{-- Primary Action --}}
+                @if($subAccount->tenant)
+                    <form method="POST" action="{{ route('reseller.tenants.login-as', $subAccount->tenant->id) }}" target="_blank"
+                          class="flex-1 lg:flex-initial">
+                        @csrf
+                        <button type="submit"
+                                class="w-full h-10 inline-flex items-center justify-center gap-2 px-4 sm:px-5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black rounded-xl transition shadow-xs hover:shadow-sm active:scale-95 cursor-pointer whitespace-nowrap">
+                            <span>ورود به سامانه</span>
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                        </button>
+                    </form>
+                @else
+                    <button type="button" @click="openQuickProvisionForSub()"
+                            class="h-10 inline-flex items-center justify-center gap-2 flex-1 lg:flex-initial px-4 sm:px-5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black rounded-xl transition shadow-xs hover:shadow-sm active:scale-95 cursor-pointer whitespace-nowrap">
+                        <span>ساخت سامانه جدید</span>
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                    </button>
+                @endif
+
+                {{-- Unified Amber Edit Button --}}
                 <a href="{{ route('reseller.sub-accounts.edit', $subAccount->id) }}"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-600 dark:text-amber-400 text-xs sm:text-sm font-bold transition-all cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="h-10 inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-amber-200/80 dark:border-amber-800/60 whitespace-nowrap shrink-0">
+                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
-                    <span>ویرایش مشخصات</span>
+                    <span class="sm:inline hidden">ویرایش کاربر</span>
+                    <span class="sm:hidden inline">ویرایش</span>
                 </a>
 
-                @if($subAccount->tenant)
-                    <a href="{{ route('reseller.tenants.show', $subAccount->tenant->id) }}"
-                       class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-bold transition-all cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {{-- Toggle Status Button (Amber / Emerald) --}}
+                <button type="button"
+                        @click="showToggleModal = true"
+                        class="h-10 w-10 sm:w-auto inline-flex items-center justify-center gap-1.5 sm:px-3.5 rounded-xl transition-colors border whitespace-nowrap shrink-0 cursor-pointer {{ $subAccount->status === 'active' ? 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200/80' : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200/80' }}"
+                        title="{{ $subAccount->status === 'active' ? 'تعلیق موقت حساب' : 'فعال‌سازی مجدد حساب' }}">
+                    @if($subAccount->status === 'active')
+                        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                  d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span>مدیریت در پنل CRM</span>
-                    </a>
-                @endif
+                        <span class="sm:inline hidden">تعلیق</span>
+                    @else
+                        <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="sm:inline hidden">فعال‌سازی</span>
+                    @endif
+                </button>
+
+                {{-- Delete Button (Rose) --}}
                 <button type="button"
                         @click="openSubAccountDeleteModal({
                             id: {{ $subAccount->id }},
@@ -164,102 +198,19 @@
                             ])->values()) }},
                             delete_url: '{{ route('reseller.sub-accounts.destroy', $subAccount->id) }}'
                         })"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 text-xs sm:text-sm font-bold transition-all cursor-pointer"
+                        class="h-10 w-10 sm:w-auto inline-flex items-center justify-center gap-1.5 sm:px-3.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-rose-200/80 dark:border-rose-800/60 cursor-pointer whitespace-nowrap shrink-0"
                         title="{{ __('resellerhub::messages.subaccounts.delete_tooltip') }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
-                    <span>{{ __('resellerhub::messages.subaccounts.delete_title') }}</span>
+                    <span class="sm:inline hidden">حذف</span>
                 </button>
             </div>
         </div>
 
-        {{-- Main Header Card --}}
-        <x-resellerhub::card class="p-6 sm:p-8">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div class="flex items-center gap-4 sm:gap-5">
-                    <div
-                        class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-indigo-600 text-white font-black text-2xl sm:text-3xl flex items-center justify-center shadow-lg shadow-indigo-600/25 shrink-0">
-                        <span>{{ mb_substr($subAccount->name, 0, 1, 'UTF-8') }}</span>
-                    </div>
-                    <div class="space-y-1.5 min-w-0">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <h1 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-                                {{ $subAccount->name }}
-                            </h1>
-                            <span
-                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border {{ $subAccount->status_badge }}">
-                                <span
-                                    class="w-2 h-2 rounded-full {{ $subAccount->status === 'active' ? 'bg-emerald-500' : 'bg-rose-500' }}"></span>
-                                <span>{{ $subAccount->status_label }}</span>
-                            </span>
-                            @if($subAccount->isOnlinePurchase())
-                                <span
-                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/80 shadow-2xs">
-                                    <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                                    </svg>
-                                    <span>خرید آنلاین از سایت</span>
-                                </span>
-                            @else
-                                <span
-                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                    </svg>
-                                    <span>ثبت مستقیم</span>
-                                </span>
-                            @endif
-                        </div>
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">
-                            {{ $subAccount->company_name ? ('کسب‌وکار: ' . $subAccount->company_name) : 'حساب کاربری خریدار سامانه CRM اختصاصی' }}
-                        </p>
-                    </div>
-                </div>
-
-                {{-- Action Buttons --}}
-                <div class="flex flex-wrap items-center gap-3 shrink-0">
-                    <button type="button"
-                            @click="showToggleModal = true"
-                            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border {{ $subAccount->status === 'active' ? 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-800/50' : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/50' }}">
-                        @if($subAccount->status === 'active')
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span>تعلیق موقت حساب</span>
-                        @else
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span>فعال‌سازی مجدد حساب</span>
-                        @endif
-                    </button>
-
-                    @if($tenantLoginUrl)
-                        <a href="{{ $tenantLoginUrl }}" target="_blank"
-                           class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
-                            <span>ورود به سامانه خریدار</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                            </svg>
-                        </a>
-                    @endif
-                </div>
-            </div>
-        </x-resellerhub::card>
-
         {{-- Metric Summary Cards --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Metric 1: Account Status --}}
             <x-resellerhub::card class="p-5 flex items-center justify-between gap-3">
                 <div class="min-w-0">
@@ -350,24 +301,27 @@
             $tenantList = $allTenants ?? collect($subAccount->tenant ? [$subAccount->tenant] : []);
         @endphp
 
-        {{-- Tab Navigation Bar --}}
+        {{-- Tab Navigation Bar (Responsive Hybrid: Full 5 tabs on desktop, 3-segment with dropdown on mobile matching tenant 197) --}}
         <div
-            class="bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-100 dark:border-gray-700/60 p-1.5 shadow-xs backdrop-blur-xl">
-            <nav class="flex items-center gap-1.5 overflow-x-auto scrollbar-none" aria-label="Tabs">
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-slate-200/80 dark:border-gray-700/80 p-1.5 shadow-xs relative">
+            {{-- Desktop Full Tab Navigation (sm and up) --}}
+            <nav class="hidden sm:flex items-center gap-1.5 overflow-x-auto hide-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                 style="scrollbar-width: none; -ms-overflow-style: none;"
+                 aria-label="Tabs Desktop">
                 {{-- Tab 1: Connected Tenants --}}
                 <button type="button"
                         @click="setTab('tenants')"
                         :class="activeTab === 'tenants'
-                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
-                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                            ? 'bg-indigo-600 text-white shadow-xs'
+                            : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap shrink-0">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
-                    <span>سامانه‌های ابری CRM</span>
+                    <span>سامانه‌ها</span>
                     <span
-                        :class="activeTab === 'tenants' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                        :class="activeTab === 'tenants' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300'"
                         class="px-2 py-0.5 rounded-full text-xs font-bold">
                         {{ reseller_fa_num($tenantList->count()) }}
                     </span>
@@ -377,30 +331,30 @@
                 <button type="button"
                         @click="setTab('profile')"
                         :class="activeTab === 'profile'
-                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
-                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                            ? 'bg-indigo-600 text-white shadow-xs'
+                            : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap shrink-0">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
-                    <span>اطلاعات خریدار و سهمیه‌ها</span>
+                    <span>اطلاعات و تنظیمات</span>
                 </button>
 
                 {{-- Tab 3: Modules & Capabilities --}}
                 <button type="button"
                         @click="setTab('modules')"
                         :class="activeTab === 'modules'
-                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
-                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                            ? 'bg-indigo-600 text-white shadow-xs'
+                            : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap shrink-0">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
                     <span>ماژول‌ها و امکانات</span>
                     <span
-                        :class="activeTab === 'modules' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                        :class="activeTab === 'modules' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300'"
                         class="px-2 py-0.5 rounded-full text-xs font-bold">
                         {{ reseller_fa_num(count($tenantModules)) }}
                     </span>
@@ -410,16 +364,16 @@
                 <button type="button"
                         @click="setTab('invoices')"
                         :class="activeTab === 'invoices'
-                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
-                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                            ? 'bg-indigo-600 text-white shadow-xs'
+                            : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap shrink-0">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                     </svg>
                     <span>سوابق مالی و فاکتورها</span>
                     <span
-                        :class="activeTab === 'invoices' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                        :class="activeTab === 'invoices' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300'"
                         class="px-2 py-0.5 rounded-full text-xs font-bold">
                         {{ reseller_fa_num($invoices->count()) }}
                     </span>
@@ -429,48 +383,164 @@
                 <button type="button"
                         @click="setTab('orders')"
                         :class="activeTab === 'orders'
-                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'"
-                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap">
+                            ? 'bg-indigo-600 text-white shadow-xs'
+                            : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-gray-700/50'"
+                        class="flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap shrink-0">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                     </svg>
-                    <span>سفارشات ثبت‌شده</span>
+                    <span>سفارشات آنلاین</span>
                     <span
-                        :class="activeTab === 'orders' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                        :class="activeTab === 'orders' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300'"
                         class="px-2 py-0.5 rounded-full text-xs font-bold">
                         {{ reseller_fa_num($orders->count()) }}
                     </span>
                 </button>
             </nav>
+
+            {{-- Mobile 3-Segment Navigation with Dropdown (Matching Tenants Show 1:1) --}}
+            <div class="sm:hidden flex items-center gap-1 w-full" aria-label="Tabs Mobile">
+                {{-- Mobile Tab 1: Tenants --}}
+                <button type="button"
+                        @click="setTab('tenants')"
+                        :class="activeTab === 'tenants'
+                            ? 'bg-indigo-600 text-white shadow-xs font-black'
+                            : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:bg-gray-700/50 font-bold'"
+                        class="flex-1 flex items-center justify-center gap-1 px-1.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer select-none min-h-[42px]">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    <span>سامانه‌ها</span>
+                    <span
+                        :class="activeTab === 'tenants' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300'"
+                        class="px-1.5 py-0.2 rounded-full text-[10px] font-bold">
+                        {{ reseller_fa_num($tenantList->count()) }}
+                    </span>
+                </button>
+
+                {{-- Mobile Tab 2: Profile --}}
+                <button type="button"
+                        @click="setTab('profile')"
+                        :class="activeTab === 'profile'
+                            ? 'bg-indigo-600 text-white shadow-xs font-black'
+                            : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:bg-gray-700/50 font-bold'"
+                        class="flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-xl text-xs transition-all cursor-pointer select-none min-h-[42px]">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <span>اطلاعات</span>
+                </button>
+
+                {{-- Mobile Tab 3: Secondary Tabs Dropdown --}}
+                <div class="flex-1 relative" @click.outside="otherTabsOpen = false">
+                    <button type="button"
+                            @click="otherTabsOpen = !otherTabsOpen"
+                            :class="['modules', 'invoices', 'orders'].includes(activeTab)
+                                ? 'bg-indigo-600 text-white shadow-xs font-black'
+                                : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:bg-gray-700/50 font-bold'"
+                            class="w-full flex items-center justify-center gap-1 px-1.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer select-none min-h-[42px]">
+                        <span class="truncate" x-text="secondaryTabLabel()">سایر بخش‌ها</span>
+                        <svg class="w-3.5 h-3.5 shrink-0 transition-transform duration-200"
+                             :class="otherTabsOpen ? 'rotate-180' : ''"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    {{-- Dropdown Menu --}}
+                    <div x-show="otherTabsOpen"
+                         x-cloak
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                         class="absolute end-0 top-full mt-2 w-56 rounded-2xl bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 shadow-xl p-1.5 z-30 space-y-1">
+
+                        {{-- Item: Modules --}}
+                        <button type="button"
+                                @click="setTab('modules'); otherTabsOpen = false"
+                                :class="activeTab === 'modules' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-black' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/60 font-bold'"
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition cursor-pointer text-right">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                                <span>ماژول‌ها و امکانات</span>
+                            </div>
+                            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300">
+                                {{ reseller_fa_num(count($tenantModules)) }}
+                            </span>
+                        </button>
+
+                        {{-- Item: Invoices --}}
+                        <button type="button"
+                                @click="setTab('invoices'); otherTabsOpen = false"
+                                :class="activeTab === 'invoices' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-black' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/60 font-bold'"
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition cursor-pointer text-right">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                                </svg>
+                                <span>سوابق مالی و فاکتورها</span>
+                            </div>
+                            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300">
+                                {{ reseller_fa_num($invoices->count()) }}
+                            </span>
+                        </button>
+
+                        {{-- Item: Orders --}}
+                        <button type="button"
+                                @click="setTab('orders'); otherTabsOpen = false"
+                                :class="activeTab === 'orders' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-black' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/60 font-bold'"
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition cursor-pointer text-right">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                </svg>
+                                <span>سفارشات آنلاین</span>
+                            </div>
+                            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300">
+                                {{ reseller_fa_num($orders->count()) }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- Tab 1 Content: Connected Tenants --}}
         <div x-show="activeTab === 'tenants'" x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
              class="space-y-6">
-            <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+            <x-resellerhub::card class="p-4 sm:p-8 space-y-4 sm:space-y-6">
                 <div
                     class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-100 dark:border-gray-700/60">
                     <div class="flex items-center gap-2.5">
                         <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
-                        <h2 class="text-base font-black text-gray-900 dark:text-white">
-                            سامانه‌های CRM متصل به این زیرمجموعه
+                        <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
+                            سامانه‌های متصل به این زیرمجموعه
                         </h2>
                         <span
                             class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
                                 {{ reseller_fa_num($tenantList->count()) }} سامانه
-                            </span>
+                        </span>
                     </div>
 
                     <button type="button" @click="openQuickProvisionForSub()"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-sm transition cursor-pointer active:scale-95">
+                            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-sm transition cursor-pointer active:scale-95">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M12 4v16m8-8H4"/>
                         </svg>
-                        <span>افزودن CRM جدید</span>
+                        <span>افزودن سامانه جدید</span>
                     </button>
                 </div>
 
@@ -613,24 +683,20 @@
                         <div class="flex items-center gap-2.5">
                             <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
                             <h2 class="text-base font-black text-gray-900 dark:text-white">
-                                اطلاعات هویتی و راه‌های ارتباطی خریدار
+                                اطلاعات هویتی و راه‌های ارتباطی کاربر زیرمجموعه
                             </h2>
                         </div>
-                        <span
-                            class="text-xs font-bold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
-                            شناسه: #{{ reseller_fa_num($subAccount->id) }}
-                        </span>
                     </div>
 
                     <div class="space-y-4 text-xs sm:text-sm">
                         <div
                             class="flex justify-between items-center p-3.5 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800">
-                            <span class="text-gray-500 dark:text-gray-400 font-medium">نام و نام خانوادگی خریدار:</span>
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">نام و نام خانوادگی کاربر زیرمجموعه:</span>
                             <span class="font-black text-gray-900 dark:text-white">{{ $subAccount->name }}</span>
                         </div>
                         <div
                             class="flex justify-between items-center p-3.5 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800">
-                            <span class="text-gray-500 dark:text-gray-400 font-medium">نام کسب‌وکار / کلینیک:</span>
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">نام سامانه:</span>
                             <span
                                 class="font-bold text-gray-800 dark:text-gray-200">{{ $subAccount->company_name ?: '—' }}</span>
                         </div>
@@ -677,7 +743,7 @@
                             </div>
                             @if($subAccount->mobile)
                                 <button type="button"
-                                        @click="copyText('{{ $subAccount->mobile }}', 'شماره تماس خریدار', 'mobile')"
+                                        @click="copyText('{{ $subAccount->mobile }}', 'شماره تماس کابر', 'mobile')"
                                         class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
                                         :class="copiedKey === 'mobile' ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300' : 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700'">
                                     <template x-if="copiedKey === 'mobile'">
@@ -710,7 +776,7 @@
                                         class="font-black text-gray-900 dark:text-white dir-ltr text-start block mt-0.5 tracking-wider">{{ $initialPassword }}</span>
                                 </div>
                                 <button type="button"
-                                        @click="copyText('{{ $initialPassword }}', 'رمز عبور خریدار', 'pwd')"
+                                        @click="copyText('{{ $initialPassword }}', 'رمز عبور کاربر', 'pwd')"
                                         class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
                                         :class="copiedKey === 'pwd' ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300' : 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700'">
                                     <template x-if="copiedKey === 'pwd'">
@@ -755,13 +821,11 @@
                             <div>
                                 <h3 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">سقف مصرف و
                                     سهمیه‌های ماژول‌ها</h3>
-                                <p class="text-xs text-gray-400">محدودیت‌های تعریف‌شده برای این زیرمجموعه و وضعیت
-                                    مصرف جاری</p>
                             </div>
                         </div>
 
                         <a href="{{ route('reseller.sub-accounts.edit', $subAccount->id) }}"
-                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-xs font-bold text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 transition">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
@@ -797,12 +861,6 @@
                                     class="font-black text-gray-900 dark:text-white">{{ reseller_fa_num($invUsed) }} {{ !is_null($invLimit) ? 'از ' . reseller_fa_num($invLimit) : 'فاکتور' }}</span>
                             </div>
                         </div>
-
-                        {{-- Tenants Quota --}}
-                        {{--
-                            سقف تعداد سامانه‌های CRM (لیمیت فروش) برای زیرمجموعه حذف شده است؛
-                            این کارت دیگر نمایش داده نمی‌شود.
-                        --}}
 
                         {{-- Other Module Limits if set --}}
                         @if(!empty($subAccount->limits))
@@ -891,7 +949,7 @@
                     <div class="flex items-center gap-2.5">
                         <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
                         <h2 class="text-base font-black text-gray-900 dark:text-white">
-                            فاکتورهای ثبت‌شده خریدار
+                            فاکتورهای ثبت‌ شده برای کاربر زیرمجموعه
                         </h2>
                     </div>
                     <a href="{{ route('reseller.invoices.index', ['search' => $subAccount->email ?: $subAccount->name]) }}"
@@ -991,7 +1049,7 @@
                     <div class="flex items-center gap-2.5">
                         <span class="w-3 h-3 rounded-full bg-indigo-600"></span>
                         <h2 class="text-base font-black text-gray-900 dark:text-white">
-                            سفارشات ثبت‌شده خریدار
+                            سفارشات ثبت‌شده برای کاربر زیرمجموعه
                         </h2>
                     </div>
                     <a href="{{ route('reseller.orders.index', ['search' => $subAccount->email ?: $subAccount->name]) }}"
@@ -1203,6 +1261,14 @@
                     } else {
                         window.location.hash = '#' + tab;
                     }
+                },
+
+                otherTabsOpen: false,
+                secondaryTabLabel() {
+                    if (this.activeTab === 'modules') return 'ماژول‌ها';
+                    if (this.activeTab === 'invoices') return 'فاکتورها';
+                    if (this.activeTab === 'orders') return 'سفارش‌ها';
+                    return 'سایر بخش‌ها';
                 },
 
                 showToggleModal: false,

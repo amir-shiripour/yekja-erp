@@ -1,20 +1,18 @@
 <div role="tabpanel" id="tabpanel-history" aria-labelledby="tab-history" x-show="activeTab === 'history'" x-cloak class="w-full">
     <x-resellerhub::card class="w-full">
         <div
-            class="p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gradient-to-l from-violet-50/60 to-transparent dark:from-violet-950/20 flex items-center justify-between flex-wrap gap-3">
+            class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-900/40 flex items-center justify-between flex-wrap gap-3">
             <div class="flex items-center gap-3">
                 <div
-                    class="p-2 bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400 rounded-xl shadow-xs">
+                    class="p-2 bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 border border-indigo-200/70 dark:border-indigo-800/50 rounded-xl shrink-0">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">تایملاین وقایع و
+                    <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
                         تاریخچه کامل سفارش</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">ثبت زمانی کلیه رخدادها، تراکنش‌های پرداختی، تحویل
-                        سامانه و تغییرات سفارش</p>
                 </div>
             </div>
             <span
@@ -23,7 +21,7 @@
                     </span>
         </div>
 
-        <div class="p-6 sm:p-8">
+        <div class="p-4 sm:p-8">
             @if($sortedTimelineEvents->isNotEmpty())
                 <div class="relative">
                     <div

@@ -1,28 +1,28 @@
-<div role="tabpanel" id="tabpanel-details" aria-labelledby="tab-details" x-show="activeTab === 'details'" class="space-y-8">
+<div role="tabpanel" id="tabpanel-details" aria-labelledby="tab-details" x-show="activeTab === 'details'" class="space-y-6 sm:space-y-8">
     <div
-        class="grid grid-cols-1 md:grid-cols-2 {{ $order->billing_cycle ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }} gap-6">
+        class="grid grid-cols-2 {{ $order->billing_cycle ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }} gap-3 sm:gap-6">
         <div
-            class="bg-white dark:bg-gray-800/60 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm p-6">
-            <div class="flex items-center gap-2 mb-4">
-                <div class="p-2 bg-sky-50 dark:bg-sky-500/10 text-sky-500 rounded-lg">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs p-3.5 sm:p-6 min-w-0">
+            <div class="flex items-center gap-2 mb-3 sm:mb-4">
+                <div class="p-1.5 sm:p-2 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-lg shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
                 </div>
-                <span class="text-xs font-black text-gray-400 uppercase">زیرمجموعه</span>
+                <span class="text-[11px] sm:text-xs font-black text-gray-500 dark:text-gray-400 uppercase truncate">اطلاعات کاربر زیرمجموعه</span>
             </div>
-            <div class="font-black text-gray-900 dark:text-white text-lg truncate">{{ $clientName }}</div>
+            <div class="font-black text-gray-900 dark:text-white text-sm sm:text-lg truncate">{{ $clientName }}</div>
             @if($clientPhone)
                 <div
-                    class="text-sm font-bold text-gray-500 mt-2 dir-ltr tabular-nums truncate text-right">{{ reseller_fa_num($clientPhone) }}</div>
+                    class="text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 mt-1.5 sm:mt-2 dir-ltr tabular-nums truncate text-right">{{ reseller_fa_num($clientPhone) }}</div>
             @endif
             @if($clientEmail)
-                <div class="text-xs text-gray-400 mt-1 truncate">{{ $clientEmail }}</div>
+                <div class="text-[11px] sm:text-xs text-gray-400 mt-1 truncate">{{ $clientEmail }}</div>
             @endif
             @if($clientCompany)
                 <div
-                    class="mt-2 text-xs font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 px-2 py-0.5 rounded-md inline-block">
+                    class="mt-2 text-[11px] sm:text-xs font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 px-2 py-0.5 rounded-md inline-block max-w-full truncate">
                     {{ $clientCompany }}
                 </div>
             @endif
@@ -30,27 +30,25 @@
 
         {{-- Card 2: Order Status with Interactive Dropdown (Violet) --}}
         <div
-            class="bg-white dark:bg-gray-800/60 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm p-6 relative z-20">
-            <div class="flex items-center gap-2 mb-4">
-                <div class="p-2 bg-violet-50 dark:bg-violet-500/10 text-violet-500 rounded-lg">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs p-3.5 sm:p-6 relative z-20 min-w-0">
+            <div class="flex items-center gap-2 mb-3 sm:mb-4">
+                <div class="p-1.5 sm:p-2 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 rounded-lg shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <span class="text-xs font-black text-gray-400 uppercase">وضعیت سفارش</span>
+                <span class="text-[11px] sm:text-xs font-black text-gray-500 dark:text-gray-400 uppercase truncate">وضعیت سفارش</span>
             </div>
             <div class="mt-2 relative">
                 <button type="button" @click="statusDropdownOpen = !statusDropdownOpen"
                         @click.away="statusDropdownOpen = false"
-                        class="w-full inline-flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-black border transition-all hover:opacity-80 focus:ring-4 focus:outline-none cursor-pointer"
-                        style="background: {{ $statusColor }}15; color: {{ $statusColor }}; border-color: {{ $statusColor }}40; --tw-ring-color: {{ $statusColor }}30">
-                    <span class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full animate-pulse"
-                              style="background: {{ $statusColor }}"></span>
-                        {{ $statusLabel }}
-                        </span>
-                    <svg class="w-4 h-4 transition-transform duration-200"
+                        class="w-full inline-flex items-center justify-between gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black border transition-all hover:opacity-85 focus:outline-none cursor-pointer"
+                        style="background: {{ $statusColor }}15; color: {{ $statusColor }}; border-color: {{ $statusColor }}40;">
+                    <span class="flex items-center gap-1.5 min-w-0">
+                        <span class="truncate">{{ $statusLabel }}</span>
+                    </span>
+                    <svg class="w-4 h-4 shrink-0 transition-transform duration-200"
                          :class="statusDropdownOpen ? 'rotate-180' : ''"
                          fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
@@ -59,21 +57,21 @@
 
                 <div x-show="statusDropdownOpen" x-transition.opacity.duration.200ms
                      style="display: none;"
-                     class="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-xl overflow-hidden max-h-60 overflow-y-auto ring-1 ring-black ring-opacity-5">
+                     class="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden max-h-60 overflow-y-auto">
                     @foreach($allStatuses as $st)
                         @php
                             $isCurrent = ($order->status === $st->id) || ($st->id === 'active' && $order->status === 'completed') || ($st->id === 'inactive' && $order->status === 'suspended');
                         @endphp
                         <button type="button"
                                 @click="statusDropdownOpen = false; promptStatusChange('{{ $st->id }}', '{{ $st->name }}', '{{ $st->color }}', {{ $isCurrent ? 'true' : 'false' }})"
-                                class="w-full text-start px-4 py-3 text-sm font-bold transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between border-b border-gray-50 dark:border-gray-700/50 last:border-0 cursor-pointer"
+                                class="w-full text-start px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-bold transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-between border-b border-gray-100 dark:border-gray-700/50 last:border-0 cursor-pointer"
                                 style="color: {{ $st->color }}">
                                 <span class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full" style="background: {{ $st->color }}"></span>
+                                    <span class="w-2 h-2 rounded-full shrink-0" style="background: {{ $st->color }}"></span>
                                     {{ $st->name }}
                                 </span>
                             @if($isCurrent)
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                      stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                 </svg>
@@ -84,64 +82,64 @@
             </div>
         </div>
         <div
-            class="bg-white dark:bg-gray-800/60 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm p-6">
-            <div class="flex items-center gap-2 mb-4">
-                <div class="p-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 rounded-lg">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs p-3.5 sm:p-6 min-w-0">
+            <div class="flex items-center gap-2 mb-3 sm:mb-4">
+                <div class="p-1.5 sm:p-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                 </div>
-                <span class="text-xs font-black text-gray-400 uppercase">مبلغ نهایی سفارش</span>
+                <span class="text-[11px] sm:text-xs font-black text-gray-500 dark:text-gray-400 uppercase truncate">مبلغ نهایی سفارش</span>
             </div>
-            <div class="font-black text-gray-900 dark:text-white text-xl tabular-nums">
+            <div class="font-black text-gray-900 dark:text-white text-base sm:text-xl tabular-nums truncate">
                 {{ reseller_fa_num(number_format($finalServicePrice)) }}
-                <span class="text-sm text-gray-400 font-normal">{{ $currencyLabel }}</span>
+                <span class="text-xs sm:text-sm text-gray-400 font-normal">{{ $currencyLabel }}</span>
             </div>
-            <p class="text-xs text-gray-400 mt-2">ثابت و غیرقابل تغییر</p>
+            <p class="text-[11px] sm:text-xs text-gray-400 mt-1.5 sm:mt-2">ثابت و غیرقابل تغییر</p>
         </div>
 
         {{-- Card 4: Renewal Price & Billing Cycle (Amber) --}}
         @if($order->billing_cycle)
             <div
-                class="bg-white dark:bg-gray-800/60 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="p-2 bg-amber-50 dark:bg-amber-500/10 text-amber-500 rounded-lg">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                 stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0-0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-                        <span class="text-xs font-black text-gray-400 uppercase">مبلغ تمدید</span>
+                class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs p-3.5 sm:p-6 min-w-0">
+                <div class="flex items-center gap-2 mb-3 sm:mb-4">
+                    <div class="p-1.5 sm:p-2 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg shrink-0">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                             stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0-0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
                     </div>
-                    <span
-                        class="text-xs font-bold px-2 py-0.5 rounded-md {{ $isRenewalManual ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400' }}">
-                            {{ $isRenewalManual ? 'دستی' : 'خودکار' }}
-                        </span>
+                    <span class="text-[11px] sm:text-xs font-black text-gray-500 dark:text-gray-400 uppercase truncate">مبلغ تمدید</span>
                 </div>
-                <div class="font-black text-gray-900 dark:text-white text-xl tabular-nums">
+                <div class="font-black text-gray-900 dark:text-white text-base sm:text-xl tabular-nums truncate">
                     {{ reseller_fa_num(number_format($calculatedRenewalPrice)) }}
-                    <span class="text-sm text-gray-400 font-normal">{{ $currencyLabel }}</span>
+                    <span class="text-xs sm:text-sm text-gray-400 font-normal">{{ $currencyLabel }}</span>
                 </div>
-                <span
-                    class="inline-block mt-2 text-xs font-black text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-500/20 px-2.5 py-1 rounded-md">
+                <div class="flex items-center flex-wrap gap-1.5 mt-1.5 sm:mt-2">
+                    <span
+                        class="inline-block text-[10px] sm:text-xs font-black text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/15 px-2 py-0.5 rounded-md">
                         دوره {{ $order->billing_cycle_label ?: reseller_duration_label($order->billing_cycle) }}
                     </span>
+                    <span
+                        class="text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-md shrink-0 {{ $isRenewalManual ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400' }}">
+                        {{ $isRenewalManual ? 'دستی' : 'خودکار' }}
+                    </span>
+                </div>
             </div>
         @endif
     </div>
 
-    {{-- Related Invoices Card (Services 1:1) --}}
+    {{-- Related Invoices Card --}}
     @if($relatedInvoices->isNotEmpty())
         <x-resellerhub::card>
             <div
-                class="p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gradient-to-l from-amber-50 to-transparent dark:from-amber-500/10 flex items-center justify-between flex-wrap gap-3">
-                <h3 class="text-lg font-black text-amber-700 dark:text-amber-400 flex items-center gap-3">
+                class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-900/40 flex items-center justify-between flex-wrap gap-3">
+                <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white flex items-center gap-2.5 sm:gap-3">
                     <div
-                        class="p-2 bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        class="p-2 bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/70 dark:border-amber-800/50 rounded-xl shrink-0">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                              stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -150,12 +148,13 @@
                     فاکتورهای مرتبط
                 </h3>
                 <span
-                    class="text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-100 dark:border-amber-500/20">
+                    class="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg border border-gray-200/80 dark:border-gray-700">
                         {{ reseller_fa_num($relatedInvoices->count()) }} فاکتور
                     </span>
             </div>
 
-            <div class="overflow-x-auto">
+            {{-- Desktop Table --}}
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-sm text-start border-collapse min-w-[900px]">
                     <thead
                         class="bg-gray-50/80 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 font-bold border-b border-gray-100 dark:border-gray-700/50 text-xs uppercase tracking-wider">
@@ -165,7 +164,7 @@
                         <th scope="col" class="px-4 py-3 font-bold text-center">تاریخ صدور</th>
                         <th scope="col" class="px-4 py-3 font-bold text-center">سررسید</th>
                         <th scope="col" class="px-4 py-3 font-bold text-center">مبلغ کل</th>
-                        <th scope="col" class="px-4 py-3 font-bold text-center">پرداخت‌شده</th>
+                        <th scope="col" class="px-4 py-3 font-bold text-center">پرداخت ‌شده</th>
                         <th scope="col" class="px-4 py-3 font-bold text-center">مانده</th>
                         <th scope="col" class="px-4 py-3 font-bold text-center"></th>
                     </tr>
@@ -247,9 +246,77 @@
                 </table>
             </div>
 
+            {{-- Mobile Separated Invoice Cards --}}
+            <div class="md:hidden divide-y divide-gray-100 dark:divide-gray-700/60">
+                @foreach($relatedInvoices as $inv)
+                    @php
+                        $invBadge = $inv->status_badge;
+                        $invRemaining = $inv->remainingAmount();
+                    @endphp
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <span class="font-black text-base text-gray-900 dark:text-white tabular-nums">{{ reseller_fa_num($inv->invoice_number) }}</span>
+                                @if($inv->isUpgrade())
+                                    <span class="block mt-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-500/20 w-max">ارتقای پکیج</span>
+                                @elseif($inv->isItemAddition())
+                                    <span class="block mt-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/20 w-max">افزودن ماژول / قابلیت</span>
+                                @elseif($inv->isManualRenewal())
+                                    <span class="block mt-1 text-[11px] font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-100 dark:border-cyan-500/20 w-max">تمدید دستی</span>
+                                @elseif($inv->isSystemGenerated())
+                                    <span class="block mt-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-100 dark:border-indigo-500/20 w-max">سیستمی</span>
+                                @endif
+                            </div>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border shrink-0 {{ $invBadge['bg'] }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $invBadge['dot'] }}"></span>
+                                {{ $inv->status_label }}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div class="rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200/70 dark:border-gray-700/50 p-2.5">
+                                <span class="block text-[10px] font-bold text-gray-400 mb-0.5">تاریخ صدور</span>
+                                <span class="block text-xs font-bold text-gray-800 dark:text-gray-200 tabular-nums dir-ltr text-right">{{ $inv->issue_date ? reseller_format_jalali($inv->issue_date) : '—' }}</span>
+                            </div>
+                            <div class="rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200/70 dark:border-gray-700/50 p-2.5">
+                                <span class="block text-[10px] font-bold text-gray-400 mb-0.5">سررسید</span>
+                                <span class="block text-xs font-bold text-gray-800 dark:text-gray-200 tabular-nums dir-ltr text-right">{{ $inv->due_date ? reseller_format_jalali($inv->due_date) : '—' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200/70 dark:border-gray-700/50 p-3 flex items-center justify-between gap-2 flex-wrap">
+                            <div>
+                                <span class="block text-[10px] font-bold text-gray-400">مبلغ کل</span>
+                                <span class="text-sm font-black text-gray-900 dark:text-white tabular-nums">{{ reseller_fa_num(number_format($inv->total)) }} <span class="text-[11px] font-normal text-gray-400">{{ $currencyLabel }}</span></span>
+                            </div>
+                            @if($inv->paid_amount > 0)
+                                <div class="text-end">
+                                    <span class="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400">پرداخت‌شده</span>
+                                    <span class="text-xs font-bold text-emerald-700 dark:text-emerald-300 tabular-nums">{{ reseller_fa_num(number_format($inv->paid_amount)) }} {{ $currencyLabel }}</span>
+                                </div>
+                            @endif
+                            @if($invRemaining > 0)
+                                <div class="text-end">
+                                    <span class="block text-[10px] font-bold text-rose-600 dark:text-rose-400">مانده</span>
+                                    <span class="text-xs font-black text-rose-600 dark:text-rose-400 tabular-nums">{{ reseller_fa_num(number_format($invRemaining)) }} {{ $currencyLabel }}</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        <a href="{{ route('reseller.invoices.show', $inv->id) }}"
+                           class="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 font-bold text-xs hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors">
+                            <span>مشاهده فاکتور</span>
+                            <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                            </svg>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+
             @if($relatedInvoices->count() > 1)
                 <div
-                    class="bg-gray-50/80 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-700/50 p-6 grid grid-cols-1 sm:grid-cols-3 gap-6 divide-y sm:divide-y-0 sm:divide-x sm:divide-x-reverse divide-gray-200 dark:divide-gray-700">
+                    class="bg-gray-50/80 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-700/50 p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x sm:divide-x-reverse divide-gray-200 dark:divide-gray-700">
                     <div class="flex flex-col items-center px-4">
                         <span
                             class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">جمع کل فاکتورها</span>
@@ -284,14 +351,14 @@
             @endif
         </x-resellerhub::card>
     @else
-        {{-- Empty State (Services 1:1) --}}
+        {{-- Empty State --}}
         <x-resellerhub::card>
             <div
-                class="p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gradient-to-l from-amber-50/50 to-transparent dark:from-amber-500/10 flex items-center justify-between flex-wrap gap-3">
-                <h3 class="text-lg font-black text-amber-700 dark:text-amber-400 flex items-center gap-3">
+                class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-900/40 flex items-center justify-between flex-wrap gap-3">
+                <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white flex items-center gap-3">
                     <div
-                        class="p-2 bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        class="p-2 bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200/70 dark:border-amber-800/50 rounded-xl shrink-0">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                              stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -323,66 +390,71 @@
         </x-resellerhub::card>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div class="space-y-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <div class="space-y-6 sm:space-y-8">
             <x-resellerhub::card>
                 <div
-                    class="p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <h3 class="text-lg font-black text-gray-800 dark:text-gray-100 flex items-center gap-3">
+                    class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                    <h3 class="text-base sm:text-lg font-black text-gray-800 dark:text-gray-100 flex items-center gap-2.5 sm:gap-3">
                         <div
-                            class="p-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 rounded-lg">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            class="p-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 rounded-lg shrink-0">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                  stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                             </svg>
                         </div>
-                        اطلاعات اشتراک و پکیج نمایندگی
+                        اطلاعات پکیج فعالی
                     </h3>
                     @if($availablePackages->count() > 1)
                         <button type="button"
                                 @click="activeTab = 'package_upgrade'"
-                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30 transition shadow-sm cursor-pointer">
-                            <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24"
+                                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-amber-700 dark:text-amber-300 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30 transition shadow-xs cursor-pointer">
+                            <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24"
                                  stroke="currentColor" stroke-width="2.2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                             </svg>
-                            ارتقای پکیج (Upgrade)
+                            ارتقای پکیج
                         </button>
                     @endif
                 </div>
-                <div class="p-6 space-y-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="p-4 sm:p-6 space-y-5 sm:space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         <div
-                            class="bg-gray-50 dark:bg-gray-900/40 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
-                            <span class="block text-xs font-bold text-gray-400 mb-2">پکیج / طرح فعال</span>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="font-black text-gray-900 dark:text-white text-lg">
-                                    {{ $package?->name ?? 'پکیج سفارشی (انتخابی)' }}
-                                    </span>
+                            class="bg-gray-50 dark:bg-gray-900/50 p-4 sm:p-5 rounded-2xl border border-gray-200/70 dark:border-gray-700/50">
+                            <span class="block text-xs font-bold text-gray-400 mb-2">پکیج فعال</span>
+                            <div class="flex items-center gap-2.5 flex-wrap">
                                 @if($package)
-                                    <span
-                                        class="inline-flex items-center gap-1 text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 px-2.5 py-1 rounded-lg">
-                                            پکیج نمایندگی
+                                    <div
+                                        class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-xs text-white"
+                                        style="{{ $package->bg_style }}">
+                                        @include('resellerhub::user.packages.partials.icon', [
+                                            'icon' => $package->icon,
+                                            'class' => 'w-4.5 h-4.5',
+                                        ])
+                                    </div>
+                                    <div class="min-w-0">
+                                        <span class="font-black text-gray-900 dark:text-white text-base sm:text-lg block truncate">
+                                            {{ $package->name }}
                                         </span>
+                                    </div>
                                 @else
-                                    <span
-                                        class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                                            طرح سفارشی
-                                        </span>
+                                    <span class="font-black text-gray-900 dark:text-white text-base sm:text-lg">
+                                        پکیج سفارشی
+                                    </span>
                                 @endif
                             </div>
                         </div>
 
                         <div
-                            class="bg-amber-50/50 dark:bg-amber-900/10 p-5 rounded-2xl border border-amber-100 dark:border-amber-800/30">
-                            <span class="block text-xs font-bold text-amber-500 dark:text-amber-400 mb-2">مبلغ پایه اشتراک</span>
-                            <div class="font-black text-gray-900 dark:text-white text-xl tabular-nums mb-2">
+                            class="bg-gray-50 dark:bg-gray-900/50 p-4 sm:p-5 rounded-2xl border border-gray-200/70 dark:border-gray-700/50">
+                            <span class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">مبلغ پایه پکیج</span>
+                            <div class="font-black text-gray-900 dark:text-white text-lg sm:text-xl tabular-nums mb-2">
                                 {{ reseller_fa_num(number_format($order->total_amount)) }}
                                 <span class="text-xs text-gray-500 font-normal">{{ $currencyLabel }}</span>
                             </div>
-                            <p class="text-[10.5px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
                                 این مبلغ برای
                                 دوره {{ $order->billing_cycle_label ?: reseller_duration_label($order->billing_cycle) }}
                                 محاسبه گردیده است.
@@ -412,17 +484,17 @@
                     @endphp
                     @if(!empty($modulesList))
                         <div class="pt-6 border-t border-gray-100 dark:border-gray-700/50">
-                            <div class="flex items-center justify-between mb-4">
-                                <h4 class="text-sm font-black text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24"
+                            <div class="flex items-center justify-between gap-2 mb-4">
+                                <h4 class="text-xs sm:text-sm font-black text-gray-700 dark:text-gray-300 flex items-center gap-2 min-w-0">
+                                    <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24"
                                          stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                                     </svg>
-                                    ماژول‌ها و دسترسی‌های فعال شده
+                                    <span class="truncate">ماژول‌ها و دسترسی‌های فعال</span>
                                 </h4>
                                 <span
-                                    class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-100 dark:border-indigo-500/20">
+                                    class="text-[11px] sm:text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-100 dark:border-indigo-500/20 shrink-0 whitespace-nowrap">
                                         {{ reseller_fa_num(count($modulesList)) }} ماژول و قابلیت
                                     </span>
                             </div>
@@ -467,7 +539,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
                             </svg>
-                            مشخصات سامانه اختصاصی متصل (CRM)
+                            مشخصات سامانه اختصاصی متصل
                         </h4>
                         @if($tenant)
                             <div
@@ -477,10 +549,10 @@
                                     <span
                                         class="font-black text-sm text-gray-900 dark:text-white">{{ $tenant->name }}</span>
                                 </div>
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs text-gray-400">دامنه / ساب‌دامین:</span>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-xs text-gray-400 shrink-0">دامنه / زیردامنه:</span>
                                     <span
-                                        class="font-bold text-xs text-indigo-600 dark:text-indigo-400 dir-ltr select-all">
+                                        class="font-bold text-xs text-indigo-600 dark:text-indigo-400 dir-ltr select-all truncate">
                                             {{ $tenant->custom_domain ?: (request()->getHttpHost() . '/' . $tenant->subdomain) }}
                                         </span>
                                 </div>
@@ -526,19 +598,19 @@
             </x-resellerhub::card>
         </div>
 
-        <div class="space-y-8">
+        <div class="space-y-6 sm:space-y-8">
             @if($order->billing_cycle)
                 <form action="{{ route('reseller.orders.update', $order->id) }}" method="POST"
-                      class="bg-white dark:bg-gray-800/80 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-sm backdrop-blur-xl transition-all duration-300">
+                      class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs transition-all duration-300">
                     @csrf
                     @method('PUT')
-                    <div class="p-6 sm:p-8 space-y-8">
+                    <div class="p-4 sm:p-6 space-y-6">
                         <div
-                            class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-6">
-                            <h3 class="text-lg font-black text-gray-800 dark:text-gray-100 flex items-center gap-3">
+                            class="flex items-center justify-between flex-wrap gap-3 border-b border-gray-100 dark:border-gray-700/60 pb-4 sm:pb-5">
+                            <h3 class="text-base sm:text-lg font-black text-gray-800 dark:text-gray-100 flex items-center gap-2.5 sm:gap-3">
                                 <div
-                                    class="p-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 rounded-lg">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                    class="p-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 rounded-lg shrink-0">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                          stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                               d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -549,9 +621,9 @@
                                 مدیریت مالی و تمدید
                             </h3>
                             <div
-                                class="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 px-4 py-2 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer select-none"
+                                class="flex items-center gap-2.5 bg-gray-50 dark:bg-gray-900/50 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 cursor-pointer select-none"
                                 @click="editMode = !editMode">
-                                    <span class="text-sm font-black text-gray-600 dark:text-gray-300"
+                                    <span class="text-xs sm:text-sm font-black text-gray-600 dark:text-gray-300"
                                           :class="editMode ? 'text-indigo-600 dark:text-indigo-400' : ''">حالت ویرایش</span>
                                 <button type="button"
                                         class="relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 pointer-events-none"
@@ -566,7 +638,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                        تاریخ تمدید (سررسید)
+                                        تاریخ سررسید
                                     </label>
                                     <input type="text" name="renewal_date"
                                            value="{{ $order->renewal_date ? reseller_format_jalali($order->renewal_date, 'Y/m/d', false) : ($order->end_date ? reseller_format_jalali($order->end_date, 'Y/m/d', false) : '') }}"
@@ -579,7 +651,7 @@
 
                                 <div>
                                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                        دوره صورتحساب
+                                        دوره زمانی سفارش
                                     </label>
                                     <select name="billing_cycle" aria-label="دوره پرداخت" :disabled="!editMode"
                                             class="w-full rounded-xl border border-gray-200 bg-gray-50/70 dark:bg-gray-900/50 dark:border-gray-700 px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 transition-all shadow-2xs dark:text-white dark:placeholder-gray-500 text-sm font-bold"
@@ -683,66 +755,95 @@
                                 دوره {{ $order->billing_cycle_label ?: reseller_duration_label($order->billing_cycle) }}
                             </span>
                     </div>
-                    <div class="p-6 sm:p-7 space-y-6">
+                    <div class="p-4 sm:p-6 space-y-5 sm:space-y-6">
                         <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 leading-relaxed">
                             با کلیک بر روی دکمه زیر، بلافاصله یک فاکتور تمدید مجزا با تاریخ سررسید فعلی صادر می‌شود
                             و تاریخ سررسید تمدید این سفارش به صورت خودکار به دوره بعدی منتقل می‌گردد تا از صدور مجدد
                             فاکتور توسط کرون‌جاب خودکار جلوگیری شود.
                         </p>
 
-                        <div
-                            class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50/80 dark:bg-gray-900/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
-                            <div>
-                                <span class="text-xs font-bold text-gray-400 block mb-1">تاریخ صدور:</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                            <div class="rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200/70 dark:border-gray-700/50 p-3.5">
+                                <span class="text-[11px] font-bold text-gray-400 block mb-1">تاریخ صدور</span>
                                 <span
                                     class="font-black text-gray-900 dark:text-white text-sm tabular-nums dir-ltr text-right inline-block">
-                                        {{ $order->renewal_date ? reseller_format_jalali($order->renewal_date) : 'امروز' }}
-                                    </span>
-                                </div>
-                                <div>
-                                    <span class="text-xs font-bold text-gray-400 block mb-1">سررسید فاکتور:</span>
-                                    <span
-                                        class="font-black text-emerald-600 dark:text-emerald-400 text-sm tabular-nums dir-ltr text-right inline-block">
-                                        {{ $nextRenewalDateCalculated ? reseller_fa_num($nextRenewalDateCalculated) : '—' }}
-                                    </span>
-                                </div>
-                                <div>
-                                    <span class="text-xs font-bold text-gray-400 block mb-1">مبلغ تمدید:</span>
-                                    <span
-                                        class="font-black text-indigo-600 dark:text-indigo-400 text-base tabular-nums">
-                                        {{ reseller_fa_num(number_format($calculatedRenewalPrice)) }}
-                                        <span
-                                            class="text-xs font-normal text-gray-500 dark:text-gray-400">{{ $currencyLabel }}</span>
-                                    </span>
-                                </div>
+                                    {{ $order->renewal_date ? reseller_format_jalali($order->renewal_date) : 'امروز' }}
+                                </span>
                             </div>
-
-                            <button type="button"
-                                    @click="openRenewalModal = true"
-                                    class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-black text-sm shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                     stroke-width="2.2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                                </svg>
-                                صدور فوری فاکتور تمدید
-                            </button>
+                            <div class="rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200/70 dark:border-gray-700/50 p-3.5">
+                                <span class="text-[11px] font-bold text-gray-400 block mb-1">سررسید فاکتور</span>
+                                <span
+                                    class="font-black text-emerald-600 dark:text-emerald-400 text-sm tabular-nums dir-ltr text-right inline-block">
+                                    {{ $nextRenewalDateCalculated ? reseller_fa_num($nextRenewalDateCalculated) : '—' }}
+                                </span>
+                            </div>
+                            <div class="rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200/70 dark:border-gray-700/50 p-3.5">
+                                <span class="text-[11px] font-bold text-gray-400 block mb-1">مبلغ تمدید</span>
+                                <span
+                                    class="font-black text-indigo-600 dark:text-indigo-400 text-sm sm:text-base tabular-nums">
+                                    {{ reseller_fa_num(number_format($calculatedRenewalPrice)) }}
+                                    <span class="text-xs font-normal text-gray-500 dark:text-gray-400">{{ $currencyLabel }}</span>
+                                </span>
+                            </div>
                         </div>
+
+                        <button type="button"
+                                @click="openRenewalModal = true"
+                                class="w-full py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                 stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            صدور فوری فاکتور تمدید
+                        </button>
+                    </div>
                 </x-resellerhub::card>
             @endif
 
-
-
             @if($invoice?->notes || $order->notes)
-                <x-resellerhub::card class="p-6 border-l-4 border-l-amber-500 bg-amber-50/50 dark:bg-amber-900/10">
-                    <div class="flex items-start gap-4 text-amber-800 dark:text-amber-300">
-                        <svg class="w-8 h-8 shrink-0 mt-0.5 opacity-80" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                        </svg>
-                        <div>
-                            <strong class="block mb-2 font-black text-lg tracking-tight">یادداشت سفارش</strong>
-                            <p class="font-medium text-base leading-loose">{{ $order->notes ?: $invoice?->notes }}</p>
+                <x-resellerhub::card x-data="{ openOrderNotes: false }">
+                    <div class="p-4 sm:p-6">
+                        <button type="button"
+                                @click="openOrderNotes = !openOrderNotes"
+                                :aria-expanded="openOrderNotes.toString()"
+                                class="w-full flex items-center justify-between gap-3 cursor-pointer text-start group select-none">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200/70 dark:border-amber-800/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </span>
+                                <div class="min-w-0">
+                                    <span class="block text-sm font-black text-gray-800 dark:text-gray-200 truncate">یادداشت سفارش</span>
+                                    <span class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate" x-show="!openOrderNotes">
+                                        برای مشاهده متن یادداشت کلیک کنید
+                                    </span>
+                                </div>
+                            </div>
+                            <span
+                                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors border"
+                                :class="openOrderNotes
+                                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                                    : 'bg-gray-100 dark:bg-gray-700/70 text-gray-600 dark:text-gray-300 border-gray-200/80 dark:border-gray-600/60 group-hover:bg-gray-200 dark:group-hover:bg-gray-700'">
+                                <span x-text="openOrderNotes ? 'بستن' : 'مشاهده'"></span>
+                                <svg class="w-3.5 h-3.5 transition-transform duration-300 ease-out"
+                                     :class="openOrderNotes ? 'rotate-180' : ''"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </span>
+                        </button>
+
+                        <div class="grid overflow-hidden"
+                             :style="{ gridTemplateRows: openOrderNotes ? '1fr' : '0fr', opacity: openOrderNotes ? '1' : '0', transition: 'grid-template-rows 300ms cubic-bezier(0.22, 1, 0.36, 1), opacity 250ms ease' }">
+                            <div class="min-h-0">
+                                <div class="pt-4 mt-4 border-t border-gray-100 dark:border-gray-700/60">
+                                    <div class="rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200/80 dark:border-gray-700/60 p-4">
+                                        <p class="font-medium text-xs sm:text-sm leading-loose text-gray-700 dark:text-gray-200 whitespace-pre-line">{{ $order->notes ?: $invoice?->notes }}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </x-resellerhub::card>
