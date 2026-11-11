@@ -31,7 +31,7 @@
         <div class="fixed inset-0 bg-gray-950/70 dark:bg-black/85 backdrop-blur-sm transition-opacity"
              @click="closeModal()"></div>
         <div
-            class="relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl transform transition-all max-w-lg w-full z-10 border border-gray-200 dark:border-gray-800 p-6 sm:p-7 space-y-5 text-start my-8">
+            class="relative bg-white dark:bg-gray-900 rounded-2xl max-h-[90vh] overflow-y-auto shadow-2xl transform transition-all max-w-lg w-full z-10 border border-gray-200 dark:border-gray-800 p-6 sm:p-7 space-y-5 text-start my-8">
             <div class="flex items-start justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-800">
                 <div class="flex items-start gap-3.5">
                     <div

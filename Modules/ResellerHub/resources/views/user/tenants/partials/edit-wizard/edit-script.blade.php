@@ -52,8 +52,10 @@
             generalError: '',
             errors: {},
             toast: {show: false, message: '', type: 'success'},
-
-            // White-Label Branding State & Handlers
+            mobileSectionOpen: {
+                invoiceDetails: false,
+            },
+// White-Label Branding State & Handlers
             whiteLabelType: initialBranding.white_label_type || 'default',
             whiteLabelBrandTitle: initialBranding.brand_title || '',
             whiteLabelPrimaryColor: initialBranding.brand_primary_color || '{{ $resellerPrimaryColor ?? "#4f46e5" }}',

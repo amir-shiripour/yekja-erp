@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'ویرایش حساب زیرمجموعه: ' . $subAccount->name)
+@section('title', 'ویرایش کاربر زیرمجموعه: ' . $subAccount->name)
 
 @php
     $tenantsCount = $tenantsCount ?? $subAccount->tenants()->count();
@@ -8,44 +8,61 @@
 @endphp
 
 @section('content')
-    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8" x-data="subAccountEditor()">
-        {{-- Header --}}
-        <div
-            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-200/60 dark:border-gray-800">
-            <div class="flex items-center gap-4">
-                <div
-                    class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700 text-white flex items-center justify-center shadow-lg shadow-indigo-500/25 ring-4 ring-indigo-50 dark:ring-indigo-950/40">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">{{ __('ویرایش حساب زیرمجموعه') }}</h1>
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8" x-data="subAccountEditor()">
+        {{-- Header & Title --}}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-5 pb-4 sm:pb-6 border-b border-gray-200/60 dark:border-gray-800">
+            <div class="flex items-start justify-between gap-3 w-full sm:w-auto">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2.5 sm:gap-4">
                         <span
-                            class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/60">
-                        {{ $subAccount->name }}
-                    </span>
+                            class="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-indigo-600 text-white shadow-sm shrink-0">
+                            <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </span>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h1 class="text-base sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                                    {{ __('ویرایش کاربر زیرمجموعه') }}
+                                </h1>
+                                <span
+                                    class="px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/60">
+                                    {{ $subAccount->name }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('بروزرسانی مشخصات خریدار و اطلاعات تماس') }}</p>
                 </div>
+
+                {{-- Mobile Back Button (Top-Left) --}}
+                <a href="{{ route('reseller.sub-accounts.index') }}"
+                   class="sm:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shrink-0 mt-0.5">
+                    <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    <span class="hidden xs:inline">بازگشت به </span>
+                    <span>لیست</span>
+                </a>
             </div>
+
+            {{-- Desktop Back Button --}}
             <a href="{{ route('reseller.sub-accounts.index') }}"
-               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all border border-gray-200 dark:border-gray-700 shadow-2xs self-start sm:self-auto cursor-pointer">
+               class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shrink-0">
                 <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                <span>{{ __('بازگشت به لیست زیرمجموعه‌ها') }}</span>
+                <span>{{ __('بازگشت به لیست سامانه‌ها و کاربران') }}</span>
             </a>
         </div>
 
         {{-- Main Grid --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             {{-- Form Section --}}
             <div class="lg:col-span-2">
-                <x-resellerhub::card class="overflow-hidden p-6 sm:p-8">
+                <x-resellerhub::card class="overflow-hidden p-4 sm:p-8">
                     <form @submit.prevent="submitForm()"
                           action="{{ route('reseller.sub-accounts.update', $subAccount->id) }}" method="POST"
                           class="space-y-6">
@@ -57,14 +74,14 @@
                                 class="flex items-center gap-2.5 pb-3 border-b border-gray-100 dark:border-gray-700/80 mb-5">
                             <span
                                 class="w-2.5 h-2.5 rounded-full bg-indigo-600 ring-4 ring-indigo-100 dark:ring-indigo-950"></span>
-                                <h3 class="text-sm font-black text-gray-900 dark:text-white">{{ __('اطلاعات هویتی و تماس') }}</h3>
+                                <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">{{ __('مشخصات هویتی کاربر زیرمجموعه') }}</h3>
                             </div>
 
                             <div class="space-y-5">
                                 {{-- Name --}}
                                 <div>
                                     <x-resellerhub::label>
-                                        {{ __('نام و نام خانوادگی خریدار') }} <span
+                                        {{ __('نام و نام خانوادگی') }} <span
                                             class="text-rose-500 font-bold">*</span>
                                     </x-resellerhub::label>
                                     <div class="relative">
@@ -109,22 +126,20 @@
                                         {{ __('شماره تلفن همراه') }} <span class="text-rose-500 font-bold">*</span>
                                     </x-resellerhub::label>
                                     <div class="relative">
-                                        <x-resellerhub::input class="pe-10 text-start tracking-wider" type="text"
+                                        <x-resellerhub::input class="pl-10 pr-4 text-left tracking-wider" type="text"
                                                               name="mobile"
                                                               x-model="form.mobile"
                                                               dir="ltr"
-
                                                               placeholder="09123456789"
                                                               required/>
                                         <div
-                                            class="absolute inset-y-0 end-0 pe-3.5 flex items-center pointer-events-none text-gray-400">
+                                            class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                             </svg>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-gray-400 mt-1.5">{{ __('شماره تماس اصلی مشتری جهت پیامک‌های سیستمی و هماهنگی.') }}</p>
                                     <template x-if="errors.mobile">
                                     <span class="text-xs text-rose-500 font-bold mt-1.5 flex items-center gap-1">
                                         <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor"
@@ -198,7 +213,7 @@
                                 </span>
                                     <div>
                                         <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">{{ __('سقف مصرف و لیمیت‌های ماژول‌ها (اختیاری)') }}</h4>
-                                        <p class="text-xs text-gray-400">{{ __('حداکثر سقف مجاز برای این زیرمجموعه را تعیین کنید (خالی گذاشتن فیلدها به معنی نامحدود است).') }}</p>
+                                        <p class="text-xs text-gray-400">{{ __('حداکثر سقف مجاز برای این کاربر زیرمجموعه را تعیین کنید (خالی گذاشتن فیلدها به معنی نامحدود است).') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -213,10 +228,10 @@
                                     <input type="number"
                                            min="1"
                                            name="limits[invoices]"
-                                           value="{{ old('limits.invoices', $subAccount->getLimit('invoices', '')) }}"
+                                           value="{{ old('limits.invoices', $subAccount->getLimit('invoices') ?? '') }}"
                                            placeholder="{{ __('مثلاً: ۲۰ (خالی = نامحدود)') }}"
                                            class="w-full rounded-xl border border-gray-200 bg-gray-50/70 dark:bg-gray-900/50 dark:border-gray-700 px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 transition-all shadow-2xs dark:text-white dark:placeholder-gray-500 text-center font-bold">
-                                    <p class="text-xs text-gray-400">{{ __('سقف صدور فاکتور توسط یا برای این زیرمجموعه') }}</p>
+                                    <p class="text-xs text-gray-400">{{ __('سقف صدور فاکتور توسط یا برای این کاربر زیرمجموعه') }}</p>
                                 </div>
                                 @if(!empty($availableModules))
                                     @foreach($availableModules as $mod)
@@ -230,7 +245,7 @@
                                                 <input type="number"
                                                        min="1"
                                                        name="limits[{{ $mod->slug }}]"
-                                                       value="{{ old('limits.' . $mod->slug, $subAccount->getLimit($mod->slug, '')) }}"
+                                                       value="{{ old('limits.' . $mod->slug, $subAccount->getLimit($mod->slug) ?? '') }}"
                                                        placeholder="{{ __('نامحدود') }}"
                                                        class="w-full rounded-xl border border-gray-200 bg-gray-50/70 dark:bg-gray-900/50 dark:border-gray-700 px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 transition-all shadow-2xs dark:text-white dark:placeholder-gray-500 text-center font-bold">
                                                 <p class="text-xs text-gray-400 truncate">{{ __('محدودیت تعداد رکورد یا سقف استفاده') }}</p>
@@ -278,14 +293,14 @@
 
                         {{-- Actions --}}
                         <div
-                            class="pt-5 border-t border-gray-100 dark:border-gray-800 flex items-center justify-end gap-3">
+                            class="pt-4 sm:pt-5 border-t border-gray-100 dark:border-gray-800 flex flex-row items-center justify-between gap-2 sm:gap-3 sticky bottom-0 sm:static bg-white/95 dark:bg-gray-800/95 backdrop-blur-md -mx-4 sm:mx-0 px-4 sm:px-0 py-3 sm:py-0 z-20">
                             <a href="{{ route('reseller.sub-accounts.index') }}"
-                               class="px-5 py-2.5 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer">
+                               class="inline-flex items-center justify-center px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer text-center shrink-0">
                                 {{ __('انصراف') }}
                             </a>
                             <button type="submit"
                                     :disabled="submitting"
-                                    class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-xs sm:text-sm font-black text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 shadow-lg shadow-indigo-600/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                                    class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 shadow-md sm:shadow-lg shadow-indigo-600/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                                 <template x-if="submitting">
                                     <svg class="animate-spin w-4 h-4 text-white shrink-0" fill="none"
                                          viewBox="0 0 24 24">
@@ -312,20 +327,20 @@
             <div class="space-y-6">
                 {{-- Connected Tenants Card --}}
                 <div
-                    class="rounded-3xl bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/60 p-6 shadow-sm space-y-4">
+                    class="rounded-2xl sm:rounded-3xl bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/60 p-4 sm:p-6 shadow-xs space-y-3.5 sm:space-y-4">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2.5 sm:gap-3">
                             <div
-                                class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                 </svg>
                             </div>
-                            <h3 class="text-sm font-black text-gray-900 dark:text-white">{{ __('سامانه‌های CRM متصل') }}</h3>
+                            <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">{{ __('سامانه‌های متصل') }}</h3>
                         </div>
                         <span
-                            class="px-2.5 py-1 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+                            class="px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-black bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
                         {{ reseller_fa_num($tenantsCount) }} {{ __('سامانه') }}
                     </span>
                     </div>
@@ -334,11 +349,11 @@
                         <div class="space-y-2">
                             @foreach($recentTenants as $t)
                                 <div
-                                    class="p-3 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+                                    class="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
                                     <div class="truncate">
                                         <div
                                             class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ $t->name }}</div>
-                                        <div class="text-xs text-gray-400 dir-ltr text-left">{{ $t->subdomain }}</div>
+                                        <div class="text-[11px] sm:text-xs text-gray-400 dir-ltr text-left">{{ $t->subdomain }}</div>
                                     </div>
                                     <a href="{{ route('reseller.tenants.show', $t->id) }}"
                                        class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline shrink-0">
@@ -349,22 +364,22 @@
                         </div>
                     @else
                         <p class="text-xs text-gray-400 leading-relaxed">
-                            {{ __('هنوز هیچ سامانه CRM به این حساب متصل نشده است. می‌توانید در بخش ساخت CRM جدید، این زیرمجموعه را انتخاب فرمایید.') }}
+                            {{ __('هنوز هیچ سامانه‌ای به این حساب متصل نشده است. می‌توانید در بخش ساخت سامانه جدید، این کاربر را انتخاب فرمایید.') }}
                         </p>
                     @endif
                 </div>
 
                 <div
-                    class="rounded-3xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 p-6 space-y-3">
+                    class="rounded-2xl sm:rounded-3xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 p-4 sm:p-6 space-y-3">
                     <h4 class="text-xs font-black text-indigo-950 dark:text-indigo-200 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <span>{{ __('قابلیت اتصال چند سامانه') }}</span>
                     </h4>
                     <p class="text-xs text-indigo-700 dark:text-indigo-300/90 leading-relaxed">
-                        {{ __('یک مشتری یا زیرمجموعه می‌تواند مالک چندین شعبه یا سیستم CRM باشد. تمامی فاکتورها و لایسنس‌های این سامانه‌ها در پنل اختصاصی مشتری تجمیع می‌گردند.') }}
+                        {{ __('یک کاربر زیرمجموعه می‌تواند چندین سامانه مستقل تحت مالکیت خود داشته باشد. تمامی فاکتورها و لایسنس‌های این سامانه‌ها در پنل اختصاصی تجمیع می‌گردند.') }}
                     </p>
                 </div>
             </div>
@@ -378,7 +393,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 translate-y-2"
-             class="fixed bottom-6 end-6 z-[100] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-bold border backdrop-blur-md"
+             class="fixed bottom-6 start-4 end-4 sm:start-auto sm:end-6 z-[100] flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-bold border backdrop-blur-md"
              :class="toast.type === 'success' ? 'bg-emerald-600/95 border-emerald-500 text-white' : 'bg-rose-600/95 border-rose-500 text-white'">
             <svg x-show="toast.type === 'success'" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor"
                  viewBox="0 0 24 24">

@@ -100,3 +100,15 @@ Route::middleware(['web', 'guest'])->prefix('login')->name('login.')->group(func
 
 
 Route::get('/ping', function() { return 'pong-crm'; });
+
+if (app()->environment('local', 'testing')) {
+    Route::middleware('web')->get('/_e2e/login', function () {
+        $user = \App\Models\User::first();
+        if ($user) {
+            auth()->login($user);
+            session()->regenerate();
+        }
+        $target = request('redirect', '/reseller/dashboard');
+        return redirect($target);
+    });
+}

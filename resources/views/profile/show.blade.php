@@ -203,9 +203,17 @@
             </div>
 
             {{-- اشتراک و پلن نمایندگی فروش --}}
-            @if(app(TenantManager::class)->hasTenant())
+            @php
+                $currentTenantForProfile = app(TenantManager::class)->getTenant() ?? auth()->user()?->tenant;
+            @endphp
+            @if($currentTenantForProfile && $currentTenantForProfile->reseller_id && class_exists(TenantSubscriptionController::class))
                 @php
-                    $subData = app(TenantSubscriptionController::class)->getSubscriptionData();
+                    $subData = null;
+                    try {
+                        $subData = app(TenantSubscriptionController::class)->getSubscriptionData();
+                    } catch (\Throwable $e) {
+                        $subData = null;
+                    }
                 @endphp
                 <div x-show="activeTab === 'subscription'" x-cloak class="pt-2">
                     @if($subData)

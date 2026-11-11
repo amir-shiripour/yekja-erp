@@ -14,7 +14,7 @@
 @endphp
 
 <div
-    class="bg-white dark:bg-gray-800/90 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-sm backdrop-blur-xl overflow-hidden transition-all">
+    class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs overflow-hidden transition-all">
     {{-- Card Header --}}
     <div
         class="p-5 sm:p-6 border-b border-gray-100 dark:border-gray-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -30,10 +30,6 @@
                 <h2 class="text-base font-black text-gray-900 dark:text-white">
                     سامانه‌ها و کاربران
                 </h2>
-                <span
-                    class="px-2.5 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/50 text-xs font-black tabular-nums">
-                    {{ reseller_fa_num($tenants->total()) }} سامانه
-                </span>
             </div>
         </div>
     </div>
@@ -165,7 +161,8 @@
             </div>
         </div>
     @else
-        <div class="overflow-x-auto min-h-[260px]">
+        {{-- Desktop Table View (>= md) --}}
+        <div class="hidden md:block overflow-x-auto min-h-[260px]">
             <table class="w-full text-right text-sm">
                 <thead>
                 <tr class="border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/75 dark:bg-gray-900/40 text-gray-500 dark:text-gray-400 text-xs">
@@ -207,9 +204,20 @@
                         $percentDaysRemaining = ($daysLeft !== null && $daysLeft > 0)
                             ? min(100, max(2, round(($daysLeft / max(1, $totalSubscriptionDays)) * 100)))
                             : 0;
-                        $barColorClass = ($daysLeft !== null && $daysLeft <= 7)
-                            ? 'bg-rose-500'
-                            : (($daysLeft !== null && $daysLeft <= 30) ? 'bg-amber-500' : 'bg-emerald-500');
+
+                        $barColorClass = 'bg-emerald-500';
+                        $daysTextClass = 'text-emerald-600 dark:text-emerald-400';
+                        $badgeClass = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800/60';
+
+                        if ($daysLeft !== null && $daysLeft <= 7) {
+                            $barColorClass = 'bg-rose-500';
+                            $daysTextClass = 'text-rose-600 dark:text-rose-400';
+                            $badgeClass = 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border-rose-100 dark:border-rose-800/60';
+                        } elseif ($daysLeft !== null && $daysLeft <= 30) {
+                            $barColorClass = 'bg-amber-500';
+                            $daysTextClass = 'text-amber-600 dark:text-amber-400';
+                            $badgeClass = 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 border-amber-100 dark:border-amber-800/60';
+                        }
                     @endphp
                     <tr class="group hover:bg-indigo-50/25 dark:hover:bg-indigo-950/20 transition-all duration-200"
                         id="row-tenant-{{ $tenant->id }}">
@@ -227,11 +235,6 @@
                             @if($tenant->status === 'active')
                                 <span
                                     class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 ring-1 ring-inset ring-emerald-600/20 shadow-2xs">
-                                    <span class="relative flex h-2 w-2 shrink-0">
-                                        <span
-                                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                    </span>
                                     <span>فعال</span>
                                 </span>
                             @elseif($tenant->status === 'suspended')
@@ -243,7 +246,6 @@
                             @elseif($tenant->status === 'pending_payment')
                                 <span
                                     class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 ring-1 ring-inset ring-amber-600/20 shadow-2xs">
-                                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
                                     <span>در انتظار پرداخت</span>
                                 </span>
                             @elseif($tenant->status === 'expired')
@@ -279,7 +281,7 @@
                             @elseif($tenant->plan_expires_at)
                                 <div class="flex items-center gap-2.5 whitespace-nowrap">
                                     <span
-                                        class="w-8 h-8 rounded-xl {{ $daysLeft <= 7 ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border-rose-100 dark:border-rose-800/60' : (($daysLeft <= 30) ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 border-amber-100 dark:border-amber-800/60' : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800/60') }} flex items-center justify-center shrink-0 border shadow-2xs">
+                                        class="w-8 h-8 rounded-xl {{ $badgeClass }} flex items-center justify-center shrink-0 border shadow-2xs">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -291,13 +293,13 @@
                                                 <span class="text-xs font-black text-rose-600 dark:text-rose-400">منقضی شده</span>
                                             @elseif($daysLeft !== null)
                                                 <span
-                                                    class="text-xs font-black tabular-nums {{ $daysLeft <= 7 ? 'text-rose-600 dark:text-rose-400' : (($daysLeft <= 30) ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400') }}">
+                                                    class="text-xs font-black tabular-nums {{ $daysTextClass }}">
                                                     {{ reseller_fa_num($daysLeft) }} روز باقی‌مانده
                                                 </span>
                                             @endif
                                         </div>
                                         <div class="text-[11px] text-gray-400 tabular-nums">
-                                            {{ reseller_format_jalali($tenant->plan_expires_at, 'Y/m/d') }}
+                                            {{ reseller_format_jalali($tenant->plan_expires_at) }}
                                         </div>
                                         @if($tenant->status === Tenant::STATUS_ACTIVE && $daysLeft !== null && $daysLeft > 0)
                                             <div
@@ -352,19 +354,18 @@
                             @else
                                 <div class="flex items-center gap-2.5 whitespace-nowrap">
                                     <span
-                                        class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 flex items-center justify-center shrink-0 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                        class="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-950/60 dark:to-indigo-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0 border border-violet-200/70 dark:border-violet-800/60 shadow-2xs">
+                                        <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                         </svg>
                                     </span>
                                     <div class="min-w-0">
                                         <span
-                                            class="font-bold text-xs sm:text-sm text-gray-800 dark:text-gray-200 block truncate">
-                                            طرح پایه
+                                            class="font-black text-xs sm:text-sm text-violet-900 dark:text-violet-200 block truncate">
+                                            پکیج سفارشی
                                         </span>
-                                        <span class="text-[11px] font-medium text-gray-400 block">
-                                            پکیج استاندارد
+                                        <span class="text-[11px] font-bold text-violet-600 dark:text-violet-400 block">
+                                            منابع و ماژول‌های اختصاصی
                                         </span>
                                     </div>
                                 </div>
@@ -374,26 +375,31 @@
                         <td class="py-4 px-4 sm:px-5">
                             <div x-data="{ copied: false }" class="inline-flex items-center gap-1.5">
                                 <a href="//{{ $displayUrl }}" target="_blank" rel="noopener noreferrer"
-                                   class="font-mono text-xs text-indigo-600 dark:text-indigo-400 hover:underline dir-ltr text-start font-bold truncate max-w-[170px]"
+                                   class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline dir-ltr text-start font-bold truncate max-w-[170px]"
                                    title="{{ $displayUrl }}">
                                     {{ $displayUrl }}
                                 </a>
                                 <button type="button"
                                         @click="
-                                            copyText('{{ $fullTenantUrl }}', 'آدرس اختصاصی سامانه کپی شد');
+                                            copyText('{{ $fullTenantUrl }}', 'آدرس اختصاصی سامانه با موفقیت کپی شد');
                                             copied = true;
                                             setTimeout(() => copied = false, 2000);
                                         "
-                                        class="p-1 rounded-lg transition-all duration-200 cursor-pointer text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
-                                        :title="copied ? 'کپی شد!' : 'کپی آدرس'">
-                                    <svg x-show="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
+                                        class="p-1 rounded-lg transition-all duration-200 cursor-pointer relative overflow-hidden active:scale-90"
+                                        :class="copied ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/70 dark:text-emerald-300 ring-2 ring-emerald-500/40 shadow-xs scale-105' : 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/60'"
+                                        :title="copied ? 'کپی شد!' : 'کپی آدرس اختصاصی سامانه'">
+                                    <span x-show="copied" x-cloak
+                                          class="absolute inset-0 rounded-lg bg-emerald-500/25 animate-ping pointer-events-none"></span>
+                                    <svg x-show="!copied"
+                                         class="w-3.5 h-3.5 transition-transform duration-200"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                     </svg>
-                                    <svg x-show="copied" x-cloak class="w-3.5 h-3.5 text-emerald-500" fill="none"
-                                         stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    <svg x-show="copied" x-cloak
+                                         class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 transition-transform duration-300 transform scale-110"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                               d="M5 13l4 4L19 7"/>
                                     </svg>
                                 </button>
@@ -426,10 +432,10 @@
                                             data-subdomain="{{ e($displayUrl) }}"
                                             data-package="{{ e($tPackage?->name ?? '') }}"
                                             data-expires="{{ e($tenant->jalali_plan_expires_at ?? 'نامحدود') }}"
-                                            data-periods="{{ e(json_encode($tPeriods)) }}"
+                                            data-periods="{{ e(json_encode($tPeriods, JSON_THROW_ON_ERROR)) }}"
                                             data-url="{{ route('reseller.tenants.renew', $tenant->id) }}"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white dark:bg-emerald-950/60 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
-                                            title="تمدید لایسنس و اشتراک">
+                                            title="تمدید اشتراک">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -506,8 +512,8 @@
                                                     <span>مشاهده جزئیات سامانه</span>
                                                 </a>
                                                 <a href="{{ route('reseller.tenants.edit', $tenant->id) }}"
-                                                   class="flex items-center gap-2 px-3.5 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors">
-                                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                                   class="flex items-center gap-2 px-3.5 py-2 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors">
+                                                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor"
                                                          viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                               stroke-width="2"
@@ -603,7 +609,7 @@
                                                                     'name' => $t->name ?: $t->subdomain,
                                                                     'subdomain' => $t->subdomain,
                                                                     'status' => $t->status,
-                                                                ])->values()) }},
+                                                                ])->values(), JSON_THROW_ON_ERROR) }},
                                                                 delete_url: '{{ route('reseller.sub-accounts.destroy', $subAcc->id) }}'
                                                             })"
                                                             class="w-full flex items-center gap-2 px-3.5 py-2 text-start text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
@@ -653,11 +659,6 @@
                             <td class="py-4 px-4 sm:px-5">
                                 <span
                                     class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 ring-1 ring-inset ring-emerald-600/20 shadow-2xs">
-                                    <span class="relative flex h-2 w-2 shrink-0">
-                                        <span
-                                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                    </span>
                                     <span>فعال</span>
                                 </span>
                             </td>
@@ -672,7 +673,7 @@
                                     </span>
                                     <div class="min-w-0">
                                         <span class="text-xs font-bold text-gray-400 block">—</span>
-                                        <span class="text-[11px] text-gray-400 block">فاقد لایسنس</span>
+                                        <span class="text-[11px] text-gray-400 block">فاقد اعتبار</span>
                                     </div>
                                 </div>
                             </td>
@@ -686,13 +687,13 @@
                                         </svg>
                                     </span>
                                     <div class="min-w-0">
-                                        <span class="text-xs font-bold text-gray-400 block">تخصیص‌نیافته</span>
+                                        <span class="text-xs font-bold text-gray-400 block">تخصیص‌ نیافته</span>
                                         <span class="text-[11px] text-gray-400 block">بدون اشتراک</span>
                                     </div>
                                 </div>
                             </td>
                             <td class="py-4 px-4 sm:px-5">
-                                <span class="text-xs text-gray-400 font-mono">—</span>
+                                <span class="text-xs text-gray-400">—</span>
                             </td>
                             <td class="py-4 px-4 sm:px-5 text-end whitespace-nowrap">
                                 <div class="inline-flex items-center justify-end gap-2 shrink-0">
@@ -737,6 +738,382 @@
             </table>
         </div>
 
+        {{-- Mobile Cards View (< md) --}}
+        <div class="md:hidden p-3.5 sm:p-4 space-y-3.5 bg-slate-50/60 dark:bg-gray-900/40 border-t border-slate-200/70 dark:border-gray-700/60">
+            @foreach($tenants as $tenant)
+                @php
+                    $tenantUrl = route('reseller.tenants.login-as', $tenant->id);
+                    $displayUrl = $tenantManager->getTenantDisplayUrl($tenant);
+                    $fullTenantUrl = $tenantManager->getTenantUrl($tenant);
+                    $tPackage = $tenant->package;
+                    $tPriceType = $tPackage?->getPriceTypeEnum();
+                    $canRenew = $tPackage ? $tPriceType->hasRenewal() : true;
+                    $tPeriods = $canRenew ? reseller_tenant_renewal_periods($tenant) : [];
+                    $daysLeft = reseller_days_remaining($tenant->plan_expires_at);
+
+                    $mBarColorClass = 'bg-emerald-500';
+                    $mDaysTextColor = 'text-gray-700 dark:text-gray-300';
+                    if ($daysLeft !== null && $daysLeft <= 7) {
+                        $mBarColorClass = 'bg-rose-500';
+                        $mDaysTextColor = 'text-rose-600 dark:text-rose-400';
+                    } elseif ($daysLeft !== null && $daysLeft <= 30) {
+                        $mBarColorClass = 'bg-amber-500';
+                        $mDaysTextColor = 'text-amber-600 dark:text-amber-400';
+                    }
+
+                    $mDaysText = '—';
+                    if ($daysLeft !== null) {
+                        $mDaysText = $daysLeft > 0 ? reseller_fa_num($daysLeft) . ' روز مانده' : 'منقضی شده';
+                    }
+
+                    $mPkgColor = $tPackage ? PackageColor::fromOrDefault($tPackage->color) : null;
+                    $mPkgIcon = $tPackage ? PackageIcon::fromOrDefault($tPackage->icon) : null;
+                @endphp
+                <div class="bg-white dark:bg-gray-800 rounded-2xl border border-slate-200/80 dark:border-gray-700/80 shadow-xs hover:border-indigo-200 dark:hover:border-indigo-800/60 transition-all overflow-hidden" id="card-tenant-{{ $tenant->id }}">
+                    {{-- Header Partition: Title & Status --}}
+                    <div class="p-3.5 sm:p-4 bg-slate-50/50 dark:bg-gray-800/50 border-b border-slate-100 dark:border-gray-700/50 flex items-start justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <a href="{{ route('reseller.tenants.show', $tenant->id) }}"
+                               class="font-bold text-sm text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors truncate block">
+                                {{ $tenant->name ?: $tenant->subdomain }}
+                            </a>
+                            <div x-data="{ copied: false }" class="flex items-center gap-1.5 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                <span class="truncate">{{ $displayUrl }}</span>
+                                <button type="button"
+                                        @click="
+                                            copyText('{{ $fullTenantUrl }}', 'آدرس اختصاصی سامانه با موفقیت کپی شد');
+                                            copied = true;
+                                            setTimeout(() => copied = false, 2000);
+                                        "
+                                        class="p-1 rounded-lg transition-all duration-200 cursor-pointer relative overflow-hidden active:scale-90 shrink-0"
+                                        :class="copied ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/70 dark:text-emerald-300 ring-2 ring-emerald-500/40 shadow-xs scale-105' : 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/60'"
+                                        :title="copied ? 'کپی شد!' : 'کپی آدرس اختصاصی سامانه'">
+                                    <span x-show="copied" x-cloak
+                                          class="absolute inset-0 rounded-lg bg-emerald-500/25 animate-ping pointer-events-none"></span>
+                                    <svg x-show="!copied"
+                                         class="w-3.5 h-3.5 transition-transform duration-200"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                    <svg x-show="copied" x-cloak
+                                         class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 transition-transform duration-300 transform scale-110"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                              d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Status Badge --}}
+                        <div class="shrink-0">
+                            @if($tenant->status === 'active')
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 ring-1 ring-inset ring-emerald-600/20">
+                                    <span>فعال</span>
+                                </span>
+                            @elseif($tenant->status === 'suspended')
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 ring-1 ring-inset ring-rose-600/20">
+                                    <span>معلق</span>
+                                </span>
+                            @elseif($tenant->status === 'pending_payment')
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 ring-1 ring-inset ring-amber-600/20">
+                                    <span>در انتظار پرداخت</span>
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                                    <span>منقضی</span>
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Body Partition: Package & Expiration --}}
+                    <div class="p-3.5 sm:p-4 flex items-center justify-between text-xs gap-3">
+                        <div class="flex items-center gap-1.5">
+                            @if($tPackage && $mPkgColor && $mPkgIcon)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold {{ $mPkgColor->lightClass() }}">
+                                    {!! $mPkgIcon->svg('w-3.5 h-3.5') !!}
+                                    <span>{{ $tPackage->name }}</span>
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-950/50 dark:to-indigo-950/50 text-violet-700 dark:text-violet-300 border border-violet-200/80 dark:border-violet-800/60 shadow-2xs">
+                                    <svg class="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                    <span>پکیج سفارشی</span>
+                                </span>
+                            @endif
+                        </div>
+
+                        <div class="text-start">
+                            @if($tenant->plan_expires_at)
+                                <span class="font-bold tabular-nums {{ $mDaysTextColor }}">
+                                    {{ $mDaysText }}
+                                </span>
+                            @else
+                                <span class="text-gray-400 font-medium">نامحدود</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Footer Partition: Complete 8-Action Operations on Mobile --}}
+                    <div class="p-3 sm:p-3.5 bg-slate-50/70 dark:bg-gray-900/30 border-t border-slate-100 dark:border-gray-700/60 space-y-2">
+                        {{-- Row 1: Primary SSO & Renewal Actions --}}
+                        <div class="flex items-center gap-2">
+                            @if(!$tenant->isPendingPayment())
+                                <form method="POST" action="{{ $tenantUrl }}" target="_blank" class="flex-1 m-0 p-0">
+                                    @csrf
+                                    <button type="submit"
+                                            class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white dark:bg-indigo-950/60 dark:hover:bg-indigo-600 dark:text-indigo-300 dark:hover:text-white border border-indigo-100 dark:border-indigo-900/40 text-xs font-bold transition-all shadow-2xs active:scale-95 cursor-pointer whitespace-nowrap"
+                                            title="ورود مستقیم به پنل مدیریت سامانه (SSO)">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                        </svg>
+                                        <span>ورود سریع</span>
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if($canRenew && !$tenant->isPendingPayment() && auth()->user()->can('resellerhub.tenants.renew'))
+                                <button type="button"
+                                        id="btn-renew-m-{{ $tenant->id }}"
+                                        @click="openRenewModalByElement($el)"
+                                        data-id="{{ $tenant->id }}"
+                                        data-name="{{ e($tenant->name) }}"
+                                        data-subdomain="{{ e($displayUrl) }}"
+                                        data-package="{{ e($tPackage?->name ?? '') }}"
+                                        data-expires="{{ e($tenant->jalali_plan_expires_at ?? 'نامحدود') }}"
+                                        data-periods="{{ e(json_encode($tPeriods, JSON_THROW_ON_ERROR)) }}"
+                                        data-url="{{ route('reseller.tenants.renew', $tenant->id) }}"
+                                        class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white dark:bg-emerald-950/60 dark:hover:bg-emerald-600 dark:text-emerald-300 dark:hover:text-white border border-emerald-100 dark:border-emerald-900/40 text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95 whitespace-nowrap"
+                                        title="تمدید سفارش">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>تمدید سفارش</span>
+                                </button>
+                            @endif
+                        </div>
+
+                        {{-- Row 2: Secondary Details, Edit & More Operations Dropdown --}}
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('reseller.tenants.show', $tenant->id) }}"
+                               class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 border border-slate-200/80 dark:border-slate-600 text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95 whitespace-nowrap"
+                               title="مشاهده جزئیات سامانه">
+                                <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                <span>جزئیات</span>
+                            </a>
+
+                            <a href="{{ route('reseller.tenants.edit', $tenant->id) }}"
+                               class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/40 text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95 whitespace-nowrap"
+                               title="ویرایش اطلاعات سامانه">
+                                <svg class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                <span>ویرایش</span>
+                            </a>
+
+                            {{-- 3-Dots Menu Button --}}
+                            <div class="relative inline-flex items-center text-start shrink-0"
+                                 x-data="{
+                                     open: false,
+                                     coords: { top: 0, left: 0 },
+                                     toggle(el) {
+                                         if (this.open) { this.open = false; return; }
+                                         const rect = el.getBoundingClientRect();
+                                         const menuWidth = 220;
+                                         const menuHeight = 220;
+                                         const margin = 6;
+                                         const spaceBelow = window.innerHeight - rect.bottom;
+                                         const spaceAbove = rect.top;
+
+                                         let top = (spaceBelow >= menuHeight + margin || spaceBelow >= spaceAbove)
+                                             ? (rect.bottom + margin)
+                                             : (rect.top - menuHeight - margin);
+
+                                         let left = rect.left;
+                                         if (left + menuWidth > window.innerWidth - 12) {
+                                             left = window.innerWidth - menuWidth - 12;
+                                         }
+                                         if (left < 12) { left = 12; }
+
+                                         this.coords = { top: Math.round(top), left: Math.round(left) };
+                                         this.open = true;
+                                     }
+                                 }">
+                                <button type="button"
+                                        @click.stop="toggle($el)"
+                                        class="p-2 rounded-xl border border-gray-200/80 dark:border-gray-700 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700/60 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-300 transition-colors cursor-pointer shrink-0 shadow-2xs active:scale-95"
+                                        title="سایر اقدامات">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                    </svg>
+                                </button>
+
+                            <template x-teleport="body">
+                                <div x-show="open"
+                                     data-tenant-dropdown="true"
+                                     @click.outside="open = false"
+                                     @scroll.window.capture="open = false"
+                                     @resize.window="open = false"
+                                     @keydown.escape.window="open = false"
+                                     x-transition:enter="transition ease-out duration-100"
+                                     x-transition:enter-start="transform opacity-0 scale-95"
+                                     x-transition:enter-end="transform opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-75"
+                                     x-transition:leave-start="transform opacity-100 scale-100"
+                                     x-transition:leave-end="transform opacity-0 scale-95"
+                                     :style="'top: ' + coords.top + 'px; left: ' + coords.left + 'px;'"
+                                     style="display: none;"
+                                     dir="rtl"
+                                     class="fixed w-56 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200/90 dark:border-gray-700/80 shadow-2xl py-1.5 z-[99999] text-xs font-bold divide-y divide-gray-100 dark:divide-gray-700/60">
+
+                                    {{-- SubAccount Profile Link --}}
+                                    @if($tenant->subAccount)
+                                        <div class="py-1">
+                                            <a href="{{ route('reseller.sub-accounts.show', $tenant->subAccount->id) }}"
+                                               class="flex items-center gap-2 px-3.5 py-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors">
+                                                <svg class="w-4 h-4 text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                </svg>
+                                                <span>مشاهده پرونده کاربر خریدار</span>
+                                            </a>
+                                        </div>
+                                    @endif
+
+                                    {{-- Suspend / Unsuspend --}}
+                                    @if(!$tenant->isPendingPayment() && auth()->user()->can('resellerhub.tenants.toggle-status'))
+                                        <div class="py-1">
+                                            <button type="button"
+                                                    id="btn-toggle-m-{{ $tenant->id }}"
+                                                    @click="open = false; openSuspendModalByElement($el)"
+                                                    data-id="{{ $tenant->id }}"
+                                                    data-name="{{ e($tenant->name) }}"
+                                                    data-subdomain="{{ e($displayUrl) }}"
+                                                    data-owner="{{ e($tenant->subAccount?->name ?? '—') }}"
+                                                    data-suspended="{{ $tenant->status === 'suspended' ? 'true' : 'false' }}"
+                                                    data-url="{{ route('reseller.tenants.toggle-status', $tenant->id) }}"
+                                                    class="w-full flex items-center gap-2 px-3.5 py-2 text-start transition-colors cursor-pointer {{ $tenant->status === 'suspended' ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40' }}">
+                                                @if($tenant->status === 'suspended')
+                                                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                                                    </svg>
+                                                    <span>رفع مسدودیت سامانه</span>
+                                                @else
+                                                    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM10 7a2 2 0 114 0v4h-4V7z"/>
+                                                    </svg>
+                                                    <span>مسدودسازی موقت سامانه</span>
+                                                @endif
+                                            </button>
+                                        </div>
+                                    @endif
+
+                                    {{-- Delete Actions Section --}}
+                                    <div class="py-1">
+                                        {{-- 1. Delete Tenant --}}
+                                        @can('resellerhub.tenants.delete')
+                                            <button type="button"
+                                                    id="btn-tenant-delete-m-{{ $tenant->id }}"
+                                                    @click="open = false; openTenantDeleteModal({
+                                                        id: {{ $tenant->id }},
+                                                        name: '{{ addslashes($tenant->name ?: $tenant->subdomain) }}',
+                                                        subdomain: '{{ addslashes($displayUrl) }}',
+                                                        delete_url: '{{ route('reseller.tenants.destroy', $tenant->id) }}'
+                                                    })"
+                                                    class="w-full flex items-center gap-2 px-3.5 py-2 text-start text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer">
+                                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                <span>حذف این سامانه</span>
+                                            </button>
+                                        @endcan
+
+                                        {{-- 2. Delete SubAccount (If attached to buyer) --}}
+                                        @if($tenant->subAccount && auth()->user()->can('resellerhub.sub-accounts.delete'))
+                                            @php
+                                                $mSubAcc = $tenant->subAccount;
+                                                $mConnTenants = $mSubAcc->getConnectedTenants();
+                                            @endphp
+                                            <button type="button"
+                                                    id="btn-subaccount-delete-m-{{ $tenant->id }}"
+                                                    @click="open = false; openSubAccountDeleteModal({
+                                                        id: {{ $mSubAcc->id }},
+                                                        name: '{{ addslashes($mSubAcc->name) }}',
+                                                        company: '{{ addslashes($mSubAcc->company_name ?? '') }}',
+                                                        tenants_count: {{ $mConnTenants->count() }},
+                                                        tenants: {{ json_encode($mConnTenants->map(fn($t) => [
+                                                            'id' => $t->id,
+                                                            'name' => $t->name ?: $t->subdomain,
+                                                            'subdomain' => $t->subdomain,
+                                                            'status' => $t->status,
+                                                        ])->values(), JSON_THROW_ON_ERROR) }},
+                                                        delete_url: '{{ route('reseller.sub-accounts.destroy', $mSubAcc->id) }}'
+                                                    })"
+                                                    class="w-full flex items-center gap-2 px-3.5 py-2 text-start text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors cursor-pointer border-t border-gray-100 dark:border-gray-700/60">
+                                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM16 11h6m-3-3v6"/>
+                                                </svg>
+                                                <span>حذف کاربر زیرمجموعه</span>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+
+            @if(isset($unassignedSubAccounts) && $unassignedSubAccounts->isNotEmpty())
+                @foreach($unassignedSubAccounts as $unassigned)
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-amber-200/80 dark:border-amber-800/60 shadow-xs overflow-hidden" id="card-unassigned-{{ $unassigned->id }}">
+                        <div class="p-3.5 sm:p-4 bg-amber-50/40 dark:bg-amber-950/20 border-b border-amber-100 dark:border-amber-900/40 flex items-center justify-between">
+                            <a href="{{ route('reseller.sub-accounts.show', $unassigned->id) }}" class="font-bold text-sm text-gray-900 dark:text-white hover:text-purple-600 transition">
+                                {{ $unassigned->company_name ?: $unassigned->name }}
+                            </a>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 ring-1 ring-inset ring-purple-600/20">
+                                کاربر زیرمجموعه
+                            </span>
+                        </div>
+                        <div class="p-3.5 sm:p-4 flex items-center justify-between gap-3">
+                            <p class="text-xs text-amber-600 dark:text-amber-400 font-medium">در انتظار تعریف یا تخصیص سامانه</p>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('reseller.tenants.create', ['sub_account_id' => $unassigned->id]) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-xs active:scale-95 whitespace-nowrap">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    <span>تخصیص سامانه</span>
+                                </a>
+                                @can('resellerhub.sub-accounts.delete')
+                                    <button type="button"
+                                            id="btn-subaccount-delete-unassigned-m-{{ $unassigned->id }}"
+                                            @click="openSubAccountDeleteModal({
+                                                id: {{ $unassigned->id }},
+                                                name: '{{ addslashes($unassigned->name) }}',
+                                                company: '{{ addslashes($unassigned->company_name ?? '') }}',
+                                                tenants_count: 0,
+                                                tenants: [],
+                                                delete_url: '{{ route('reseller.sub-accounts.destroy', $unassigned->id) }}'
+                                            })"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition border border-rose-200/60 dark:border-rose-900/40 active:scale-95 cursor-pointer whitespace-nowrap">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        <span>حذف</span>
+                                    </button>
+                                @endcan
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
+        </div>
+
         {{-- Pagination Footer --}}
         @if($tenants->total() > 0)
             <div
@@ -775,7 +1152,7 @@
                         <select name="per_page" aria-label="تعداد در صفحه" onchange="this.form.submit()"
                                 class="rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-1 px-2 text-xs font-bold text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-indigo-500 cursor-pointer">
                             @foreach([10, 15, 25, 50, 100] as $size)
-                                <option value="{{ $size }}" @selected(request('per_page', 15) == $size)>
+                                <option value="{{ $size }}" @selected((int) request('per_page', 15) === $size)>
                                     {{ reseller_fa_num($size) }}
                                 </option>
                             @endforeach

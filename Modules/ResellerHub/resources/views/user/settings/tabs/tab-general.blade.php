@@ -1,7 +1,7 @@
 <div role="tabpanel" id="tabpanel-general" aria-labelledby="tab-general" x-show="activeTab === 'general'" x-cloak
      class="space-y-6 pb-24 relative transition-all"
      :class="{ 'z-50': defaultPackageDropdownOpen, 'z-10': !defaultPackageDropdownOpen }">
-    <x-resellerhub::card class="p-6 sm:p-8 space-y-6 relative transition-all"
+    <x-resellerhub::card class="p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 relative transition-all"
                          x-bind:class="{ 'z-50': defaultPackageDropdownOpen, 'z-10': !defaultPackageDropdownOpen }">
         <div class="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-gray-700/60">
             <span
@@ -14,9 +14,6 @@
             <div>
                 <h2 class="text-base font-black text-gray-900 dark:text-white">قوانین و پیش‌فرض‌های
                     اشتراک</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">تنظیم مدت‌زمان اولیه سامانه‌ها،
-                    رفتار
-                    سیستم پس از انقضا و مهلت‌های ارفاقی</p>
             </div>
         </div>
 
@@ -24,8 +21,7 @@
             <div class="space-y-1.5 relative transition-all"
                  :class="{ 'z-40': durationDropdownOpen, 'z-10': !durationDropdownOpen }">
                 <x-resellerhub::label>
-                    مدت‌زمان پیش‌فرض لایسنس اولیه
-                </x-resellerhub::label>
+                پیش فرض مدت زمان اعتبار</x-resellerhub::label>
                 <input type="hidden" name="default_plan_duration_months" :value="defaultDuration">
                 <div class="relative">
                     <button type="button" @click="durationDropdownOpen = !durationDropdownOpen"
@@ -73,8 +69,8 @@
                         </template>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400 mt-1.5 ms-1">در هنگام باز شدن ویزارد ساخت CRM، این مقدار به عنوان
-                    انتخاب پیش‌فرض لایسنس اولیه خواهد بود.</p>
+                <p class="text-xs text-gray-400 mt-1.5 ms-1">در هنگام باز شدن صفحه ساخت سامانه، این مقدار به عنوان
+                     پیش‌فرض خواهد بود.</p>
             </div>
 
             {{-- Max Advance Renewal Cycles --}}
@@ -147,8 +143,8 @@
                            x-model="allowCustomDomains"
                            class="mt-1 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800">
                     <div>
-                        <span class="text-xs font-bold text-gray-900 dark:text-white block">اجازه اتصال دامنه اختصاصی (Custom Domain)</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400 block mt-0.5">امکان اتصال دامنه اختصاصی توسط زیرمجموعه‌ها مانند clinic.ir به جای سابدامین اشتراکی.</span>
+                        <span class="text-xs font-bold text-gray-900 dark:text-white block">اجازه اتصال دامنه اختصاصی</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400 block mt-0.5">امکان اتصال دامنه اختصاصی توسط زیرمجموعه‌ها مانند clinic.ir به جای زیردامنه اشتراکی.</span>
                     </div>
                 </label>
 
@@ -168,11 +164,6 @@
                                         </svg>
                                         تعرفه و قیمت‌گذاری اتصال دامنه اختصاصی:
                                     </span>
-                        <p class="text-xs text-gray-400 mt-0.5">
-                            در صورت فعال بودن دامنه اختصاصی، این تعرفه به صورت تفکیک‌شده به فاکتور و
-                            لایسنس
-                            خریدار اضافه خواهد شد:
-                        </p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -254,19 +245,32 @@
                             یک رکورد <strong>CNAME</strong> با مقدار هدف زیر ثبت نماید:
                         </p>
                         <div
-                            class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-lg dir-ltr border border-gray-200/70 dark:border-gray-700/60">
-                                        <span class="font-bold text-xs text-indigo-600 dark:text-indigo-400"
+                            class="flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-900/50 p-2.5 rounded-lg dir-ltr border border-gray-200/70 dark:border-gray-700/60">
+                                        <span class="font-bold text-xs text-indigo-600 dark:text-indigo-400 truncate"
                                               x-text="cnameTarget"></span>
                             <button type="button"
-                                    @click="copyToClipboard(cnameTarget, 'آدرس اتصال CNAME کپی شد')"
-                                    class="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 text-xs font-bold px-2.5 py-1 rounded-md bg-indigo-50 hover:bg-indigo-100/70 dark:bg-indigo-950/60 transition cursor-pointer">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
-                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="2"
-                                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                </svg>
-                                کپی مقدار هدف
+                                    id="copy-cname-target-btn"
+                                    x-data="{ copied: false }"
+                                    @click="copyToClipboard(cnameTarget, 'آدرس اتصال CNAME کپی شد'); copied = true; setTimeout(() => copied = false, 2000)"
+                                    :class="copied ? 'bg-emerald-600 text-white border-emerald-600 scale-[1.02]' : 'text-indigo-600 hover:text-indigo-700 dark:text-indigo-300 bg-indigo-50 hover:bg-indigo-100/70 dark:bg-indigo-950/60 border-indigo-200/60 dark:border-indigo-800/50'"
+                                    class="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-lg border transition-all duration-200 active:scale-95 cursor-pointer shrink-0">
+                                <template x-if="copied">
+                                    <span class="inline-flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <span>کپی شد!</span>
+                                    </span>
+                                </template>
+                                <template x-if="!copied">
+                                    <span class="inline-flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                        </svg>
+                                        <span>کپی</span>
+                                    </span>
+                                </template>
                             </button>
                         </div>
                     </div>
@@ -278,7 +282,7 @@
         <div class="pt-6 border-t border-gray-100 dark:border-gray-700/60 space-y-4">
             <div class="flex items-center gap-3">
                 <span
-                    class="p-2.5 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-500/20 rounded-2xl">
+                    class="p-2.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/70 dark:border-indigo-800/50 rounded-xl shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
@@ -287,17 +291,13 @@
                 <div>
                     <h3 class="text-sm font-black text-gray-900 dark:text-white">الگوی نام‌گذاری خودکار آدرس سامانه
                         مشتریان</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        آدرس اختصاصی سامانه مشتریان پس از نام دامنه اصلی شما قرار می‌گیرد (مانند <span
-                            class="text-indigo-600 dark:text-indigo-400 dir-ltr">domain.com/ali</span>).
-                    </p>
                 </div>
             </div>
 
             <div
-                class="p-5 sm:p-6 rounded-3xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40 space-y-5">
+                class="p-4 sm:p-5 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-900/40 space-y-5">
                 <div
-                    class="p-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-transparent border border-indigo-200/80 dark:border-indigo-800/60 bg-white dark:bg-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                    class="p-3.5 sm:p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/70 dark:border-indigo-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
                         <div
                             class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-indigo-600/30">
@@ -327,14 +327,14 @@
                 {{-- Quick Presets / Templates --}}
                 <div class="space-y-2">
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                        الگوهای آماده و پیشنهادی (یک‌کلیک برای انتخاب):
+                        الگوهای آماده و پیشنهادی:
                     </label>
                     <div class="flex flex-wrap gap-2">
                         <button type="button"
                                 @click="setSubdomainPatternPreset('{name}')"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border"
                                 :class="subdomainPattern === '{name}' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-600/25' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-400'">
-                            <span>نام ثبت‌نامی کاربر (توصیه‌شده):</span>
+                            <span>نام ثبت‌ نامی کاربر (توصیه‌شده):</span>
                             <code class="text-xs dir-ltr">{name}</code>
                         </button>
                         <button type="button"
@@ -452,25 +452,10 @@
                                         class="text-xs text-indigo-600 opacity-0 group-hover:opacity-100 font-bold transition">+ درج</span>
                                 </div>
                                 <span
-                                    class="block text-xs text-gray-500 dark:text-gray-400 mt-1">سال خورشیدی (۱۴۰۵)</span>
+                                    class="block text-xs text-gray-500 dark:text-gray-400 mt-1">سال شمسی</span>
                             </button>
                         </div>
                     </div>
-                </div>
-
-                {{-- Security & Collision Notice --}}
-                <div
-                    class="p-3.5 rounded-2xl bg-gray-100/80 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700 flex items-start gap-2.5 text-xs text-gray-600 dark:text-gray-400">
-                    <svg class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                    </svg>
-                    <p class="leading-relaxed text-xs">
-                        <strong>جلوگیری خودکار از تداخل نام:</strong> سامانه نام‌های رزرو شده (مانند admin, api, app) را
-                        کنترل کرده و در صورت ثبت نام تکراری، به طور هوشمند شمارنده ترتیبی اضافه می‌کند تا هیچ‌گاه خطای
-                        ایجاد دامین رخ ندهد.
-                    </p>
                 </div>
             </div>
         </div>
@@ -709,10 +694,10 @@
 
         <div class="pt-4 border-t border-gray-100 dark:border-gray-700/60">
             <div
-                class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-50/80 to-blue-50/40 dark:from-indigo-950/30 dark:to-blue-950/20 border border-indigo-100 dark:border-indigo-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="flex items-start gap-3.5">
+                class="p-4 sm:p-5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/70 dark:border-indigo-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-3">
                     <div
-                        class="p-2.5 rounded-xl bg-indigo-600 text-white shrink-0 shadow-sm shadow-indigo-500/20">
+                        class="p-2.5 rounded-xl bg-indigo-600 text-white shrink-0 shadow-xs">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                              stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"

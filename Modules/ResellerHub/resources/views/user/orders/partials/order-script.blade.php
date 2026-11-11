@@ -24,7 +24,17 @@
         Alpine.data('orderManager', () => ({
             activeTab: (window.location.hash ? window.location.hash.substring(1) : '') || 'details',
             editMode: false,
+            otherTabsOpen: false,
             statusDropdownOpen: false,
+            setTab(tab) {
+                this.activeTab = tab;
+                this.otherTabsOpen = false;
+            },
+            secondaryTabLabel() {
+                if (this.activeTab === 'history') return 'تاریخچه';
+                if (this.activeTab === 'add_items') return 'ماژول‌ها';
+                return 'سایر';
+            },
             openStatusModal: false,
             statusSubmitting: false,
             pendingStatusId: '{{ $order->status }}',
@@ -177,6 +187,56 @@
             itemsToRemove: [],
             removeModalOpen: false,
             removing: false,
+            mobileSectionOpen: {
+                active: true,
+                catalog: true,
+                items: true,
+                summary: true,
+            },
+            summaryInView: false,
+
+            updateSummaryVisibility() {
+                const el = document.querySelector('#add-items-summary-box');
+                if (!el) return;
+                const rect = el.getBoundingClientRect();
+                this.summaryInView = rect.height > 0 && rect.top < (window.innerHeight - 20) && rect.bottom > 0;
+            },
+
+            init() {
+                this.$nextTick(() => {
+                    const el = document.querySelector('#add-items-summary-box');
+                    if (el && 'IntersectionObserver' in window) {
+                        const observer = new IntersectionObserver((entries) => {
+                            entries.forEach(entry => {
+                                this.summaryInView = entry.isIntersecting;
+                            });
+                        }, {
+                            threshold: 0.05,
+                            rootMargin: '0px 0px -20px 0px',
+                        });
+                        observer.observe(el);
+                    }
+                    this.updateSummaryVisibility();
+                });
+
+                let lastTick = false;
+                window.addEventListener('scroll', () => {
+                    if (lastTick) return;
+                    lastTick = true;
+                    window.requestAnimationFrame(() => {
+                        this.updateSummaryVisibility();
+                        lastTick = false;
+                    });
+                }, { passive: true });
+            },
+
+            get isItemsBodyOpen() {
+                return this.mobileSectionOpen.items;
+            },
+
+            toggleItemsCard() {
+                this.mobileSectionOpen.items = !this.mobileSectionOpen.items;
+            },
 
             isSelected(slug) {
                 return this.selectedItems.some(i => i.slug === slug);

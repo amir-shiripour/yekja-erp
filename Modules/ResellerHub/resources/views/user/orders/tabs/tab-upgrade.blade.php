@@ -2,10 +2,10 @@
 <div role="tabpanel" id="tabpanel-package_upgrade" aria-labelledby="tab-package_upgrade" x-show="activeTab === 'package_upgrade'" x-cloak class="space-y-8">
     <x-resellerhub::card>
         <div
-            class="p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gradient-to-l from-indigo-50/70 to-transparent dark:from-indigo-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3">
                 <div
-                    class="p-2.5 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400 rounded-2xl shadow-sm">
+                    class="p-2.5 bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 border border-indigo-200/70 dark:border-indigo-800/50 rounded-xl shrink-0">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
@@ -14,8 +14,6 @@
                 <div>
                     <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">پکیج و ماژول‌های
                         فعال کنونی سفارش</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">مشخصات لایسنس جاری و دسترسی‌های فعال روی سامانه
-                        خریدار</p>
                 </div>
             </div>
 
@@ -31,22 +29,26 @@
             </div>
         </div>
 
-        <div class="p-6 sm:p-8 space-y-6">
+        <div class="p-4 sm:p-6 space-y-5 sm:space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div
-                    class="p-5 rounded-2xl bg-gray-50/80 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800">
-                    <span class="text-xs font-bold text-gray-400 block mb-1.5">عنوان پکیج فعال</span>
-                    <div class="flex items-center gap-2">
-                                <span class="w-3.5 h-3.5 rounded-full shrink-0"
-                                      style="background-color: {{ $package?->color ?: '#10b981' }}"></span>
+                    class="p-4 sm:p-5 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200/70 dark:border-gray-700/50">
+                    <span class="text-xs font-bold text-gray-400 block mb-2">عنوان پکیج فعال</span>
+                    <div class="flex items-center gap-2.5">
+                        @if($package)
+                            <div
+                                class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-xs text-white"
+                                style="{{ $package->bg_style }}">
+                                @include('resellerhub::user.packages.partials.icon', [
+                                    'icon' => $package->icon,
+                                    'class' => 'w-4 h-4',
+                                ])
+                            </div>
+                        @else
+                            <span class="w-3.5 h-3.5 rounded-full shrink-0 bg-emerald-500"></span>
+                        @endif
                         <h4 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">{{ $package?->name ?? 'پکیج سفارشی (اختصاصی)' }}</h4>
                     </div>
-                    @if($package?->description)
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ $package->description }}</p>
-                    @else
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">ماژول‌ها و دسترسی‌های این سفارش
-                            به صورت اختصاصی و سفارشی تنظیم شده‌اند.</p>
-                    @endif
                 </div>
 
                 <div
@@ -88,11 +90,6 @@
                     ])->toArray();
                 }
 
-                /**
-                 * Snapshots created by older releases stored the English module name
-                 * (e.g. "Notifications"). Always resolve the Persian label from the slug
-                 * and only fall back to a stored title when it is already localized.
-                 */
                 $resolveModuleLabel = static function ($item): string {
                     $slug = is_array($item)
                         ? (string)($item['slug'] ?? $item['key'] ?? '')
@@ -173,10 +170,10 @@
 
     <x-resellerhub::card>
         <div
-            class="p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gradient-to-l from-amber-50/70 to-transparent dark:from-amber-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3">
                 <div
-                    class="p-2.5 bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-2xl shadow-md shadow-amber-500/20">
+                    class="p-2.5 bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 border border-indigo-200/70 dark:border-indigo-800/50 rounded-xl shrink-0">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                          stroke-width="2.2">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -184,10 +181,7 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">ارتقای آنلاین پکیج
-                        و صدور فاکتور مابه‌التفاوت</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">پکیج بالاتر را انتخاب کنید تا مابه‌التفاوت به صورت
-                        زنده محاسبه و فاکتور ارتقا صادر شود</p>
+                    <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">ارتقای آنلاین پکیج</h3>
                 </div>
             </div>
         </div>
@@ -206,7 +200,7 @@
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
                         <label class="block text-xs sm:text-sm font-black text-gray-900 dark:text-white">
-                            ۱. پکیج مقصد برای ارتقا را انتخاب کنید:
+                             پکیج مقصد برای ارتقا را انتخاب کنید:
                         </label>
                         <span class="text-xs text-gray-400">قیمت‌ها بر اساس دوره {{ $order->billing_cycle_label ?: reseller_duration_label($order->billing_cycle) }} نمایش داده شده‌اند</span>
                     </div>
@@ -214,13 +208,13 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <template x-for="pkg in packagesData" :key="pkg.id">
                             <div @click="canSelectPackage(pkg) && selectUpgradePackage(pkg.id)"
-                                 class="p-5 rounded-2xl border-2 transition-all text-right flex flex-col justify-between relative overflow-hidden"
+                                 class="p-5 rounded-2xl border transition-all text-right flex flex-col justify-between relative overflow-hidden"
                                  :class="[
                                              !canSelectPackage(pkg)
                                                  ? 'opacity-60 cursor-not-allowed bg-gray-50 dark:bg-gray-800/40 border-gray-200 dark:border-gray-700/60'
                                                  : selectedUpgradePackageId == pkg.id
-                                                     ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 ring-4 ring-amber-500/20 cursor-pointer shadow-md'
-                                                     : 'border-gray-200 dark:border-gray-700/70 hover:border-amber-400 bg-white dark:bg-gray-800/60 cursor-pointer hover:shadow-sm'
+                                                     ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/20 ring-2 ring-indigo-500/20 cursor-pointer shadow-sm'
+                                                     : 'border-gray-200 dark:border-gray-700/70 hover:border-indigo-300 bg-white dark:bg-gray-800/60 cursor-pointer hover:shadow-xs'
                                          ]">
                                 <div>
                                     <div class="flex items-start justify-between gap-2 mb-3">
@@ -232,7 +226,7 @@
                                         </div>
                                         <template x-if="pkg.id == currentPackageId">
                                                     <span
-                                                        class="text-xs font-bold text-gray-500 bg-gray-200 dark:bg-gray-700 px-2.5 py-0.5 rounded-full">پکیج فعلی</span>
+                                                        class="text-xs font-bold text-gray-500 bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 rounded-full">پکیج فعلی</span>
                                         </template>
                                         <template x-if="pkg.id != currentPackageId && isPackageCheaper(pkg)">
                                                     <span
@@ -241,7 +235,7 @@
                                         <template
                                             x-if="pkg.id != currentPackageId && !isPackageCheaper(pkg) && selectedUpgradePackageId == pkg.id">
                                                     <span
-                                                        class="text-xs font-black text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/60 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                                        class="text-xs font-black text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-900/60 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor"
                                                              viewBox="0 0 24 24"><path stroke-linecap="round"
                                                                                        stroke-linejoin="round"
@@ -252,13 +246,13 @@
                                         </template>
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-3 line-clamp-2"
-                                       x-text="pkg.description || 'پکیج استاندارد سامانه CRM'"></p>
+                                       x-text="pkg.description || 'پکیج استاندارد سامانه '"></p>
                                 </div>
 
                                 <div
                                     class="pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs">
                                             <span class="text-gray-400 font-bold"
-                                                  x-text="toFa(pkg.modules_count) + ' ماژول پیش‌فرض'"></span>
+                                                  x-text="toFa(pkg.modules_count) + ' ماژول پیش‌ فرض'"></span>
                                     <div class="font-black text-gray-900 dark:text-white tabular-nums dir-ltr">
                                         <span x-text="toFa(formatNumber(pkg.price_for_order_cycle))"></span>
                                         <span
@@ -274,31 +268,31 @@
                 <div x-show="selectedUpgradePackageId" x-cloak
                      class="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
                     <label class="block text-xs sm:text-sm font-black text-gray-900 dark:text-white">
-                        ۲. شیوه محاسبه مابه‌التفاوت:
+                        شیوه محاسبه مابه‌التفاوت:
                     </label>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <label
-                            class="flex items-start gap-3 p-4 rounded-2xl border-2 text-xs cursor-pointer transition"
-                            :class="upgradeCalcMode === 'prorated' ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'">
+                            class="flex items-start gap-3 p-4 rounded-2xl border text-xs cursor-pointer transition"
+                            :class="upgradeCalcMode === 'prorated' ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/20 text-indigo-900 dark:text-indigo-200 ring-1 ring-indigo-500/20' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'">
                             <input type="radio" value="prorated" x-model="upgradeCalcMode" class="sr-only">
                             <span
                                 class="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center shrink-0 mt-0.5"
-                                :class="upgradeCalcMode === 'prorated' ? 'border-amber-600 bg-amber-600 ring-2 ring-amber-500/20' : ''"></span>
+                                :class="upgradeCalcMode === 'prorated' ? 'border-indigo-600 bg-indigo-600 ring-2 ring-indigo-500/20' : ''"></span>
                             <div>
                                         <span
-                                            class="font-black block text-xs sm:text-sm">تسهیم به نسبت (Prorated)</span>
-                                <span class="text-xs text-gray-400 block mt-1">محاسبه دقیق بر پایه تعداد روزهای باقیمانده تا پایان لایسنس</span>
+                                            class="font-black block text-xs sm:text-sm">تسهیم به نسبت</span>
+                                <span class="text-xs text-gray-400 block mt-1">محاسبه دقیق بر پایه تعداد روزهای باقیمانده تا پایان اعتبار</span>
                             </div>
                         </label>
 
                         <label
-                            class="flex items-start gap-3 p-4 rounded-2xl border-2 text-xs cursor-pointer transition"
-                            :class="upgradeCalcMode === 'full' ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'">
+                            class="flex items-start gap-3 p-4 rounded-2xl border text-xs cursor-pointer transition"
+                            :class="upgradeCalcMode === 'full' ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/20 text-indigo-900 dark:text-indigo-200 ring-1 ring-indigo-500/20' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'">
                             <input type="radio" value="full" x-model="upgradeCalcMode" class="sr-only">
                             <span
                                 class="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center shrink-0 mt-0.5"
-                                :class="upgradeCalcMode === 'full' ? 'border-amber-600 bg-amber-600 ring-2 ring-amber-500/20' : ''"></span>
+                                :class="upgradeCalcMode === 'full' ? 'border-indigo-600 bg-indigo-600 ring-2 ring-indigo-500/20' : ''"></span>
                             <div>
                                 <span class="font-black block text-xs sm:text-sm">مابه‌التفاوت کامل دوره</span>
                                 <span class="text-xs text-gray-400 block mt-1">کسر کامل مبلغ پکیج قبلی از پکیج جدید برای کل دوره</span>
@@ -306,12 +300,12 @@
                         </label>
 
                         <label
-                            class="flex items-start gap-3 p-4 rounded-2xl border-2 text-xs cursor-pointer transition"
-                            :class="upgradeCalcMode === 'custom' ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'">
+                            class="flex items-start gap-3 p-4 rounded-2xl border text-xs cursor-pointer transition"
+                            :class="upgradeCalcMode === 'custom' ? 'border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/20 text-indigo-900 dark:text-indigo-200 ring-1 ring-indigo-500/20' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'">
                             <input type="radio" value="custom" x-model="upgradeCalcMode" class="sr-only">
                             <span
                                 class="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center shrink-0 mt-0.5"
-                                :class="upgradeCalcMode === 'custom' ? 'border-amber-600 bg-amber-600 ring-2 ring-amber-500/20' : ''"></span>
+                                :class="upgradeCalcMode === 'custom' ? 'border-indigo-600 bg-indigo-600 ring-2 ring-indigo-500/20' : ''"></span>
                             <div>
                                 <span class="font-black block text-xs sm:text-sm">مبلغ توافقی / دلخواه</span>
                                 <span class="text-xs text-gray-400 block mt-1">تعیین مستقیم مبلغ فاکتور ارتقا توسط خود شما</span>
@@ -324,56 +318,56 @@
                             نظر مابه‌التفاوت ({{ $currencyLabel }}):</label>
                         <input type="text" x-model="customUpgradePrice" @input="formatCustomPrice($event)"
                                placeholder="مثال: ۵۰۰,۰۰۰"
-                               class="w-full sm:w-80 text-sm rounded-xl border border-gray-200 bg-white dark:bg-gray-900 px-4 py-2.5 font-bold dir-ltr text-right focus:border-amber-500 focus:ring-amber-500/20">
+                               class="w-full sm:w-80 text-sm rounded-xl border border-gray-200 bg-white dark:bg-gray-900 px-4 py-2.5 font-bold dir-ltr text-right focus:border-indigo-500 focus:ring-indigo-500/20">
                     </div>
                 </div>
 
                 {{-- Step 3: LIVE CALCULATION BREAKDOWN CARD --}}
                 <div x-show="selectedUpgradePackageId" x-cloak
-                     class="p-6 rounded-3xl bg-amber-50/50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-800/50 space-y-4">
+                     class="p-5 sm:p-6 rounded-2xl bg-gray-50 dark:bg-gray-900/40 border border-gray-200/80 dark:border-gray-700/60 space-y-4">
                     <div
-                        class="flex items-center justify-between pb-3 border-b border-amber-200/70 dark:border-amber-800/50">
-                        <h4 class="text-sm font-black text-amber-900 dark:text-amber-200 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none"
+                        class="flex items-center justify-between pb-3 border-b border-gray-200/80 dark:border-gray-700/60">
+                        <h4 class="text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
+                            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none"
                                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                             </svg>
                             <span>محاسبه زنده مابه‌التفاوت ارتقای پکیج</span>
                         </h4>
-                        <span class="text-xs font-bold text-amber-700 dark:text-amber-300"
+                        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400"
                               x-text="'ارتقا به «' + (selectedNewPackage ? selectedNewPackage.name : '') + '»'"></span>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-xs">
                         <div
-                            class="p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-amber-100 dark:border-amber-900/40">
+                            class="p-3.5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
                             <span class="text-gray-400 block mb-1">قیمت دوره پکیج جدید:</span>
                             <span class="font-black text-sm text-gray-900 dark:text-white tabular-nums dir-ltr"
                                   x-text="toFa(formatNumber(newPackagePrice)) + ' {{ $currencyLabel }}'"></span>
                         </div>
 
                         <div
-                            class="p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-amber-100 dark:border-amber-900/40">
+                            class="p-3.5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
                             <span class="text-gray-400 block mb-1">کسر بابت ارزش پکیج فعلی:</span>
                             <span class="font-black text-sm text-gray-900 dark:text-white tabular-nums dir-ltr"
                                   x-text="toFa(formatNumber(oldPackagePrice)) + ' {{ $currencyLabel }}'"></span>
                         </div>
 
                         <div
-                            class="p-3.5 bg-white dark:bg-gray-900 rounded-2xl border border-amber-100 dark:border-amber-900/40">
-                            <span class="text-gray-400 block mb-1">روزهای باقیمانده لایسنس:</span>
+                            class="p-3.5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200/80 dark:border-gray-700/60">
+                            <span class="text-gray-400 block mb-1">روزهای باقیمانده اعتبار:</span>
                             <span
-                                class="font-black text-sm text-amber-700 dark:text-amber-300 tabular-nums dir-ltr"
+                                class="font-black text-sm text-indigo-600 dark:text-indigo-400 tabular-nums dir-ltr"
                                 x-text="toFa(remainingDaysCount) + ' از ' + toFa(totalCycleDaysCount) + ' روز'"></span>
                         </div>
 
                         <div
-                            class="p-3.5 bg-amber-100/70 dark:bg-amber-900/40 rounded-2xl border border-amber-300 dark:border-amber-700">
-                                    <span class="text-amber-900 dark:text-amber-200 font-bold block mb-1"
+                            class="p-3.5 bg-emerald-600 text-white rounded-xl shadow-xs">
+                                    <span class="text-emerald-100 font-bold block mb-1"
                                           x-text="upgradeIssueInvoice ? 'مبلغ نهایی فاکتور ارتقا:' : 'مابه‌التفاوت محاسبه‌شده:'"></span>
                             <span
-                                class="font-black text-base text-amber-700 dark:text-amber-300 tabular-nums dir-ltr"
+                                class="font-black text-base text-white tabular-nums dir-ltr"
                                 x-text="finalUpgradeAmountFormatted + ' {{ $currencyLabel }}'"></span>
                         </div>
                     </div>
@@ -430,7 +424,7 @@
                         </label>
                         <input type="text" name="notes" x-model="upgradeNotes"
                                placeholder="توضیحات تکمیلی پیرامون ارتقا..."
-                               class="w-full text-xs sm:text-sm rounded-xl border border-gray-200 bg-white dark:bg-gray-800 px-4 py-3 text-gray-800 dark:text-gray-200 focus:border-amber-500">
+                               class="w-full text-xs sm:text-sm rounded-xl border border-gray-200 bg-white dark:bg-gray-800 px-4 py-3 text-gray-800 dark:text-gray-200 focus:border-indigo-500">
                     </div>
 
                     <div
@@ -441,7 +435,7 @@
 
                         <button type="submit"
                                 :disabled="!selectedUpgradePackageId || !canSelectPackage(selectedNewPackage) || upgradeSubmitting"
-                                class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 active:scale-95 text-white font-black text-sm shadow-lg shadow-amber-500/25 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0">
+                                class="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black text-xs sm:text-sm shadow-xs transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0">
                             <svg x-show="upgradeSubmitting" class="w-4 h-4 animate-spin" fill="none"
                                  viewBox="0 0 24 24" style="display: none;">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"

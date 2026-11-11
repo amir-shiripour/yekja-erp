@@ -15,7 +15,7 @@
 
 {{-- Resource Quotas & Live Usages Card --}}
 <div
-    class="bg-white dark:bg-gray-800/80 p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700/60 space-y-6 backdrop-blur-xl"
+    class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-xs border border-gray-200/80 dark:border-gray-700/60 space-y-6"
     x-data="{ quotaFilter: 'all' }">
 
     {{-- Card Header --}}
@@ -42,20 +42,18 @@
             @if($allHealthy && $exceededCount === 0)
                 <span
                     class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-bold border border-emerald-200/60 dark:border-emerald-800/40">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                     سقف‌ها در وضعیت عادی
                 </span>
             @else
                 <span
                     class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 rounded-full text-xs font-bold border border-rose-200/60 dark:border-rose-800/40">
-                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
                     نیاز به ارتقای ظرفیت
                 </span>
             @endif
 
             <a href="{{ route('reseller.tenants.edit', $tenant->id) }}"
-               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-xl transition border border-indigo-100/80 dark:border-indigo-800/40">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 hover:text-amber-800 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-xl transition border border-amber-200/80 dark:border-amber-800/60">
+                <svg class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
@@ -192,7 +190,7 @@
                         ? 'bg-rose-600 text-white shadow-xs'
                         : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200/60 dark:border-rose-800/40'"
                     class="px-3.5 py-1.5 rounded-xl transition cursor-pointer shrink-0 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
                 <span>نزدیک به تکمیل / پر شده ({{ reseller_fa_num($warningCount + $exceededCount) }})</span>
             </button>
         @endif
@@ -267,7 +265,7 @@
                                 </span>
                             @elseif($isExceeded || $percent >= 100)
                                 <span
-                                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/40 animate-pulse">
+                                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/40">
                                     <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                                     تکمیل ظرفیت
                                 </span>

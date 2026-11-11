@@ -90,7 +90,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             {{-- Expiry Date --}}
             <div
-                class="p-4 rounded-2xl bg-white/95 dark:bg-gray-900/60 border border-indigo-100/90 dark:border-gray-700/60 shadow-xs backdrop-blur-md">
+                class="p-4 rounded-2xl bg-white dark:bg-gray-900/80 border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
                 <div class="flex items-center justify-between">
                     <span
                         class="text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('resellerhub::messages.subscription.views.expiry_date_label') }}</span>
@@ -103,7 +103,7 @@
 
             {{-- Days Remaining --}}
             <div
-                class="p-4 rounded-2xl bg-white/95 dark:bg-gray-900/60 border border-indigo-100/90 dark:border-gray-700/60 shadow-xs backdrop-blur-md">
+                class="p-4 rounded-2xl bg-white dark:bg-gray-900/80 border border-gray-200/80 dark:border-gray-700/60 shadow-xs">
                 <div class="flex items-center justify-between">
                         <span
                             class="text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('resellerhub::messages.subscription.views.license_remaining_term') }}</span>

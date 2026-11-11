@@ -15,10 +15,7 @@
                     <span
                         class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black text-sm flex items-center justify-center">۲</span>
                     <div>
-                        <h2 class="text-base font-black text-gray-900 dark:text-white">تخصیص حساب زیرمجموعه (خریدار
-                            سامانه) و وضعیت دسترسی</h2>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">مشخص کنید این سامانه متعلق به کدام
-                            حساب زیرمجموعه (مشتری) شماست. یک زیرمجموعه می‌تواند چندین سامانه CRM داشته باشد.</p>
+                        <h2 class="text-base font-black text-gray-900 dark:text-white">انتخاب کاربر</h2>
                     </div>
                 </div>
 
@@ -27,7 +24,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    <span>افزودن حساب جدید</span>
+                    <span>افزودن کاربر زیرمجموعه جدید</span>
                 </button>
             </div>
 
@@ -97,12 +94,12 @@
                     <div class="space-y-3">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <x-resellerhub::label>
-                                انتخاب خریدار (زیرمجموعه) از لیست موجود <span class="text-red-500 font-bold">*</span>
+                                انتخاب کاربر <span class="text-red-500 font-bold">*</span>
                             </x-resellerhub::label>
                             {{-- Search Filter Input --}}
                             <div class="relative max-w-xs w-full">
                                 <input type="text" x-model="subAccountSearchQuery"
-                                       placeholder="جستجوی نام یا شماره تماس مشتری..."
+                                       placeholder="جستجوی کاربر بر اساس نام، شماره موبایل یا..."
                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/60 px-3.5 py-2 ps-9 text-xs font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10">
                                 <svg
                                     class="w-4 h-4 text-gray-400 absolute inset-y-0 start-3 my-auto pointer-events-none"
@@ -165,7 +162,7 @@
                                     </svg>
                                 </div>
                                 <h4 class="text-xs sm:text-sm font-black text-gray-800 dark:text-gray-200">
-                                    حساب زیرمجموعه‌ای یافت نشد
+                                    هیچ کاربر زیرمجموعه‌ای یافت نشد
                                 </h4>
                                 <p class="text-xs text-gray-400 max-w-sm mx-auto">
                                     هیچ حسابی مطابق با عبارت جستجو پیدا نشد. برای تعریف سریع خریدار روی دکمه زیر کلیک
@@ -177,7 +174,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M12 4v16m8-8H4"/>
                                     </svg>
-                                    <span>افزودن حساب زیرمجموعه جدید</span>
+                                    <span>افزودن کاربر زیرمجموعه جدید</span>
                                 </button>
                             </div>
                         </template>
@@ -209,21 +206,21 @@
             </div>
 
             {{-- Navigation Buttons --}}
-            <div class="pt-6 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+            <div class="pt-6 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between gap-2.5 sm:gap-3">
                 <button type="button" @click="prevStep()"
-                        class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer">
-                    <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600 transition cursor-pointer shrink-0">
+                    <svg class="w-4 h-4 rtl:rotate-180 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
-                    <span>مرحله قبلی: کسب‌وکار</span>
+                    <span>مرحله قبلی: آدرس و ظاهر</span>
                 </button>
 
                 <button type="button" @click="nextStep()"
                         :disabled="!form.sub_account_id"
-                        class="inline-flex items-center gap-2 px-7 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-black rounded-xl transition shadow-lg shadow-indigo-600/25 cursor-pointer">
-                    <span>مرحله بعدی: ماژول‌ها و ذخیره</span>
-                    <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-7 py-2.5 sm:py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-black rounded-xl transition shadow-lg shadow-indigo-600/25 cursor-pointer shrink-0">
+                    <span>مرحله بعدی: ماژول‌ها و امکانات</span>
+                    <svg class="w-4 h-4 rtl:rotate-180 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                     </svg>

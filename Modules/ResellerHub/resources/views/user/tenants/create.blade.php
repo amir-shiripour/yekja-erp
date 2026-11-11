@@ -1,12 +1,12 @@
 @php
-    use Modules\ResellerHub\App\Models\ResellerSetting;
+    use Modules\ResellerHub\App\Helpers\ResellerHelper;use Modules\ResellerHub\App\Models\ResellerSetting;
     use Modules\ResellerHub\App\Services\DomainVerificationService;
     use Morilog\Jalali\Jalalian;
 @endphp
 
 @extends('layouts.user')
 
-@section('title', 'ساخت CRM جدید')
+@section('title', 'ساخت سامانه جدید')
 
 @php
     $resellersListForJs = collect($resellersList ?? [])->values();
@@ -64,8 +64,8 @@
         'defaultTaxMode' => $defaultTaxMode ?? "invoice",
         'allowsCustomDomains' => ($reseller && method_exists($reseller, 'allowsCustomDomains') && $reseller->allowsCustomDomains()),
         'cnameTarget' => app(DomainVerificationService::class)->getTargetCname(),
-        'durationOptions' => \Modules\ResellerHub\App\Helpers\ResellerHelper::durationOptions(),
-        'colorPresets' => \Modules\ResellerHub\App\Helpers\ResellerHelper::whiteLabelColorPresets(),
+        'durationOptions' => ResellerHelper::durationOptions(),
+        'colorPresets' => ResellerHelper::whiteLabelColorPresets(),
     ];
 @endphp
 
@@ -74,30 +74,41 @@
     @include('partials.jalali-date-picker')
 
     <div x-data="tenantCreator(window.tenantCreatorConfig)"
-         class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative">
+         class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8 relative">
 
         @include('resellerhub::partials.toast')
 
         {{-- Header & Title --}}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-            <div>
-                <h1 class="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-4 tracking-tight">
-                    <span
-                        class="flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 text-white shadow-sm shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                    </span>
-                    <span>ساخت و راه‌اندازی CRM جدید</span>
-                </h1>
-                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2 ms-1">
-                    اطلاعات کلینیک یا سازمان خریدار را وارد کنید تا سامانه به صورت آنی و بدون کدنویسی راه‌اندازی شود.
-                </p>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-5">
+            <div class="flex items-start justify-between gap-3 w-full sm:w-auto">
+                <div class="min-w-0">
+                    <h1 class="text-base sm:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2.5 sm:gap-4 tracking-tight">
+                        <span
+                            class="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-indigo-600 text-white shadow-sm shrink-0">
+                            <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </span>
+                        <span>ساخت و راه‌اندازی سامانه جدید</span>
+                    </h1>
+                </div>
+
+                {{-- Mobile Back to Dashboard Button (Top-Left) --}}
+                <a href="{{ route('reseller.dashboard') }}"
+                   class="sm:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shrink-0 mt-0.5">
+                    <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    <span class="hidden xs:inline">بازگشت به </span>
+                    <span>داشبورد</span>
+                </a>
             </div>
 
+            {{-- Desktop Back to Dashboard Button --}}
             <a href="{{ route('reseller.dashboard') }}"
-               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shrink-0">
+                <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
@@ -114,7 +125,7 @@
         {{-- Main Wizard Form --}}
         <form x-show="createdTenant === null"
               @submit.prevent="submitForm($el)"
-              class="bg-white dark:bg-gray-800/80 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700/60 divide-y divide-gray-100 dark:divide-gray-700/60 backdrop-blur-xl">
+              class="bg-white dark:bg-gray-800 rounded-2xl shadow-xs border border-gray-200/80 dark:border-gray-700/60 divide-y divide-gray-100 dark:divide-gray-700/60">
             @csrf
 
             @include('resellerhub::user.tenants.partials.create-wizard.error-alert')

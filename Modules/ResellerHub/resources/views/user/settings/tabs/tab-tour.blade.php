@@ -48,33 +48,26 @@
 
     {{-- Tour Master Toggle Card with Checkbox --}}
     <x-resellerhub::card
-        class="p-5 sm:p-6 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 transition-all">
-        <div class="flex items-center justify-between flex-wrap gap-4">
-            <div class="flex items-center gap-3.5">
-                <div class="w-11 h-11 rounded-2xl flex items-center justify-center transition-all shrink-0"
+        class="p-4 sm:p-6 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 transition-all">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start sm:items-center gap-3 min-w-0">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center transition-all shrink-0"
                      :class="tourEnabled ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/80 shadow-xs' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-200 dark:border-gray-700'">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                     </svg>
                 </div>
-                <div>
-                    <div class="flex items-center gap-2">
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <h3 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">وضعیت فعال‌بودن تور
-                            راه‌اندازی (Onboarding Tour)</h3>
-                        <span class="px-2.5 py-0.5 rounded-full text-xs font-black transition-all"
-                              :class="tourEnabled ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-900/60' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60'"
-                              x-text="tourEnabled ? 'فعال در سامانه' : 'غیرفعال'"></span>
+                            راه‌اندازی </h3>
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        با فعال‌بودن این گزینه، ویجت هوشمند مراحل راه‌اندازی در داشبورد کاربران نمایش داده می‌شود و
-                        فرآیند خوش‌آمدگویی فعال خواهد بود.
-                    </p>
                 </div>
             </div>
 
             <label
-                class="flex items-center gap-3 p-2.5 sm:px-4 sm:py-2.5 rounded-2xl border cursor-pointer select-none transition-all"
+                class="flex items-center justify-center sm:justify-start gap-2.5 px-4 py-2.5 rounded-xl border cursor-pointer select-none transition-all shrink-0 w-full sm:w-auto"
                 :class="tourEnabled ? 'bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800' : 'bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700'">
                 <input type="checkbox"
                        name="onboarding_tour_enabled"
@@ -147,7 +140,7 @@
 
                 <button type="button"
                         @click="openAddCustomStepModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-500/20 transition-all cursor-pointer border border-transparent">
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer border border-transparent">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -187,8 +180,8 @@
                             {{-- Step Number & Dynamic Icon Preview --}}
                             <div class="relative shrink-0">
                                 <div
-                                    class="w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-black text-xs shadow-sm transition-all"
-                                    :class="step.enabled ? 'bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-indigo-500/20' : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'">
+                                    class="w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-black text-xs shadow-xs transition-all"
+                                    :class="step.enabled ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'">
                                     <span class="w-5 h-5 flex items-center justify-center text-white"
                                           x-html="getStepIconSvg(step.icon)"></span>
                                     <span class="text-[9px] font-black opacity-90 mt-0.5"
@@ -446,8 +439,8 @@
 
     {{-- Card 3: Interactive Live Preview --}}
     <x-resellerhub::card
-        class="p-6 sm:p-8 space-y-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
-        <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800">
+        class="p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-700/60">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-gray-100 dark:border-gray-800">
             <div class="flex items-center gap-3">
                 <span
                     class="p-2.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-2xl shadow-xs border border-indigo-100/60 dark:border-indigo-900/40">
@@ -459,22 +452,14 @@
                 </span>
                 <div>
                     <h2 class="text-base font-black text-gray-900 dark:text-white">پیش‌نمایش زنده در داشبورد مدیر سامانه
-                        (Live Preview)</h2>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        این شبیه‌ساز دقیقاً نشان می‌دهد کاربر ادمین با تنظیمات فعلی، تور راه‌اندازی را چگونه مشاهده
-                        خواهد کرد.
-                    </p>
+                        </h2>
                 </div>
             </div>
-            <span
-                class="text-xs font-bold px-3 py-1 rounded-xl bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80">
-                شبیه‌ساز زنده
-            </span>
         </div>
 
         {{-- Simulated Stepper in Dashboard --}}
         <div
-            class="bg-gray-50 dark:bg-gray-800/60 p-6 rounded-3xl border border-gray-200/80 dark:border-gray-700 space-y-6">
+            class="bg-gray-50 dark:bg-gray-800/60 p-4 sm:p-6 rounded-2xl border border-gray-200/80 dark:border-gray-700 space-y-5 sm:space-y-6">
             <div class="flex items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <span
@@ -486,7 +471,7 @@
                     </span>
                     <div>
                         <h3 class="text-sm font-black text-gray-900 dark:text-white">مراحل راه‌اندازی و فعال‌سازی سامانه
-                            CRM</h3>
+                            </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             <span x-text="activeEnabledSteps.length"></span> مرحله کلیدی فعال برای راه‌اندازی اولیه
                             سامانه
@@ -529,7 +514,7 @@
             class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-4">
             <div class="flex items-center gap-3">
                 <span
-                    class="p-2.5 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/80 dark:to-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-2xl shadow-xs border border-indigo-200/80 dark:border-indigo-800/80">
+                    class="p-2.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-200/70 dark:border-indigo-800/50 shrink-0">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -538,10 +523,6 @@
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <h2 class="text-base font-black text-gray-900 dark:text-white">مدیریت یادآوری و نمایش مراحل اختیاری تور</h2>
-                        <span
-                            class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-900/60">
-                            هوشمند و انعطاف‌پذیر
-                        </span>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         تعیین رفتار سیستم در صورتی که کاربر مراحل اجباری را گذرانده و دکمه «پر کردن بعداً» را برای مراحل
@@ -1249,7 +1230,7 @@
                         class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700/80 shrink-0">
                         <div class="flex items-center gap-3">
                             <span
-                                class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white flex items-center justify-center shadow-md shadow-indigo-500/25 shrink-0">
+                                class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs shrink-0">
                                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                      stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
@@ -1280,7 +1261,7 @@
                     <div class="space-y-4.5 overflow-y-auto px-1 -mx-1 text-right flex-1">
                         {{-- Presets Bar --}}
                         <div
-                            class="p-4 bg-gradient-to-br from-indigo-50/70 via-purple-50/40 to-transparent dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-transparent rounded-2xl border border-indigo-100 dark:border-indigo-900/50 space-y-2.5">
+                            class="p-4 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-2xl border border-indigo-200/70 dark:border-indigo-800/50 space-y-2.5">
                             <div class="flex items-center justify-between">
                                 <span
                                     class="text-xs font-black text-indigo-950 dark:text-indigo-200 flex items-center gap-2">
@@ -1888,7 +1869,7 @@
                                 انصراف
                             </button>
                             <button type="button" @click="createCustomStep()"
-                                    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-black shadow-md shadow-indigo-500/25 hover:shadow-indigo-500/35 transition-all cursor-pointer">
+                                    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-xs transition-colors cursor-pointer">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                      stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
@@ -1902,142 +1883,5 @@
         </div>
     </template>
 
-    {{-- Delete Confirmation Modal --}}
-    <template x-teleport="body">
-        <div x-show="deleteStepModalOpen"
-             x-cloak
-             class="fixed inset-0 z-[99999] overflow-y-auto"
-             role="dialog"
-             aria-modal="true"
-             dir="rtl">
-            <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-6">
-                {{-- Backdrop (Behind Modal) --}}
-                <div x-show="deleteStepModalOpen"
-                     x-transition:enter="ease-out duration-300"
-                     x-transition:enter-start="opacity-0"
-                     x-transition:enter-end="opacity-100"
-                     x-transition:leave="ease-in duration-200"
-                     x-transition:leave-start="opacity-100"
-                     x-transition:leave-end="opacity-0"
-                     class="fixed inset-0 bg-gray-950/70 dark:bg-black/85 backdrop-blur-xs transition-opacity"
-                     @click="deleteStepModalOpen = false"
-                     aria-hidden="true"></div>
-
-                {{-- Modal Card (In Front with relative z-10) --}}
-                <div x-show="deleteStepModalOpen"
-                     x-transition:enter="ease-out duration-300"
-                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="ease-in duration-200"
-                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative z-10 w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl text-right overflow-hidden shadow-2xl transform transition-all border border-gray-100 dark:border-gray-700/80 p-6 sm:p-7 space-y-5 my-8">
-
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 shadow-inner">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-black text-gray-900 dark:text-white">حذف گام سفارشی</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">این عملیات مرحله را از لیست تور
-                                آنبوردینگ حذف می‌کند.</p>
-                        </div>
-                    </div>
-
-                    <div
-                        class="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                        آیا از حذف مرحله <span class="font-black text-rose-600 dark:text-rose-400"
-                                               x-text="'«' + stepToDeleteTitle + '»'"></span> اطمینان دارید؟
-                        <span class="block mt-1 text-xs text-gray-500 dark:text-gray-400">در صورت وابستگی سایر گام‌ها به این مرحله، پیش‌نیاز آن‌ها نیز به‌صورت خودکار برداشته خواهد شد.</span>
-                    </div>
-
-                    <div
-                        class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700/80 gap-4">
-                        <button type="button"
-                                @click="deleteStepModalOpen = false"
-                                class="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-bold hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors cursor-pointer">
-                            انصراف
-                        </button>
-                        <button type="button"
-                                @click="executeDeleteStep()"
-                                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white text-xs font-bold shadow-md shadow-rose-500/20 hover:shadow-rose-500/30 transition-all cursor-pointer">
-                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                 stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
-                            </svg>
-                            <span>تأیید و حذف مرحله</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    {{-- Alert Dialog Modal --}}
-    <template x-teleport="body">
-        <div x-show="alertModalOpen"
-             x-cloak
-             class="fixed inset-0 z-[99999] overflow-y-auto"
-             role="dialog"
-             aria-modal="true"
-             dir="rtl">
-            <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-6">
-                {{-- Backdrop (Behind Modal) --}}
-                <div x-show="alertModalOpen"
-                     x-transition:enter="ease-out duration-300"
-                     x-transition:enter-start="opacity-0"
-                     x-transition:enter-end="opacity-100"
-                     x-transition:leave="ease-in duration-200"
-                     x-transition:leave-start="opacity-100"
-                     x-transition:leave-end="opacity-0"
-                     class="fixed inset-0 bg-gray-950/70 dark:bg-black/85 backdrop-blur-xs transition-opacity"
-                     @click="alertModalOpen = false"
-                     aria-hidden="true"></div>
-
-                {{-- Modal Card (In Front with relative z-10) --}}
-                <div x-show="alertModalOpen"
-                     x-transition:enter="ease-out duration-300"
-                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="ease-in duration-200"
-                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative z-10 w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl text-right overflow-hidden shadow-2xl transform transition-all border border-gray-100 dark:border-gray-700/80 p-6 sm:p-7 space-y-4 my-8">
-
-                    <div class="flex items-center gap-3">
-                        <div class="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-inner"
-                             :class="{
-                                 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400': alertModalType === 'warning',
-                                 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400': alertModalType === 'error',
-                                 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400': alertModalType === 'info'
-                             }">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-black text-gray-900 dark:text-white"
-                                x-text="alertModalTitle"></h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed"
-                               x-text="alertModalMessage"></p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-end pt-2">
-                        <button type="button"
-                                @click="alertModalOpen = false"
-                                class="px-5 py-2.5 rounded-xl bg-gray-900 hover:bg-black text-white dark:bg-gray-700 dark:hover:bg-gray-600 text-xs font-bold transition-colors cursor-pointer">
-                            متوجه شدم
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </template>
+    @include('resellerhub::user.settings.tabs.partials.tour-modals')
 </div>

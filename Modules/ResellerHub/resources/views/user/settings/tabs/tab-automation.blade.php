@@ -65,18 +65,18 @@
 @endphp
 
 <div role="tabpanel" id="tabpanel-automation" aria-labelledby="tab-automation" x-show="activeTab === 'automation'"
-     x-cloak class="space-y-6">
-    <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+     x-cloak class="space-y-4 sm:space-y-6">
+    <x-resellerhub::card class="p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
         <div
             class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
             <div class="flex items-center gap-3">
-                <span class="p-2.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                <span class="p-2.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/70 dark:border-indigo-800/50 rounded-xl shrink-0">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                 </span>
-                <div>
-                    <h2 class="text-base font-black text-gray-900 dark:text-white">اتوماسیون و گردش کارهای نمایندگی</h2>
+                <div class="min-w-0">
+                    <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">اتوماسیون و گردش کارهای نمایندگی</h2>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         مدیریت @fa($totalWorkflowsCount) گردش کار استاندارد برای پردازش خودکار فاکتورها، پیامک‌های
                         یادآوری، تعلیق و تایید پرداخت مشتریان
@@ -84,12 +84,12 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-2.5 shrink-0">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
                 <a href="{{ \Illuminate\Support\Facades\Route::has('user.workflows.index') ? route('user.workflows.index') : '#' }}"
                    target="_blank"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700/60 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-bold transition-all cursor-pointer">
+                   class="inline-flex items-center justify-center gap-1.5 h-10 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-gray-700/70 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-200 border border-slate-200/80 dark:border-gray-600 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap">
                     <span>مدیریت پیشرفته در گردش کارها</span>
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                     </svg>
@@ -97,38 +97,14 @@
 
                 <button type="button"
                         @click="confirmSeedModalOpen = true"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-500/20 transition-all text-xs font-bold cursor-pointer group">
-                    <svg class="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" fill="none"
+                        class="inline-flex items-center justify-center gap-2 h-10 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs transition-colors text-xs font-bold cursor-pointer group whitespace-nowrap">
+                    <svg class="w-4 h-4 group-hover:rotate-180 transition-transform duration-500 shrink-0" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
                     <span>نصب یا بازنشانی @fa($totalWorkflowsCount) گردش کار</span>
                 </button>
-            </div>
-        </div>
-
-        {{-- Notice Bar --}}
-        <div
-            class="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-800/40 flex items-start gap-3">
-            <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
-                 stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <div class="text-xs text-indigo-950 dark:text-indigo-200 leading-relaxed">
-                <strong>یکپارچگی کامل با سیستم مرکزی کرون، اسکنرها و پیامک:</strong> تمامی @fa($totalWorkflowsCount)
-                گردش کار استاندارد با تسک زمان‌بندی‌شده
-                <code
-                    class="px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 font-mono text-xs text-indigo-800 dark:text-indigo-300">workflows:process</code>
-                و دستورات تخصصی اسکنر
-                <code
-                    class="px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 font-mono text-xs text-indigo-800 dark:text-indigo-300">reseller:scan-overdue</code>
-                و
-                <code
-                    class="px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 font-mono text-xs text-indigo-800 dark:text-indigo-300">reseller:scan-expiry</code>
-                در کرون جاب سیستم همگام هستند و رویدادهای روزانه، وصول مطالبات (Dunning)، تعلیق و هشدارهای سهمیه بدون
-                نیاز به دخالت دستی اجرا می‌شوند.
             </div>
         </div>
 

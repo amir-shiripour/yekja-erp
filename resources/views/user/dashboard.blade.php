@@ -95,22 +95,27 @@
 
     $isOnboardingActive = false;
     $shouldRenderTourWidget = false;
-    if ($tenantForDashboard) {
-        $stateService = app(OnboardingStateService::class);
-        $onboardingProgress = $stateService->getTenantProgress($tenantForDashboard);
-        $tourConfig = ResellerSetting::getOnboardingTourConfig($tenantForDashboard->reseller_id);
-        $isDismissedOrPostponed = $stateService->isTourDismissedOrPostponed($tenantForDashboard);
-        $isTourCompleted = $tenantForDashboard->isOnboardingCompleted();
+    if ($tenantForDashboard && !empty($tenantForDashboard->reseller_id) && class_exists(OnboardingStateService::class)) {
+        try {
+            $stateService = app(OnboardingStateService::class);
+            $onboardingProgress = $stateService->getTenantProgress($tenantForDashboard);
+            $tourConfig = ResellerSetting::getOnboardingTourConfig($tenantForDashboard->reseller_id);
+            $isDismissedOrPostponed = $stateService->isTourDismissedOrPostponed($tenantForDashboard);
+            $isTourCompleted = $tenantForDashboard->isOnboardingCompleted();
 
-        $isOnboardingActive = ($tourConfig['enabled'] ?? true)
-            && !($onboardingProgress['is_finished'] ?? false)
-            && !empty($onboardingProgress['total'])
-            && !$isTourCompleted
-            && !$isDismissedOrPostponed;
+            $isOnboardingActive = ($tourConfig['enabled'] ?? true)
+                && !($onboardingProgress['is_finished'] ?? false)
+                && !empty($onboardingProgress['total'])
+                && !$isTourCompleted
+                && !$isDismissedOrPostponed;
 
-        $shouldRenderTourWidget = ($tourConfig['enabled'] ?? true)
-            && !$isTourCompleted
-            && !$isDismissedOrPostponed;
+            $shouldRenderTourWidget = ($tourConfig['enabled'] ?? true)
+                && !$isTourCompleted
+                && !$isDismissedOrPostponed;
+        } catch (\Throwable $e) {
+            $isOnboardingActive = false;
+            $shouldRenderTourWidget = false;
+        }
     }
 @endphp
 
@@ -118,54 +123,36 @@
     <div x-data="dashboardManager(@js($renderList), @js($hiddenWidgets))" class="space-y-8 pb-12">
 
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            @if($isOnboardingActive)
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                        <span
-                            class="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                            </svg>
-                        </span>
-                        راه‌اندازی سامانه CRM
-                    </h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-14">
-                        مراحل اولیه راه‌اندازی و فعال‌سازی سامانه اختصاصی خود را تکمیل کنید
-                    </p>
-                </div>
-            @else
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                        <span
-                            class="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                            </svg>
-                        </span>
-                        پیشخوان و داشبورد
-                    </h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-14">
-                        نمای کلی وضعیت سیستم و ویجت‌های کاربردی
-                    </p>
-                </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                    <span
+                        class="flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                    </span>
+                    پیشخوان و داشبورد
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 mr-14">
+                    نمای کلی وضعیت سیستم و ویجت‌های کاربردی
+                </p>
+            </div>
 
-                <button
-                    @click="toggleEditMode()"
-                    class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all transform active:scale-95"
-                    :class="editMode ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm'"
-                >
-                    <svg x-show="!editMode" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                    </svg>
-                    <svg x-show="editMode" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    <span x-text="editMode ? 'ذخیره چیدمان' : 'شخصی‌سازی داشبورد'"></span>
-                </button>
-            @endif
+            <button
+                @click="toggleEditMode()"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all transform active:scale-95"
+                :class="editMode ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm'"
+            >
+                <svg x-show="!editMode" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
+                <svg x-show="editMode" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span x-text="editMode ? 'ذخیره چیدمان' : 'شخصی‌سازی داشبورد'"></span>
+            </button>
         </div>
 
         @includeIf('resellerhub::partials.unpaid-order-banner')
@@ -174,8 +161,7 @@
             @livewire('resellerhub.onboarding-widget')
         @endif
 
-        @if(!$isOnboardingActive)
-            <div x-show="editMode && Object.keys(hiddenWidgets).length > 0" x-transition
+        <div x-show="editMode && Object.keys(hiddenWidgets).length > 0" x-transition
                  class="bg-indigo-50 dark:bg-indigo-900/10 border-2 border-dashed border-indigo-200 dark:border-indigo-800/50 rounded-2xl p-6 animate-in fade-in slide-in-from-top-4">
                 <div class="flex items-center gap-2 mb-4">
                     <span
@@ -307,7 +293,6 @@
                     شخصی‌سازی داشبورد
                 </button>
             </div>
-        @endif
 
     </div>
 

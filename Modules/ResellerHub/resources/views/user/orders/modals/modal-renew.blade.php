@@ -51,7 +51,7 @@
             <div
                 class="space-y-3 bg-gray-50/80 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 text-xs">
                 <div class="flex justify-between items-center py-1">
-                    <span class="text-gray-400 font-bold">زیرمجموعه (مشتری):</span>
+                    <span class="text-gray-400 font-bold">کاربر زیرمجموعه:</span>
                     <span class="font-black text-gray-800 dark:text-gray-200">{{ $clientName }}</span>
                 </div>
                 @if($tenant)
@@ -63,7 +63,7 @@
                 @endif
                 <div
                     class="flex justify-between items-center py-1 border-t border-gray-100 dark:border-gray-700/50">
-                    <span class="text-gray-400 font-bold">پکیج / طرح:</span>
+                    <span class="text-gray-400 font-bold">پکیج:</span>
                     <span class="font-black text-gray-800 dark:text-gray-200">
                         {{ $package?->name ?? 'طرح اختصاصی (سفارشی)' }}
                     </span>
@@ -99,7 +99,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                             </svg>
-                            ثابت — بر اساس پکیج سفارش
+                            بر اساس سفارش فعلی
                         </span>
                     </div>
 
@@ -133,23 +133,6 @@
                                     </span>
                                 </div>
                             </div>
-                        </div>
-
-                  {{-- Notice --}}
-                  <div
-                      class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/40 flex items-start gap-3 text-amber-800 dark:text-amber-300 text-xs leading-relaxed text-right">
-                      <svg class="w-5 h-5 shrink-0 text-amber-500 mt-0.5" fill="none" viewBox="0 0 24 24"
-                           stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
-                      <p>
-                          دوره تمدید «{{ $renewalDurationLbl }}» به‌صورت خودکار از پکیج این سفارش تعیین شده و قابل
-                          تغییر نیست.
-                          با تایید، فاکتور جدید در وضعیت «در انتظار پرداخت» ثبت شده و سررسید تمدید سفارش به همان
-                          اندازه
-                          به جلو منتقل می‌شود.
-                      </p>
                         </div>
 
                   {{-- Actions --}}

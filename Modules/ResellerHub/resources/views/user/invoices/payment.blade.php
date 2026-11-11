@@ -53,28 +53,32 @@
 @section('content')
     
 
-    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8" x-data="paymentWizard()">
+    <div class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-8" x-data="paymentWizard()">
 
         {{-- Header --}}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h1 class="text-xl font-black text-gray-900 dark:text-white flex items-center gap-3 tracking-tight">
+        <div class="flex items-center justify-between gap-2.5 sm:gap-4">
+            <h1 class="text-sm sm:text-xl font-black text-gray-900 dark:text-white flex items-center gap-2 sm:gap-3 tracking-tight min-w-0">
                 <span
-                    class="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-md shadow-emerald-500/20">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    class="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-md shadow-emerald-500/20 shrink-0">
+                    <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                     </svg>
                 </span>
-                ثبت پرداختی فاکتور نمایندگی <span
-                    class="text-emerald-600 dark:text-emerald-400 font-black tabular-nums">#{{ reseller_fa_num($invoice->invoice_number) }}</span>
+                <span class="flex flex-wrap items-center gap-x-1.5 min-w-0">
+                    <span class="truncate">ثبت پرداختی فاکتور</span>
+                    <span class="hidden sm:inline">نمایندگی</span>
+                    <span class="text-emerald-600 dark:text-emerald-400 font-black tabular-nums">#{{ reseller_fa_num($invoice->invoice_number) }}</span>
+                </span>
             </h1>
             <a href="{{ route('reseller.invoices.show', $invoice->id) }}"
-               class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors group cursor-pointer">
+               class="shrink-0 inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 h-9 sm:h-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors group cursor-pointer whitespace-nowrap">
                 <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                بازگشت به فاکتور
+                <span class="sm:hidden">بازگشت</span>
+                <span class="hidden sm:inline">بازگشت به فاکتور</span>
             </a>
         </div>
 
@@ -100,21 +104,21 @@
 
         <form id="paymentForm" action="{{ route('reseller.invoices.payment.store', $invoice->id) }}" method="POST"
               @submit.prevent="submitForm"
-              class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
             @csrf
 
             {{-- Main Form Column --}}
-            <div class="lg:col-span-8 xl:col-span-9 space-y-6">
+            <div class="lg:col-span-8 xl:col-span-9 space-y-4 sm:space-y-6">
 
                 {{-- Step 1: Compact Payment Type Cards --}}
                 <x-resellerhub::card>
                     <div
-                        class="p-4 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20 flex items-center gap-2.5">
+                        class="p-3.5 sm:p-4 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20 flex items-center gap-2.5">
                         <span
-                            class="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-500 text-white font-bold text-xs">۱</span>
-                        <h2 class="text-base font-black text-gray-800 dark:text-gray-100">انتخاب نوع پرداخت</h2>
+                            class="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-indigo-500 text-white font-bold text-xs shrink-0">۱</span>
+                        <h2 class="text-sm sm:text-base font-black text-gray-800 dark:text-gray-100">انتخاب نوع پرداخت</h2>
                     </div>
-                    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div class="p-3.5 sm:p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
                         @if($hasOnlineMethod)
                             <div @click="setPaymentType('online')"
                                  class="flex flex-col items-center justify-center text-center gap-2.5 p-4 rounded-xl border-2 transition-all cursor-pointer focus:outline-none outline-none"
@@ -157,15 +161,15 @@
                 {{-- Step 2: Method Cards with Toggle Button & Smooth Animation --}}
                 <x-resellerhub::card x-show="paymentType" x-transition>
                     <div
-                        class="p-4 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
+                        class="p-3.5 sm:p-4 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 sm:gap-2.5">
                             <span
-                                class="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-500 text-white font-bold text-xs">۲</span>
-                            <h2 class="text-base font-black text-gray-800 dark:text-gray-100">انتخاب روش دقیق
+                                class="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-indigo-500 text-white font-bold text-xs shrink-0">۲</span>
+                            <h2 class="text-sm sm:text-base font-black text-gray-800 dark:text-gray-100">انتخاب روش دقیق
                                 پرداخت</h2>
                         </div>
                         <button type="button" @click="showMethodDetails = !showMethodDetails"
-                                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all font-bold text-xs shadow-sm active:scale-95 cursor-pointer">
+                                class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all font-bold text-xs shadow-sm active:scale-95 cursor-pointer whitespace-nowrap">
                             <span x-text="showMethodDetails ? 'مخفی‌سازی روش‌ها' : 'نمایش روش‌ها'"></span>
                             <svg class="w-4 h-4 transition-transform duration-300"
                                  :class="showMethodDetails ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24"
@@ -182,7 +186,7 @@
                          x-transition:leave="transition ease-in duration-200"
                          x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                          x-transition:leave-end="opacity-0 -translate-y-2 scale-98"
-                         class="p-4 space-y-5">
+                         class="p-3.5 sm:p-4 space-y-4 sm:space-y-5">
 
                         {{-- Online Payment Cards --}}
                         @if($hasOnlineMethod)
@@ -272,24 +276,24 @@
                                                 <div
                                                     class="space-y-1.5 pt-2.5 border-t border-gray-100 dark:border-gray-700/60 text-xs text-gray-600 dark:text-gray-300">
                                                     @if(!empty($account['card_number']))
-                                                        <p class="flex justify-between">
-                                                            <span class="text-gray-500 dark:text-gray-400 font-medium">شماره کارت:</span>
+                                                        <p class="flex items-center justify-between gap-2">
+                                                            <span class="text-gray-500 dark:text-gray-400 font-medium shrink-0">شماره کارت:</span>
                                                             <strong
-                                                                class="font-bold tabular-nums text-gray-800 dark:text-gray-200">{{ reseller_fa_num($account['card_number']) }}</strong>
+                                                                class="font-bold tabular-nums dir-ltr text-gray-800 dark:text-gray-200">{{ reseller_fa_num($account['card_number']) }}</strong>
                                                         </p>
                                                     @endif
                                                     @if(!empty($account['account_number']))
-                                                        <p class="flex justify-between">
-                                                            <span class="text-gray-500 dark:text-gray-400 font-medium">شماره حساب:</span>
+                                                        <p class="flex items-center justify-between gap-2">
+                                                            <span class="text-gray-500 dark:text-gray-400 font-medium shrink-0">شماره حساب:</span>
                                                             <strong
-                                                                class="font-bold tabular-nums text-gray-800 dark:text-gray-200">{{ reseller_fa_num($account['account_number']) }}</strong>
+                                                                class="font-bold tabular-nums dir-ltr text-gray-800 dark:text-gray-200">{{ reseller_fa_num($account['account_number']) }}</strong>
                                                         </p>
                                                     @endif
                                                     @if(!empty($account['iban']))
-                                                        <p class="flex justify-between">
-                                                            <span class="text-gray-500 dark:text-gray-400 font-medium">شماره شبا:</span>
+                                                        <p class="flex items-center justify-between gap-2">
+                                                            <span class="text-gray-500 dark:text-gray-400 font-medium shrink-0">شماره شبا:</span>
                                                             <strong
-                                                                class="font-bold tabular-nums text-gray-800 dark:text-gray-200">{{ reseller_fa_num($account['iban']) }}</strong>
+                                                                class="font-bold tabular-nums dir-ltr break-all text-end text-gray-800 dark:text-gray-200">{{ reseller_fa_num($account['iban']) }}</strong>
                                                         </p>
                                                     @endif
                                                 </div>
@@ -377,23 +381,23 @@
 
                 {{-- Step 3: Selected Payments Rows Table & Deposit Date --}}
                 <div x-show="paymentType || selectedRows.length > 0" x-transition
-                     class="bg-white dark:bg-gray-800/80 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-sm backdrop-blur-xl transition-all duration-300">
+                     class="bg-white dark:bg-gray-800/80 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-sm backdrop-blur-xl transition-all duration-300">
                     <div
-                        class="p-4 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
+                        class="p-3.5 sm:p-4 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 sm:gap-2.5">
                             <span
-                                class="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-500 text-white font-bold text-xs">۳</span>
-                            <h2 class="text-base font-black text-gray-800 dark:text-gray-100">جدول ردیف‌های پرداختی و
+                                class="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-500 text-white font-bold text-xs shrink-0">۳</span>
+                            <h2 class="text-sm sm:text-base font-black text-gray-800 dark:text-gray-100">جدول ردیف‌های پرداختی و
                                 نهایی‌سازی</h2>
                         </div>
-                        <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
+                        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap">
                             تعداد ردیف‌ها: <strong
                                 class="text-emerald-600 dark:text-emerald-400 font-black tabular-nums"
                                 x-text="selectedRows.length"></strong>
                         </span>
                     </div>
 
-                    <div class="p-4 space-y-6">
+                    <div class="p-3.5 sm:p-4 space-y-4 sm:space-y-6">
                         {{-- Empty State --}}
                         <template x-if="selectedRows.length === 0">
                             <div
@@ -415,7 +419,7 @@
                             <div class="space-y-3">
                                 <template x-for="(row, index) in selectedRows" :key="row.id">
                                     <div
-                                        class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all">
+                                        class="p-3.5 sm:p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all">
 
                                         {{-- Hidden inputs --}}
                                         <template x-if="row.type === 'wallet'">
@@ -441,29 +445,39 @@
                                             </div>
                                         </template>
 
-                                        {{-- Title Badge --}}
-                                        <div class="flex items-center gap-2.5 min-w-[200px]">
-                                            <span
-                                                class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-sm"
-                                                :class="{
-                                                      'bg-emerald-500': row.type === 'wallet',
-                                                      'bg-indigo-500': row.type === 'direct'
-                                                  }">
+                                        {{-- Title Badge (+ Mobile Delete Button) --}}
+                                        <div class="flex items-center justify-between gap-2.5 md:min-w-[200px]">
+                                            <div class="flex items-center gap-2.5 min-w-0">
                                                 <span
-                                                    x-text="row.type === 'wallet' ? 'کیف' : 'بانک'"></span>
-                                            </span>
-                                            <div>
-                                                <span class="block text-xs font-black text-gray-900 dark:text-white"
-                                                      x-text="row.title"></span>
-                                                <span class="text-xs text-gray-400 dark:text-gray-500"
-                                                      x-text="'ردیف ' + (index + 1)"></span>
+                                                    class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-sm"
+                                                    :class="{
+                                                          'bg-emerald-500': row.type === 'wallet',
+                                                          'bg-indigo-500': row.type === 'direct'
+                                                      }">
+                                                    <span
+                                                        x-text="row.type === 'wallet' ? 'کیف' : 'بانک'"></span>
+                                                </span>
+                                                <div class="min-w-0">
+                                                    <span class="block text-xs font-black text-gray-900 dark:text-white truncate"
+                                                          x-text="row.title"></span>
+                                                    <span class="text-xs text-gray-400 dark:text-gray-500"
+                                                          x-text="'ردیف ' + (index + 1)"></span>
+                                                </div>
                                             </div>
+                                            <button type="button" @click="removeRow(index)"
+                                                    class="md:hidden p-1.5 rounded-lg text-rose-600 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 transition-colors cursor-pointer shrink-0"
+                                                    title="حذف ردیف">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                                     stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
                                         </div>
 
                                         {{-- Amount Input --}}
-                                        <div class="flex-1 max-w-xs">
-                                            <x-resellerhub::label>مبلغ پرداختی این ردیف ({{ $currencyLabel }}
-                                                )
+                                        <div class="w-full md:flex-1 md:max-w-xs">
+                                            <x-resellerhub::label>مبلغ پرداختی این ردیف ({{ $currencyLabel }})
                                             </x-resellerhub::label>
                                             <x-resellerhub::input class="text-center font-bold" type="text"
                                                                   x-bind:value="row.amount"
@@ -474,7 +488,7 @@
                                         </div>
 
                                         {{-- Tracking Code Input --}}
-                                        <div class="flex-1 max-w-xs">
+                                        <div class="w-full md:flex-1 md:max-w-xs">
                                             <x-resellerhub::label
                                                 x-text="row.gateway ? 'کد پیگیری (در صورت خالی بودن به درگاه متصل می‌شوید)' : 'کد پیگیری / ارجاع (اختیاری)'"></x-resellerhub::label>
                                             <x-resellerhub::input class="text-center " type="text"
@@ -484,8 +498,8 @@
                                                                   placeholder="شماره پیگیری..."/>
                                         </div>
 
-                                        {{-- Delete Button --}}
-                                        <div class="flex items-center justify-end">
+                                        {{-- Desktop Delete Button --}}
+                                        <div class="hidden md:flex items-center justify-end">
                                             <button type="button" @click="removeRow(index)"
                                                     class="p-2 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                                                     title="حذف ردیف">
@@ -544,40 +558,40 @@
             </div>
 
             {{-- Right Column: Summary & Wallet Sidebar --}}
-            <div class="lg:col-span-4 xl:col-span-3 space-y-6 lg:sticky lg:top-6">
+            <div class="lg:col-span-4 xl:col-span-3 space-y-4 sm:space-y-6 lg:sticky lg:top-6">
                 {{-- Financial Summary Card --}}
                 <x-resellerhub::card>
-                    <div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
-                        <h3 class="text-base font-black text-gray-800 dark:text-gray-100">خلاصه وضعیت فاکتور</h3>
+                    <div class="p-3.5 sm:p-4 border-b border-gray-100 dark:border-gray-700/50">
+                        <h3 class="text-sm sm:text-base font-black text-gray-800 dark:text-gray-100">خلاصه وضعیت فاکتور</h3>
                     </div>
-                    <div class="p-4 space-y-4 text-sm">
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-gray-500 dark:text-gray-400">مشتری:</span>
+                    <div class="p-3.5 sm:p-4 space-y-3 sm:space-y-4 text-xs sm:text-sm">
+                        <div class="flex justify-between items-center gap-3">
+                            <span class="font-bold text-gray-500 dark:text-gray-400 shrink-0">مشتری:</span>
                             <span
-                                class="font-bold text-gray-800 dark:text-gray-200">{{ $invoice->sub_account_name ?? '—' }}</span>
+                                class="font-bold text-gray-800 dark:text-gray-200 text-end break-words">{{ $invoice->sub_account_name ?? '—' }}</span>
                         </div>
                         @if($invoice->tenant)
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-gray-500 dark:text-gray-400">سامانه:</span>
+                            <div class="flex justify-between items-center gap-3">
+                                <span class="font-bold text-gray-500 dark:text-gray-400 shrink-0">سامانه:</span>
                                 <span
-                                    class="font-bold text-indigo-600 dark:text-indigo-400">{{ $invoice->tenant->name }}</span>
+                                    class="font-bold text-indigo-600 dark:text-indigo-400 text-end break-words">{{ $invoice->tenant->name }}</span>
                             </div>
                         @endif
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-gray-500 dark:text-gray-400">مبلغ کل فاکتور:</span>
-                            <span class="font-black text-gray-800 dark:text-gray-200 tabular-nums">{{ reseller_price($invoiceTotal, null) }} <span
+                        <div class="flex justify-between items-center gap-3">
+                            <span class="font-bold text-gray-500 dark:text-gray-400 shrink-0">مبلغ کل فاکتور:</span>
+                            <span class="font-black text-gray-800 dark:text-gray-200 tabular-nums shrink-0">{{ reseller_fa_num(number_format($invoiceTotal)) }} <span
                                     class="text-xs font-medium">{{ $currencyLabel }}</span></span>
                         </div>
                         <div
-                            class="flex justify-between items-center border-b border-dashed border-gray-200 dark:border-gray-700 pb-4">
-                            <span class="font-bold text-gray-500 dark:text-gray-400">پرداخت شده قبلی:</span>
-                            <span class="font-black text-emerald-600 dark:text-emerald-400 tabular-nums">{{ reseller_price($paidAmount, null) }} <span
+                            class="flex justify-between items-center gap-3 border-b border-dashed border-gray-200 dark:border-gray-700 pb-3 sm:pb-4">
+                            <span class="font-bold text-gray-500 dark:text-gray-400 shrink-0">پرداخت شده قبلی:</span>
+                            <span class="font-black text-emerald-600 dark:text-emerald-400 tabular-nums shrink-0">{{ reseller_fa_num(number_format($paidAmount)) }} <span
                                     class="text-xs font-medium">{{ $currencyLabel }}</span></span>
                         </div>
                         <div
-                            class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30 flex justify-between items-center">
+                            class="p-3 sm:p-3.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30 flex justify-between items-center gap-2">
                             <span class="font-bold text-amber-800 dark:text-amber-300 text-xs">مانده بدهی فاکتور:</span>
-                            <span class="font-black text-xl text-amber-700 dark:text-amber-200 tabular-nums">{{ reseller_price($dueAmount, null) }} <span
+                            <span class="font-black text-lg sm:text-xl text-amber-700 dark:text-amber-200 tabular-nums shrink-0">{{ reseller_fa_num(number_format($dueAmount)) }} <span
                                     class="text-xs font-medium">{{ $currencyLabel }}</span></span>
                         </div>
                     </div>

@@ -14,11 +14,11 @@
              @click="!renewLoading && closeRenewModal()"></div>
 
         <div
-            class="relative bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl transform transition-all max-w-xl w-full z-10 border border-gray-100 dark:border-gray-800 p-6 sm:p-8 space-y-6 text-center">
+            class="relative bg-white dark:bg-gray-900 rounded-2xl max-h-[90vh] overflow-y-auto shadow-xl transform transition-all max-w-xl w-full z-10 border border-gray-200/80 dark:border-gray-800 p-6 sm:p-8 space-y-6 text-center">
 
             {{-- Icon Badge --}}
             <div
-                class="w-16 h-16 mx-auto rounded-3xl flex items-center justify-center shadow-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shadow-emerald-500/20">
+                class="w-14 h-14 mx-auto rounded-xl flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50 shadow-xs">
                 <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -27,9 +27,9 @@
 
             {{-- Title & Subtitle --}}
             <div class="space-y-1.5">
-                <h3 class="text-xl font-black text-gray-900 dark:text-white">تمدید لایسنس و افزایش مدت اعتبار</h3>
+                <h3 class="text-xl font-black text-gray-900 dark:text-white">تمدید سفارش</h3>
                 <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                    افزایش مدت اعتبار لایسنس سامانه
+                    افزایش مدت اعتبار سامانه
                     <strong class="text-gray-900 dark:text-gray-100 font-bold"
                             x-text="selectedRenewTenant.name || ''"></strong>
                 </p>
@@ -182,14 +182,8 @@
 
             {{-- Issue Invoice Switch Card (Standard pattern matching ResellerHub) --}}
             <div
-                class="p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-200/80 dark:border-gray-700/60 flex items-center justify-between gap-4 text-start">
-                <div>
-                    <span
-                        class="text-xs font-black text-gray-800 dark:text-gray-200 block">صدور فاکتور مالی برای تمدید</span>
-                    <p class="text-xs text-gray-400 mt-0.5">در صورت فعال بودن، فاکتور رسمی تمدید صادر می‌شود. در غیر
-                        این صورت، اعتبار لایسنس مستقیماً افزایش می‌یابد.</p>
-                </div>
-                <label class="flex items-center gap-3 cursor-pointer select-none shrink-0 group">
+                class="p-4 rounded-2xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-200/80 dark:border-gray-700/60 text-start">
+                <label class="flex items-center justify-between w-full cursor-pointer select-none group">
                     <span class="text-xs sm:text-sm font-bold transition-colors"
                           :class="issueInvoice ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'"
                           x-text="issueInvoice ? 'فاکتور صادر شود' : 'عدم صدور (تمدید مستقیم)'"></span>
@@ -211,7 +205,7 @@
             {{-- Optional Notes Input --}}
             <div class="text-start space-y-1">
                 <label class="block text-xs font-bold text-gray-600 dark:text-gray-400"
-                       x-text="issueInvoice ? 'یادداشت برای فاکتور تمدید (اختیاری):' : 'یادداشت تمدید لایسنس (اختیاری):'"></label>
+                       x-text="issueInvoice ? 'یادداشت برای فاکتور تمدید (اختیاری):' : 'یادداشت تمدید سفارش (اختیاری):'"></label>
                 <input type="text"
                        x-model="renewNotes"
                        placeholder="مثلاً: تمدید سالانه به درخواست مدیر زیرمجموعه یا پیگیری پشتیبانی..."
@@ -219,7 +213,7 @@
             </div>
 
             {{-- Modal Action Buttons --}}
-            <div class="flex items-center justify-center gap-3 pt-2">
+            <div class="flex items-center justify-center gap-3 pt-2 mb-2">
                 <button type="button" @click="closeRenewModal()" :disabled="renewLoading"
                         class="px-5 py-3 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-bold transition-all w-1/2 flex items-center justify-center cursor-pointer disabled:opacity-50">
                     انصراف
@@ -240,7 +234,7 @@
                         </svg>
                     </template>
                     <span
-                        x-text="renewLoading ? 'در حال انجام...' : (issueInvoice ? 'تایید و صدور فاکتور تمدید' : 'تایید و افزایش اعتبار لایسنس')"></span>
+                        x-text="renewLoading ? 'در حال انجام...' : (issueInvoice ? 'تایید' : 'تایید')"></span>
                 </button>
             </div>
         </div>

@@ -203,7 +203,11 @@
                 return window.toFaDigits(str);
             },
 
-            async copyText(text, msg = 'آدرس اختصاصی سامانه کپی شد') {
+            async copyToClipboard(text, msg = 'آدرس اختصاصی سامانه با موفقیت کپی شد') {
+                return await this.copyText(text, msg);
+            },
+
+            async copyText(text, msg = 'آدرس اختصاصی سامانه با موفقیت کپی شد') {
                 if (!text) return false;
                 let success = false;
 
@@ -533,10 +537,10 @@
                             }
                         }
 
-                        this.showToast(data.message || 'لایسنس سامانه با موفقیت تمدید شد.', 'success');
+                        this.showToast(data.message || 'مدت اعتبار سفارش با موفقیت تمدید شد.', 'success');
                         this.closeRenewModal();
                     } else {
-                        this.showToast(data.message || 'خطا در تمدید لایسنس.', 'error');
+                        this.showToast(data.message || 'خطا در تمدید سفارش.', 'error');
                         this.renewLoading = false;
                     }
                 } catch (e) {

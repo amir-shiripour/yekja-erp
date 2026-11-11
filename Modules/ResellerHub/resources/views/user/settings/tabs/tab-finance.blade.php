@@ -64,7 +64,7 @@
                 </div>
             </div>
             <div
-                class="relative overflow-hidden p-6 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/10 border border-indigo-100 dark:border-indigo-500/20 flex flex-col items-center justify-center text-center">
+                class="relative overflow-hidden p-5 sm:p-6 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/70 dark:border-indigo-800/50 flex flex-col items-center justify-center text-center">
                 <span
                     class="text-xs font-bold uppercase tracking-widest text-indigo-400 dark:text-indigo-500 mb-2">پیش‌نمایش شماره فاکتور</span>
                 <span
@@ -102,7 +102,7 @@
 
     <x-resellerhub::card>
         <div
-            class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-emerald-50/50 to-transparent dark:from-emerald-900/10">
+            class="p-4 sm:p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60">
             <h2 class="text-lg font-black text-gray-900 dark:text-white flex items-center gap-3">
                             <span
                                 class="flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shadow-inner">
@@ -372,7 +372,7 @@
 
     <x-resellerhub::card>
         <div
-            class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-emerald-50/50 to-transparent dark:from-emerald-900/10">
+            class="p-4 sm:p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60">
             <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-3">
                 <span
                     class="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -464,10 +464,10 @@
             </div>
 
             <div
-                class="mt-6 p-5 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 bg-gradient-to-r from-emerald-50/70 via-teal-50/40 to-transparent dark:from-emerald-950/30 dark:via-teal-950/20 dark:to-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                class="mt-6 p-4 sm:p-5 rounded-2xl border border-emerald-200/70 dark:border-emerald-800/50 bg-emerald-50/50 dark:bg-emerald-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-3.5">
                     <span
-                        class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20">
+                        class="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <line x1="12" y1="1" x2="12" y2="23"></line>
                                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
@@ -481,7 +481,7 @@
                     </div>
                 </div>
                 <a href="{{ route('reseller.pricings.index') }}"
-                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold transition shadow-sm shrink-0">
+                   class="inline-flex items-center justify-center gap-2 h-10 px-4 sm:px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors shadow-xs shrink-0 whitespace-nowrap">
                     <span>ورود به مدیریت تعرفه ماژول‌ها</span>
                     <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor"
                          viewBox="0 0 24 24">
@@ -495,7 +495,7 @@
 
     <x-resellerhub::card>
         <div
-            class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-indigo-50/50 to-transparent dark:from-indigo-900/10">
+            class="p-4 sm:p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60">
             <div class="flex items-center gap-3">
                 <span
                     class="flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 shadow-inner shrink-0">
@@ -704,7 +704,7 @@
     {{-- 8. Stamp & Signature Display Size Settings (Identical to Services Module) --}}
     <x-resellerhub::card>
         <div
-            class="p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60 bg-gradient-to-r from-amber-50/50 via-transparent to-transparent dark:from-amber-900/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            class="p-4 sm:p-6 md:p-8 border-b border-gray-100 dark:border-gray-700/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-3">
                             <span
                                 class="flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 shadow-inner shrink-0">
@@ -720,10 +720,6 @@
                     <h2 class="text-lg font-black text-gray-900 dark:text-white">
                         تنظیمات اندازه تصویر مهر و امضا در چاپ فاکتور
                     </h2>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">
-                        ابعاد نمایش (عرض و ارتفاع بر حسب پیکسل) تصویر مهر و امضا را به‌صورت مجزا برای پرینت
-                        استاندارد و رسمی تعیین کنید.
-                    </p>
                 </div>
             </div>
 
@@ -733,17 +729,6 @@
                         class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span>تصویر مهر و امضا بارگذاری شده است</span>
-                    </div>
-                </template>
-                <template x-if="!sealPreview">
-                    <div
-                        class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400 text-xs font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                             stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                        <span>تصویر مهر هنوز بارگذاری نشده</span>
                     </div>
                 </template>
             </div>
@@ -857,8 +842,6 @@
                                             </svg>
                                             پیش‌نمایش زنده در قالب استاندارد
                                         </span>
-                            <span class="text-[10px] text-gray-400 font-mono dir-ltr"
-                                  x-text="(stdWidth || 'خودکار') + ' × ' + (stdHeight || 'خودکار') + ' px'"></span>
                         </div>
                         <div
                             class="bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 p-4 flex flex-col items-center justify-center min-h-[140px] shadow-inner">
@@ -998,8 +981,6 @@
                                             </svg>
                                             پیش‌نمایش زنده در قالب رسمی
                                         </span>
-                            <span class="text-[10px] text-gray-400 font-mono dir-ltr"
-                                  x-text="(offWidth || 'خودکار') + ' × ' + (offHeight || 'خودکار') + ' px'"></span>
                         </div>
                         <div
                             class="bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 p-3 min-h-[140px] shadow-inner">

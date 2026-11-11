@@ -200,7 +200,7 @@
 
             @if($packages->isEmpty())
                 <div
-                    class="text-center py-16 rounded-3xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm max-w-md mx-auto">
+                    class="text-center py-16 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm max-w-md mx-auto">
                     <div
                         class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +240,7 @@
                         @endphp
 
                         <div
-                            class="group flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 hover:border-indigo-400/80 dark:hover:border-indigo-600 transition-all duration-300 rounded-3xl bg-white dark:bg-gray-900 border border-gray-200/90 dark:border-gray-800 p-6 sm:p-7 relative">
+                            class="group flex flex-col justify-between hover:shadow-xl hover:-translate-y-0.5 hover:border-indigo-400/80 dark:hover:border-indigo-600 transition-all duration-300 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/90 dark:border-gray-800 p-6 sm:p-7 relative">
                             <div class="flex flex-col">
                                 <div class="flex items-start gap-4 mb-5">
                                     <div
@@ -553,7 +553,7 @@
 
                     {{-- Minimalist Toggle Card --}}
                     <div
-                        class="rounded-3xl p-6 sm:p-7 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 transition-all duration-300">
+                        class="rounded-2xl p-6 sm:p-7 bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 transition-all duration-300">
                         <div class="flex items-center gap-4 text-right w-full sm:w-auto">
                             <div
                                 class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-2xs">

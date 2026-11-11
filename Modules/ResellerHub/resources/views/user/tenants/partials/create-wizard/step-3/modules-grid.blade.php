@@ -152,7 +152,7 @@
                                                x-model="moduleLimits[feat.key]"
                                                @input.debounce.250ms="syncInvoiceItemsFromModules()"
                                                placeholder="سقف"
-                                               title="سقف مجاز این قابلیت (خالی = نامحدود)"
+                                               title="سقف مجاز این قابلیت"
                                                class="w-16 text-center rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-1 py-0.5 text-xs font-bold text-gray-800 dark:text-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20">
                                     </div>
                                     <span
@@ -179,7 +179,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
         <div
             class="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
-            <span class="text-gray-400 block mb-0.5">عنوان / برند سامانه:</span>
+            <span class="text-gray-400 block mb-0.5">عنوان سامانه:</span>
             <span class="font-bold text-gray-900 dark:text-white truncate block"
                   x-text="whiteLabelBrandTitle || (selectedSubAccount ? (selectedSubAccount.company_name || selectedSubAccount.name) : '') || form.subdomain || '—'"></span>
         </div>
@@ -192,13 +192,13 @@
         </div>
         <div
             class="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
-            <span class="text-gray-400 block mb-0.5">خریدار (زیرمجموعه):</span>
+            <span class="text-gray-400 block mb-0.5">کاربران (زیرمجموعه):</span>
             <span class="font-bold text-gray-900 dark:text-white truncate block"
                   x-text="form.admin_name ? (form.admin_name + (form.admin_email ? ' (' + form.admin_email + ')' : '')) : '-'"></span>
         </div>
         <div
             class="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
-            <span class="text-gray-400 block mb-0.5">مدت لایسنس:</span>
+            <span class="text-gray-400 block mb-0.5">مدت اعتبار:</span>
             <span class="font-bold text-gray-900 dark:text-white block" x-text="durationLabel"></span>
         </div>
     </div>

@@ -27,13 +27,13 @@
     isCancellingPayment: false,
     cancelPaymentActionUrl: '',
     cancelPaymentDetails: { date: '', amount: '', method: '', transaction_id: '' }
-}" class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+}" class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-8">
 
         {{-- Breadcrumb --}}
-        <nav class="flex items-center gap-2 text-sm font-medium" aria-label="Breadcrumb">
+        <nav class="flex items-center gap-2 text-xs sm:text-sm font-medium" aria-label="Breadcrumb">
             <a href="{{ route('reseller.invoices.index') }}"
                class="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors">
-                لیست صورتحساب‌ها
+                مدیریت فاکتورها
             </a>
             <svg class="w-4 h-4 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                  stroke-width="2">
@@ -46,204 +46,124 @@
 
         {{-- Hero Header (Services Style 1:1) --}}
         <x-resellerhub::card>
-            <div class="p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div class="flex items-start gap-5">
-                    <div
-                        class="shrink-0 flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-white shadow-lg shadow-amber-500/30">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                    <div class="min-w-0">
-                        <div class="flex flex-wrap items-center gap-3 mb-2">
-                        <span
-                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20">
-                            فاکتور رسمی
-                        </span>
-                            <span
-                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border {{ $statusBadge['bg'] }}">
-                            <span class="w-2 h-2 rounded-full {{ $statusBadge['dot'] }}"></span>
-                            {{ $statusLabel }}
-                        </span>
-                            <span
-                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border {{ $invoice->source_badge }}">
-                                @if($invoice->isOnlinePurchase())
-                                    <svg class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" fill="none"
-                                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                                    </svg>
-                                    <span>{{ $invoice->source_label }}</span>
-                                @else
-                                    <svg class="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24"
-                                         stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                    </svg>
-                                    <span>{{ $invoice->source_label }}</span>
-                                @endif
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <h1 class="text-2xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight tabular-nums">
-                                {{ $faNum($invoice->invoice_number) }}
-                            </h1>
-                            @if($invoice->isUpgrade())
-                                <span
-                                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-black bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                         stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                                    </svg>
-                                    فاکتور ارتقای پکیج
-                                </span>
-                            @elseif($invoice->isManualRenewal())
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-500/20">
-                                    فاکتور تمدید (دستی)
-                                </span>
-                            @elseif($isItemAddition)
-                                <span
-                                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
-                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                         stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round"
-                                                                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                    افزودن ماژول / قابلیت
-                                </span>
-                            @elseif($invoice->isSystemGenerated() || $isRenewal)
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 border border-indigo-100 dark:border-indigo-500/20">
-                                    ایجاد سیستمی (تمدید)
-                                </span>
-                            @endif
-                            @php
-                                $orderModel = $invoice->getOrderModel();
-                                $isOrderCustom = $orderModel ? $orderModel->isCustomPackage() : false;
-                                $effectivePackage = null;
-                                if (!$isItemAddition && !$isOrderCustom && !($invoice->tenant && empty($invoice->tenant->package_id))) {
-                                    $effectivePackage = $invoice->package ?? $invoice->tenant?->package;
-                                }
-                                $packageItem = $invoice->items->firstWhere('item_type', 'package') ?? $invoice->items->firstWhere('item_type', 'package_upgrade');
-                                $pkgItemDiscount = $packageItem ? (int)$packageItem->discount_amount : (int)($invoice->discount_amount ?? 0);
-                                $hasInvoicePromo = ($pkgItemDiscount > 0) || !empty($invoice->meta['has_package_discount']);
-                            @endphp
-                            @if($effectivePackage || $packageItem)
-                                <span
-                                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-bold bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40">
-                                    <span>پکیج: {{ $effectivePackage->name ?? ($packageItem->title ?? 'پلن اشتراک') }}</span>
-                                    @if($hasInvoicePromo)
-                                        <span
-                                            class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-black bg-rose-500 text-white shadow-xs"
-                                            title="این فاکتور با اعمال تخفیف ویژه دوره زمانی پکیج صادر گردیده است">
-                                            <svg class="w-3 h-3 text-rose-100" fill="none" viewBox="0 0 24 24"
-                                                 stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round"
-                                                                                                stroke-linejoin="round"
-                                                                                                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                            <span>خریداری‌شده با تخفیف ویژه دوره @if($pkgItemDiscount > 0)
-                                                    ({{ $faNum(number_format($pkgItemDiscount)) }} {{ $currencyLabel }})
-                                                @endif</span>
-                                        </span>
-                                    @elseif($effectivePackage && (float)($effectivePackage->discount_value ?? 0) > 0)
-                                        <span
-                                            class="inline-flex items-center px-1.5 py-0.2 rounded text-xs font-black bg-rose-500 text-white">
-                                            {{ $effectivePackage->discount_type === 'percent' ? $faNum($effectivePackage->discount_value) . '٪ تخفیف' : $faNum(number_format($effectivePackage->discount_value)) . ' ' . $currencyLabel . ' تخفیف' }}
-                                        </span>
-                                    @endif
-                                </span>
-                            @else
-                                <span
-                                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
-                                    <span>پکیج: سفارشی (Custom)</span>
-                                </span>
-                            @endif
-                        </div>
+            <div class="p-4 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-6">
+                <div class="flex items-center justify-between gap-2.5 sm:gap-5 w-full lg:w-auto">
+                    <div class="flex items-center gap-3 sm:gap-5 min-w-0 flex-1">
                         <div
-                            class="flex flex-wrap items-center gap-x-6 gap-y-2 mt-3 text-sm text-gray-500 dark:text-gray-400">
-                        <span class="flex items-center gap-1.5">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                 stroke-width="1.5">
+                            class="shrink-0 flex items-center justify-center w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-amber-600 text-white shadow-xs">
+                            <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
-                            تاریخ صدور: <span
-                                class="tabular-nums font-medium">{{ $faNum($toJalali($invoice->issue_date)?->format('Y/m/d') ?? '—') }}</span>
-                        </span>
-                            @if($invoice->due_date)
-                                <span class="flex items-center gap-1.5">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                     stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                تاریخ سررسید: <span
-                                        class="tabular-nums font-medium">{{ $faNum($toJalali($invoice->due_date)?->format('Y/m/d') ?? '—') }}</span>
-                            </span>
-                            @endif
-                            @if($invoice->paid_at)
-                                <span
-                                    class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                     stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                تاریخ پرداخت: <span
-                                        class="tabular-nums font-medium">{{ $faNum($toJalali($invoice->paid_at)?->format('Y/m/d') ?? '—') }}</span>
-                            </span>
-                            @endif
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                                <h1 class="text-[13px] sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2 min-w-0 leading-snug">
+                                    <span>جزئیات فاکتور</span>
+                                    <span class="hidden sm:inline text-indigo-600 dark:text-indigo-400 dir-ltr font-black tabular-nums">{{ $faNum($invoice->invoice_number) }}</span>
+                                </h1>
+                                @if($invoice->isUpgrade())
+                                    <span
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-black bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                             stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                        </svg>
+                                        فاکتور ارتقای پکیج
+                                    </span>
+                                @elseif($invoice->isManualRenewal())
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-500/20">
+                                        فاکتور تمدید (دستی)
+                                    </span>
+                                @elseif($isItemAddition)
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                             stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round"
+                                                                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                        افزودن ماژول / قابلیت
+                                    </span>
+                                @elseif($invoice->isSystemGenerated() || $isRenewal)
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 border border-indigo-100 dark:border-indigo-500/20">
+                                        ایجاد سیستمی (تمدید)
+                                    </span>
+                                @endif
+                                @php
+                                    $orderModel = $invoice->getOrderModel();
+                                    $isOrderCustom = $orderModel ? $orderModel->isCustomPackage() : false;
+                                    $effectivePackage = null;
+                                    if (!$isItemAddition && !$isOrderCustom && !($invoice->tenant && empty($invoice->tenant->package_id))) {
+                                        $effectivePackage = $invoice->package ?? $invoice->tenant?->package;
+                                    }
+                                    $packageItem = $invoice->items->firstWhere('item_type', 'package') ?? $invoice->items->firstWhere('item_type', 'package_upgrade');
+                                    $pkgItemDiscount = $packageItem ? (int)$packageItem->discount_amount : (int)($invoice->discount_amount ?? 0);
+                                    $hasInvoicePromo = ($pkgItemDiscount > 0) || !empty($invoice->meta['has_package_discount']);
+                                @endphp
+                            </div>
                         </div>
                     </div>
+
+                    {{-- Mobile Back Button Inside Header (Same Height as Icon) --}}
+                    <a href="{{ route('reseller.invoices.index') }}"
+                       class="sm:hidden shrink-0 inline-flex items-center justify-center gap-1.5 px-3 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 text-xs font-bold transition-all active:scale-95 cursor-pointer whitespace-nowrap">
+                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        <span>بازگشت</span>
+                    </a>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-3 shrink-0">
+                <div class="flex sm:flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto shrink-0 pt-3 border-t border-gray-100 dark:border-gray-700/50 sm:pt-0 sm:border-t-0">
                     {{-- Register Payment (If Unpaid / Has Remaining) --}}
                     @if(!$isCanceled && $remainingAmount > 0)
                         <a href="{{ route('reseller.invoices.payment', $invoice->id) }}"
-                           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white text-sm font-bold shadow-lg transition-all active:scale-95 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 shadow-emerald-500/30 hover:shadow-emerald-500/50 cursor-pointer">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                           class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-6 h-10 sm:h-auto sm:py-3 rounded-xl text-white text-[11px] sm:text-sm font-bold shadow-md sm:shadow-lg transition-all active:scale-95 bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/25 hover:shadow-emerald-500/50 cursor-pointer whitespace-nowrap">
+                            <svg class="w-3.5 h-3.5 sm:w-5 sm:h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                  stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                             </svg>
-                            <span>{{ $invoice->paid_amount == 0 ? 'ثبت پرداختی' : 'ثبت پرداخت جدید' }}</span>
+                            <span class="truncate">{{ $invoice->paid_amount == 0 ? 'ثبت پرداختی' : 'ثبت پرداخت جدید' }}</span>
                         </a>
                     @endif
 
                     {{-- Cancel Invoice with Modal --}}
                     @if(!$isCanceled && $remainingAmount > 0)
                         <button type="button" @click="openCancelInvoiceModal = true"
-                                class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 text-sm font-bold transition-all active:scale-95 cursor-pointer">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-5 h-10 sm:h-auto sm:py-3 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 text-[11px] sm:text-sm font-bold transition-all active:scale-95 cursor-pointer whitespace-nowrap">
+                            <svg class="w-3.5 h-3.5 sm:w-5 sm:h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                  stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                       d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                             </svg>
-                            <span>لغو فاکتور</span>
+                            <span class="truncate">لغو فاکتور</span>
                         </button>
                     @endif
 
                     {{-- Download PDF Button with Spinner --}}
                     <a href="{{ route('reseller.invoices.print', $invoice->id) }}"
-                       class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 dark:bg-sky-500/10 dark:text-sky-400 dark:hover:bg-sky-500/20 text-sm font-bold transition-all active:scale-95 cursor-pointer"
+                       class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-5 h-10 sm:h-auto sm:py-3 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 dark:bg-sky-500/10 dark:text-sky-400 dark:hover:bg-sky-500/20 text-[11px] sm:text-sm font-bold transition-all active:scale-95 cursor-pointer whitespace-nowrap"
                        id="pdf-download-btn" target="_blank">
-                        <svg id="pdf-icon-default" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        <svg id="pdf-icon-default" class="w-3.5 h-3.5 sm:w-5 sm:h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                              stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                         </svg>
-                        <svg id="pdf-icon-spinner" class="w-5 h-5 animate-spin hidden" fill="none" viewBox="0 0 24 24">
+                        <svg id="pdf-icon-spinner" class="w-3.5 h-3.5 sm:w-5 sm:h-5 animate-spin hidden shrink-0" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                             <path class="opacity-75" fill="currentColor"
                                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                         </svg>
-                        <span id="pdf-btn-text">دانلود PDF</span>
+                        <span id="pdf-btn-text" class="truncate">دانلود PDF</span>
                     </a>
 
-                    {{-- Back Button --}}
+                    {{-- Desktop Back Button --}}
                     <a href="{{ route('reseller.invoices.index') }}"
-                       class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 text-sm font-bold transition-all active:scale-95 cursor-pointer">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                       class="hidden sm:inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 text-sm font-bold transition-all active:scale-95 cursor-pointer whitespace-nowrap">
+                        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>
                         <span>بازگشت</span>
@@ -279,17 +199,17 @@
         {{-- Connected Order Banner (Services Style) --}}
         @if($invoice->order)
             <div
-                class="rounded-3xl border border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 p-6 shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-                    <div class="flex items-center gap-4">
+                class="rounded-2xl sm:rounded-3xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50 dark:bg-emerald-950/30 p-4 sm:p-6 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5">
+                    <div class="flex items-start sm:items-center gap-3 sm:gap-4">
                         <div
-                            class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-600/30 shrink-0">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-600/30 shrink-0">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                             </svg>
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <h3 class="font-black text-sm sm:text-base text-gray-900 dark:text-white flex items-center gap-2 flex-wrap">
                                 <span>این صورتحساب به سفارش متصل است:</span>
                                 <span
@@ -298,14 +218,14 @@
                                     class="px-2 py-0.5 rounded-full text-xs font-bold {{ $invoice->order->status_badge['bg'] }}">{{ $invoice->order->status_label }}</span>
                             </h3>
                             <div
-                                class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mt-1.5 flex-wrap">
+                                class="flex items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400 mt-1.5 flex-wrap">
                                 <span>دوره اشتراک: <strong
                                         class="text-gray-800 dark:text-gray-200">{{ $invoice->order->billing_cycle_label }}</strong></span>
-                                <span>•</span>
+                                <span class="hidden sm:inline">•</span>
                                 <span>سررسید تمدید دوره بعد: <strong
                                         class="text-indigo-600 dark:text-indigo-400 tabular-nums">{{ $faNum($toJalali($invoice->order->renewal_date ?? $invoice->order->end_date)?->format('Y/m/d') ?? '—') }}</strong></span>
                                 @if($invoice->order->renewal_price)
-                                    <span>•</span>
+                                    <span class="hidden sm:inline">•</span>
                                     <span>مبلغ تمدید دوره: <strong
                                             class="tabular-nums text-gray-800 dark:text-gray-200">{{ $faNum(number_format($invoice->order->renewal_price)) }} {{ $currencyLabel }}</strong></span>
                                 @endif
@@ -313,7 +233,7 @@
                         </div>
                     </div>
                     <a href="{{ route('reseller.orders.show', $invoice->order->id) }}"
-                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-black transition shadow-md shadow-emerald-600/25 shrink-0 cursor-pointer">
+                       class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-black transition shadow-md shadow-emerald-600/25 shrink-0 cursor-pointer">
                         <span>مشاهده سفارش و لایسنس</span>
                         <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -466,10 +386,10 @@
             </div>
         @endif
         <x-resellerhub::card>
-            <div class="p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20">
-                <h3 class="text-lg font-black text-gray-800 dark:text-gray-100 flex items-center gap-3">
-                    <div class="p-2 bg-sky-100 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20">
+                <h3 class="text-base sm:text-lg font-black text-gray-800 dark:text-gray-100 flex items-center gap-2.5 sm:gap-3">
+                    <div class="p-1.5 sm:p-2 bg-sky-100 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400 rounded-lg">
+                        <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
@@ -477,39 +397,30 @@
                     اطلاعات مشتری و طرفین قرارداد
                 </h3>
             </div>
-            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-sm">
-                <div class="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+            <div class="p-3.5 sm:p-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4 text-sm">
+                <div class="col-span-2 sm:col-span-1 bg-gray-50 dark:bg-gray-800/40 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700">
                     <span
-                        class="block text-xs font-bold text-gray-400 dark:text-gray-500 mb-1.5">نام زیرحساب (خریدار)</span>
+                        class="block text-[11px] sm:text-xs font-bold text-gray-400 dark:text-gray-500 mb-1 sm:mb-1.5">نام کاربری</span>
                     <span
-                        class="text-gray-800 dark:text-gray-200 text-base font-bold break-all">{{ $invoice->sub_account_name }}</span>
+                        class="text-gray-800 dark:text-gray-200 text-sm sm:text-base font-bold break-words">{{ $invoice->sub_account_name }}</span>
                 </div>
 
-                <div class="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                <div class="bg-gray-50 dark:bg-gray-800/40 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700">
                     <span
-                        class="block text-xs font-bold text-gray-400 dark:text-gray-500 mb-1.5">شماره تماس زیرحساب</span>
+                        class="block text-[11px] sm:text-xs font-bold text-gray-400 dark:text-gray-500 mb-1 sm:mb-1.5">شماره تماس زیرحساب</span>
                     <span
-                        class="text-gray-800 dark:text-gray-200 text-base font-bold tabular-nums dir-ltr block text-start">
+                        class="text-gray-800 dark:text-gray-200 text-sm sm:text-base font-bold tabular-nums dir-ltr block text-start">
                     {{ $invoice->sub_account_mobile ? $faNum($invoice->sub_account_mobile) : '—' }}
                 </span>
                 </div>
 
-                <div class="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
-                    <span
-                        class="block text-xs font-bold text-gray-400 dark:text-gray-500 mb-1.5">پست الکترونیک زیرحساب</span>
-                    <span
-                        class="text-gray-800 dark:text-gray-200 text-sm font-medium dir-ltr block text-start truncate">
-                    {{ $invoice->sub_account_email ?: '—' }}
-                </span>
-                </div>
-
-                <div class="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
-                    <span class="block text-xs font-bold text-gray-400 dark:text-gray-500 mb-1.5">سامانه CRM متصل</span>
+                <div class="bg-gray-50 dark:bg-gray-800/40 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <span class="block text-[11px] sm:text-xs font-bold text-gray-400 dark:text-gray-500 mb-1 sm:mb-1.5">سامانه متصل</span>
                     @if($invoice->tenant)
                         <a href="{{ $invoice->tenant->url ?? ('/' . $invoice->tenant->subdomain) }}" target="_blank"
-                           class="text-indigo-600 dark:text-indigo-400 text-sm font-bold hover:underline flex items-center gap-1 dir-ltr">
-                            <span>{{ $invoice->tenant->subdomain }}</span>
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           class="text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-bold hover:underline flex items-center gap-1 dir-ltr truncate">
+                            <span class="truncate">{{ $invoice->tenant->subdomain }}</span>
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -519,20 +430,13 @@
                     @endif
                 </div>
 
-                <div class="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                <div class="col-span-2 sm:col-span-1 bg-gray-50 dark:bg-gray-800/40 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700">
                     <span
-                        class="block text-xs font-bold text-gray-400 dark:text-gray-500 mb-1.5">فروشنده (نمایندگی)</span>
-                    <span class="text-gray-800 dark:text-gray-200 text-sm font-bold truncate block">
-                        {{ $reseller->display_name }}
-                    </span>
-                </div>
-
-                <div class="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                        class="block text-[11px] sm:text-xs font-bold text-gray-400 dark:text-gray-500 mb-1 sm:mb-1.5">ایمیل کاربر </span>
                     <span
-                        class="block text-xs font-bold text-gray-400 dark:text-gray-500 mb-1.5">پشتیبانی نمایندگی</span>
-                    <span class="text-gray-800 dark:text-gray-200 text-sm tabular-nums dir-ltr block text-start">
-                        {{ !empty($reseller->support_phone) ? reseller_fa_num($reseller->support_phone) : ($reseller->support_email ?: '—') }}
-                    </span>
+                        class="text-gray-800 dark:text-gray-200 text-xs sm:text-sm font-medium dir-ltr block text-start break-all sm:truncate">
+                    {{ $invoice->sub_account_email ?: '—' }}
+                </span>
                 </div>
             </div>
         </x-resellerhub::card>
@@ -540,15 +444,15 @@
         {{-- Line Items Table (Services Style 1:1) --}}
         <x-resellerhub::card>
             <div
-                class="p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20 flex items-center justify-between">
-                <h3 class="text-lg font-black text-gray-800 dark:text-gray-100 flex items-center gap-3">
+                class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/20 flex items-center justify-between gap-3">
+                <h3 class="text-base sm:text-lg font-black text-gray-800 dark:text-gray-100 flex items-center gap-2.5 sm:gap-3">
                     <div
-                        class="p-2 bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        class="p-1.5 sm:p-2 bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400 rounded-lg shrink-0">
+                        <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                         </svg>
                     </div>
-                    اقلام و خدمات فاکتور
+                    <span>اقلام و خدمات فاکتور</span>
                 </h3>
                 @php
                     $visibleItems = $invoice->items->reject(function ($it) {
@@ -567,13 +471,185 @@
                     if ($hasPackage && !$isItemized) {
                         $visibleItems = $visibleItems->reject(fn($it) => $it->item_type === 'module' && ((int)($it->unit_price ?? 0) === 0));
                     }
+
+                    $preparedItems = $visibleItems->values()->map(function ($it) {
+                        $displayTitle = $it->title;
+                        $extractedLimits = [];
+                        if (preg_match('/—\s*\[سقف:\s*(.+?)\]/u', $displayTitle, $limitMatches)) {
+                            $extractedLimits[] = trim($limitMatches[1]);
+                            $displayTitle = trim(preg_replace('/—\s*\[سقف:\s*(.+?)\]/u', '', $displayTitle));
+                        }
+
+                        return [
+                            'model' => $it,
+                            'isSetupFee' => $it->item_type === 'setup_fee',
+                            'isPackage' => $it->item_type === 'package',
+                            'isUpgrade' => $it->item_type === 'package_upgrade',
+                            'isModule' => $it->item_type === 'module',
+                            'displayTitle' => $displayTitle,
+                            'extractedLimits' => $extractedLimits,
+                        ];
+                    });
                 @endphp
                 <span
-                    class="text-sm font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-3 py-1.5 rounded-lg border border-violet-100 dark:border-violet-500/20">
-                {{ $faNum($visibleItems->count()) }} ردیف
-            </span>
+                    class="shrink-0 whitespace-nowrap text-xs sm:text-sm font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-violet-100 dark:border-violet-500/20">
+                    {{ $faNum($visibleItems->count()) }} ردیف
+                </span>
             </div>
-            <div class="overflow-x-auto">
+
+            {{-- Mobile Separated Line Item Cards --}}
+            <div class="md:hidden p-3.5 space-y-3 bg-gray-50/40 dark:bg-gray-900/10">
+                @foreach($preparedItems as $entry)
+                    @php
+                        $item = $entry['model'];
+                        $isSetupFee = $entry['isSetupFee'];
+                        $isPackage = $entry['isPackage'];
+                        $isUpgrade = $entry['isUpgrade'];
+                        $isModule = $entry['isModule'];
+                        $displayTitle = $entry['displayTitle'];
+                        $extractedLimits = $entry['extractedLimits'];
+                    @endphp
+                    <div class="rounded-2xl bg-white dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 p-3.5 shadow-xs space-y-3">
+                        <div class="flex items-start justify-between gap-2.5">
+                            <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                                <span
+                                    class="shrink-0 w-6 h-6 mt-0.5 flex items-center justify-center rounded-lg text-xs font-black {{ $item->icon_badge_class }}">
+                                    @if($isSetupFee)
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                                             stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                    @else
+                                        {{ reseller_fa_num($loop->iteration) }}
+                                    @endif
+                                </span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-bold text-gray-800 dark:text-gray-200 leading-5 break-words">
+                                        {{ $displayTitle }}
+                                    </p>
+                                    @if(!empty($item->description) && $item->description !== $item->title && !str_starts_with($item->title, $item->description))
+                                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-relaxed break-words">
+                                            {{ $item->description }}
+                                        </p>
+                                    @endif
+                                </div>
+                            </div>
+                            @if(!$isItemized)
+                                <span
+                                    class="shrink-0 whitespace-nowrap inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black {{ $item->type_badge_class }}">
+                                    {{ $item->type_label }}
+                                </span>
+                            @endif
+                        </div>
+
+                        @if(count($extractedLimits) > 0)
+                            <div class="flex items-center gap-1.5 flex-wrap pt-1">
+                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                                    سقف‌های مصرف:
+                                </span>
+                                @foreach($extractedLimits as $lim)
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40 text-[11px] font-black">
+                                        {{ $lim }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        @elseif(!$isItemized && $isModule)
+                            <div>
+                                <span class="inline-flex items-center gap-1 text-[11px] text-gray-400 font-medium">
+                                    <svg class="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    سقف مصرف: نامحدود
+                                </span>
+                            </div>
+                        @endif
+
+                        @if(!$isItemized)
+                            <div class="rounded-xl bg-gray-50/90 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700/60 px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-gray-400">دوره:</span>
+                                    @if($isSetupFee)
+                                        <span class="font-bold text-amber-700 dark:text-amber-400">یک‌باره</span>
+                                    @else
+                                        <span class="font-bold text-gray-700 dark:text-gray-300 tabular-nums">{{ $item->duration_text }}</span>
+                                        @if(($item->quantity ?? 1) > 1 && ($item->duration_months ?? 0) > 0)
+                                            <span class="text-gray-300">×</span>
+                                            <span class="font-black text-gray-900 dark:text-white tabular-nums">{{ reseller_fa_num($item->quantity) }}</span>
+                                        @endif
+                                    @endif
+                                </div>
+                                <div>
+                                    @if($isPackage || $isUpgrade)
+                                        <span
+                                            class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                                            <svg class="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            محاسبه در خلاصه مالی
+                                        </span>
+                                    @elseif($isModule)
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+                                            شامل در پکیج
+                                        </span>
+                                    @elseif($isSetupFee)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
+                                            هزینه یکباره راه‌اندازی
+                                        </span>
+                                    @elseif($isCustomDomain || $isWhiteLabel)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 border border-sky-200 dark:border-sky-500/30">
+                                            خدمت جانبی اختصاصی
+                                        </span>
+                                    @else
+                                        @if(($item->total_price ?? 0) > 0 || ($item->unit_price ?? 0) > 0)
+                                            <span class="tabular-nums font-bold text-gray-800 dark:text-gray-200">
+                                                {{ $faNum(number_format($item->total_price ?: $item->unit_price)) }} {{ $currencyLabel }}
+                                            </span>
+                                        @else
+                                            <span class="text-[11px] text-gray-400">بدون هزینه</span>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                        @else
+                            <div class="rounded-xl bg-gray-50/90 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700/60 p-2.5 grid grid-cols-2 gap-2 text-xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-400">مدت / تعداد:</span>
+                                    <span class="font-bold text-gray-700 dark:text-gray-300 tabular-nums">
+                                        @if($isSetupFee)
+                                            یک‌باره
+                                        @else
+                                            {{ $faNum($item->duration_months) }} ماهه
+                                            @if(($item->quantity ?? 1) > 1)
+                                                × {{ $faNum($item->quantity) }}
+                                            @endif
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-400">مبلغ واحد:</span>
+                                    <span class="font-bold text-gray-700 dark:text-gray-300 tabular-nums">{{ $faNum(number_format($item->unit_price)) }}</span>
+                                </div>
+                                @if(($item->discount_amount ?? 0) > 0)
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-gray-400">تخفیف:</span>
+                                        <span class="font-bold text-red-500 tabular-nums">{{ $faNum(number_format($item->discount_amount)) }} {{ $currencyLabel }}</span>
+                                    </div>
+                                @endif
+                                <div class="col-span-2 pt-1.5 border-t border-dashed border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                    <span class="font-bold text-gray-600 dark:text-gray-400">مبلغ کل:</span>
+                                    <span class="font-black text-indigo-600 dark:text-indigo-400 tabular-nums">{{ $faNum(number_format($item->total_price)) }} {{ $currencyLabel }}</span>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-sm text-start border-collapse min-w-[850px]">
                     <thead
                         class="bg-gray-50/80 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 font-bold border-b border-gray-100 dark:border-gray-700/50 text-xs uppercase tracking-wider">
@@ -595,20 +671,15 @@
                     @endif
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50 transition-all">
-                    @foreach($visibleItems as $item)
+                    @foreach($preparedItems as $entry)
                         @php
-                            $isSetupFee = $item->item_type === 'setup_fee';
-                            $isPackage = $item->item_type === 'package';
-                            $isUpgrade = $item->item_type === 'package_upgrade';
-                            $isModule = $item->item_type === 'module';
-
-                            // Clean title and extract limits if embedded like "— [سقف: ...]"
-                            $displayTitle = $item->title;
-                            $extractedLimits = [];
-                            if (preg_match('/—\s*\[سقف:\s*(.+?)\]/u', $displayTitle, $limitMatches)) {
-                                $extractedLimits[] = trim($limitMatches[1]);
-                                $displayTitle = trim(preg_replace('/—\s*\[سقف:\s*(.+?)\]/u', '', $displayTitle));
-                            }
+                            $item = $entry['model'];
+                            $isSetupFee = $entry['isSetupFee'];
+                            $isPackage = $entry['isPackage'];
+                            $isUpgrade = $entry['isUpgrade'];
+                            $isModule = $entry['isModule'];
+                            $displayTitle = $entry['displayTitle'];
+                            $extractedLimits = $entry['extractedLimits'];
                         @endphp
                         <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors {{ $item->row_bg_class }}">
                             @if(!$isItemized)
@@ -812,25 +883,10 @@
                     </tbody>
                 </table>
             </div>
-
-            @if(!$isItemized)
-                <div
-                    class="p-3.5 bg-gradient-to-r from-indigo-50/70 to-violet-50/70 dark:from-indigo-950/20 dark:to-violet-950/20 border-t border-indigo-100 dark:border-indigo-900/40 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    <div class="flex items-center gap-2 text-indigo-800 dark:text-indigo-200">
-                        <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span class="font-medium">تعرفه ماژول‌ها در قالب پکیج کلی تجمیع شده است و مبالغ و تخفیف‌ها در بخش «خلاصه مالی فاکتور» تفکیک و محاسبه شده‌اند.</span>
-                    </div>
-                </div>
-            @endif
-
             {{-- Table Summary Footer (Services Style) --}}
             <div
-                class="bg-gray-50/80 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-700/50 p-6 flex justify-end">
-                <div class="w-full sm:w-96 space-y-4 text-base">
+                class="bg-gray-50/80 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-700/50 p-4 sm:p-6 flex justify-end">
+                <div class="w-full sm:w-96 space-y-3 sm:space-y-4 text-sm sm:text-base">
                     <div class="flex justify-between items-center text-gray-600 dark:text-gray-400">
                         <span class="font-medium">جمع مبالغ اقلام:</span>
                         <span class="tabular-nums font-bold">{{ $faNum(number_format($invoice->subtotal)) }} <span
@@ -890,14 +946,14 @@
                         </div>
                     @endif
                     <div
-                        class="pt-4 border-t-2 border-dashed border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                        class="pt-3 sm:pt-4 border-t-2 border-dashed border-gray-200 dark:border-gray-700 flex justify-between items-center gap-3">
                         <div>
-                            <span class="font-black text-gray-900 dark:text-white text-lg block">مبلغ نهایی:</span>
-                            <span class="text-xs text-gray-400">پس از کسر تخفیف و اعمال مالیات</span>
+                            <span class="font-black text-gray-900 dark:text-white text-base sm:text-lg block">مبلغ نهایی:</span>
+                            <span class="text-[11px] sm:text-xs text-gray-400">پس از کسر تخفیف و اعمال مالیات</span>
                         </div>
-                        <span class="font-black text-indigo-600 dark:text-indigo-400 text-2xl tabular-nums">
+                        <span class="font-black text-indigo-600 dark:text-indigo-400 text-xl sm:text-2xl tabular-nums shrink-0">
                         {{ $faNum(number_format($invoice->total)) }}
-                        <span class="text-sm font-bold text-indigo-400/80">{{ $currencyLabel }}</span>
+                        <span class="text-xs sm:text-sm font-bold text-indigo-400/80">{{ $currencyLabel }}</span>
                     </span>
                     </div>
                 </div>
@@ -906,10 +962,10 @@
 
         {{-- Connected Tenant & Package Cards (Side-by-Side in 1 Row) --}}
         @if($invoice->tenant || $effectivePackage)
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 items-stretch">
                 {{-- Connected Tenant Card (Quick Info) --}}
                 @if($invoice->tenant)
-                    <x-resellerhub::card class="p-6 space-y-4 flex flex-col justify-between">
+                    <x-resellerhub::card class="p-4 sm:p-6 space-y-3.5 sm:space-y-4 flex flex-col justify-between">
                         <div>
                             <div
                                 class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700/60">
@@ -973,28 +1029,21 @@
 
                 {{-- Package & Package Discount Card --}}
                 @if($effectivePackage)
-                    <x-resellerhub::card class="p-6 space-y-4 flex flex-col justify-between">
+                    <x-resellerhub::card class="p-4 sm:p-6 space-y-3.5 sm:space-y-4 flex flex-col justify-between">
                         <div>
                             <div
                                 class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700/60">
                                 <h4 class="font-black text-sm text-gray-900 dark:text-white flex items-center gap-2.5">
                                     <div
-                                        class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300 flex items-center justify-center shrink-0">
-                                        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                             stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                        </svg>
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white shadow-xs"
+                                        style="{{ $effectivePackage->bg_style }}">
+                                        @include('resellerhub::user.packages.partials.icon', ['icon' => $effectivePackage->icon, 'class' => 'w-4.5 h-4.5'])
                                     </div>
                                     <span>پکیج: {{ $effectivePackage->name }}</span>
                                 </h4>
-                                <span
-                                    class="px-2.5 py-1 text-xs font-bold rounded-lg bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40">
-                                    {{ $effectivePackage->price_type === 'subscription' ? 'اشتراکی' : ($effectivePackage->price_type === 'free' ? 'رایگان' : 'یک‌باره') }}
-                                </span>
                             </div>
                             <div
-                                class="mt-4 rounded-xl p-3.5 border transition-all {{ ((float)($effectivePackage->discount_value ?? 0) > 0 || ($packageItem && $packageItem->discount_amount > 0)) ? 'bg-gradient-to-r from-rose-50/80 to-amber-50/50 dark:from-rose-950/20 dark:to-amber-950/10 border-rose-200/80 dark:border-rose-900/40' : 'bg-gray-50/70 dark:bg-gray-800/40 border-gray-100 dark:border-gray-700/60' }}">
+                                class="mt-4 rounded-xl p-3.5 border transition-all {{ ((float)($effectivePackage->discount_value ?? 0) > 0 || ($packageItem && $packageItem->discount_amount > 0)) ? 'bg-rose-50/80 dark:bg-rose-950/25 border-rose-200/80 dark:border-rose-900/40' : 'bg-gray-50/70 dark:bg-gray-800/40 border-gray-100 dark:border-gray-700/60' }}">
                                 <div class="flex items-center justify-between gap-2">
                                     <span
                                         class="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
@@ -1071,7 +1120,7 @@
                         </div>
                     </x-resellerhub::card>
                 @else
-                    <x-resellerhub::card class="p-6 space-y-4 flex flex-col justify-between">
+                    <x-resellerhub::card class="p-4 sm:p-6 space-y-3.5 sm:space-y-4 flex flex-col justify-between">
                         <div>
                             <div
                                 class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700/60">
@@ -1125,17 +1174,17 @@
         @endif
 
         {{-- 2-Column Bottom Grid (Sidebar 4 Cols + Content 8 Cols) --}}
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-start">
             {{-- SIDEBAR (4 Cols) --}}
-            <div class="lg:col-span-4 xl:col-span-4 space-y-8 order-2 lg:order-1">
+            <div class="lg:col-span-4 xl:col-span-4 space-y-4 sm:space-y-8 order-2 lg:order-1">
                 {{-- Summary Status Card --}}
                 <x-resellerhub::card>
                     <div
-                        class="p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gradient-to-l from-indigo-50 to-transparent dark:from-indigo-500/10">
-                        <h3 class="text-lg font-black text-indigo-700 dark:text-indigo-400 flex items-center gap-3">
+                        class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700/50">
+                        <h3 class="text-base sm:text-lg font-black text-indigo-700 dark:text-indigo-400 flex items-center gap-2.5 sm:gap-3">
                             <div
-                                class="p-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 rounded-lg shadow-sm">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                class="p-1.5 sm:p-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 rounded-lg shadow-sm">
+                                <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                      stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                           d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
@@ -1144,15 +1193,61 @@
                             خلاصه وضعیت فاکتور
                         </h3>
                     </div>
-                    <div class="p-6 space-y-4 text-base">
+                    <div class="p-4 sm:p-6 space-y-3.5 sm:space-y-4 text-sm sm:text-base">
                         <div
-                            class="flex justify-between items-center text-gray-600 dark:text-gray-400 mb-4 pb-4 border-b border-gray-100 dark:border-gray-700/50">
-                            <span class="font-medium text-sm">وضعیت فعلی:</span>
+                            class="flex justify-between items-center text-gray-600 dark:text-gray-400 pb-3 sm:pb-4 border-b border-gray-100 dark:border-gray-700/50">
+                            <span class="font-medium text-xs sm:text-sm">وضعیت فعلی:</span>
                             <span
                                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border {{ $statusBadge['bg'] }}">
-                            <span class="w-2 h-2 rounded-full {{ $statusBadge['dot'] }}"></span>
                             {{ $statusLabel }}
                         </span>
+                        </div>
+
+                        {{-- Matte / Subtle Invoice Dates Cards --}}
+                        <div class="grid {{ $invoice->due_date ? 'grid-cols-2' : 'grid-cols-1' }} gap-2.5 text-xs">
+                            <div class="group rounded-2xl p-2.5 sm:p-3 bg-slate-50/90 dark:bg-gray-800/50 border border-slate-200/70 dark:border-gray-700/50 flex items-center gap-2.5 transition-colors hover:border-indigo-200/80 dark:hover:border-indigo-800/50">
+                                <span class="w-8 h-8 rounded-xl bg-indigo-50/90 text-indigo-500/85 dark:bg-indigo-500/15 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                </span>
+                                <div class="min-w-0 flex flex-col gap-0.5">
+                                    <span class="text-[11px] text-gray-400 dark:text-gray-500 font-medium leading-none">تاریخ صدور</span>
+                                    <span class="tabular-nums text-xs sm:text-[13px] font-extrabold text-gray-600 dark:text-gray-300 mt-1">
+                                        {{ $faNum($toJalali($invoice->issue_date)?->format('Y/m/d') ?? '—') }}
+                                    </span>
+                                </div>
+                            </div>
+                            @if($invoice->due_date)
+                                <div class="group rounded-2xl p-2.5 sm:p-3 bg-slate-50/90 dark:bg-gray-800/50 border border-slate-200/70 dark:border-gray-700/50 flex items-center gap-2.5 transition-colors hover:border-amber-200/80 dark:hover:border-amber-800/50">
+                                    <span class="w-8 h-8 rounded-xl bg-amber-50/90 text-amber-600/85 dark:bg-amber-500/15 dark:text-amber-400 flex items-center justify-center shrink-0">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </span>
+                                    <div class="min-w-0 flex flex-col gap-0.5">
+                                        <span class="text-[11px] text-gray-400 dark:text-gray-500 font-medium leading-none">تاریخ سررسید</span>
+                                        <span class="tabular-nums text-xs sm:text-[13px] font-extrabold text-gray-600 dark:text-gray-300 mt-1">
+                                            {{ $faNum($toJalali($invoice->due_date)?->format('Y/m/d') ?? '—') }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
+                            @if($invoice->paid_at)
+                                <div class="{{ $invoice->due_date ? 'col-span-2' : '' }} rounded-2xl px-3 py-2.5 bg-emerald-50/60 dark:bg-emerald-950/25 border border-emerald-200/60 dark:border-emerald-800/40 flex items-center justify-between text-emerald-700/90 dark:text-emerald-400">
+                                    <span class="flex items-center gap-2 text-[11px] font-bold">
+                                        <span class="w-5 h-5 rounded-lg bg-emerald-100/90 dark:bg-emerald-500/20 flex items-center justify-center shrink-0">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </span>
+                                        تاریخ پرداخت
+                                    </span>
+                                    <span class="tabular-nums font-extrabold text-xs">{{ $faNum($toJalali($invoice->paid_at)?->format('Y/m/d') ?? '—') }}</span>
+                                </div>
+                            @endif
                         </div>
 
                         <div class="flex justify-between items-center text-gray-600 dark:text-gray-400">
@@ -1172,28 +1267,28 @@
                         </div>
 
                         <div
-                            class="pt-4 border-t-2 border-dashed border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            class="pt-3.5 sm:pt-4 border-t-2 border-dashed border-gray-200 dark:border-gray-700 flex justify-between items-center">
                             <span class="font-black text-gray-900 dark:text-white">مانده بدهی:</span>
                             <span
-                                class="font-black {{ $remainingAmount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600' }} text-xl tabular-nums">
+                                class="font-black {{ $remainingAmount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600' }} text-lg sm:text-xl tabular-nums">
                             {{ $faNum(number_format($remainingAmount)) }} <span
-                                    class="text-sm font-bold">{{ $currencyLabel }}</span>
+                                    class="text-xs sm:text-sm font-bold">{{ $currencyLabel }}</span>
                         </span>
                         </div>
                     </div>
                 </x-resellerhub::card>
             </div>
 
-            <div class="lg:col-span-8 xl:col-span-8 space-y-8 order-1 lg:order-2">
+            <div class="lg:col-span-8 xl:col-span-8 space-y-4 sm:space-y-8 order-1 lg:order-2">
                 {{-- Payments History Table ("اطلاعات پرداخت" - Services Style) --}}
                 @if ($invoice->payments->isNotEmpty())
                     <x-resellerhub::card>
                         <div
-                            class="p-6 border-b border-gray-100 dark:border-gray-700/50 bg-gradient-to-l from-emerald-50 to-transparent dark:from-emerald-500/10 flex items-center justify-between">
-                            <h3 class="text-lg font-black text-emerald-700 dark:text-emerald-400 flex items-center gap-3">
+                            class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700/50 flex flex-wrap items-center justify-between gap-2.5">
+                            <h3 class="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-400 flex items-center gap-2.5 sm:gap-3">
                                 <div
-                                    class="p-2 bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-lg shadow-sm">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                    class="p-1.5 sm:p-2 bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-lg shadow-sm">
+                                    <svg class="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                          stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                               d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
@@ -1203,7 +1298,7 @@
                             </h3>
                             @if(!$isCanceled && $remainingAmount > 0)
                                 <a href="{{ route('reseller.invoices.payment', $invoice->id) }}"
-                                   class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-100/80 hover:bg-emerald-200 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold transition">
+                                   class="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl bg-emerald-100/80 hover:bg-emerald-200 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold transition whitespace-nowrap">
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                          stroke-width="2.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
@@ -1212,7 +1307,64 @@
                                 </a>
                             @endif
                         </div>
-                        <div class="overflow-x-auto">
+
+                        {{-- Mobile Separated Payment Cards --}}
+                        <div class="md:hidden p-3.5 space-y-3 bg-gray-50/40 dark:bg-gray-900/10">
+                            @foreach ($invoice->payments as $payment)
+                                <div class="rounded-2xl bg-white dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 p-3.5 shadow-xs space-y-2.5">
+                                    <div class="flex items-center justify-between gap-2 pb-2 border-b border-gray-100 dark:border-gray-700/60">
+                                        <span class="text-xs font-bold tabular-nums text-gray-600 dark:text-gray-300">
+                                            {{ $faNum($toJalali($payment->paid_at)?->format('Y/m/d') ?? '—') }}
+                                        </span>
+                                        @if($payment->status === 'canceled')
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-gray-100 text-gray-500 border border-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600">
+                                                لغو شده
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+                                                پرداخت شده
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">مبلغ پرداختی:</span>
+                                        <span class="text-sm font-black text-gray-900 dark:text-white tabular-nums">
+                                            {{ $faNum(number_format($payment->amount)) }} {{ $currencyLabel }}
+                                        </span>
+                                    </div>
+                                    <div class="rounded-xl bg-gray-50/80 dark:bg-gray-900/40 p-2.5 space-y-1.5 text-xs">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="text-gray-400">روش پرداخت:</span>
+                                            <span class="font-bold text-gray-700 dark:text-gray-300">
+                                                {{ ResellerInvoicePayment::formatMethodName($payment->method, $payment->gateway) }}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="text-gray-400">کد رهگیری:</span>
+                                            <span class="font-medium tabular-nums text-gray-600 dark:text-gray-400 dir-ltr">
+                                                {{ $payment->transaction_id ?: '—' }}
+                                            </span>
+                                        </div>
+                                        @if($payment->notes)
+                                            <div class="pt-1.5 border-t border-gray-200/60 dark:border-gray-700/60 text-gray-600 dark:text-gray-400 leading-relaxed">
+                                                {{ $payment->notes }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                    @if($payment->status !== 'canceled' && !$isCanceled)
+                                        <div class="pt-1 flex justify-end">
+                                            <button type="button"
+                                                    @click="openCancelPaymentModal = true; cancelPaymentActionUrl = '{{ route("reseller.invoices.payments.cancel", [$invoice->id, $payment->id]) }}'; cancelPaymentDetails = { date: '{{ $faNum($toJalali($payment->paid_at)?->format('Y/m/d') ?? '—') }}', amount: '{{ $faNum(number_format($payment->amount)) }} {{ $currencyLabel }}', method: '{{ ResellerInvoicePayment::formatMethodName($payment->method, $payment->gateway) }}', transaction_id: '{{ $payment->transaction_id ?: '—' }}' }"
+                                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-600 hover:bg-rose-100 dark:text-rose-400 text-xs font-bold cursor-pointer transition">
+                                                لغو تراکنش
+                                            </button>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="hidden md:block overflow-x-auto">
                             <table class="w-full text-sm text-start border-collapse">
                                 <thead
                                     class="bg-gray-50/80 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 font-bold border-b border-gray-100 dark:border-gray-700/50 text-xs uppercase tracking-wider">
@@ -1274,24 +1426,55 @@
                     </x-resellerhub::card>
                 @endif
 
-                {{-- Combined Terms & Notes Card --}}
+                {{-- Combined Terms & Notes Collapsible Card --}}
                 @if($invoice->terms || $invoice->notes)
-                    <x-resellerhub::card
-                        class="p-6 sm:p-8 border-l-4 border-l-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/10"
-                    >
-                        <div class="flex items-start gap-4 text-indigo-800 dark:text-indigo-300">
-                            <svg class="w-8 h-8 shrink-0 mt-0.5 opacity-80" fill="none" viewBox="0 0 24 24"
-                                 stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                            <div>
-                                <strong class="block mb-2 font-black text-lg tracking-tight">شرایط، قوانین و یادداشت
-                                    فاکتور</strong>
-                                <p class="font-medium text-base leading-loose whitespace-pre-line">{{ trim(($invoice->terms ? $invoice->terms . "\n" : '') . ($invoice->notes ?? '')) }}</p>
+                    <div x-data="{ openTerms: false }"
+                         class="bg-white dark:bg-gray-800 rounded-2xl border shadow-xs overflow-hidden transition-all duration-300"
+                         :class="openTerms ? 'border-indigo-300 dark:border-indigo-600/70 shadow-md' : 'border-gray-200/80 dark:border-gray-700/60'">
+                        <button type="button"
+                                @click="openTerms = !openTerms"
+                                :aria-expanded="openTerms.toString()"
+                                class="w-full p-4 sm:px-6 sm:py-5 flex items-center justify-between gap-3 text-start cursor-pointer select-none group transition-colors hover:bg-indigo-50/40 dark:hover:bg-indigo-950/20 focus:outline-none focus-visible:bg-indigo-50/60">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-100/90 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-105">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <strong class="block font-black text-sm sm:text-base text-indigo-900 dark:text-indigo-200 tracking-tight leading-snug">
+                                        شرایط، قوانین و یادداشت فاکتور
+                                    </strong>
+                                    <span class="block text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+                                          x-text="openTerms ? 'ضوابط و توضیحات فاکتور' : 'نمایش متن و توضیحات'"></span>
+                                </div>
+                            </div>
+
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold shrink-0 border transition-all duration-300"
+                                  :class="openTerms
+                                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-500/25'
+                                      : 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-300 border-indigo-200/80 dark:border-indigo-700/60 group-hover:border-indigo-300 dark:group-hover:border-indigo-600'">
+                                <span x-text="openTerms ? 'بستن' : 'مشاهده'"></span>
+                                <svg class="w-3.5 h-3.5 transition-transform duration-300 ease-out"
+                                     :class="openTerms ? 'rotate-180' : ''"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </span>
+                        </button>
+
+                        <div class="grid"
+                             :style="{ gridTemplateRows: openTerms ? '1fr' : '0fr', opacity: openTerms ? '1' : '0', transition: 'grid-template-rows 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease' }">
+                            <div class="overflow-hidden min-h-0">
+                                <div class="px-4 pb-4 pt-3.5 sm:px-6 sm:pb-6 border-t border-gray-100 dark:border-gray-700/60">
+                                    <div class="rounded-2xl bg-gray-50/80 dark:bg-gray-900/50 border border-gray-200/60 dark:border-gray-700/50 p-3.5 sm:p-4 text-gray-700 dark:text-gray-200">
+                                        <p class="font-medium text-xs sm:text-sm leading-relaxed sm:leading-loose whitespace-pre-line break-words">{{ trim(($invoice->terms ? $invoice->terms . "\n" : '') . ($invoice->notes ?? '')) }}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </x-resellerhub::card>
+                    </div>
                 @endif
             </div>
         </div>
@@ -1306,7 +1489,7 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0">
             <div @click.outside="openCancelInvoiceModal = false"
-                 class="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 text-right"
+                 class="bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-800 p-5 sm:p-8 max-w-md w-full shadow-2xl space-y-5 sm:space-y-6 text-right"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
@@ -1396,7 +1579,7 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0">
             <div @click.outside="openCancelPaymentModal = false"
-                 class="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 text-right"
+                 class="bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-800 p-5 sm:p-8 max-w-md w-full shadow-2xl space-y-5 sm:space-y-6 text-right"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"

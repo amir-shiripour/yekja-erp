@@ -12,9 +12,6 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-black text-gray-900 dark:text-white">سامانه با موفقیت ساخته شد!</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">پایگاه داده اختصاصی، ماژول‌ها و اطلاعات
-                        ورود
-                        مدیر با موفقیت پیکربندی شدند.</p>
                 </div>
             </div>
 

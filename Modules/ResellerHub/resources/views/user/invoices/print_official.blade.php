@@ -155,7 +155,7 @@
                 padding: {{ $orientation === 'landscape' ? '4mm 6mm' : '5mm 8mm' }}      !important;
             }
 
-            .no-print {
+            .no-print, .print-actions-bar, .mobile-only-view {
                 display: none !important;
             }
 
@@ -212,15 +212,205 @@
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
+
+        .mobile-only-view {
+            display: none;
+        }
+
+        @media screen {
+            .print-actions-bar {
+                position: fixed;
+                bottom: 2rem;
+                right: 2rem;
+                z-index: 50;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .print-fab {
+                background-color: #4f46e5;
+                color: white;
+                font-weight: 700;
+                padding: 0.75rem 1.5rem;
+                border-radius: 9999px;
+                box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                cursor: pointer;
+                border: none;
+                text-decoration: none;
+                transition: transform 0.2s, background-color 0.2s;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+
+            .print-fab:hover {
+                transform: scale(1.05);
+                background-color: #4338ca;
+            }
+
+            .print-fab--pay {
+                background-color: #059669;
+                font-size: 13px;
+                box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.35);
+            }
+
+            .print-fab--pay:hover {
+                background-color: #047857;
+            }
+        }
+
+        @media screen and (max-width: 639px) {
+            .a4-container {
+                width: calc(100% - 16px) !important;
+                margin: 10px auto 84px !important;
+                padding: 12px !important;
+                border-radius: 12px;
+                font-size: 11.5px;
+            }
+
+            .print-actions-bar {
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                padding: 10px 12px !important;
+                background: rgba(255, 255, 255, 0.94);
+                backdrop-filter: blur(8px);
+                border-top: 1px solid #cbd5e1;
+                box-shadow: 0 -4px 18px rgba(15, 23, 42, 0.08);
+                gap: 8px !important;
+            }
+
+            .print-fab {
+                flex: 1;
+                padding: 10px 12px !important;
+                border-radius: 10px !important;
+                font-size: 12px !important;
+                box-shadow: none !important;
+            }
+
+            .print-fab:hover {
+                transform: none;
+            }
+
+            .official-top-header {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 8px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .official-logo-col,
+            .official-title-col,
+            .official-meta-col {
+                width: 100% !important;
+            }
+
+            .official-logo-col {
+                display: flex;
+                justify-content: center;
+            }
+
+            .official-title-col {
+                font-size: 14px !important;
+                padding-top: 0 !important;
+                margin-bottom: 0 !important;
+            }
+
+            .official-meta-col {
+                padding: 8px 10px !important;
+                font-size: 11px !important;
+            }
+
+            .official-info-grid {
+                grid-template-columns: 1fr !important;
+                gap: 6px !important;
+                font-size: 11.5px !important;
+            }
+
+            .official-info-grid > div {
+                grid-column: span 1 / span 1 !important;
+                word-break: break-word;
+            }
+
+            .official-desktop-table {
+                display: none !important;
+            }
+
+            .mobile-only-view {
+                display: block !important;
+            }
+
+            .m-official-list {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 10px;
+            }
+
+            .m-official-card {
+                border: 1px solid #000;
+                border-radius: 6px;
+                padding: 9px 10px;
+                background: #ffffff;
+                font-size: 11.5px;
+            }
+
+            .m-official-card-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 8px;
+                padding-bottom: 6px;
+                margin-bottom: 6px;
+                border-bottom: 1px dashed #cbd5e1;
+            }
+
+            .m-official-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 5px 10px;
+                font-size: 11px;
+            }
+
+            .m-official-summary {
+                border: 1px solid #000;
+                border-radius: 6px;
+                background: #f8fafc;
+                padding: 9px 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                font-size: 11.5px;
+            }
+
+            .m-official-sum-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+            }
+
+            .m-official-sum-row--final {
+                padding-top: 6px;
+                border-top: 1px solid #94a3b8;
+                font-weight: 700;
+                color: #4f46e5;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
 
 {{-- Print floating button (Hidden on print) --}}
-<div class="fixed bottom-8 right-8 no-print z-50 flex items-center gap-3">
-    <button type="button" onclick="window.print()"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center gap-2 transition-transform transform hover:scale-105 cursor-pointer">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="no-print print-actions-bar">
+    <button type="button" onclick="window.print()" class="print-fab">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+             style="width: 1.15rem; height: 1.15rem; flex-shrink: 0;">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
         </svg>
@@ -228,9 +418,9 @@
     </button>
     @if(!$isFullyPaid && !$isCanceled && $due > 0)
         <a href="{{ route('portal.invoices.pay', $invoice->id) }}"
-           class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-full shadow-lg flex items-center gap-2 transition-transform transform hover:scale-105 cursor-pointer no-print text-sm"
-           style="text-decoration: none;">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+           class="print-fab print-fab--pay no-print">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"
+                 style="width: 1.15rem; height: 1.15rem; flex-shrink: 0;">
                 <path stroke-linecap="round" stroke-linejoin="round"
                       d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
             </svg>
@@ -244,8 +434,8 @@
     <div class="relative z-10">
 
         {{-- Official Top Header --}}
-        <div class="flex justify-between items-start mb-2">
-            <div class="w-1/4">
+        <div class="flex justify-between items-start mb-2 official-top-header">
+            <div class="w-1/4 official-logo-col">
                 @if($appLogoDataUri)
                     <img src="{{ $appLogoDataUri }}" alt="{{ $siteName }}"
                          style="max-height: 44px; max-width: 140px; object-fit: contain;">
@@ -253,10 +443,10 @@
                     <h3 class="font-bold text-sm text-gray-800">{{ $siteName }}</h3>
                 @endif
             </div>
-            <div class="w-2/4 header-title text-center pt-1">
+            <div class="w-2/4 header-title text-center pt-1 official-title-col">
                 صورتحساب فروش کالا و خدمات
             </div>
-            <div class="w-1/4 border border-official rounded p-1.5 bg-gray-50 text-left space-y-1 text-[9.5px]">
+            <div class="w-1/4 border border-official rounded p-1.5 bg-gray-50 text-left space-y-1 text-[9.5px] official-meta-col">
                 <div class="flex items-center justify-between border-b border-gray-200 pb-1 mb-1">
                     <span class="text-gray-500 font-medium">شماره سریال:</span>
                     <span
@@ -288,7 +478,7 @@
                 <div class="bg-gray-100 border-b border-official text-center font-bold py-1 text-[10.5px]">مشخصات
                     فروشنده
                 </div>
-                <div class="p-2 grid grid-cols-4 gap-y-1.5 gap-x-3 text-xs">
+                <div class="p-2 grid grid-cols-4 gap-y-1.5 gap-x-3 text-xs official-info-grid">
                     @foreach($sellerFields as $field)
                         <div class="col-span-{{ $field['span'] }}">
                             <span class="text-gray-600">{{ $field['label'] }}:</span>
@@ -304,7 +494,7 @@
         <div class="border border-official rounded mb-2">
             <div class="bg-gray-100 border-b border-official text-center font-bold py-1 text-[10.5px]">مشخصات خریدار
             </div>
-            <div class="p-2 grid grid-cols-4 gap-1.5 text-xs">
+            <div class="p-2 grid grid-cols-4 gap-1.5 text-xs official-info-grid">
                 <div class="col-span-2">
                     <span class="text-gray-600">نام شخص حقیقی/حقوقی:</span>
                     <span class="font-bold">{{ $buyerName }}</span>
@@ -344,7 +534,83 @@
 
         {{-- Official Table --}}
         <div class="mb-4">
-            <table class="w-full border-collapse border border-official text-xs">
+            {{-- Mobile Official Items View (Hidden on >= 640px and print) --}}
+            <div class="mobile-only-view">
+                <div class="m-official-list">
+                    @forelse($invoice->items as $index => $item)
+                        @php
+                            $itemQty = (float) ($item->quantity ?? 1);
+                            $displayQty = fmod($itemQty, 1.0) === 0.0 ? (int) $itemQty : $itemQty;
+                            $rowBasePrice = $item->unit_price;
+                            $rowDiscount = (float) ($item->discount_amount ?? 0);
+                            $rowTotal = (float) ($item->total_price ?? ($rowBasePrice * $itemQty - $rowDiscount));
+                            $durationLabel = !empty($item->duration_months) ? reseller_duration_label($item->duration_months) : '';
+                        @endphp
+                        <div class="m-official-card">
+                            <div class="m-official-card-head">
+                                <div>
+                                    <span style="font-weight: 700;">{{ $faNum($index + 1) }}. {{ $item->title ?: 'ردیف فاکتور' }}</span>
+                                    @if($item->description)
+                                        <span class="text-gray-600" style="display: block; font-size: 11px; margin-top: 2px;">{{ $item->description }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="m-official-grid">
+                                <div>
+                                    <span class="text-gray-500">مقدار / مدت:</span>
+                                    <strong>{{ $durationLabel ?: $faNum($displayQty) }} ({{ $durationLabel ? 'دوره' : 'عدد' }})</strong>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">مبلغ واحد:</span>
+                                    <strong>{{ $faNum(number_format($rowBasePrice)) }}</strong>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">تخفیف:</span>
+                                    <strong class="text-red-600">{{ $rowDiscount > 0 ? $faNum(number_format($rowDiscount)) : '۰' }}</strong>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">مبلغ کل:</span>
+                                    <strong>{{ $faNum(number_format($rowTotal)) }} {{ $currencyLabel }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="m-official-card" style="text-align: center; color: #64748b;">هیچ ردیفی ثبت نشده است.</div>
+                    @endforelse
+                </div>
+
+                <div class="m-official-summary">
+                    <div class="m-official-sum-row">
+                        <span>جمع مبالغ پایه:</span>
+                        <strong>{{ $faNum(number_format($subtotal ?: $invoice->items->sum('total_price'))) }} {{ $currencyLabel }}</strong>
+                    </div>
+                    @if($invoice->tax_amount > 0)
+                        <div class="m-official-sum-row text-green-600">
+                            <span>مالیات بر ارزش افزوده @if((float) ($invoice->tax_percent ?? 0) > 0)({{ $faNum((float) $invoice->tax_percent) }}٪)@endif:</span>
+                            <strong>{{ $faNum(number_format($invoice->tax_amount)) }} {{ $currencyLabel }}</strong>
+                        </div>
+                    @endif
+                    @if($invoice->discount_amount > 0)
+                        <div class="m-official-sum-row text-red-600">
+                            <span>مجموع تخفیف‌ها:</span>
+                            <strong>{{ $faNum(number_format($invoice->discount_amount)) }} {{ $currencyLabel }}</strong>
+                        </div>
+                    @endif
+                    @if(!empty($invoice->meta['rounding']['is_rounded']))
+                        @php $roundDiff = (int)($invoice->meta['rounding']['diff'] ?? 0); @endphp
+                        <div class="m-official-sum-row {{ $roundDiff > 0 ? 'text-green-600' : 'text-red-600' }}">
+                            <span>تعدیل رندسازی:</span>
+                            <strong>{{ $roundDiff > 0 ? '+ ' : '− ' }}{{ $faNum(number_format(abs($roundDiff))) }} {{ $currencyLabel }}</strong>
+                        </div>
+                    @endif
+                    <div class="m-official-sum-row m-official-sum-row--final">
+                        <span>مبلغ نهایی فاکتور:</span>
+                        <strong>{{ $faNum(number_format($total)) }} {{ $currencyLabel }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <table class="w-full border-collapse border border-official text-xs official-desktop-table">
                 <thead class="bg-gray-100 font-bold">
                 <tr>
                     <th scope="col" class="table-cell-border w-8">ردیف</th>
@@ -448,7 +714,23 @@
 
         @if($validPayments->isNotEmpty())
             <div class="mb-2">
-                <table class="w-full border-collapse border border-official text-[9.5px]">
+                <div class="mobile-only-view">
+                    <div class="m-official-list">
+                        @foreach($validPayments as $payment)
+                            <div class="m-official-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span class="text-gray-600">{{ $toJalali($payment->paid_at ?: $payment->created_at) }}</span>
+                                    <strong class="text-emerald-600">{{ $faNum(number_format($payment->amount)) }} {{ $currencyLabel }}</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px;">
+                                    <span>{{ $getPaymentMethodName($payment->payment_method ?? $payment->method, $payment->gateway ?? null) }}</span>
+                                    <span dir="ltr" class="text-gray-600">{{ $faNum($payment->transaction_id) ?: '---' }}</span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                <table class="w-full border-collapse border border-official text-[9.5px] official-desktop-table">
                     <thead class="bg-gray-100 font-bold">
                     <tr>
                         <th scope="col" class="table-cell-border">تاریخ پرداخت</th>

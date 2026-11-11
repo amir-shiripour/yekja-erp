@@ -990,163 +990,94 @@
         }
     </script>
 
-    <div x-data="packageShowManager()" class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative">
+    <div x-data="packageShowManager()" class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 relative">
 
-        {{-- Breadcrumb --}}
-        <div class="flex items-center justify-between">
-            <nav class="flex items-center gap-2 text-xs font-bold text-gray-500">
-                <a href="{{ route('reseller.dashboard') }}" class="hover:text-indigo-600 transition">داشبورد
-                    نمایندگی</a>
-                <span>/</span>
-                <a href="{{ route('reseller.packages.index') }}" class="hover:text-indigo-600 transition">پکیج‌های
-                    اصناف</a>
-                <span>/</span>
-                <span class="text-gray-900 dark:text-white font-black">{{ $package->name }}</span>
-            </nav>
+        {{-- Header & Quick Actions (Matching Tenant Show 1:1) --}}
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="flex items-center justify-between gap-3 min-w-0">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl text-white flex items-center justify-center font-black shadow-xs shrink-0"
+                             style="{{ $package->bg_style }}">
+                            @include('resellerhub::user.packages.partials.icon', ['icon' => $package->icon, 'class' => 'w-5 h-5 text-white'])
+                        </div>
+                        <h1 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">{{ $package->name }}</h1>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400 mt-1">
+                        <span>ثبت: {{ $package->created_at ? reseller_fa_num(Jalalian::fromCarbon($package->created_at)->format('Y/m/d')) : '-' }}</span>
+                        <span>&bull;</span>
+                        <span>نوع فروش: <strong class="text-slate-700 dark:text-gray-200">{{ $priceTypeLabels[$priceType] ?? 'اشتراکی' }}</strong></span>
+                        @if(!empty($package->description))
+                            <span class="truncate max-w-xs xl:max-w-md">{{ $package->description }}</span>
+                        @endif
+                    </div>
+                </div>
 
-            <a href="{{ route('reseller.packages.index') }}"
-               class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 dark:text-gray-400 hover:text-indigo-600 transition">
-                <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                <span>بازگشت به لیست پکیج‌ها</span>
-            </a>
+                {{-- Sleek Back to List Button (Prominent & standard at top corner) --}}
+                <a href="{{ route('reseller.packages.index') }}"
+                   class="h-10 inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-200 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-slate-200/70 dark:border-gray-700 whitespace-nowrap shrink-0 shadow-2xs">
+                    <svg class="w-4 h-4 text-slate-500 shrink-0 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    <span class="sm:inline hidden">بازگشت به لیست</span>
+                    <span class="sm:hidden inline">بازگشت</span>
+                </a>
+            </div>
+
+            {{-- Action Bar: Single horizontal row with unified h-10 height (Zero 2-tier stacking!) --}}
+            <div class="flex items-center gap-2 w-full lg:w-auto shrink-0">
+                {{-- Primary Action: Quick Provision CRM --}}
+                <button type="button" @click="openQuickProvision()"
+                        class="w-full lg:w-auto h-10 inline-flex items-center justify-center gap-2 px-3.5 sm:px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black rounded-xl transition shadow-xs hover:shadow-sm active:scale-95 cursor-pointer whitespace-nowrap flex-1 lg:flex-initial">
+                    <svg class="w-4 h-4 text-white shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>ساخت فوری سامانه</span>
+                    <span class="hidden xl:inline">با این پکیج</span>
+                </button>
+
+                {{-- Unified Amber Edit Button --}}
+                <a href="{{ route('reseller.packages.edit', $package->id) }}"
+                   class="h-10 inline-flex items-center justify-center gap-1.5 px-3 sm:px-3.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-amber-200/80 dark:border-amber-800/60 whitespace-nowrap shrink-0">
+                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                    <span class="sm:inline hidden">ویرایش</span>
+                    <span class="hidden xl:inline">پکیج</span>
+                </a>
+
+                {{-- Toggle Status Button --}}
+                <button type="button" @click="openStatusModal(packageData)"
+                        class="h-10 w-10 sm:w-auto inline-flex items-center justify-center gap-1.5 sm:px-3.5 {{ $package->isActive() ? 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60' : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/60' }} text-xs sm:text-sm font-bold rounded-xl transition-colors border whitespace-nowrap shrink-0 cursor-pointer"
+                        title="{{ $package->isActive() ? 'غیرفعال‌سازی این پکیج' : 'فعال‌سازی مجدد این پکیج' }}">
+                    @if($package->isActive())
+                        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="sm:inline hidden">غیرفعال‌سازی</span>
+                    @else
+                        <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="sm:inline hidden">فعال‌سازی</span>
+                    @endif
+                </button>
+
+                {{-- Delete Button (Rose) --}}
+                <button type="button" @click="openDeleteModal()"
+                        class="h-10 w-10 sm:w-auto inline-flex items-center justify-center gap-1.5 sm:px-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-rose-200/80 dark:border-rose-800/60 cursor-pointer whitespace-nowrap shrink-0"
+                        title="حذف پکیج">
+                    <svg class="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    <span class="sm:inline hidden">حذف</span>
+                </button>
+            </div>
         </div>
 
-        {{-- HERO HEADER CARD --}}
-        <x-resellerhub::card class="overflow-hidden">
-            <div class="p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-
-                {{-- Left Side: Themed Icon + Title + Meta Info --}}
-                <div class="flex items-start sm:items-center gap-4 sm:gap-5 min-w-0">
-                    <div
-                        class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl text-white flex items-center justify-center font-black shadow-lg shrink-0"
-                        style="{{ $package->bg_style }}">
-                        @include('resellerhub::user.packages.partials.icon', ['icon' => $package->icon, 'class' => 'w-8 h-8 sm:w-10 sm:h-10 text-white'])
-                    </div>
-
-                    <div class="min-w-0 space-y-1.5">
-                        <div class="flex flex-wrap items-center gap-2.5">
-                            <h1 class="text-xl sm:text-3xl font-black text-gray-900 dark:text-white">
-                                {{ $package->name }}
-                            </h1>
-                            <span class="px-3 py-0.5 rounded-full text-xs font-black border"
-                                  style="{{ $package->light_bg_style }}">
-                                رنگ پکیج: {{ $package->color_hex }}
-                            </span>
-                            <span
-                                class="px-2.5 py-0.5 rounded-full text-xs font-black bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                                نوع فروش: {{ $priceTypeLabels[$priceType] ?? 'اشتراکی' }}
-                            </span>
-                            @if($package->isActive())
-                                <span
-                                    class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    فعال و در دسترس سفارش جدید
-                                </span>
-                            @else
-                                <span
-                                    class="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 flex items-center gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                    غیرفعال (پنهان از خریداران جدید)
-                                </span>
-                            @endif
-                            @if($hasDiscount)
-                                <span
-                                    class="px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                                    </svg>
-                                    <span>{{ $discountLabel }}</span>
-                                </span>
-                            @else
-                                <span
-                                    class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
-                                    بدون تخفیف
-                                </span>
-                            @endif
-                        </div>
-
-                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                            شناسه پکیج: #{{ reseller_fa_num($package->id) }}
-                            <span class="mx-1.5 text-gray-300 dark:text-gray-600">&bull;</span>
-                            تاریخ
-                            ثبت: {{ $package->created_at ? reseller_fa_num(Jalalian::fromCarbon($package->created_at)->format('Y/m/d')) : '-' }}
-                            <span class="mx-1.5 text-gray-300 dark:text-gray-600">&bull;</span>
-                            ترکیب: <strong
-                                class="text-gray-800 dark:text-gray-200">{{ reseller_fa_num(count($packageModules)) }}
-                                ماژول</strong> و <strong
-                                class="text-indigo-600 dark:text-indigo-400">{{ reseller_fa_num(count($packageFeatures)) }}
-                                قابلیت</strong>
-                        </p>
-
-                        @if(!empty($package->description))
-                            <p class="text-xs text-gray-600 dark:text-gray-300 pt-1 leading-relaxed max-w-3xl">
-                                {{ $package->description }}
-                            </p>
-                        @endif
-                    </div>
-                </div>
-
-                {{-- Right Side: Action Buttons --}}
-                <div class="flex items-center gap-3 flex-wrap shrink-0">
-                    <button type="button" @click="openQuickProvision()"
-                            class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-black text-xs sm:text-sm shadow-lg shadow-indigo-600/30 transition-all active:scale-95 cursor-pointer">
-                        <svg class="w-4 h-4 text-white-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                  d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                                  clip-rule="evenodd"/>
-                        </svg>
-                        <span>ساخت فوری CRM با این پکیج</span>
-                    </button>
-
-                    <button type="button" @click="openStatusModal(packageData)"
-                            class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl {{ $package->isActive() ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-900/50' : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-900/50' }} text-xs sm:text-sm font-bold transition cursor-pointer"
-                            title="{{ $package->isActive() ? 'غیرفعال‌سازی این پکیج' : 'فعال‌سازی مجدد این پکیج' }}">
-                        @if($package->isActive())
-                            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor"
-                                 viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span>غیرفعال‌سازی پکیج</span>
-                        @else
-                            <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none"
-                                 stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <span>فعال‌سازی پکیج</span>
-                        @endif
-                    </button>
-
-                    <a href="{{ route('reseller.packages.edit', $package->id) }}"
-                       class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                        </svg>
-                        <span>ویرایش پکیج</span>
-                    </a>
-
-                    <button type="button" @click="openDeleteModal()"
-                            class="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900/50 transition cursor-pointer"
-                            title="حذف پکیج">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                    </button>
-                </div>
-
-            </div>
-        </x-resellerhub::card>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {{-- Metric Summary Cards (Hidden on mobile to match tenants/197 clean experience) --}}
+        <div class="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <x-resellerhub::card class="p-5 flex items-center gap-4">
                 <div
                     class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
@@ -1225,16 +1156,18 @@
                     <div class="flex items-baseline gap-1 mt-0.5">
                         <span
                             class="text-2xl font-black text-gray-900 dark:text-white">{{ reseller_fa_num($tenants->count()) }}</span>
-                        <span class="text-xs text-gray-400">سامانه CRM</span>
+                        <span class="text-xs text-gray-400">سامانه</span>
                     </div>
                 </div>
             </x-resellerhub::card>
         </div>
 
-        {{-- Tab Navigation Bar --}}
-        <div
-            class="bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-100 dark:border-gray-700/60 p-1.5 shadow-xs backdrop-blur-xl">
-            <nav class="flex items-center gap-1.5 overflow-x-auto scrollbar-none" aria-label="Tabs">
+        {{-- Tab Navigation Bar (Responsive Hybrid: Full on desktop, 3-segment equal bar on mobile matching tenant 197) --}}
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border border-slate-200/80 dark:border-gray-700/80 p-1.5 shadow-xs relative">
+            {{-- Desktop Full Tab Navigation (sm and up) --}}
+            <nav class="hidden sm:flex items-center gap-1.5 overflow-x-auto hide-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                 style="scrollbar-width: none; -ms-overflow-style: none;"
+                 aria-label="Tabs Desktop">
                 {{-- Tab 1: Pricing & Subscription Matrix --}}
                 <button type="button"
                         @click="setTab('pricing')"
@@ -1294,6 +1227,65 @@
                     </span>
                 </button>
             </nav>
+
+            {{-- Mobile 3-Segment Navigation (Matching Tenants Show 1:1) --}}
+            <div class="sm:hidden flex items-center gap-1 w-full" aria-label="Tabs Mobile">
+                {{-- Tab 1: Pricing --}}
+                <button type="button"
+                        @click="setTab('pricing')"
+                        :class="activeTab === 'pricing'
+                            ? 'bg-indigo-600 text-white shadow-xs font-black'
+                            : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:bg-gray-700/50 font-bold'"
+                        class="flex-1 flex items-center justify-center gap-1 px-1.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer select-none min-h-[42px]">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>تعرفه‌ها</span>
+                    @if($hasDiscount)
+                        <span :class="activeTab === 'pricing' ? 'bg-white/20 text-white' : 'bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400'"
+                              class="px-1.5 py-0.2 rounded-full text-[10px] font-bold">
+                            تخفیف
+                        </span>
+                    @endif
+                </button>
+
+                {{-- Tab 2: Modules --}}
+                <button type="button"
+                        @click="setTab('modules')"
+                        :class="activeTab === 'modules'
+                            ? 'bg-indigo-600 text-white shadow-xs font-black'
+                            : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:bg-gray-700/50 font-bold'"
+                        class="flex-1 flex items-center justify-center gap-1 px-1.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer select-none min-h-[42px]">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    <span>ماژول‌ها</span>
+                    <span :class="activeTab === 'modules' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300'"
+                          class="px-1.5 py-0.2 rounded-full text-[10px] font-bold">
+                        {{ reseller_fa_num(count($packageModules)) }}
+                    </span>
+                </button>
+
+                {{-- Tab 3: Tenants --}}
+                <button type="button"
+                        @click="setTab('tenants')"
+                        :class="activeTab === 'tenants'
+                            ? 'bg-indigo-600 text-white shadow-xs font-black'
+                            : 'text-slate-600 dark:text-gray-400 hover:text-slate-900 hover:bg-slate-100/80 dark:hover:bg-gray-700/50 font-bold'"
+                        class="flex-1 flex items-center justify-center gap-1 px-1.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer select-none min-h-[42px]">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <span>سامانه‌ها</span>
+                    <span :class="activeTab === 'tenants' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300'"
+                          class="px-1.5 py-0.2 rounded-full text-[10px] font-bold">
+                        {{ reseller_fa_num($tenants->count()) }}
+                    </span>
+                </button>
+            </div>
         </div>
 
         {{-- Tab 1 Content: Pricing & Subscription Matrix --}}
@@ -1304,7 +1296,7 @@
              class="space-y-6">
 
             {{-- PRICING MATRIX CARD --}}
-            <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+            <x-resellerhub::card class="p-4 sm:p-8 space-y-4 sm:space-y-6">
                 <div
                     class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
                     <div class="flex items-center gap-3">
@@ -1585,28 +1577,20 @@
              style="display: none;">
 
             {{-- ACTIVE MODULES & CAPABILITIES (COMPACT 3-COLUMN CARD GRID) --}}
-            <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+            <x-resellerhub::card class="p-4 sm:p-8 space-y-4 sm:space-y-6">
                 <div
                     class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
                     <div>
                         <h2 class="text-base font-black text-gray-900 dark:text-white flex items-center gap-2.5">
                         <span
                             class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                             </svg>
                         </span>
                             <span>ماژول‌ها و دسترسی‌های فعال این پکیج</span>
-                            <span
-                                class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
-                            {{ reseller_fa_num(count($packageModules)) }} ماژول • {{ reseller_fa_num(count($packageFeatures)) }} قابلیت
-                        </span>
                         </h2>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            سامانه‌هایی که با این پکیج فعال شوند، به این ماژول‌ها و دسترسی‌های تفکیکی زیرمجموعه دسترسی
-                            خواهند داشت.
-                        </p>
                     </div>
 
                     <a href="{{ route('reseller.packages.edit', $package->id) }}"
@@ -1746,7 +1730,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                         </svg>
-                                        <span>سقف مصرف (Limit):</span>
+                                        <span>سقف مصرف:</span>
                                     </span>
                                         <span
                                             class="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-xs font-black text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
@@ -1773,10 +1757,6 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-sm font-black text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
-                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
-                                </svg>
                                 <span>سایر ماژول‌های سیستم که در این پکیج غیرفعال هستند ({{ reseller_fa_num($excludedModules->count()) }})</span>
                             </h3>
                             <p class="text-xs text-gray-400 mt-0.5">
@@ -1821,34 +1801,21 @@
              style="display: none;">
 
             {{-- TENANTS CREATED WITH THIS PACKAGE --}}
-            <x-resellerhub::card class="p-6 sm:p-8 space-y-6">
+            <x-resellerhub::card class="p-4 sm:p-8 space-y-4 sm:space-y-6">
                 <div
                     class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
                     <div>
                         <h2 class="text-base font-black text-gray-900 dark:text-white flex items-center gap-2.5">
                         <span
                             class="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                             </svg>
                         </span>
-                            <span>سامانه‌های CRM دارای این پکیج ({{ reseller_fa_num($tenants->count()) }})</span>
+                            <span>سامانه‌های  دارای این پکیج</span>
                         </h2>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            لیست مشتریان و کلینیک‌هایی که با ترکیب ماژول‌های این پکیج راه‌اندازی شده‌اند.
-                        </p>
                     </div>
-
-                    <button type="button" @click="openQuickProvision()"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-500/20 transition cursor-pointer self-start sm:self-auto">
-                        <svg class="w-3.5 h-3.5 text-white-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                  d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                                  clip-rule="evenodd"/>
-                        </svg>
-                        <span>ساخت فوری CRM با این پکیج</span>
-                    </button>
                 </div>
 
                 @if($tenants->isEmpty())
@@ -1871,7 +1838,7 @@
                         </div>
                         <button type="button" @click="openQuickProvision()"
                                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-600 text-indigo-600 dark:text-indigo-300 hover:text-white dark:hover:text-white text-xs font-black transition cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
@@ -1879,7 +1846,112 @@
                         </button>
                     </div>
                 @else
-                    <div class="overflow-x-auto">
+                    {{-- Mobile Card List (Zero Horizontal Scroll!) --}}
+                    <div class="sm:hidden space-y-3.5">
+                        @foreach($tenants as $t)
+                            @php
+                                $tenantManager = app(\App\Tenancy\TenantManager::class);
+                                $tenantUrl = route('reseller.tenants.login-as', $t->id);
+                                $displayUrl = $tenantManager->getTenantDisplayUrl($t);
+                                $isExpired = $t->isExpired();
+                                $isActive = $t->status === 'active' && !$isExpired;
+                                $tExpiresJalali = $t->plan_expires_at ? \Morilog\Jalali\Jalalian::fromCarbon($t->plan_expires_at)->format('Y/m/d') : null;
+                                $tDaysRemaining = $t->plan_expires_at ? now()->diffInDays($t->plan_expires_at, false) : null;
+                            @endphp
+                            <div class="p-4 rounded-2xl bg-gray-50/70 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 space-y-3">
+                                {{-- Card Header: Avatar, Name, URL & Status --}}
+                                <div class="flex items-center justify-between gap-3 pb-3 border-b border-gray-200/60 dark:border-gray-700/60">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black text-sm shrink-0">
+                                            <span>{{ mb_substr($t->name, 0, 1, 'UTF-8') }}</span>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h3 class="text-sm font-black text-gray-900 dark:text-white truncate">
+                                                <a href="{{ route('reseller.tenants.show', $t->id) }}" class="hover:text-indigo-600 transition">
+                                                    {{ $t->name }}
+                                                </a>
+                                            </h3>
+                                            <span class="text-xs text-indigo-600 dark:text-indigo-400 dir-ltr text-start block mt-0.5 truncate">{{ $displayUrl }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="shrink-0">
+                                        @if($isActive)
+                                            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60 flex items-center gap-1">
+                                                <span>فعال</span>
+                                            </span>
+                                        @elseif($isExpired)
+                                            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/60">
+                                                منقضی
+                                            </span>
+                                        @else
+                                            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/60">
+                                                معلق
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- Card Details: Buyer & Expiry --}}
+                                <div class="grid grid-cols-2 gap-2 text-xs py-1">
+                                    <div class="space-y-0.5">
+                                        <span class="text-gray-400 block text-[11px]">خریدار / زیرمجموعه:</span>
+                                        <span class="font-bold text-gray-800 dark:text-gray-200 block truncate">
+                                            {{ $t->subAccount?->name ?? '—' }}
+                                        </span>
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <span class="text-gray-400 block text-[11px]">اعتبار لایسنس:</span>
+                                        <div class="flex items-center gap-1">
+                                            <span class="font-bold text-gray-800 dark:text-gray-200 dir-ltr">
+                                                {{ $tExpiresJalali ? reseller_fa_num($tExpiresJalali) : 'بدون انقضا' }}
+                                            </span>
+                                            @if(!is_null($tDaysRemaining) && $tDaysRemaining > 0)
+                                                <span class="text-[10px] px-1.5 py-0.2 rounded font-bold {{ $tDaysRemaining > 7 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400' }}">
+                                                    {{ reseller_fa_num($tDaysRemaining) }} روز
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Card Actions: Login, Manage, Edit --}}
+                                <div class="flex items-center gap-2 pt-2 border-t border-gray-200/60 dark:border-gray-700/60">
+                                    <form method="POST" action="{{ $tenantUrl }}" target="_blank" class="flex-1">
+                                        @csrf
+                                        <button type="submit"
+                                                class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 text-xs font-bold transition shadow-2xs">
+                                            <span>ورود مستقیم</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+
+                                    <a href="{{ route('reseller.tenants.show', $t->id) }}"
+                                       class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 text-xs font-bold transition">
+                                        <span>مدیریت</span>
+                                        <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </a>
+
+                                    <a href="{{ route('reseller.tenants.edit', $t->id) }}"
+                                       class="inline-flex items-center justify-center gap-1 p-2 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 text-xs font-bold transition"
+                                       title="ویرایش سامانه">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    {{-- Desktop Table View --}}
+                    <div class="hidden sm:block overflow-x-auto">
                         <table class="w-full text-right text-xs sm:text-sm">
                             <thead class="bg-gray-50/75 dark:bg-gray-900/40 text-gray-500 dark:text-gray-400 text-xs">
                             <tr>
@@ -1946,19 +2018,16 @@
                                         @if($isActive)
                                             <span
                                                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/50">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                             فعال
                                         </span>
                                         @elseif($isExpired)
                                             <span
                                                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/50">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                                             منقضی
                                         </span>
                                         @else
                                             <span
                                                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/50">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                                             معلق
                                         </span>
                                         @endif

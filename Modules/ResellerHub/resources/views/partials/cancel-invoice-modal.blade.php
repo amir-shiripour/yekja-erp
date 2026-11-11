@@ -31,7 +31,7 @@
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
              @click.stop="$event.stopPropagation()"
-             class="relative bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl transform transition-all max-w-lg w-full z-10 border border-gray-100 dark:border-gray-800 p-6 sm:p-8 space-y-6 text-right my-8"
+             class="relative bg-white dark:bg-gray-900 rounded-2xl max-h-[90vh] overflow-y-auto shadow-xl transform transition-all max-w-lg w-full z-10 border border-gray-200/80 dark:border-gray-800 p-6 sm:p-8 space-y-6 text-right my-8"
              dir="rtl">
 
             {{-- Header: Warning Icon + Title + Close Button --}}

@@ -2,9 +2,9 @@
     use Morilog\Jalali\Jalalian;
 
     $exportStatusLabels = [
-        'active' => ['label' => 'فعال', 'class' => 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800', 'dot' => 'bg-emerald-500'],
-        'suspended' => ['label' => 'معلق', 'class' => 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800', 'dot' => 'bg-rose-500'],
-        'expired' => ['label' => 'منقضی‌شده', 'class' => 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800', 'dot' => 'bg-amber-500'],
+        'active' => ['label' => 'فعال', 'class' => 'bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200/50 dark:border-emerald-800/40', 'dot' => 'bg-emerald-500'],
+        'suspended' => ['label' => 'معلق', 'class' => 'bg-rose-50/70 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200/50 dark:border-rose-800/40', 'dot' => 'bg-rose-500'],
+        'expired' => ['label' => 'منقضی‌شده', 'class' => 'bg-amber-50/70 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200/50 dark:border-amber-800/40', 'dot' => 'bg-amber-500'],
     ];
 
     $hasActiveFilters = request()->hasAny(['search', 'status', 'reseller_id', 'sort_by', 'sort_order', 'per_page']);
@@ -23,66 +23,41 @@
 
     {{-- Hero Banner --}}
     <x-resellerhub::card class="overflow-hidden">
-        <div class="p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div class="flex items-start sm:items-center gap-4 sm:gap-5 min-w-0">
+        <div class="p-4 sm:p-6 md:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
+            <div class="flex items-start sm:items-center gap-3.5 sm:gap-5 min-w-0">
                 <div
-                    class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-black shadow-lg shadow-emerald-500/25 shrink-0">
-                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    class="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/40 flex items-center justify-center font-black shadow-xs shrink-0">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7M4 7c0-2 1.5-3 3.5-3h9c2 0 3.5 1 3.5 3M4 7c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3m0 5c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3"/>
                     </svg>
                 </div>
                 <div class="space-y-1.5 min-w-0">
                     <div class="flex flex-wrap items-center gap-2.5">
-                        <h2 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                        <h2 class="text-base sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">
                             استخراج و پشتیبان‌گیری دیتابیس مستاجران
                         </h2>
-                        <span
-                            class="px-3 py-0.5 rounded-full text-xs font-black bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60">
-                            SQL Dump & JSON Export
-                        </span>
-                        <span
-                            class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-                            ویژه مدیر ارشد
-                        </span>
                     </div>
-                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-3xl">
-                        تولید فایل مستقل خروجی ساختار (<span
-                            class="font-mono text-emerald-600 font-bold">CREATE TABLE</span>) و داده‌ها (<span
-                            class="font-mono text-emerald-600 font-bold">INSERT INTO</span>) به همراه کلیدهای خارجی، جهت
-                        انتقال، بک‌آپ آفلاین یا مهاجرت به سرور مستقل هر کلینیک و مشتری.
-                    </p>
                 </div>
-            </div>
-
-            <div class="flex items-center gap-2.5 shrink-0">
-                <span
-                    class="px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/60 text-xs font-bold text-gray-600 dark:text-gray-300 flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                    </svg>
-                    <span>امضای اعتبارسنجی موقت ۱۵ دقیقه‌ای</span>
-                </span>
             </div>
         </div>
     </x-resellerhub::card>
 
     {{-- 4 Metric Summary Cards --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {{-- Total Tenants --}}
-        <x-resellerhub::card class="p-5 flex items-center justify-between gap-4">
+        <x-resellerhub::card class="p-4 sm:p-5 flex items-center justify-between gap-4">
             <div class="min-w-0">
                 <span class="text-xs font-bold text-gray-400 block truncate">کل سامانه‌های در دسترس</span>
                 <div class="flex items-baseline gap-1 mt-1">
                     <span
                         class="text-2xl font-black text-gray-900 dark:text-white">{{ reseller_fa_num($exportTotalTenants) }}</span>
-                    <span class="text-xs text-gray-400">سامانه CRM</span>
+                    <span class="text-xs text-gray-400">سامانه</span>
                 </div>
             </div>
             <div
-                class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-2xs">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="w-11 h-11 rounded-xl bg-gray-100/90 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 border border-gray-200/70 dark:border-gray-600/50 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
@@ -90,18 +65,18 @@
         </x-resellerhub::card>
 
         {{-- Active Tenants --}}
-        <x-resellerhub::card class="p-5 flex items-center justify-between gap-4">
+        <x-resellerhub::card class="p-4 sm:p-5 flex items-center justify-between gap-4">
             <div class="min-w-0">
                 <span class="text-xs font-bold text-gray-400 block truncate">سامانه‌های فعال</span>
                 <div class="flex items-baseline gap-1 mt-1">
                     <span
-                        class="text-2xl font-black text-emerald-600 dark:text-emerald-400">{{ reseller_fa_num($exportActiveTenants) }}</span>
+                        class="text-2xl font-black text-gray-900 dark:text-white">{{ reseller_fa_num($exportActiveTenants) }}</span>
                     <span class="text-xs text-gray-400">سرویس فعال</span>
                 </div>
             </div>
             <div
-                class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="w-11 h-11 rounded-xl bg-gray-100/90 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 border border-gray-200/70 dark:border-gray-600/50 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -109,18 +84,18 @@
         </x-resellerhub::card>
 
         {{-- Custom Domains --}}
-        <x-resellerhub::card class="p-5 flex items-center justify-between gap-4">
+        <x-resellerhub::card class="p-4 sm:p-5 flex items-center justify-between gap-4">
             <div class="min-w-0">
                 <span class="text-xs font-bold text-gray-400 block truncate">دارای دامنه اختصاصی</span>
                 <div class="flex items-baseline gap-1 mt-1">
                     <span
-                        class="text-2xl font-black text-blue-600 dark:text-blue-400">{{ reseller_fa_num($exportCustomDomainCount) }}</span>
+                        class="text-2xl font-black text-gray-900 dark:text-white">{{ reseller_fa_num($exportCustomDomainCount) }}</span>
                     <span class="text-xs text-gray-400">دامنه سفارشی</span>
                 </div>
             </div>
             <div
-                class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 shadow-2xs">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="w-11 h-11 rounded-xl bg-gray-100/90 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 border border-gray-200/70 dark:border-gray-600/50 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
                 </svg>
@@ -128,7 +103,7 @@
         </x-resellerhub::card>
 
         {{-- Security Guarantee --}}
-        <x-resellerhub::card class="p-5 flex items-center justify-between gap-4">
+        <x-resellerhub::card class="p-4 sm:p-5 flex items-center justify-between gap-4">
             <div class="min-w-0">
                 <span class="text-xs font-bold text-gray-400 block truncate">ایزولاسیون کامل رکوردها</span>
                 <p class="text-xs font-black text-gray-700 dark:text-gray-300 mt-1 leading-snug">
@@ -136,8 +111,8 @@
                 </p>
             </div>
             <div
-                class="w-12 h-12 rounded-2xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0 shadow-2xs">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/40 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
@@ -147,7 +122,7 @@
 
     {{-- Search and Filter Bar --}}
     <form method="GET" action="{{ route('reseller.settings.index') }}"
-          class="bg-white dark:bg-gray-800/80 rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-sm backdrop-blur-xl p-5 sm:p-6 transition-all duration-300">
+          class="bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs p-4 sm:p-5 transition-all duration-300">
         <input type="hidden" name="tab" value="database">
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-center">
@@ -163,7 +138,7 @@
                 <x-resellerhub::input class="ps-10" type="text"
                                       name="search"
                                       value="{{ request('search') }}"
-                                      placeholder="جستجو در نام سامانه، ساب‌دامین، دامنه یا خریدار..."
+                                      placeholder="جستجو در نام سامانه، زیردامنه، دامنه یا خریدار..."
                 />
             </div>
 
@@ -211,7 +186,7 @@
             {{-- Action Buttons --}}
             <div class="col-span-1 sm:col-span-2 lg:col-span-2 flex items-center gap-2 justify-end">
                 <button type="submit"
-                        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black shadow-md shadow-indigo-500/20 transition-all cursor-pointer">
+                        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black shadow-xs transition-all cursor-pointer">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
@@ -237,85 +212,199 @@
     {{-- Tenants Table Card --}}
     <x-resellerhub::card class="overflow-hidden">
         <div
-            class="px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            class="px-4 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-2.5">
+            <div class="flex flex-wrap items-center gap-2">
                 <h3 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">
-                    سامانه‌های CRM آماده استخراج دیتابیس
+                    سامانه‌های آماده استخراج دیتابیس
                 </h3>
-                <span
-                    class="text-xs px-2.5 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700/70 text-gray-600 dark:text-gray-300 font-bold">
-                    {{ reseller_fa_num($exportTenants->total()) }} سامانه یافت شد
-                </span>
             </div>
         </div>
 
         @if($exportTenants->count() > 0)
-            <div class="overflow-x-auto">
-                <table class="w-full text-start text-xs sm:text-sm">
+            @php
+                $preparedExportRows = [];
+                foreach ($exportTenants as $tenant) {
+                    $tStats = $exportTenantsData[$tenant->id] ?? ['total_records' => 0, 'modules' => []];
+                    $totalRec = $tStats['total_records'] ?? 0;
+                    $st = $exportStatusLabels[$tenant->status] ?? ['label' => $tenant->status, 'class' => 'bg-gray-100 text-gray-700', 'dot' => 'bg-gray-400'];
+
+                    $tenantModalPayload = [
+                        'id' => $tenant->id,
+                        'name' => $tenant->name,
+                        'subdomain' => $tenant->subdomain,
+                        'custom_domain' => $tenant->custom_domain,
+                        'status' => $tenant->status,
+                        'status_label' => $st['label'],
+                        'created_at_fa' => $tenant->jalali_created_at ?: '-',
+                        'owner_name' => $tenant->subAccount ? ($tenant->subAccount->company_name ?: $tenant->subAccount->name) : 'نمایندگی اصلی',
+                        'owner_phone' => $tenant->subAccount ? ($tenant->subAccount->mobile ?: ($tenant->subAccount->phone ?? '-')) : '-',
+                        'export_sql_url' => route('reseller.tenants.export-sql', $tenant),
+                        'export_json_url' => route('reseller.tenants.export-json', $tenant),
+                        'show_url' => route('reseller.tenants.show', $tenant),
+                    ];
+
+                    $preparedExportRows[] = compact('tenant', 'tStats', 'totalRec', 'st', 'tenantModalPayload');
+                }
+            @endphp
+
+            {{-- Mobile Stacked Cards --}}
+            <div class="lg:hidden divide-y divide-gray-100 dark:divide-gray-700/60">
+                @foreach($preparedExportRows as $row)
+                    @php
+                        $tenant = $row['tenant'];
+                        $tStats = $row['tStats'];
+                        $totalRec = $row['totalRec'];
+                        $st = $row['st'];
+                        $tenantModalPayload = $row['tenantModalPayload'];
+                    @endphp
+                    <div class="p-4 space-y-3">
+                        {{-- Row Header: Avatar + Name + Status --}}
+                        <div class="flex items-start justify-between gap-2.5">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div
+                                    class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700 font-black text-xs flex items-center justify-center shrink-0">
+                                    <span>#{{ $tenant->id }}</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="font-black text-sm text-gray-900 dark:text-white truncate">
+                                        {{ $tenant->name }}
+                                    </div>
+                                    <div class="text-[11px] text-gray-400 mt-0.5">
+                                        ثبت: {{ reseller_fa_num($tenant->jalali_created_at ?: '-') }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <span
+                                class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border {{ $st['class'] }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $st['dot'] }}"></span>
+                                <span>{{ $st['label'] }}</span>
+                            </span>
+                        </div>
+
+                        {{-- Domain + Volume pills --}}
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded-md font-mono text-[11px] font-bold bg-gray-100/90 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200/70 dark:border-gray-700 dir-ltr">
+                                /{{ $tenant->subdomain }}
+                            </span>
+                            @if($tenant->custom_domain)
+                                <span
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-gray-50 dark:bg-gray-800/70 text-gray-600 dark:text-gray-300 border border-gray-200/70 dark:border-gray-700 dir-ltr max-w-full truncate">
+                                    {{ $tenant->custom_domain }}
+                                </span>
+                            @endif
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-50 dark:bg-gray-800/70 text-gray-600 dark:text-gray-300 font-bold text-[11px] border border-gray-200/70 dark:border-gray-700">
+                                {{ reseller_fa_num(number_format($totalRec)) }} رکورد
+                            </span>
+                        </div>
+
+                        {{-- Owner & Reseller Meta --}}
+                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 dark:border-gray-800 text-xs">
+                            <div class="min-w-0">
+                                <span class="text-[11px] text-gray-400 block">خریدار / زیرمجموعه</span>
+                                <span class="font-bold text-gray-800 dark:text-gray-200 truncate block">
+                                    {{ $tenant->subAccount ? ($tenant->subAccount->company_name ?: $tenant->subAccount->name) : 'حساب مستقیم' }}
+                                </span>
+                            </div>
+                            <div class="min-w-0 text-end">
+                                <span class="text-[11px] text-gray-400 block">نماینده ثبت‌کننده</span>
+                                <span class="font-bold text-gray-800 dark:text-gray-200 truncate block">
+                                    {{ $tenant->reseller?->company_name ?: ($tenant->reseller?->user?->name ?? 'نماینده #' . $tenant->reseller_id) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Export Actions --}}
+                        <div class="grid grid-cols-4 gap-2 pt-1">
+                            <button type="button"
+                                    @click="openModal(@js($tenantModalPayload), @js($tStats))"
+                                    class="col-span-2 h-9 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-all active:scale-95 whitespace-nowrap cursor-pointer">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                <span>عملیات استخراج</span>
+                            </button>
+
+                            <a href="{{ route('reseller.tenants.export-sql', $tenant) }}"
+                               title="دانلود فوری SQL Dump"
+                               class="col-span-1 h-9 px-2 inline-flex items-center justify-center gap-1 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition-all active:scale-95 font-mono text-xs font-bold">
+                                <svg class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                <span>SQL</span>
+                            </a>
+
+                            <a href="{{ route('reseller.tenants.export-json', $tenant) }}"
+                               title="دانلود فوری خروجی JSON"
+                               class="col-span-1 h-9 px-2 inline-flex items-center justify-center gap-1 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition-all active:scale-95 font-mono text-xs font-bold">
+                                <svg class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                <span>JSON</span>
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Desktop Table --}}
+            <div class="hidden lg:block overflow-x-auto">
+                <table class="w-full text-start text-xs">
                     <thead>
                     <tr class="border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/60 dark:bg-gray-900/40 text-gray-400 dark:text-gray-500 font-black">
-                        <th scope="col" class="py-3.5 px-4 text-start">شناسه و نام سامانه</th>
-                        <th scope="col" class="py-3.5 px-4 text-start">مسیر اختصاصی (ساب‌دامین / دامنه)</th>
-                        <th scope="col" class="py-3.5 px-4 text-start">خریدار / زیرمجموعه</th>
-                        <th scope="col" class="py-3.5 px-4 text-start">نماینده ثبت‌کننده</th>
-                        <th scope="col" class="py-3.5 px-4 text-center">وضعیت سامانه</th>
-                        <th scope="col" class="py-3.5 px-4 text-center">حجم داده‌های ثبت‌شده</th>
-                        <th scope="col" class="py-3.5 px-4 text-end">عملیات استخراج</th>
+                        <th scope="col" class="py-3.5 px-3 text-start whitespace-nowrap">سامانه</th>
+                        <th scope="col" class="py-3.5 px-2.5 text-start whitespace-nowrap">مسیر</th>
+                        <th scope="col" class="py-3.5 px-2.5 text-start whitespace-nowrap">خریدار</th>
+                        <th scope="col" class="py-3.5 px-2.5 text-start whitespace-nowrap">نماینده</th>
+                        <th scope="col" class="py-3.5 px-2 text-center whitespace-nowrap">وضعیت</th>
+                        <th scope="col" class="py-3.5 px-2 text-center whitespace-nowrap">داده‌ها</th>
+                        <th scope="col" class="py-3.5 px-3 text-end whitespace-nowrap">عملیات</th>
                     </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700/40">
-                    @foreach($exportTenants as $tenant)
+                    @foreach($preparedExportRows as $row)
                         @php
-                            $tStats = $exportTenantsData[$tenant->id] ?? ['total_records' => 0, 'modules' => []];
-                            $totalRec = $tStats['total_records'] ?? 0;
-                            $st = $exportStatusLabels[$tenant->status] ?? ['label' => $tenant->status, 'class' => 'bg-gray-100 text-gray-700', 'dot' => 'bg-gray-400'];
-
-                            $tenantModalPayload = [
-                                'id' => $tenant->id,
-                                'name' => $tenant->name,
-                                'subdomain' => $tenant->subdomain,
-                                'custom_domain' => $tenant->custom_domain,
-                                'status' => $tenant->status,
-                                'status_label' => $st['label'],
-                                'created_at_fa' => $tenant->jalali_created_at ?: '-',
-                                'owner_name' => $tenant->subAccount ? ($tenant->subAccount->company_name ?: $tenant->subAccount->name) : 'نمایندگی اصلی',
-                                'owner_phone' => $tenant->subAccount ? ($tenant->subAccount->mobile ?: ($tenant->subAccount->phone ?? '-')) : '-',
-                                'export_sql_url' => route('reseller.tenants.export-sql', $tenant),
-                                'export_json_url' => route('reseller.tenants.export-json', $tenant),
-                                'show_url' => route('reseller.tenants.show', $tenant),
-                            ];
+                            $tenant = $row['tenant'];
+                            $tStats = $row['tStats'];
+                            $totalRec = $row['totalRec'];
+                            $st = $row['st'];
+                            $tenantModalPayload = $row['tenantModalPayload'];
                         @endphp
                         <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/60 transition-colors">
                             {{-- Tenant Title & ID --}}
-                            <td class="py-4 px-4">
-                                <div class="flex items-center gap-3">
+                            <td class="py-3.5 px-3">
+                                <div class="flex items-center gap-2">
                                     <div
-                                        class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white font-black text-sm flex items-center justify-center shadow-xs shrink-0">
+                                        class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700 font-black text-[11px] flex items-center justify-center shrink-0">
                                         <span>#{{ $tenant->id }}</span>
                                     </div>
                                     <div class="min-w-0">
-                                        <div class="font-black text-gray-900 dark:text-white truncate max-w-[200px]">
+                                        <div class="font-black text-gray-900 dark:text-white truncate max-w-[130px]" title="{{ $tenant->name }}">
                                             {{ $tenant->name }}
                                         </div>
-                                        <div class="text-xs text-gray-400 mt-0.5">
-                                            ثبت: {{ reseller_fa_num($tenant->jalali_created_at ?: '-') }}
+                                        <div class="text-[11px] text-gray-400 mt-0.5 whitespace-nowrap">
+                                            {{ reseller_fa_num($tenant->jalali_created_at ?: '-') }}
                                         </div>
                                     </div>
                                 </div>
                             </td>
 
                             {{-- Subdomain / Custom Domain --}}
-                            <td class="py-4 px-4">
-                                <div class="space-y-1">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1 rounded-lg font-mono text-xs font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/60 dir-ltr">
+                            <td class="py-3.5 px-2.5">
+                                <div class="space-y-1 max-w-[125px]">
+                                    <span title="/{{ $tenant->subdomain }}"
+                                        class="inline-block max-w-full truncate align-middle px-2 py-0.5 rounded-lg font-mono text-[11px] font-bold bg-gray-100/90 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200/70 dark:border-gray-700 dir-ltr">
                                         /{{ $tenant->subdomain }}
                                     </span>
                                     @if($tenant->custom_domain)
                                         <div
-                                            class="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 dir-ltr">
-                                            <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor"
+                                            class="text-[11px] font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1 dir-ltr max-w-full">
+                                            <svg class="w-3 h-3 shrink-0 text-gray-400" fill="none" stroke="currentColor"
                                                  viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
@@ -327,77 +416,74 @@
                             </td>
 
                             {{-- Owner / SubAccount --}}
-                            <td class="py-4 px-4">
+                            <td class="py-3.5 px-2.5">
                                 @if($tenant->subAccount)
-                                    <div class="font-bold text-gray-800 dark:text-gray-200">
+                                    <div class="font-bold text-gray-800 dark:text-gray-200 truncate max-w-[115px]" title="{{ $tenant->subAccount->company_name ?: $tenant->subAccount->name }}">
                                         {{ $tenant->subAccount->company_name ?: $tenant->subAccount->name }}
                                     </div>
-                                    <div class="text-xs text-gray-400 mt-0.5 dir-ltr text-right">
+                                    <div class="text-[11px] text-gray-400 mt-0.5 dir-ltr text-right whitespace-nowrap">
                                         {{ $tenant->subAccount->mobile ?: ($tenant->subAccount->phone ?? '-') }}
                                     </div>
                                 @else
-                                    <span class="text-xs font-bold text-gray-400">حساب مستقیم نمایندگی</span>
+                                    <span class="text-xs font-bold text-gray-400 whitespace-nowrap">حساب مستقیم</span>
                                 @endif
                             </td>
 
                             {{-- Reseller Info --}}
-                            <td class="py-4 px-4">
-                                <div class="font-bold text-gray-800 dark:text-gray-200">
-                                    {{ $tenant->reseller?->company_name ?: ($tenant->reseller?->user?->name ?? 'نماینده #' . $tenant->reseller_id) }}
+                            <td class="py-3.5 px-2.5">
+                                @php $resellerTitle = $tenant->reseller?->company_name ?: ($tenant->reseller?->user?->name ?? 'نماینده #' . $tenant->reseller_id); @endphp
+                                <div class="font-bold text-gray-800 dark:text-gray-200 truncate max-w-[120px]" title="{{ $resellerTitle }}">
+                                    {{ $resellerTitle }}
                                 </div>
-                                <div class="text-xs text-gray-400 mt-0.5">
-                                    شناسه نماینده: #{{ $tenant->reseller_id }}
+                                <div class="text-[11px] text-gray-400 mt-0.5 whitespace-nowrap">
+                                    #{{ $tenant->reseller_id }}
                                 </div>
                             </td>
 
-                            {{-- Status Badge with Pulse Dot --}}
-                            <td class="py-4 px-4 text-center">
+                            {{-- Status Badge --}}
+                            <td class="py-3.5 px-2 text-center whitespace-nowrap">
                                 <span
-                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black border {{ $st['class'] }}">
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold border {{ $st['class'] }}">
                                     <span class="w-1.5 h-1.5 rounded-full {{ $st['dot'] }}"></span>
                                     <span>{{ $st['label'] }}</span>
                                 </span>
                             </td>
 
                             {{-- Total Records Count --}}
-                            <td class="py-4 px-4 text-center">
+                            <td class="py-3.5 px-2 text-center whitespace-nowrap">
                                 <span
-                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-mono font-black text-xs border border-emerald-200/60 dark:border-emerald-800/60">
-                                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7M4 7c0-2 1.5-3 3.5-3h9c2 0 3.5 1 3.5 3M4 7c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3m0 5c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3"/>
-                                    </svg>
+                                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gray-50 dark:bg-gray-800/70 text-gray-700 dark:text-gray-300 font-bold text-[11px] border border-gray-200/70 dark:border-gray-700">
                                     <span>{{ reseller_fa_num(number_format($totalRec)) }} رکورد</span>
                                 </span>
                             </td>
 
                             {{-- Export Operations Action Buttons --}}
-                            <td class="py-4 px-4 text-end">
+                            <td class="py-3.5 px-3 text-end whitespace-nowrap">
                                 <div class="inline-flex items-center gap-1.5">
                                     {{-- Open Detailed Modal Button --}}
                                     <button type="button"
                                             @click="openModal(@js($tenantModalPayload), @js($tStats))"
-                                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-md shadow-indigo-500/20 transition cursor-pointer">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            title="عملیات استخراج و جزئیات"
+                                            class="h-8 inline-flex items-center justify-center gap-1 px-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] shadow-xs transition-all active:scale-95 whitespace-nowrap cursor-pointer">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                   d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                         </svg>
-                                        <span>عملیات استخراج</span>
+                                        <span>استخراج</span>
                                     </button>
 
                                     {{-- Quick SQL Download Button --}}
                                     <a href="{{ route('reseller.tenants.export-sql', $tenant) }}"
                                        title="دانلود فوری SQL Dump"
-                                       class="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 transition">
-                                        <span class="font-mono text-xs font-black">SQL</span>
+                                       class="h-8 px-2 inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition-all active:scale-95 font-mono text-[11px] font-bold whitespace-nowrap">
+                                        <span>SQL</span>
                                     </a>
 
                                     {{-- Quick JSON Download Button --}}
                                     <a href="{{ route('reseller.tenants.export-json', $tenant) }}"
                                        title="دانلود فوری خروجی JSON"
-                                       class="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 transition">
-                                        <span class="font-mono text-xs font-bold">JSON</span>
+                                       class="h-8 px-2 inline-flex items-center justify-center rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition-all active:scale-95 font-mono text-[11px] font-bold whitespace-nowrap">
+                                        <span>JSON</span>
                                     </a>
                                 </div>
                             </td>
@@ -408,11 +494,60 @@
             </div>
 
             {{-- Pagination Footer --}}
-            @if($exportTenants->hasPages())
+            @if($exportTenants->total() > 0)
                 <div
-                    class="px-6 py-4 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
-                    <div>
-                        {{ $exportTenants->links('resellerhub::partials.pagination') }}
+                    class="px-4 sm:px-6 py-4 border-t border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-900/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                        <span>
+                            نمایش
+                            <strong class="font-bold text-gray-900 dark:text-white">{{ reseller_fa_num($exportTenants->firstItem() ?? 1) }}</strong>
+                            تا
+                            <strong class="font-bold text-gray-900 dark:text-white">{{ reseller_fa_num($exportTenants->lastItem() ?? $exportTenants->count()) }}</strong>
+                            از مجموع
+                            <strong class="font-bold text-gray-900 dark:text-white">{{ reseller_fa_num($exportTenants->total()) }}</strong>
+                            سامانه
+                        </span>
+
+                        <span class="text-gray-300 dark:text-gray-600 hidden sm:inline">•</span>
+
+                        <form method="GET" action="{{ route('reseller.settings.index') }}"
+                              class="inline-flex items-center gap-1.5 m-0">
+                            <input type="hidden" name="tab" value="database">
+                            @foreach(request()->except(['per_page', 'export_page', 'page', 'tab']) as $k => $v)
+                                @if(!is_array($v) && $v !== null && $v !== '')
+                                    <input type="hidden" name="{{ $k }}" value="{{ $v }}">
+                                @endif
+                            @endforeach
+                            <span class="hidden sm:inline">تعداد در صفحه:</span>
+                            <select name="per_page" aria-label="تعداد در صفحه" onchange="this.form.submit()"
+                                    class="rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-1.5 px-2.5 text-xs font-bold text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-2xs">
+                                @foreach([10, 15, 25, 50, 100] as $size)
+                                    <option value="{{ $size }}" @selected((int) request('per_page', 10) === $size)>{{ reseller_fa_num($size) }}</option>
+                                @endforeach
+                            </select>
+                        </form>
+                    </div>
+
+                    <div class="flex items-center justify-center">
+                        @if($exportTenants->hasPages())
+                            {{ $exportTenants->appends(['tab' => 'database'])->withQueryString()->links('resellerhub::partials.pagination') }}
+                        @else
+                            <div class="inline-flex items-center gap-1.5">
+                                <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800/50 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </span>
+                                <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-600 text-white font-black text-xs shadow-sm select-none">
+                                    {{ reseller_fa_num(1) }}
+                                </span>
+                                <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800/50 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                                    </svg>
+                                </span>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endif
@@ -462,7 +597,7 @@
                 class="px-6 py-5 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between gap-4 bg-gray-50/50 dark:bg-gray-900/40">
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0">
+                        class="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7M4 7c0-2 1.5-3 3.5-3h9c2 0 3.5 1 3.5 3M4 7c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3m0 5c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3"/>
@@ -505,7 +640,7 @@
                     <div>
                         <span class="text-xs text-gray-400 block font-bold">آدرس ساب‌دامین:</span>
                         <span
-                            class="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 mt-0.5 block truncate dir-ltr">
+                            class="text-xs font-bold text-blue-600 dark:text-blue-400 mt-0.5 block truncate dir-ltr">
                             /<span x-text="currentTenant?.subdomain"></span>
                         </span>
                     </div>
@@ -526,21 +661,21 @@
 
                     {{-- Option 1: Standalone SQL Dump (Recommended) --}}
                     <a :href="currentTenant?.export_sql_url"
-                       class="group p-4 sm:p-5 rounded-2xl bg-emerald-50/60 hover:bg-emerald-50 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/30 border-2 border-emerald-500/40 hover:border-emerald-500 flex items-center justify-between gap-4 transition-all duration-200 shadow-sm cursor-pointer">
-                        <div class="flex items-center gap-3.5">
+                       class="group p-4 sm:p-5 rounded-2xl bg-indigo-50/40 hover:bg-indigo-50/80 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/35 border border-indigo-200/80 dark:border-indigo-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-200 shadow-xs cursor-pointer">
+                        <div class="flex items-center gap-3.5 min-w-0">
                             <div
-                                class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md shadow-emerald-500/25 group-hover:scale-105 transition-transform">
+                                class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0">
                                 SQL
                             </div>
-                            <div class="space-y-1">
-                                <div class="font-black text-gray-900 dark:text-white text-sm flex items-center gap-2">
+                            <div class="space-y-1 min-w-0">
+                                <div class="font-black text-gray-900 dark:text-white text-sm flex flex-wrap items-center gap-2">
                                     <span>دانلود فایل کامل دیتابیس (SQL Dump)</span>
-                                    <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-600 text-white font-bold">پیشنهادی</span>
+                                    <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold">پیشنهادی</span>
                                 </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                                    شامل ساختار کامل جداول (<code class="font-mono text-xs text-emerald-600 font-bold">CREATE
+                                    شامل ساختار کامل جداول (<code class="text-xs text-indigo-600 dark:text-indigo-400 font-bold">CREATE
                                         TABLE</code>) و درج رکوردهای تفکیک‌شده (<code
-                                        class="font-mono text-xs text-emerald-600 font-bold">INSERT INTO</code>) با
+                                        class="text-xs text-indigo-600 dark:text-indigo-400 font-bold">INSERT INTO</code>) با
                                     رعایت روابط خارجی.
                                 </p>
                             </div>
@@ -548,7 +683,7 @@
 
                         <div class="shrink-0">
                             <span
-                                class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-black text-xs shadow-md shadow-emerald-500/20 group-hover:bg-emerald-700 transition">
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 text-white font-black text-xs shadow-xs group-hover:bg-indigo-700 transition">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -560,13 +695,13 @@
 
                     {{-- Option 2: JSON Export --}}
                     <a :href="currentTenant?.export_json_url"
-                       class="group p-4 sm:p-5 rounded-2xl bg-white dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4 transition-all duration-200 shadow-xs cursor-pointer">
-                        <div class="flex items-center gap-3.5">
+                       class="group p-4 sm:p-5 rounded-2xl bg-white dark:bg-gray-800/80 hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-gray-200/80 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-200 shadow-xs cursor-pointer">
+                        <div class="flex items-center gap-3.5 min-w-0">
                             <div
-                                class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md shadow-indigo-500/25 group-hover:scale-105 transition-transform">
+                                class="w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-gray-600 flex items-center justify-center font-black text-xs shrink-0">
                                 JSON
                             </div>
-                            <div class="space-y-1">
+                            <div class="space-y-1 min-w-0">
                                 <div class="font-black text-gray-900 dark:text-white text-sm">
                                     دانلود آرشیو ساختاریافته JSON
                                 </div>
@@ -579,7 +714,7 @@
 
                         <div class="shrink-0">
                             <span
-                                class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold text-xs transition">
+                                class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold text-xs transition">
                                 <span>دانلود .json</span>
                             </span>
                         </div>
@@ -600,7 +735,7 @@
                                     <div class="min-w-0 flex-1">
                                         <div class="font-bold text-gray-800 dark:text-gray-200 truncate"
                                              x-text="tbl.label"></div>
-                                        <div class="text-xs text-gray-400 font-mono" x-text="tbl.table"></div>
+                                        <div class="text-xs text-gray-400" x-text="tbl.table"></div>
                                     </div>
                                     <span
                                         class="px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs border border-emerald-200/60 dark:border-emerald-800/50 shrink-0">

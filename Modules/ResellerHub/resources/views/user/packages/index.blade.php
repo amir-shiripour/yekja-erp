@@ -796,8 +796,8 @@
                     this.formErrors = {};
 
                     if (!this.form.sub_account_id) {
-                        this.formErrors.sub_account_id = ['انتخاب حساب خریدار (زیرمجموعه) الزامی است.'];
-                        this.generalError = 'لطفاً ابتدا خریدار این سامانه را انتخاب کنید یا خریدار جدید ثبت نمایید.';
+                        this.formErrors.sub_account_id = ['انتخاب حساب کاربر زیرمجموعه الزامی است.'];
+                        this.generalError = 'لطفاً ابتدا کاربر این سامانه را انتخاب کنید یا کاربر جدید ثبت نمایید.';
                         return;
                     }
 
@@ -1040,12 +1040,12 @@
         @endif
 
         {{-- Header --}}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-            <div>
-                <h1 class="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-4 tracking-tight">
+        <div class="flex items-center justify-between gap-2 sm:gap-5">
+            <div class="shrink-0">
+                <h1 class="text-sm sm:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-1.5 sm:gap-4 tracking-tight whitespace-nowrap">
                 <span
-                    class="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-500/30 shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-md sm:shadow-lg shadow-indigo-500/30 shrink-0">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
@@ -1054,18 +1054,20 @@
                 </h1>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
                 <a href="{{ route('reseller.packages.create') }}"
-                   class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition-all active:scale-95 cursor-pointer">
+                   class="inline-flex items-center justify-center gap-1 sm:gap-2 px-2.5 sm:px-6 h-9 sm:h-12 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-bold text-xs sm:text-sm shadow-md sm:shadow-lg shadow-indigo-500/25 transition-all active:scale-95 cursor-pointer shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    <span>ساخت پکیج جدید</span>
+                    <span class="hidden sm:inline">ساخت پکیج جدید</span>
+                    <span class="sm:hidden">پکیج جدید</span>
                 </a>
 
                 <a href="{{ route('reseller.tenants.create') }}"
-                   class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                    <span>ساخت سامانه</span>
+                   class="inline-flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-5 h-9 sm:h-12 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 transition-colors shrink-0">
+                    <span class="hidden sm:inline">ساخت سامانه</span>
+                    <span class="sm:hidden">سامانه جدید</span>
                     <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M14 5l7 7m0 0l-7 7m7-7H3"/>
@@ -1107,7 +1109,7 @@
                     class="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/60 border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-xl flex items-center gap-4">
                     <span
                         class="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                   d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                         </svg>
@@ -1124,17 +1126,17 @@
 
                 {{-- Card 2: Active Packages --}}
                 <div
-                    class="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-emerald-50/60 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/20 shadow-sm flex items-center gap-4">
+                    class="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/60 border-gray-100 dark:border-gray-700/50 shadow-sm flex items-center gap-4">
                     <span
                         class="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </span>
                     <div class="min-w-0 flex-1">
                         <span
-                            class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide block mb-1 truncate">پکیج‌های فعال (در دسترس)</span>
+                            class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide block mb-1 truncate">پکیج‌های فعال</span>
                         <div class="flex flex-wrap items-baseline gap-1">
                             <span
                                 class="text-xl xl:text-2xl font-black text-emerald-700 dark:text-emerald-400 tabular-nums break-all">{{ reseller_fa_num($activeCount ?? 0) }}</span>
@@ -1145,10 +1147,10 @@
 
                 {{-- Card 3: Inactive Packages --}}
                 <div
-                    class="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-amber-50/60 dark:bg-amber-500/5 border border-amber-100 dark:border-amber-500/20 shadow-sm flex items-center gap-4">
+                    class="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/60 border-gray-100 dark:border-gray-700/50 shadow-sm flex items-center gap-4">
                     <span
                         class="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -1169,7 +1171,7 @@
                     class="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/60 border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-xl flex items-center gap-4">
                     <span
                         class="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                   d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                         </svg>
@@ -1301,7 +1303,7 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400">عبارت جستجو یا فیلترهای انتخابی را تغییر
                             دهید یا پاک کنید.</p>
                     </div>
-                    <div>
+                    <div class="shrink-0">
                         <a href="{{ route('reseller.packages.index') }}"
                            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-bold transition cursor-pointer">
                             <span>پاکسازی فیلترها و مشاهده همه</span>
@@ -1362,7 +1364,7 @@
                                         style="{{ $pkg->bg_style }}">
                                         @include('resellerhub::user.packages.partials.icon', ['icon' => $pkg->icon, 'class' => 'w-5 h-5'])
                                     </span>
-                                        <div class="min-w-0">
+                                        <div class="shrink-0">
                                             <h3 class="font-black text-sm sm:text-base text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition"
                                                 title="{{ $pkg->name }}">
                                                 {{ $pkg->name }}
@@ -1375,13 +1377,11 @@
                                                 @if($pkg->isActive())
                                                     <span
                                                         class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/40">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                                     فعال
                                                 </span>
                                                 @else
                                                     <span
                                                         class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                                                     غیرفعال
                                                 </span>
                                                 @endif
@@ -1413,7 +1413,7 @@
                                             @endif
                                         </button>
                                         <a href="{{ route('reseller.packages.show', $pkg->id) }}"
-                                           class="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition cursor-pointer"
+                                           class="p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/60 rounded-xl transition cursor-pointer"
                                            title="مشاهده جزئیات پکیج">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1423,7 +1423,7 @@
                                             </svg>
                                         </a>
                                         <a href="{{ route('reseller.packages.edit', $pkg->id) }}"
-                                           class="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition cursor-pointer"
+                                           class="p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/60 rounded-xl transition cursor-pointer"
                                            title="ویرایش پکیج">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1479,7 +1479,7 @@
                                 </div>
 
                                 <div class="flex-1 space-y-3">
-                                    <div>
+                                    <div class="shrink-0">
                                         <div class="text-xs font-black text-gray-500 dark:text-gray-400 mb-1.5">
                                             ماژول‌های پکیج
                                         </div>
@@ -1503,7 +1503,7 @@
                                     </div>
 
                                     @if(!empty($limitsShown))
-                                        <div>
+                                        <div class="shrink-0">
                                             <div class="text-xs font-black text-gray-500 dark:text-gray-400 mb-1.5">سقف
                                                 مصرف
                                             </div>
@@ -1535,7 +1535,7 @@
                                 <div
                                     class="rounded-2xl bg-gray-50 dark:bg-gray-900/40 border border-gray-100 dark:border-gray-700/60 overflow-hidden">
                                     <div class="px-4 py-3 flex items-center justify-between gap-3 min-h-[64px]">
-                                        <div class="min-w-0">
+                                        <div class="shrink-0">
                                             @if($pkgPriceType === 'free')
                                                 <div class="text-xs text-gray-400 font-bold">نوع تعرفه</div>
                                                 <div class="text-sm font-black text-emerald-600 dark:text-emerald-400">

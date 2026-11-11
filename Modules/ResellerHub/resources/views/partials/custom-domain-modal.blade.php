@@ -12,11 +12,11 @@
              @click="!domainLoading && closeDomainModal()"></div>
 
         <div
-            class="relative bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl transform transition-all max-w-lg w-full z-10 border border-gray-100 dark:border-gray-800 p-6 sm:p-8 space-y-6 text-center">
+            class="relative bg-white dark:bg-gray-900 rounded-2xl max-h-[90vh] overflow-y-auto shadow-xl transform transition-all max-w-lg w-full z-10 border border-gray-200/80 dark:border-gray-800 p-6 sm:p-8 space-y-6 text-center">
 
             {{-- Icon Badge --}}
             <div
-                class="w-16 h-16 mx-auto rounded-3xl flex items-center justify-center shadow-lg bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 shadow-indigo-500/20">
+                class="w-14 h-14 mx-auto rounded-xl flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 shadow-xs">
                 <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>

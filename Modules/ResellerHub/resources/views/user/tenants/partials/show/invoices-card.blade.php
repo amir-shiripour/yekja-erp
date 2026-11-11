@@ -9,7 +9,7 @@
 
 {{-- Card: Tenant Invoices --}}
 <div
-    class="bg-white dark:bg-gray-800/80 p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700/60 space-y-6 backdrop-blur-xl">
+    class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-xs border border-gray-200/80 dark:border-gray-700/60 space-y-6">
 
     {{-- Header --}}
     <div
@@ -24,10 +24,6 @@
             </span>
             <div>
                 <h2 class="text-base font-black text-gray-900 dark:text-white">فاکتورها و سوابق مالی سامانه</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    نمایش {{ reseller_fa_num($tenantInvoices->count()) }} فاکتور اخیر — وضعیت‌ها و مبالغ دقیقاً مطابق با
-                    بخش مدیریت فاکتورها
-                </p>
             </div>
         </div>
 
@@ -384,10 +380,7 @@
                               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </span>
-                <p class="text-sm font-bold text-gray-500 dark:text-gray-400">هنوز فاکتوری برای این سامانه صادر نشده
-                    است</p>
-                <p class="text-xs text-gray-400">با تمدید لایسنس یا خرید سرویس جدید، فاکتورها در این بخش نمایش داده
-                    می‌شوند</p>
+                <p class="text-sm font-bold text-gray-500 dark:text-gray-400">هنوز فاکتوری برای این سامانه صادر نشده است</p>
             </div>
         @endforelse
     </div>

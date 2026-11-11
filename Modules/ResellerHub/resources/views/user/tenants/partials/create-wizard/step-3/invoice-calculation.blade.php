@@ -1,35 +1,34 @@
-<x-resellerhub::card class="p-6 sm:p-8 space-y-6"
+<x-resellerhub::card class="p-4 sm:p-6 sm:p-8 space-y-5 sm:space-y-6"
                      x-init="if (!invoiceIssueDate) setTodayIssueDate()">
     <div
-        class="flex items-center justify-between gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
-        <div class="flex items-center gap-3">
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-gray-100 dark:border-gray-700/60">
+        <div class="flex items-start sm:items-center gap-3 min-w-0">
             <span
-                class="p-2.5 bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 rounded-xl">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                     stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                            </span>
-            <div>
-                <h2 class="text-base font-black text-gray-900 dark:text-white">صدور فاکتور برای این
-                    سامانه</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                class="p-2.5 bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 rounded-xl shrink-0 mt-0.5 sm:mt-0">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                     stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </span>
+            <div class="min-w-0">
+                <h2 class="text-sm sm:text-base font-black text-gray-900 dark:text-white">صدور فاکتور برای این سامانه</h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
                     {{ __('resellerhub::messages.wizard.step3.invoice_calc_desc') }}
                 </p>
             </div>
         </div>
-        <label class="flex items-center gap-3 cursor-pointer select-none shrink-0 group">
+        <label class="flex items-center justify-between sm:justify-end gap-3 cursor-pointer select-none group w-full sm:w-auto p-2.5 sm:p-0 rounded-xl bg-gray-50/80 dark:bg-gray-900/50 sm:bg-transparent border border-gray-100 dark:border-gray-700/60 sm:border-0 shrink-0">
             <span class="text-xs sm:text-sm font-bold transition-colors"
                   :class="issueInvoice ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'"
                   x-text="invoiceToggleLabel"></span>
-            <div class="relative inline-flex items-center">
+            <div class="relative inline-flex items-center shrink-0">
                 <input type="checkbox" x-model="issueInvoice"
                        class="sr-only peer">
                 <div
-                    class="w-13 h-7 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-300 shadow-inner"></div>
+                    class="w-12 sm:w-13 h-6 sm:h-7 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-300 shadow-inner"></div>
                 <div
-                    class="absolute right-1 top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center">
+                    class="absolute right-0.5 sm:right-1 top-0.5 sm:top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center">
                     <svg
                         class="w-3 h-3 text-emerald-600 opacity-0 peer-checked:opacity-100 transition-opacity"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -110,10 +109,6 @@
                         x-model="invoiceNumberAuto ? invoiceNumberPreview : invoiceNumberOverride"
                         style="height: 44px !important;" x-bind:readonly="invoiceNumberAuto"/>
                 </div>
-
-                <p class="text-xs text-gray-400 ms-1 line-clamp-1" x-text="invoiceNumberAuto
-                                    ? 'شماره‌گذاری خودکار از تنظیمات مالی'
-                                    : 'در صورت ورود دستی، یکتا بودن شماره الزامی است.'"></p>
             </div>
 
             <div class="min-w-0 space-y-2">
@@ -181,49 +176,62 @@
 </x-resellerhub::card>
 <x-resellerhub::card class="overflow-hidden" x-show="issueInvoice" x-transition>
     <div
-        class="p-6 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-900/20 flex flex-wrap items-center justify-between gap-3">
-        <h3 class="text-base font-black text-gray-800 dark:text-gray-100 flex flex-wrap items-center gap-3">
-            <span
-                class="p-2 bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400 rounded-lg">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                     stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                                </svg>
-                            </span>
-            <span>اقلام فاکتور</span>
-            <span
-                class="text-xs font-bold text-gray-400 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-lg"
-                x-text="'بر اساس ' + durationLabel + ' و ' + faNum(selectedModules.length) + ' ماژول انتخابی'"></span>
-            <template x-if="getActiveLimitsCount() > 0">
+        class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-900/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div class="space-y-2">
+            <div class="flex items-center gap-2.5">
                 <span
-                    class="inline-flex items-center gap-1.5 text-xs font-black text-amber-700 bg-amber-50 dark:bg-amber-500/20 dark:text-amber-300 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-500/30">
-                    <svg class="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                                    </svg>
-                                    <span x-text="faNum(getActiveLimitsCount()) + ' سقف/لیمیت فعال'"></span>
-                                </span>
-            </template>
-            <template x-if="enableModuleItemizedPricing">
+                    class="p-2 bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400 rounded-lg shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                    </svg>
+                </span>
+                <h3 class="text-sm sm:text-base font-black text-gray-800 dark:text-gray-100">
+                    اقلام فاکتور
+                </h3>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <span
-                    class="inline-flex items-center gap-1 text-xs font-black text-emerald-700 bg-emerald-50 dark:bg-emerald-500/20 dark:text-emerald-300 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-500/30">
-                                    قیمت‌گذاری مستقل ماژول‌ها فعال است
-                                </span>
-            </template>
-        </h3>
-        <button type="button" @click="addCustomInvoiceItem()"
-                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 active:scale-95 text-white text-xs font-bold shadow-sm transition-all">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                 stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-            </svg>
-            افزودن ردیف دلخواه
-        </button>
+                    class="text-[11px] sm:text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-lg"
+                    x-text="'بر اساس ' + durationLabel + ' و ' + faNum(selectedModules.length) + ' ماژول انتخابی'"></span>
+                <template x-if="getActiveLimitsCount() > 0">
+                    <span
+                        class="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-amber-700 bg-amber-50 dark:bg-amber-500/20 dark:text-amber-300 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-500/30">
+                        <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <span x-text="faNum(getActiveLimitsCount()) + ' سقف/لیمیت فعال'"></span>
+                    </span>
+                </template>
+                <template x-if="enableModuleItemizedPricing">
+                    <span
+                        class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-black text-emerald-700 bg-emerald-50 dark:bg-emerald-500/20 dark:text-emerald-300 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-500/30">
+                        قیمت‌گذاری مستقل ماژول‌ها فعال است
+                    </span>
+                </template>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 dark:border-gray-700/60 w-full sm:w-auto">
+            <button type="button" @click="mobileSectionOpen.invoiceDetails = !mobileSectionOpen.invoiceDetails"
+                    class="sm:hidden inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black bg-violet-50 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800 cursor-pointer">
+                <span x-text="mobileSectionOpen.invoiceDetails ? 'بستن اقلام' : 'مشاهده (' + faNum(invoiceItems.length) + ')'"></span>
+                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="mobileSectionOpen.invoiceDetails ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <button type="button" @click="addCustomInvoiceItem()"
+                    class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 active:scale-95 text-white text-xs font-bold shadow-sm transition-all cursor-pointer">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>افزودن ردیف</span>
+            </button>
+        </div>
     </div>
 
-    <div class="overflow-x-auto" x-show="invoiceItems.length > 0">
+    <div :class="{'hidden sm:block': !mobileSectionOpen.invoiceDetails}">
+    <div class="hidden sm:block overflow-x-auto" x-show="invoiceItems.length > 0">
         <table class="w-full text-sm min-w-[760px]">
             <thead>
             <tr x-show="!enableModuleItemizedPricing"
@@ -484,30 +492,181 @@
             </tbody>
         </table>
     </div>
-    <div x-show="!enableModuleItemizedPricing"
-         class="p-3.5 bg-indigo-50/70 dark:bg-indigo-950/40 border-t border-indigo-100 dark:border-indigo-900/40 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="flex items-center gap-2 text-indigo-800 dark:text-indigo-200">
-            <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24"
-                 stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span class="font-medium">تعرفه ماژول‌ها در قالب پکیج کلی تجمیع شده است. ستون‌های قیمت و تخفیف به صورت مجزا پنهان بوده و مبالغ در بخش «خلاصه مالی فاکتور» محاسبه شده‌اند.</span>
+
+        {{-- Mobile Cards for Invoice Items --}}
+        <div class="sm:hidden p-3.5 space-y-3 bg-gray-50/60 dark:bg-gray-900/30 divide-y divide-gray-100 dark:divide-gray-800" x-show="invoiceItems.length > 0">
+            <template x-for="(item, idx) in invoiceItems" :key="'mob-' + idx + '-' + (item.item_id || 'custom')">
+                <div class="pt-3 first:pt-0">
+                    <div class="p-3.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/60 shadow-xs space-y-3">
+                        {{-- Top line: Item badge + title + delete button --}}
+                        <div class="flex items-start justify-between gap-2.5">
+                            <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                                <span
+                                    class="shrink-0 w-6 h-6 mt-0.5 flex items-center justify-center rounded-lg text-xs font-black"
+                                    :class="{
+                                        'bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400': item.item_type === 'module',
+                                        'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400': item.item_type === 'package',
+                                        'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400': item.item_type === 'setup_fee',
+                                        'bg-sky-100 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400': item.item_type === 'custom_domain' || item.item_type === 'white_label',
+                                        'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300': item.item_type === 'custom',
+                                    }">
+                                    <svg x-show="item.item_type === 'setup_fee'" class="w-3.5 h-3.5"
+                                         fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                         stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    <span x-show="item.item_type !== 'setup_fee'"
+                                          x-text="faNum(idx + 1)"></span>
+                                </span>
+
+                                <div class="min-w-0 flex-1">
+                                    <template x-if="item.item_type === 'custom'">
+                                        <input type="text" x-model="item.description"
+                                               class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/50 px-2.5 py-1.5 text-xs font-bold text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none"
+                                               placeholder="شرح ردیف دلخواه...">
+                                    </template>
+                                    <template x-if="item.item_type !== 'custom'">
+                                        <p class="text-xs font-black text-gray-800 dark:text-gray-100 leading-snug"
+                                           x-text="item.description"></p>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <button type="button" @click="removeInvoiceItem(idx)"
+                                    x-show="invoiceItems.length > 1"
+                                    class="p-1.5 rounded-lg text-gray-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors shrink-0 cursor-pointer"
+                                    title="حذف ردیف">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {{-- Limits if any --}}
+                        <template x-if="getItemLimits(item).length > 0">
+                            <div class="p-2.5 rounded-xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 space-y-1.5">
+                                <div class="text-[11px] font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    <span>سقف‌های مصرف مشخص‌ شده:</span>
+                                </div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <template x-for="lim in getItemLimits(item)" :key="lim.key">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 text-amber-800 dark:text-amber-200 border border-amber-200/60 dark:border-amber-800/40 text-[10px] font-black">
+                                            <span x-text="lim.label + ': ' + faNum(lim.value) + ' عدد'"></span>
+                                        </span>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        {{-- Badges & Status line --}}
+                        <div class="pt-2.5 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between gap-2 flex-wrap">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                {{-- Item type badge --}}
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black"
+                                    :class="{
+                                        'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300': item.item_type === 'package',
+                                        'bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300': item.item_type === 'module' && !item.is_extra,
+                                        'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300': (item.item_type === 'module' && item.is_extra) || item.item_type === 'setup_fee',
+                                        'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300': item.item_type === 'custom_domain' || item.item_type === 'white_label',
+                                        'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300': item.item_type === 'custom',
+                                    }">
+                                    <span x-text="item.item_type === 'package' ? 'پکیج اصلی' : (item.item_type === 'module' ? (item.is_extra ? 'ماژول الحاقی' : 'ماژول پکیج') : (item.item_type === 'setup_fee' ? 'راه‌اندازی' : (item.item_type === 'custom_domain' ? 'دامنه اختصاصی' : (item.item_type === 'white_label' ? 'وایت‌لیبل' : 'سفارشی'))))"></span>
+                                </span>
+
+                                <span
+                                    class="text-[11px] font-bold text-gray-500 dark:text-gray-400 tabular-nums"
+                                    x-text="(item.duration_months > 0) ? (item.duration_months >= 1200 ? 'مادام‌العمر' : (item.duration_months === 12 ? '۱ ساله' : (item.duration_months === 1 ? '۱ ماهه' : (item.duration_months === 3 ? '۳ ماهه' : (item.duration_months === 6 ? '۶ ماهه' : faNum(item.duration_months) + ' ماهه'))))) : (item.item_type === 'package' ? 'مادام‌العمر' : (faNum(item.quantity || 1) + ' عدد'))"></span>
+                            </div>
+
+                            {{-- Normal pricing summary --}}
+                            <div x-show="!enableModuleItemizedPricing" class="flex items-center gap-1.5 flex-wrap">
+                                <template x-if="item.item_type === 'package'">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">
+                                        محاسبه در خلاصه مالی
+                                    </span>
+                                </template>
+                                <template x-if="item.item_type === 'module'">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                          :class="item.is_extra ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'">
+                                        <span x-text="item.is_extra ? 'الحاقی' : 'شامل در پکیج'"></span>
+                                    </span>
+                                </template>
+                                <template x-if="item.item_type === 'setup_fee'">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
+                                        هزینه یکباره
+                                    </span>
+                                </template>
+                                <template x-if="item.item_type === 'custom'">
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-gray-400 text-[11px]">مبلغ:</span>
+                                        <input type="text" inputmode="numeric"
+                                               x-effect="if(document.activeElement !== $el) $el.value = (item.unit_price > 0 ? formatPriceInput(item.unit_price) : '')"
+                                               @input="let val = parsePriceInput($event.target.value); item.unit_price = val; $event.target.value = val ? formatPriceInput(val) : '';"
+                                               class="w-20 rounded-lg border border-gray-200 dark:border-gray-700 px-1.5 py-0.5 text-center text-xs font-bold text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none"
+                                               placeholder="۰">
+                                        <span class="text-[10px] text-gray-400">{{ $currencyLabel }}</span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            {{-- Itemized pricing on mobile --}}
+                            <div x-show="enableModuleItemizedPricing" class="w-full pt-2 space-y-2 border-t border-gray-100 dark:border-gray-700/50">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="text-[10px] text-gray-400 font-bold block mb-1">تعداد:</span>
+                                        <input type="text" inputmode="numeric"
+                                               :value="faNum(item.quantity)"
+                                               @input="item.quantity = Math.max(1, parsePriceInput($event.target.value) || 1)"
+                                               class="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/50 px-2 py-1 text-center text-xs font-bold text-gray-900 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] text-gray-400 font-bold block mb-1">مبلغ واحد ({{ $currencyLabel }}):</span>
+                                        <div class="flex items-center gap-1">
+                                            <input type="text" inputmode="numeric"
+                                                   x-effect="if(document.activeElement !== $el) $el.value = (item.unit_price > 0 ? formatPriceInput(item.unit_price) : '')"
+                                                   @input="let val = parsePriceInput($event.target.value); item.unit_price = val; $event.target.value = val ? formatPriceInput(val) : '';"
+                                                   :readonly="item.item_type !== 'custom' && !item._priceUnlocked"
+                                                   :class="(item.item_type !== 'custom' && !item._priceUnlocked) ? 'bg-gray-100/70 dark:bg-gray-800/60 cursor-not-allowed text-gray-500 dark:text-gray-400' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white'"
+                                                   class="w-full rounded-lg border border-gray-200 dark:border-gray-700 px-2 py-1 text-center text-xs font-bold"
+                                                   placeholder="رایگان">
+                                            <template x-if="item.item_type !== 'custom'">
+                                                <button type="button" @click="item._priceUnlocked = !item._priceUnlocked"
+                                                        class="p-1 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-400 shrink-0">
+                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                    </svg>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between pt-1">
+                                    <span class="text-xs font-bold text-gray-500 dark:text-gray-400">مبلغ کل این ردیف:</span>
+                                    <div class="text-xs font-black text-gray-900 dark:text-white tabular-nums">
+                                        <span x-text="formatAmount(getItemRowTotal(item))"></span>
+                                        <span class="text-[10px] text-gray-400 ms-0.5">{{ $currencyLabel }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
         </div>
-        <a href="{{ route('reseller.pricings.index') }}" target="_blank"
-           class="inline-flex items-center gap-1 text-xs font-black text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200 underline">
-            <span>تنظیمات قیمت‌گذاری ماژول‌ها</span>
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-            </svg>
-        </a>
-    </div>
 
-
-    <div x-show="invoiceItems.length === 0" class="p-8 text-center text-xs text-gray-400">
+        <div x-show="invoiceItems.length === 0" class="p-8 text-center text-xs text-gray-400">
         هنوز موردی به فاکتور اضافه نشده — ماژول‌ها و پکیج را در مراحل قبل انتخاب کنید یا ردیف دلخواه
         بسازید.
+    </div>
     </div>
 </x-resellerhub::card>
 
@@ -556,9 +715,6 @@
                                     </span>
                     خلاصه مالی فاکتور
                 </h3>
-                <span
-                    class="text-xs font-bold text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md"
-                    x-text="'واحد: ' + '{{ $currencyLabel }}'"></span>
             </div>
 
             <div class="space-y-3 pt-3 text-xs">
@@ -729,12 +885,10 @@
         </div>
     </x-resellerhub::card>
 </div>
-<x-resellerhub::card
-    class="p-4 sm:p-5 flex flex-col-reverse sm:flex-row items-center justify-between gap-3"
->
+<x-resellerhub::card class="p-4 sm:p-5 flex items-center justify-between gap-2.5 sm:gap-3">
     <button type="button" @click="prevStep()"
-            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gray-100 dark:bg-gray-700/60 hover:bg-gray-200 dark:hover:bg-gray-700 text-sm font-black text-gray-600 dark:text-gray-300 transition-all active:scale-95 cursor-pointer">
-        <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gray-100 dark:bg-gray-700/60 hover:bg-gray-200 dark:hover:bg-gray-700 text-xs sm:text-sm font-black text-gray-600 dark:text-gray-300 transition-all active:scale-95 cursor-pointer shrink-0">
+        <svg class="w-4 h-4 rtl:rotate-180 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
@@ -742,11 +896,11 @@
     </button>
 
     <button type="submit" :disabled="submitting"
-            class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-black shadow-md shadow-indigo-600/20 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed">
-        <svg x-show="!submitting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="inline-flex items-center justify-center gap-2 sm:gap-2.5 px-4 sm:px-8 py-2.5 sm:py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black shadow-md shadow-indigo-600/20 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed shrink-0">
+        <svg x-show="!submitting" class="w-4 sm:w-5 h-4 sm:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
         </svg>
-        <svg x-show="submitting" x-cloak class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+        <svg x-show="submitting" x-cloak class="w-4 sm:w-5 h-4 sm:h-5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                     stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor"

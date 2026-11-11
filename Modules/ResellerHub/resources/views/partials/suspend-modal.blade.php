@@ -13,11 +13,11 @@
              @click="!loading && closeModal()"></div>
 
         <div
-            class="relative bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl transform transition-all max-w-lg w-full z-10 border border-gray-100 dark:border-gray-800 p-6 sm:p-8 space-y-6 text-center">
+            class="relative bg-white dark:bg-gray-900 rounded-2xl max-h-[90vh] overflow-y-auto shadow-xl transform transition-all max-w-lg w-full z-10 border border-gray-200/80 dark:border-gray-800 p-6 sm:p-8 space-y-6 text-center">
 
             {{-- Dynamic Icon Badge --}}
             <div
-                class="w-16 h-16 mx-auto rounded-3xl flex items-center justify-center shadow-lg transition-colors duration-300"
+                class="w-14 h-14 mx-auto rounded-xl flex items-center justify-center transition-colors duration-300 shadow-xs"
                 :class="selectedTenant.suspended ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shadow-emerald-500/20' : 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 shadow-amber-500/20'">
                 <template x-if="selectedTenant.suspended">
                     <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

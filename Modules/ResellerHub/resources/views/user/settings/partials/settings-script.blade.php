@@ -1271,33 +1271,42 @@
                 this.toast.message = msg;
                 this.toast.type = type;
                 this.toast.show = true;
+                if (typeof window.showToast === 'function') {
+                    window.showToast(msg, type);
+                } else {
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: msg, type } }));
+                }
                 setTimeout(() => {
                     this.toast.show = false;
                 }, 4000);
+            },
+
+            fallbackCopyToClipboard(text, msg) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    this.showToast(msg, 'success');
+                } catch (err) {
+                    this.showToast(this.t('common.copy_error'), 'error');
+                }
+                textArea.remove();
             },
 
             copyToClipboard(text, msg = null) {
                 if (!text) return;
                 msg = msg || this.t('common.copied');
                 if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(text).then(() => {
-                        this.showToast(msg, 'success');
-                    });
+                    navigator.clipboard.writeText(text)
+                        .then(() => this.showToast(msg, 'success'))
+                        .catch(() => this.fallbackCopyToClipboard(text, msg));
                 } else {
-                    const textArea = document.createElement('textarea');
-                    textArea.value = text;
-                    textArea.style.position = 'fixed';
-                    textArea.style.left = '-999999px';
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        this.showToast(msg, 'success');
-                    } catch (err) {
-                        this.showToast(this.t('common.copy_error'), 'error');
-                    }
-                    textArea.remove();
+                    this.fallbackCopyToClipboard(text, msg);
                 }
             },
 
