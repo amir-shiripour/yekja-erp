@@ -113,9 +113,9 @@
                     </div>
                 </div>
 
-                {{-- Sleek Back to List Button (Prominent & standard at top corner) --}}
+                {{-- Mobile/Tablet Back Button (Top corner next to title) --}}
                 <a href="{{ route('reseller.sub-accounts.index') }}"
-                   class="h-10 inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-200 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-slate-200/70 dark:border-gray-700 whitespace-nowrap shrink-0">
+                   class="lg:hidden h-10 inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-200 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-slate-200/70 dark:border-gray-700 whitespace-nowrap shrink-0">
                     <svg class="w-4 h-4 text-slate-500 shrink-0 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
@@ -206,6 +206,15 @@
                     </svg>
                     <span class="sm:inline hidden">حذف</span>
                 </button>
+
+                {{-- Desktop Back Button (End of Action Bar) --}}
+                <a href="{{ route('reseller.sub-accounts.index') }}"
+                   class="hidden lg:inline-flex h-10 items-center justify-center gap-1.5 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-200 text-sm font-bold rounded-xl transition-colors border border-slate-200/70 dark:border-gray-700 whitespace-nowrap shrink-0">
+                    <svg class="w-4 h-4 text-slate-500 shrink-0 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    <span>بازگشت به لیست</span>
+                </a>
             </div>
         </div>
 
