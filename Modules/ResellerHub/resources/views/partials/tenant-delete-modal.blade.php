@@ -45,11 +45,6 @@
                         <h2 id="tenant-delete-title" class="font-bold text-gray-900 dark:text-gray-100 text-base sm:text-lg leading-snug">
                             {{ __('resellerhub::messages.tenants.delete_title') }}
                         </h2>
-                        <span
-                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/80 shrink-0">
-                            <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                            <span>{{ __('resellerhub::messages.tenants.delete_badge') }}</span>
-                        </span>
                     </div>
                     <p class="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-normal"
                        x-text="tenantLabel()"></p>
