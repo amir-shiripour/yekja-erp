@@ -102,8 +102,10 @@
                         @if($subAccount->isOnlinePurchase())
                             <span
                                 class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/80">
-                                <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                                <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                                 </svg>
                                 <span>خرید آنلاین</span>
                             </span>
@@ -114,8 +116,10 @@
                 {{-- Mobile/Tablet Back Button (Top corner next to title) --}}
                 <a href="{{ route('reseller.sub-accounts.index') }}"
                    class="lg:hidden h-10 inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-200 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-slate-200/70 dark:border-gray-700 whitespace-nowrap shrink-0">
-                    <svg class="w-4 h-4 text-slate-500 shrink-0 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    <svg class="w-4 h-4 text-slate-500 shrink-0 rtl:rotate-180" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
                     <span class="sm:inline hidden">بازگشت به لیست</span>
                     <span class="sm:hidden inline">بازگشت</span>
@@ -126,7 +130,8 @@
             <div class="flex items-center gap-2 w-full lg:w-auto">
                 {{-- Primary Action --}}
                 @if($subAccount->tenant)
-                    <form method="POST" action="{{ route('reseller.tenants.login-as', $subAccount->tenant->id) }}" target="_blank"
+                    <form method="POST" action="{{ route('reseller.tenants.login-as', $subAccount->tenant->id) }}"
+                          target="_blank"
                           class="flex-1 lg:flex-initial">
                         @csrf
                         <button type="submit"
@@ -151,7 +156,8 @@
                 {{-- Unified Amber Edit Button --}}
                 <a href="{{ route('reseller.sub-accounts.edit', $subAccount->id) }}"
                    class="h-10 inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-amber-200/80 dark:border-amber-800/60 whitespace-nowrap shrink-0">
-                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
@@ -165,13 +171,15 @@
                         class="h-10 w-10 sm:w-auto inline-flex items-center justify-center gap-1.5 sm:px-3.5 rounded-xl transition-colors border whitespace-nowrap shrink-0 cursor-pointer {{ $subAccount->status === 'active' ? 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200/80' : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200/80' }}"
                         title="{{ $subAccount->status === 'active' ? 'تعلیق موقت حساب' : 'فعال‌سازی مجدد حساب' }}">
                     @if($subAccount->status === 'active')
-                        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none"
+                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <span class="sm:inline hidden">تعلیق</span>
                     @else
-                        <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none"
+                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -198,7 +206,8 @@
                         })"
                         class="h-10 w-10 sm:w-auto inline-flex items-center justify-center gap-1.5 sm:px-3.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-rose-200/80 dark:border-rose-800/60 cursor-pointer whitespace-nowrap shrink-0"
                         title="{{ __('resellerhub::messages.subaccounts.delete_tooltip') }}">
-                    <svg class="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
@@ -208,8 +217,10 @@
                 {{-- Desktop Back Button (End of Action Bar) --}}
                 <a href="{{ route('reseller.sub-accounts.index') }}"
                    class="hidden lg:flex h-10 items-center justify-center gap-1.5 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-slate-700 dark:text-gray-200 text-sm font-bold rounded-xl transition-colors border border-slate-200/70 dark:border-gray-700 whitespace-nowrap shrink-0">
-                    <svg class="w-4 h-4 text-slate-500 shrink-0 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    <svg class="w-4 h-4 text-slate-500 shrink-0 rtl:rotate-180" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
                     <span>بازگشت به لیست</span>
                 </a>
@@ -311,9 +322,10 @@
         <div
             class="bg-white dark:bg-gray-800 rounded-2xl border border-slate-200/80 dark:border-gray-700/80 p-1.5 shadow-xs relative">
             {{-- Desktop Full Tab Navigation (sm and up) --}}
-            <nav class="hidden sm:flex items-center gap-1.5 overflow-x-auto hide-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-                 style="scrollbar-width: none; -ms-overflow-style: none;"
-                 aria-label="Tabs Desktop">
+            <nav
+                class="hidden sm:flex items-center gap-1.5 overflow-x-auto hide-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                style="scrollbar-width: none; -ms-overflow-style: none;"
+                aria-label="Tabs Desktop">
                 {{-- Tab 1: Connected Tenants --}}
                 <button type="button"
                         @click="setTab('tenants')"
@@ -473,13 +485,15 @@
                                 :class="activeTab === 'modules' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-black' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/60 font-bold'"
                                 class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition cursor-pointer text-right">
                             <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                                 </svg>
                                 <span>ماژول‌ها و امکانات</span>
                             </div>
-                            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300">
+                            <span
+                                class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300">
                                 {{ reseller_fa_num(count($tenantModules)) }}
                             </span>
                         </button>
@@ -490,13 +504,15 @@
                                 :class="activeTab === 'invoices' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-black' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/60 font-bold'"
                                 class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition cursor-pointer text-right">
                             <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                                 </svg>
                                 <span>سوابق مالی و فاکتورها</span>
                             </div>
-                            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300">
+                            <span
+                                class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300">
                                 {{ reseller_fa_num($invoices->count()) }}
                             </span>
                         </button>
@@ -507,13 +523,15 @@
                                 :class="activeTab === 'orders' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-black' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/60 font-bold'"
                                 class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition cursor-pointer text-right">
                             <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                                 </svg>
                                 <span>سفارشات آنلاین</span>
                             </div>
-                            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300">
+                            <span
+                                class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300">
                                 {{ reseller_fa_num($orders->count()) }}
                             </span>
                         </button>
@@ -1288,12 +1306,13 @@
                 },
 
                 showToast(msg, type = 'success') {
-                    this.toast.message = msg;
-                    this.toast.type = type;
-                    this.toast.show = true;
-                    setTimeout(() => {
-                        this.toast.show = false;
-                    }, 3500);
+                    if (window._rhToastComponent) {
+                        window._rhToastComponent.showToast(msg, type);
+                    } else if (typeof window.showToast === 'function') {
+                        window.showToast(msg, type);
+                    } else {
+                        this.$dispatch('toast', {message: msg, type: type});
+                    }
                 },
 
                 copyText(text, label = 'متن', key = null) {
