@@ -1102,86 +1102,90 @@
                 </a>
             </x-resellerhub::card>
         @else
-            {{-- Summary Strip (KPI Stat Cards consistent with invoices and orders) --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {{-- Summary Strip (2-Col Mobile / 4-Col Desktop consistent with Invoices and Orders) --}}
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
                 {{-- Card 1: Total Packages --}}
                 <div
-                    class="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/60 border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-xl flex items-center gap-4">
+                    class="relative overflow-hidden rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/60 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-4">
                     <span
-                        class="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
+                        <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                   d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                         </svg>
                     </span>
-                    <div class="min-w-0 flex-1">
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wide block mb-1 truncate">کل پکیج‌های ماژول</span>
+                    <div class="min-w-0 flex-1 w-full">
+                        <span
+                            class="text-[11px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide block mb-0.5 sm:mb-1 truncate">کل پکیج‌های ماژول</span>
                         <div class="flex flex-wrap items-baseline gap-1">
                             <span
-                                class="text-xl xl:text-2xl font-black text-gray-900 dark:text-white tabular-nums break-all">{{ reseller_fa_num($totalCount ?? count($packages)) }}</span>
-                            <span class="text-xs font-medium text-gray-400 ms-1">پکیج</span>
+                                class="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white tabular-nums break-all">{{ reseller_fa_num($totalCount ?? $packages->total()) }}</span>
+                            <span class="text-[10px] sm:text-xs font-medium text-gray-400 ms-0.5">پکیج</span>
                         </div>
                     </div>
                 </div>
 
                 {{-- Card 2: Active Packages --}}
                 <div
-                    class="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/60 border-gray-100 dark:border-gray-700/50 shadow-sm flex items-center gap-4">
+                    class="relative overflow-hidden rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/60 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-4">
                     <span
-                        class="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                        <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </span>
-                    <div class="min-w-0 flex-1">
+                    <div class="min-w-0 flex-1 w-full">
                         <span
-                            class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide block mb-1 truncate">پکیج‌های فعال</span>
+                            class="text-[11px] sm:text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide block mb-0.5 sm:mb-1 truncate">پکیج‌های فعال</span>
                         <div class="flex flex-wrap items-baseline gap-1">
                             <span
-                                class="text-xl xl:text-2xl font-black text-emerald-700 dark:text-emerald-400 tabular-nums break-all">{{ reseller_fa_num($activeCount ?? 0) }}</span>
-                            <span class="text-xs font-medium text-emerald-600/80 ms-1">آماده سفارش</span>
+                                class="text-base sm:text-xl xl:text-2xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums break-all">{{ reseller_fa_num($activeCount ?? 0) }}</span>
+                            <span
+                                class="text-[10px] sm:text-xs font-medium text-emerald-600/80 ms-0.5">آماده سفارش</span>
                         </div>
                     </div>
                 </div>
 
                 {{-- Card 3: Inactive Packages --}}
                 <div
-                    class="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/60 border-gray-100 dark:border-gray-700/50 shadow-sm flex items-center gap-4">
+                    class="relative overflow-hidden rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/60 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-4">
                     <span
-                        class="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 shrink-0">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
+                        <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </span>
-                    <div class="min-w-0 flex-1">
+                    <div class="min-w-0 flex-1 w-full">
                         <span
-                            class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide block mb-1 truncate">پکیج‌های غیرفعال</span>
+                            class="text-[11px] sm:text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide block mb-0.5 sm:mb-1 truncate">پکیج‌های غیرفعال</span>
                         <div class="flex flex-wrap items-baseline gap-1">
                             <span
-                                class="text-xl xl:text-2xl font-black text-amber-700 dark:text-amber-400 tabular-nums break-all">{{ reseller_fa_num($inactiveCount ?? 0) }}</span>
-                            <span class="text-xs font-medium text-amber-500/80 ms-1">مخفی از خرید جدید</span>
+                                class="text-base sm:text-xl xl:text-2xl font-black text-amber-600 dark:text-amber-400 tabular-nums break-all">{{ reseller_fa_num($inactiveCount ?? 0) }}</span>
+                            <span
+                                class="text-[10px] sm:text-xs font-medium text-amber-500/80 ms-0.5">مخفی از خرید</span>
                         </div>
                     </div>
                 </div>
 
                 {{-- Card 4: Connected Tenants --}}
                 <div
-                    class="relative overflow-hidden rounded-3xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/60 border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-xl flex items-center gap-4">
+                    class="relative overflow-hidden rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group bg-white dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/60 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-4">
                     <span
-                        class="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 shrink-0">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 shrink-0">
+                        <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                   d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                         </svg>
                     </span>
-                    <div class="min-w-0 flex-1">
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wide block mb-1 truncate">سامانه‌های فعال متصل</span>
+                    <div class="min-w-0 flex-1 w-full">
+                        <span
+                            class="text-[11px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide block mb-0.5 sm:mb-1 truncate">سامانه‌های متصل</span>
                         <div class="flex flex-wrap items-baseline gap-1">
                             <span
-                                class="text-xl xl:text-2xl font-black text-gray-900 dark:text-white tabular-nums break-all">{{ reseller_fa_num($connectedTenantsCount ?? 0) }}</span>
-                            <span class="text-xs font-medium text-gray-400 ms-1">سامانه</span>
+                                class="text-base sm:text-xl xl:text-2xl font-black text-gray-900 dark:text-white tabular-nums break-all">{{ reseller_fa_num($connectedTenantsCount ?? 0) }}</span>
+                            <span class="text-[10px] sm:text-xs font-medium text-gray-400 ms-0.5">سامانه</span>
                         </div>
                     </div>
                 </div>
@@ -1189,10 +1193,10 @@
 
             {{-- Filters Form (100% Consistent with invoices, orders, and subaccounts) --}}
             <form method="GET" action="{{ route('reseller.packages.index') }}"
-                  class="bg-white dark:bg-gray-800/60 p-5 rounded-3xl border border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-xl">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-center">
+                  class="bg-white dark:bg-gray-800/60 p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700/50 shadow-sm backdrop-blur-xl">
+                <div class="grid grid-cols-2 lg:grid-cols-12 gap-2.5 sm:gap-3.5 items-center">
                     {{-- Search Input --}}
-                    <div class="relative lg:col-span-4">
+                    <div class="col-span-2 lg:col-span-4 relative">
                         <div
                             class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-gray-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1202,14 +1206,14 @@
                         </div>
                         <input type="text" name="search" value="{{ request('search') }}"
                                placeholder="جستجو در نام و توضیحات پکیج..."
-                               class="w-full rounded-2xl border-gray-200 bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700 ps-11 pe-4 py-3 text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all dark:text-white">
+                               class="w-full rounded-2xl border-gray-200 bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700 ps-11 pe-4 py-2.5 sm:py-3 text-xs sm:text-sm focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all dark:text-white">
                     </div>
 
                     {{-- Status Filter --}}
-                    <div class="lg:col-span-2">
+                    <div class="col-span-1 lg:col-span-2">
                         <select name="status" aria-label="فیلتر وضعیت"
-                                class="w-full rounded-2xl border-gray-200 bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700 px-3.5 py-3 text-xs font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all dark:text-white cursor-pointer">
-                            <option value="">همه وضعیت‌ها ({{ reseller_fa_num($totalCount ?? count($packages)) }})
+                                class="w-full rounded-2xl border-gray-200 bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700 px-3 py-2.5 sm:py-3 text-xs font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all dark:text-white cursor-pointer">
+                            <option value="">همه وضعیت‌ها ({{ reseller_fa_num($totalCount ?? $packages->total()) }})
                             </option>
                             <option value="active" @selected(request('status') === 'active')>فقط فعال‌ها
                                 ({{ reseller_fa_num($activeCount ?? 0) }})
@@ -1221,9 +1225,9 @@
                     </div>
 
                     {{-- Price Type Filter --}}
-                    <div class="lg:col-span-2">
+                    <div class="col-span-1 lg:col-span-2">
                         <select name="price_type" aria-label="انتخاب price_type"
-                                class="w-full rounded-2xl border-gray-200 bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700 px-3.5 py-3 text-xs font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all dark:text-white cursor-pointer">
+                                class="w-full rounded-2xl border-gray-200 bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700 px-3 py-2.5 sm:py-3 text-xs font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all dark:text-white cursor-pointer">
                             <option value="">همه مدل‌های تعرفه</option>
                             <option value="subscription" @selected(request('price_type') === 'subscription')>اشتراکی /
                                 دوره‌ای
@@ -1235,9 +1239,9 @@
                     </div>
 
                     {{-- Sort Filter --}}
-                    <div class="lg:col-span-2">
+                    <div class="col-span-2 sm:col-span-1 lg:col-span-2">
                         <select name="sort_by" aria-label="مرتب‌سازی"
-                                class="w-full rounded-2xl border-gray-200 bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700 px-3.5 py-3 text-xs font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all dark:text-white cursor-pointer">
+                                class="w-full rounded-2xl border-gray-200 bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700 px-3.5 py-2.5 sm:py-3 text-xs font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all dark:text-white cursor-pointer">
                             <option value="latest" @selected(request('sort_by') === 'latest' || !request('sort_by'))>
                                 جدیدترین (پیش‌فرض)
                             </option>
@@ -1260,11 +1264,14 @@
                     @if(request('sort_order'))
                         <input type="hidden" name="sort_order" value="{{ request('sort_order') }}">
                     @endif
+                    @if(request('per_page'))
+                        <input type="hidden" name="per_page" value="{{ request('per_page') }}">
+                    @endif
 
                     {{-- Submit & Reset Buttons --}}
-                    <div class="flex items-center gap-1.5 lg:col-span-2 justify-end">
+                    <div class="col-span-2 sm:col-span-1 lg:col-span-2 flex items-center gap-1.5 justify-end">
                         <button type="submit"
-                                class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black shadow-md shadow-indigo-500/20 transition-all cursor-pointer">
+                                class="flex-1 inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-black shadow-md shadow-indigo-500/20 transition-all cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
@@ -1272,9 +1279,9 @@
                             <span>اعمال فیلتر</span>
                         </button>
 
-                        @if(request()->hasAny(['search', 'status', 'price_type', 'sort_by', 'sort_order']))
+                        @if(request()->hasAny(['search', 'status', 'price_type', 'sort_by', 'sort_order', 'per_page']))
                             <a href="{{ route('reseller.packages.index') }}"
-                               class="inline-flex items-center justify-center p-3 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors shrink-0"
+                               class="inline-flex items-center justify-center p-2.5 sm:p-3 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors shrink-0"
                                title="پاکسازی فیلترها">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1606,6 +1613,76 @@
                         </x-resellerhub::card>
                     @endforeach
                 </div>
+
+                {{-- Pagination & Per-Page Controls --}}
+                @if($packages->total() > 0)
+                    <div
+                        class="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/60 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div
+                            class="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                            <div>
+                                نمایش
+                                <strong
+                                    class="font-bold text-gray-900 dark:text-white">{{ reseller_fa_num($packages->firstItem() ?? 1) }}</strong>
+                                تا
+                                <strong
+                                    class="font-bold text-gray-900 dark:text-white">{{ reseller_fa_num($packages->lastItem() ?? $packages->count()) }}</strong>
+                                از مجموع
+                                <strong
+                                    class="font-bold text-indigo-600 dark:text-indigo-400">{{ reseller_fa_num($packages->total()) }}</strong>
+                                پکیج ثبت‌شده
+                            </div>
+
+                            <span class="text-gray-300 dark:text-gray-600 hidden sm:inline">•</span>
+
+                            {{-- Per Page Dropdown --}}
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-gray-400 text-xs">تعداد در هر صفحه:</span>
+                                <select name="per_page" aria-label="تعداد در هر صفحه"
+                                        onchange="window.location.href = this.value"
+                                        class="py-1 px-2.5 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer shadow-2xs">
+                                    @foreach([6, 9, 12, 15, 24, 30] as $size)
+                                        <option
+                                            value="{{ request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]) }}"
+                                            {{ (int)$packages->perPage() === $size ? 'selected' : '' }}>
+                                            {{ reseller_fa_num($size) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            @if($packages->hasPages())
+                                {{ $packages->withQueryString()->links('resellerhub::partials.pagination') }}
+                            @else
+                                <nav role="navigation" aria-label="Pagination Navigation"
+                                     class="inline-flex items-center gap-1.5">
+                                    <span
+                                        class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800/50 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none"
+                                        title="صفحه قبل">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                             stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-600 text-white font-black text-xs shadow-md shadow-indigo-500/20 select-none">
+                                        {{ reseller_fa_num(1) }}
+                                    </span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800/50 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none"
+                                        title="صفحه بعد">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                             stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                    </span>
+                                </nav>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             @endif
         @endif
 

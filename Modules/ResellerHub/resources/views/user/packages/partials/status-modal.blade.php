@@ -108,7 +108,6 @@
                             <div class="flex items-center gap-2 mt-0.5 text-xs text-gray-400">
                                 <span
                                     x-text="faNum(packageToToggle.modules_count ?? (packageToToggle.modules?.length || 0)) + ' ماژول'"></span>
-                                <span>•</span>
                                 <span class="font-semibold text-gray-600 dark:text-gray-300"
                                       x-text="faNum(packageToToggle.tenants_count || 0) + ' سامانه متصل'"></span>
                             </div>
