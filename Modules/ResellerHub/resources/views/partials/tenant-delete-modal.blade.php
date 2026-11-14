@@ -2,8 +2,8 @@
      x-data="tenantDeleteModalComponent()"
      x-show="open"
      x-cloak
-     style="display: none;"
-     class="fixed inset-0 z-[99999] overflow-y-auto"
+     style="display: none; z-index: 99998;"
+     class="fixed inset-0 z-[99998] overflow-y-auto"
      role="dialog"
      aria-modal="true"
      aria-labelledby="tenant-delete-title"

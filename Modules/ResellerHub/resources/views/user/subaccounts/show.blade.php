@@ -23,10 +23,8 @@
             'features' => $pFeats,
             'features_count' => count($pFeats),
             'limits' => $p->limits ?? [],
-
             'price_type' => $p->price_type ?? 'subscription',
             'active_periods' => $activePeriods,
-
             'monthly_price' => (int)($p->monthly_price ?? 0),
             'quarterly_price' => (int)($p->quarterly_price ?? 0),
             'semi_annual_price' => (int)($p->semi_annual_price ?? 0),
@@ -239,11 +237,10 @@
                 </div>
             </x-resellerhub::card>
 
-            {{-- Metric 2: CRM Tenant --}}
             <x-resellerhub::card class="p-5 flex items-center justify-between gap-3">
                 <div class="min-w-0">
                     <span
-                        class="text-xs font-bold text-gray-400 dark:text-gray-400 block truncate">سامانه ابری CRM</span>
+                        class="text-xs font-bold text-gray-400 dark:text-gray-400 block truncate">سامانه ابری</span>
                     <p class="text-lg sm:text-xl font-black text-gray-900 dark:text-white mt-1.5 truncate">
                         {{ $subAccount->tenant ? $subAccount->tenant->name : 'فاقد سامانه' }}
                     </p>
@@ -662,9 +659,9 @@
                                       d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                             </svg>
                         </div>
-                        <h3 class="text-sm font-black text-gray-800 dark:text-gray-200">فاقد سامانه CRM فعال</h3>
+                        <h3 class="text-sm font-black text-gray-800 dark:text-gray-200">فاقد سامانه فعال</h3>
                         <p class="text-xs text-gray-400 max-w-xs mx-auto">
-                            برای این زیرمجموعه هنوز سامانه CRM متصلی ساخته نشده است.
+                            برای این زیرمجموعه هنوز سامانه متصلی ساخته نشده است.
                         </p>
                         <div class="pt-3">
                             <button type="button" @click="openQuickProvisionForSub()"
@@ -673,7 +670,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M12 4v16m8-8H4"/>
                                 </svg>
-                                <span>ساخت اولین سامانه CRM برای این خریدار</span>
+                                <span>ساخت اولین سامانه برای این خریدار</span>
                             </button>
                         </div>
                     </div>
@@ -1202,7 +1199,7 @@
                         <h3 class="text-xl font-black text-gray-900 dark:text-white"
                             x-text="status === 'active' ? ('تعلیق دسترسی «' + name + '»') : ('فعال‌سازی مجدد حساب «' + name + '»')"></h3>
                         <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed"
-                           x-text="status === 'active' ? 'با تعلیق حساب، دسترسی اولیه ورود خریدار و مدیر این زیرمجموعه موقتاً مسدود شده و امکان ورود به CRM غیرفعال خواهد شد.' : 'با رفع تعلیق، دسترسی کامل ورود خریدار به سامانه CRM اختصاصی بلافاصله فعال می‌گردد.'"></p>
+                           x-text="status === 'active' ? 'با تعلیق حساب، دسترسی اولیه ورود خریدار و مدیر این زیرمجموعه موقتاً مسدود شده و امکان ورود به سامانه غیرفعال خواهد شد.' : 'با رفع تعلیق، دسترسی کامل ورود خریدار به سامانه اختصاصی بلافاصله فعال می‌گردد.'"></p>
                     </div>
 
                     {{-- Summary Preview Card --}}
@@ -1245,7 +1242,7 @@
             </div>
         </div>
 
-        {{-- Quick Provision CRM Modal (inside x-data root) --}}
+        {{-- Quick Provision Modal (inside x-data root) --}}
         @include('resellerhub::user.subaccounts.partials.quick-provision-modal')
 
     </div>
@@ -1965,10 +1962,10 @@
                         this.createdInvoice = data.invoice || null;
                         this.createdOrder = data.order || null;
 
-                        this.showToast('سامانه CRM خریدار با موفقیت راه‌اندازی شد.', 'success');
+                        this.showToast('سامانه خریدار با موفقیت راه‌اندازی شد.', 'success');
                     } catch (err) {
                         this.submitting = false;
-                        this.generalError = 'خطای ارتباط با سرور هنگام ایجاد سامانه CRM.';
+                        this.generalError = 'خطای ارتباط با سرور هنگام ایجاد سامانه.';
                     }
                 },
 
