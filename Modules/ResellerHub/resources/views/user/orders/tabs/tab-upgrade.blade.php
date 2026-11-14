@@ -403,18 +403,13 @@
                                           x-text="upgradeIssueInvoice ? 'فاکتور صادر شود' : 'عدم صدور'"></span>
                             <div class="relative inline-flex items-center">
                                 <input type="checkbox" x-model="upgradeIssueInvoice" class="sr-only peer">
-                                <div
-                                    class="w-13 h-7 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-300 shadow-inner"></div>
-                                <div
-                                    class="absolute right-1 top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:-translate-x-6 flex items-center justify-center">
-                                    <svg
-                                        class="w-3 h-3 text-emerald-600 opacity-0 peer-checked:opacity-100 transition-opacity"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                </div>
-                            </div>
+                <div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-200 ease-in-out shadow-xs"></div>
+                <div class="absolute right-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ease-in-out peer-checked:-translate-x-5 flex items-center justify-center">
+                    <svg class="w-3 h-3 text-emerald-600 opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+            </div>
                         </label>
                     </div>
 

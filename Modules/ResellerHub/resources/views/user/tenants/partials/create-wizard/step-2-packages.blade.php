@@ -65,18 +65,29 @@
                 }" class="relative overflow-visible" :class="{ 'z-50': open }">
             <button type="button" @click="open = !open"
                     class="w-full rounded-xl border border-gray-200 bg-gray-50/70 dark:bg-gray-900/50 dark:border-gray-700 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all cursor-pointer flex items-center justify-between cursor-pointer w-full text-start py-2.5 px-3.5 text-xs sm:text-sm">
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5 min-w-0 flex-1">
                     <div
-                        class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400 flex items-center justify-center text-xs font-bold">
+                        class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400 flex items-center justify-center text-xs font-bold shrink-0">
                         <span x-text="getSelectedTitle() ? getSelectedTitle().charAt(0) : 'U'"></span>
                     </div>
                     <span class="truncate font-medium" x-text="getSelectedTitle()"></span>
                 </div>
-                <svg class="w-4 h-4 text-gray-400 shrink-0 ms-2" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19 9l-7 7-7-7"/>
-                </svg>
+                <div class="flex items-center gap-1 shrink-0 ms-2">
+                    <template x-if="form.sub_account_id">
+                        <span @click.stop="select(null)"
+                              class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400 hover:text-red-500 rounded-lg transition-colors cursor-pointer"
+                              title="حذف انتخاب کاربر">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </span>
+                    </template>
+                    <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
             </button>
 
             <div x-show="open" @click.outside="open = false" x-cloak
@@ -86,6 +97,17 @@
                            placeholder="جستجوی کاربر بر اساس نام، شماره موبایل یا..."
                            class="w-full text-xs p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
                 </div>
+
+                {{-- Option to clear selection --}}
+                <template x-if="form.sub_account_id">
+                    <div @click="select(null)"
+                         class="px-3 py-2 text-xs rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 cursor-pointer transition-colors flex items-center gap-2 border-b border-gray-100 dark:border-gray-700/60 mb-1">
+                        <svg class="w-4 h-4 shrink-0 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        <span class="font-bold">حذف انتخاب (بدون کاربر زیرمجموعه)</span>
+                    </div>
+                </template>
 
                 <template x-for="opt in filteredOptions" :key="opt.id">
                     <div @click="select(opt)"
