@@ -271,7 +271,9 @@ class Checkout extends Component
      */
     protected function calculatePayableTotal(ResellerPackage $package, int $months): int
     {
-        $unitPrice = $package->getFinalPriceForMonths($months);
+        $reseller = $this->resolveReseller();
+        $resellerId = $reseller?->id ?? $package->reseller_id;
+        $unitPrice = ResellerHelper::roundPrice($package->getFinalPriceForMonths($months), $resellerId);
         $items = $this->resolveInvoiceItems($package, $months, $unitPrice);
 
         $total = 0;
@@ -280,9 +282,8 @@ class Checkout extends Component
             $total += max(0, (int)($item['unit_price'] ?? 0) - (int)($item['discount_amount'] ?? 0));
         }
 
-        $reseller = $this->resolveReseller();
-        if ($total > 0 && $reseller) {
-            return app(PriceRoundingService::class)->round($total, $reseller->id);
+        if ($total > 0 && $resellerId) {
+            return app(PriceRoundingService::class)->round($total, $resellerId);
         }
 
         return $total;
@@ -512,11 +513,12 @@ class Checkout extends Component
 
     protected function resolveInvoiceItems($package, int $months, int $unitPrice): array
     {
-        $rawPrice = $package->getPriceForMonths($months);
-        $finalPrice = $package->getFinalPriceForMonths($months);
+        $resellerId = $this->resolveReseller()?->id ?? $package->reseller_id;
+        $rawPrice = ResellerHelper::roundPrice($package->getPriceForMonths($months), $resellerId);
+        $finalPrice = ResellerHelper::roundPrice($package->getFinalPriceForMonths($months), $resellerId);
         $hasDiscount = ($package->isSubscription() ? $package->hasActiveDiscountForMonths($months) : $package->hasActiveDiscount()) && $finalPrice < $rawPrice;
         $discountAmount = $hasDiscount ? max(0, $rawPrice - $finalPrice) : 0;
-        $itemUnitPrice = $hasDiscount ? $rawPrice : $unitPrice;
+        $itemUnitPrice = $hasDiscount ? $rawPrice : ResellerHelper::roundPrice($unitPrice, $resellerId);
 
         $items = [
             [
@@ -703,7 +705,7 @@ class Checkout extends Component
                 }
 
                 // 3. Generate Invoice
-                $unitPrice = $package->getFinalPriceForMonths($months);
+                $unitPrice = ResellerHelper::roundPrice($package->getFinalPriceForMonths($months), $reseller->id);
                 $items = $this->resolveInvoiceItems($package, $months, $unitPrice);
 
                 $billingService = app(ResellerBillingService::class);

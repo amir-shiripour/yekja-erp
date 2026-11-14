@@ -11,9 +11,10 @@
         $pkgFeats = ResellerHelper::filterCommercialFeatures($rawFeats);
         $isFreeAllowed = $isRegistrationWithoutPaymentAllowed ?? $this->isRegistrationWithoutPaymentAllowed();
         $isFree = $isFreeAllowed;
+        $resellerId = $reseller?->id ?? $selectedPackage?->reseller_id;
         $currentMonths = ResellerPackage::resolveMonthFromPeriodKey($billingPeriod);
-        $rawPrice = $isFree ? 0 : $selectedPackage->getPriceForMonths($currentMonths);
-        $currentPrice = $isFree ? 0 : $selectedPackage->getFinalPriceForMonths($currentMonths);
+        $rawPrice = $isFree ? 0 : ResellerHelper::roundPrice($selectedPackage->getPriceForMonths($currentMonths), $resellerId);
+        $currentPrice = $isFree ? 0 : ResellerHelper::roundPrice($selectedPackage->getFinalPriceForMonths($currentMonths), $resellerId);
         $hasDiscount = !$isFree && ($selectedPackage->isSubscription() ? $selectedPackage->hasActiveDiscountForMonths($currentMonths) : $selectedPackage->hasActiveDiscount()) && $currentPrice < $rawPrice;
     @endphp
     <div
@@ -314,8 +315,9 @@
                                          style="display: none;" class="flex flex-col gap-3">
                                         @if($pkg->isPeriodActive($pKey))
                                             @php
-                                                $rawPriceForPeriod = $pkg->getPriceForMonths($pData['months']);
-                                                $finalPriceForPeriod = $pkg->getFinalPriceForMonths($pData['months']);
+                                                $pkgResellerId = $reseller?->id ?? $pkg->reseller_id;
+                                                $rawPriceForPeriod = ResellerHelper::roundPrice($pkg->getPriceForMonths($pData['months']), $pkgResellerId);
+                                                $finalPriceForPeriod = ResellerHelper::roundPrice($pkg->getFinalPriceForMonths($pData['months']), $pkgResellerId);
                                                 $hasPkgDiscount = $pkg->hasActiveDiscountForMonths($pData['months']) && $finalPriceForPeriod < $rawPriceForPeriod;
                                             @endphp
                                             <div

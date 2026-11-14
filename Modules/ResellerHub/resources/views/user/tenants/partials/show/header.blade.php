@@ -54,16 +54,21 @@
             <span class="sm:hidden inline">ویرایش</span>
         </a>
 
-        {{-- SQL Dump (Emerald) --}}
-        <a href="{{ route('reseller.tenants.export-sql', $tenant->id) }}"
-           class="h-10 w-10 sm:w-auto inline-flex items-center justify-center gap-1.5 sm:px-3.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-emerald-200/80 dark:border-emerald-800/60 whitespace-nowrap shrink-0"
-           title="استخراج دیتابیس اختصاصی این سامانه">
-            <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-            </svg>
-            <span class="sm:inline hidden">دانلود SQL Dump</span>
-        </a>
+        @php
+            $isSuperAdmin = $isSuperAdmin ?? (auth()->user() && method_exists(auth()->user(), 'hasRole') && auth()->user()->hasRole('super-admin'));
+        @endphp
+        @if($isSuperAdmin)
+            {{-- SQL Dump (Emerald) --}}
+            <a href="{{ route('reseller.tenants.export-sql', $tenant->id) }}"
+               class="h-10 w-10 sm:w-auto inline-flex items-center justify-center gap-1.5 sm:px-3.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold rounded-xl transition-colors border border-emerald-200/80 dark:border-emerald-800/60 whitespace-nowrap shrink-0"
+               title="استخراج دیتابیس اختصاصی این سامانه">
+                <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                <span class="sm:inline hidden">دانلود SQL Dump</span>
+            </a>
+        @endif
 
         {{-- Hard Delete Tenant (Rose) --}}
         <button type="button"

@@ -96,16 +96,6 @@
             'icon' => '<line x1="12" y1="1" x2="12" y2="23"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
         ],
         [
-            'color' => 'cyan',
-            'url' => route('reseller.tenants.export'),
-            'title' => 'استخراج دیتابیس',
-            'desc' => 'تهیه نسخه پشتیبان SQL و JSON از دیتابیس مشتریان',
-            'badge' => 'SQL + JSON',
-            'hover_border' => 'hover:border-cyan-400 dark:hover:border-cyan-500 hover:shadow-cyan-500/10',
-            'hover_text' => 'group-hover:text-cyan-600 dark:group-hover:text-cyan-400',
-            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>',
-        ],
-        [
             'color' => 'fuchsia',
             'url' => route('reseller.settings.index'),
             'title' => ' تنظیمات',
@@ -116,6 +106,20 @@
             'icon' => '<circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>',
         ],
     ];
+
+    $isSuperAdmin = $isSuperAdmin ?? (auth()->user() && method_exists(auth()->user(), 'hasRole') && auth()->user()->hasRole('super-admin'));
+    if ($isSuperAdmin) {
+        $shortcuts[] = [
+            'color' => 'cyan',
+            'url' => route('reseller.tenants.export'),
+            'title' => 'استخراج دیتابیس',
+            'desc' => 'تهیه نسخه پشتیبان SQL و JSON از دیتابیس مشتریان',
+            'badge' => 'SQL + JSON',
+            'hover_border' => 'hover:border-cyan-400 dark:hover:border-cyan-500 hover:shadow-cyan-500/10',
+            'hover_text' => 'group-hover:text-cyan-600 dark:group-hover:text-cyan-400',
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>',
+        ];
+    }
 @endphp
 
 <section class="space-y-3">
@@ -131,7 +135,7 @@
                 دسترسی سریع و کنسول ابزارهای نمایندگی
             </h2>
         </div>
-        <span class="text-xs font-bold text-gray-400">{{ reseller_fa_num(8) }} ماژول عملیاتی فعال</span>
+        <span class="text-xs font-bold text-gray-400">{{ reseller_fa_num(count($shortcuts)) }} ماژول عملیاتی فعال</span>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

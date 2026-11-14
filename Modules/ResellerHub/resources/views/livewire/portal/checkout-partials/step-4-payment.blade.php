@@ -5,13 +5,14 @@
     $isFreeAllowed = $isRegistrationWithoutPaymentAllowed ?? $this->isRegistrationWithoutPaymentAllowed();
     $isPackageFree = $isFreeAllowed;
     $currentMonths = ResellerPackage::resolveMonthFromPeriodKey($billingPeriod);
-    $rawPackagePrice = $isPackageFree ? 0 : $selectedPackage->getPriceForMonths($currentMonths);
-    $packagePrice = $isPackageFree ? 0 : $selectedPackage->getFinalPriceForMonths($currentMonths);
+    $resellerId = $reseller?->id ?? $selectedPackage?->reseller_id;
+    $rawPackagePrice = $isPackageFree ? 0 : ResellerHelper::roundPrice($selectedPackage->getPriceForMonths($currentMonths), $resellerId);
+    $packagePrice = $isPackageFree ? 0 : ResellerHelper::roundPrice($selectedPackage->getFinalPriceForMonths($currentMonths), $resellerId);
     $packageSetupFee = $isPackageFree ? 0 : $selectedPackage->getFinalSetupFeeAttribute();
     $hasPkgDiscount = !$isPackageFree && ($selectedPackage->isSubscription() ? $selectedPackage->hasActiveDiscountForMonths($currentMonths) : $selectedPackage->hasActiveDiscount()) && $packagePrice < $rawPackagePrice;
     $wlFee = $this->getWhiteLabelFee($currentMonths);
     $rawTotal = $isPackageFree ? 0 : ($packagePrice + $packageSetupFee + $wlFee['total']);
-    $totalPrice = $rawTotal > 0 ? ResellerHelper::roundPrice($rawTotal) : 0;
+    $totalPrice = $rawTotal > 0 ? ResellerHelper::roundPrice($rawTotal, $resellerId) : 0;
     $pkgPeriods = $packagePeriods ?? ($selectedPackage && method_exists($selectedPackage, 'getPackagePeriods') ? $selectedPackage->getPackagePeriods() : ($availablePeriods ?? []));
 @endphp
 <div
@@ -106,12 +107,12 @@
                         @foreach($pkgPeriods as $pKey => $pData)
                             @php
                                 $periodMonths = (int)($pData['months'] ?? ResellerPackage::resolveMonthFromPeriodKey($pKey));
-                                $rawPkgPriceForPeriod = (int)($pData['raw_price'] ?? $selectedPackage->getPriceForMonths($periodMonths));
-                                $finalPkgPriceForPeriod = (int)($pData['final_price'] ?? $selectedPackage->getFinalPriceForMonths($periodMonths));
+                                $rawPkgPriceForPeriod = ResellerHelper::roundPrice((int)($pData['raw_price'] ?? $selectedPackage->getPriceForMonths($periodMonths)), $resellerId);
+                                $finalPkgPriceForPeriod = ResellerHelper::roundPrice((int)($pData['final_price'] ?? $selectedPackage->getFinalPriceForMonths($periodMonths)), $resellerId);
                                 $hasPeriodDiscount = !empty($pData['has_discount']) || ($selectedPackage->hasActiveDiscountForMonths($periodMonths) && $finalPkgPriceForPeriod < $rawPkgPriceForPeriod);
                                 $wlForPeriod = $this->getWhiteLabelFee($periodMonths);
                                 $periodSetupFee = $selectedPackage->getFinalSetupFeeAttribute();
-                                $periodCombined = ResellerHelper::roundPrice($finalPkgPriceForPeriod + $periodSetupFee + $wlForPeriod['total']);
+                                $periodCombined = ResellerHelper::roundPrice($finalPkgPriceForPeriod + $periodSetupFee + $wlForPeriod['total'], $resellerId);
                                 $periodDiscountPercent = (int)($pData['discount_percent'] ?? ($rawPkgPriceForPeriod > 0 ? round((($rawPkgPriceForPeriod - $finalPkgPriceForPeriod) / $rawPkgPriceForPeriod) * 100) : 0));
                             @endphp
                             <label
