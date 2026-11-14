@@ -1,4 +1,3 @@
-{{-- Reusable Toast Notifications for ResellerHub --}}
 <div x-data="{
         toast: { show: false, message: '', type: 'success' },
         _timer: null,

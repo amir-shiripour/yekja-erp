@@ -52,12 +52,12 @@
                     </div>
 
                     <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white tracking-tight">
-                        اشتراک شما برای پلن «{{ $unpaidPayload['package_name'] ?? 'سازمانی' }}» ثبت شده است
+                        اشتراک شما برای پکیج «{{ $unpaidPayload['package_name'] ?? 'سازمانی' }}» ثبت شده است
                     </h3>
 
                     <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl">
                         جهت فعال‌سازی آنی ماژول‌ها و استفاده کامل از امکانات سامانه، فاکتور مربوطه را تسویه نمایید. تا
-                        زمان پرداخت، دسترسی به ماژول‌های این پلن در حالت قفل موقت قرار دارد.
+                        زمان پرداخت، دسترسی به ماژول‌های این پکیج در حالت قفل موقت قرار دارد.
                     </p>
 
                     @if(!empty($unpaidPayload['invoice_due_formatted']))

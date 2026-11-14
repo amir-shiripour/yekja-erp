@@ -1,10 +1,9 @@
-{{-- SubAccount Deletion Confirmation Modal --}}
 <div id="subaccount-delete-modal"
      x-data="subAccountDeleteModalComponent()"
      x-show="open"
      x-cloak
-     style="display: none;"
-     class="fixed inset-0 z-[99999] overflow-y-auto"
+     style="display: none; z-index: 99998;"
+     class="fixed inset-0 z-[99998] overflow-y-auto"
      role="dialog"
      aria-modal="true"
      aria-labelledby="subaccount-delete-title"
@@ -24,7 +23,7 @@
 
         {{-- Dialog Panel (dqnamo style enhanced) --}}
         <div @click.stop
-             class="relative w-full max-w-lg origin-center rounded-2xl border border-gray-200/90 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 sm:p-7 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.06),0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.4),0_25px_50px_-12px_rgba(0,0,0,0.7)] my-8 text-start space-y-5 z-10 transition-all"
+             class="relative w-full max-w-md sm:max-w-lg origin-center rounded-2xl border border-gray-200/90 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 sm:p-7 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.06),0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.4),0_25px_50px_-12px_rgba(0,0,0,0.7)] my-8 text-start space-y-5 z-10 transition-all"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 scale-95"
              x-transition:enter-end="opacity-100 scale-100"
@@ -51,13 +50,6 @@
                                 <span>{{ __('resellerhub::messages.subaccounts.delete_title') }}</span>
                             </template>
                         </h2>
-                        <template x-if="subAccount && subAccount.tenants_count > 0">
-                            <span
-                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/80 shrink-0">
-                                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                                <span x-text="toPersianDigits(subAccount?.tenants_count) + ' سامانه'"></span>
-                            </span>
-                        </template>
                     </div>
                     <p class="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-normal"
                        x-text="subAccountLabel()"></p>
@@ -67,23 +59,6 @@
             {{-- CASE 1: CONNECTED TENANTS DETAILS --}}
             <template x-if="subAccount && subAccount.tenants_count > 0">
                 <div class="space-y-3.5 pt-1">
-                    {{-- Recommendation Callout --}}
-                    <div
-                        class="p-4 rounded-xl bg-amber-50/90 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/40 text-xs sm:text-[13px] text-amber-900 dark:text-amber-200 leading-relaxed flex items-start gap-3">
-                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none"
-                             viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <div class="space-y-1">
-                            <span
-                                class="font-bold block text-amber-950 dark:text-amber-100 text-xs sm:text-sm">{{ __('resellerhub::messages.subaccounts.delete_recommendation_title') }}</span>
-                            <div class="text-amber-800 dark:text-amber-300 leading-relaxed"
-                                 x-html="recommendationText()"></div>
-                        </div>
-                    </div>
-
-                    {{-- Connected Tenants Compact List --}}
                     <div class="space-y-2">
                         <span class="text-xs font-semibold text-gray-700 dark:text-gray-300 block"
                               x-text="connectedTenantsTitle()"></span>
@@ -144,6 +119,7 @@
                             @pointermove="handlePointerMove($event)"
                             @pointerup="cancelHold()"
                             @pointercancel="cancelHold()"
+                            @lostpointercapture="cancelHold()"
                             @contextmenu.prevent
                             class="relative isolate inline-flex h-11 touch-none cursor-pointer select-none items-center justify-center overflow-hidden rounded-xl border border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 px-4 font-semibold text-rose-700 dark:text-rose-300 text-xs sm:text-sm outline-none transition-all active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-rose-500 w-full"
                             :class="{ 'border-rose-600 bg-rose-600 text-white': isHolding && holdProgress >= 100 }">
@@ -246,9 +222,13 @@
             subAccount: null,
             holdProgress: 0,
             isHolding: false,
-            holdDuration: 1800, // 1.8 seconds (dqnamo style)
+            holdDuration: 1600, // 1.6 seconds (dqnamo style)
             holdStartTime: null,
             animFrame: null,
+
+            // Global release safety net (fixes hold continuing on its own when press starts on inner icon/text)
+            globalCancelBound: false,
+            globalCancelHandler: null,
 
             // Undo countdown state
             undoDuration: 5000, // 5 seconds
@@ -281,6 +261,7 @@
                 this.isHolding = false;
                 this.holdProgress = 0;
                 this.undoProgress = 100;
+                this.unbindGlobalCancel();
                 if (this.animFrame) cancelAnimationFrame(this.animFrame);
                 if (this.undoAnimFrame) cancelAnimationFrame(this.undoAnimFrame);
                 if (this.undoTimer) clearTimeout(this.undoTimer);
@@ -299,6 +280,21 @@
             startHold(event) {
                 if (this.stage !== 'idle' || this.isHolding) return;
                 this.isHolding = true;
+
+                // FIX (icon auto-fill bug): capture the pointer so pointerup/pointercancel are
+                // ALWAYS delivered to the button itself — even when the press started on an
+                // inner icon/text node. Without capture, the release event can get swallowed
+                // and the progress would run to 100% on its own.
+                try {
+                    if (event.pointerId !== undefined && event.currentTarget && event.currentTarget.setPointerCapture) {
+                        event.currentTarget.setPointerCapture(event.pointerId);
+                    }
+                } catch (e) {
+                }
+
+                // Global safety net: any pointer release anywhere (or window blur) cancels the hold.
+                this.bindGlobalCancel();
+
                 this.holdStartTime = Date.now();
 
                 const loop = () => {
@@ -325,6 +321,7 @@
             },
 
             cancelHold() {
+                this.unbindGlobalCancel();
                 if (this.stage !== 'idle') return;
                 this.isHolding = false;
                 if (this.animFrame) {
@@ -332,6 +329,24 @@
                     this.animFrame = null;
                 }
                 this.holdProgress = 0;
+            },
+
+            // --- GLOBAL RELEASE SAFETY NET (prevents "stuck" hold when release events are lost) ---
+            bindGlobalCancel() {
+                if (this.globalCancelBound) return;
+                this.globalCancelHandler = () => this.cancelHold();
+                window.addEventListener('pointerup', this.globalCancelHandler, true);
+                window.addEventListener('pointercancel', this.globalCancelHandler, true);
+                window.addEventListener('blur', this.globalCancelHandler);
+                this.globalCancelBound = true;
+            },
+
+            unbindGlobalCancel() {
+                if (!this.globalCancelBound) return;
+                window.removeEventListener('pointerup', this.globalCancelHandler, true);
+                window.removeEventListener('pointercancel', this.globalCancelHandler, true);
+                window.removeEventListener('blur', this.globalCancelHandler);
+                this.globalCancelBound = false;
             },
 
             handlePointerMove(event) {
