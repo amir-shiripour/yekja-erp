@@ -22,12 +22,13 @@ use Modules\ResellerHub\App\Models\ResellerSetting;
 use Modules\ResellerHub\App\Models\ResellerSubAccount;
 use Modules\ResellerHub\App\Services\ModuleCapabilityCatalogService;
 use Modules\ResellerHub\App\Traits\HasReseller;
+use Modules\ResellerHub\App\Traits\HasResellerPagination;
 use Modules\ResellerHub\App\Traits\HasResellerSorting;
 use Morilog\Jalali\Jalalian;
 
 class ResellerPackageController extends Controller
 {
-    use HasReseller, HasResellerSorting;
+    use HasReseller, HasResellerSorting, HasResellerPagination;
 
     protected function getAvailableModules(Reseller $reseller): Collection
     {
@@ -187,12 +188,18 @@ class ResellerPackageController extends Controller
             $packageQuery->where('is_free', false)->where('price_type', 'one_time');
         }
 
-        $packages = $packageQuery->get();
-        $totalCount = ResellerPackage::forReseller($reseller->id)->count();
-        $activeCount = ResellerPackage::forReseller($reseller->id)->active()->count();
-        $inactiveCount = ResellerPackage::forReseller($reseller->id)->inactive()->count();
+        $perPage = $this->resolvePerPage($request, 12, [6, 9, 12, 15, 24, 30]);
+        $packages = $packageQuery->paginate($perPage)->withQueryString();
+
+        $targetResellerId = ($isSuperAdmin && !empty($selectedResellerId) && $selectedResellerId !== 'all')
+            ? (int)$selectedResellerId
+            : $reseller->id;
+
+        $totalCount = ResellerPackage::forReseller($targetResellerId)->count();
+        $activeCount = ResellerPackage::forReseller($targetResellerId)->active()->count();
+        $inactiveCount = ResellerPackage::forReseller($targetResellerId)->inactive()->count();
         $connectedTenantsCount = Tenant::whereNotNull('package_id')
-            ->whereIn('package_id', ResellerPackage::forReseller($reseller->id)->select('id'))
+            ->whereIn('package_id', ResellerPackage::forReseller($targetResellerId)->select('id'))
             ->count();
         $availableModules = $this->getAvailableModules($reseller);
         $catalog = app(ModuleCapabilityCatalogService::class)->getCatalogForReseller($reseller);

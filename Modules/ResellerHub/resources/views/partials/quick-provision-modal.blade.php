@@ -194,7 +194,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                         <a :href="createdTenant.sso_login_url || createdTenant.url" target="_blank"
                            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-md transition flex items-center justify-center gap-2">
-                            <span>ورود مستقیم به پنل CRM جدید</span>
+                            <span>ورود مستقیم به پنل جدید</span>
                             <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -329,7 +329,7 @@
                                         <span
                                             class="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black text-xs flex items-center justify-center">۱</span>
                                         <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">
-                                            انتخاب کاربر سامانه  <span class="text-rose-500">*</span>
+                                            انتخاب کاربر سامانه <span class="text-rose-500">*</span>
                                         </h4>
                                     </div>
                                     <p class="text-xs text-gray-400 mt-0.5 ms-8">
@@ -461,7 +461,8 @@
                                 class="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black text-xs flex items-center justify-center">
                                 {{ $mode === 'subaccount' ? '۳' : '۲' }}
                             </span>
-                            <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">نام و نشانی سامانه</h4>
+                            <h4 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">نام و نشانی
+                                سامانه</h4>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -690,13 +691,17 @@
                                       x-text="form.issue_invoice ? 'فاکتور صادر شود' : 'بدون فاکتور'"></span>
                                 <div class="relative inline-flex items-center">
                                     <input type="checkbox" x-model="form.issue_invoice" class="sr-only peer">
-                <div class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-200 ease-in-out shadow-xs"></div>
-                <div class="absolute right-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ease-in-out peer-checked:-translate-x-5 flex items-center justify-center">
-                    <svg class="w-3 h-3 text-emerald-600 opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                    </svg>
-                </div>
-            </div>
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-emerald-500 transition-colors duration-200 ease-in-out shadow-xs"></div>
+                                    <div
+                                        class="absolute right-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ease-in-out peer-checked:-translate-x-5 flex items-center justify-center">
+                                        <svg
+                                            class="w-3 h-3 text-emerald-600 opacity-0 peer-checked:opacity-100 transition-opacity"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                </div>
                             </label>
                         </div>
 
@@ -912,7 +917,7 @@
                                           clip-rule="evenodd"/>
                                 </svg>
                             </template>
-                            <span>راه‌اندازی فوری CRM</span>
+                            <span>راه‌اندازی فوری</span>
                             <span class="opacity-90 text-xs font-normal"
                                   x-text="'(' + formatPrice(form.issue_invoice ? getInvoiceTotal() : getPackageTotalAmount()) + ' ' + currencyLabel + ')'"></span>
                         </button>

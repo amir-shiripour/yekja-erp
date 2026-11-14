@@ -69,7 +69,6 @@
                     <div class="space-y-1.5">
                         <div
                             class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60">
-                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                             <span x-text="faNum(packageToDelete?.tenants_count || 0) + ' سامانه فعال متصل'"></span>
                         </div>
                         <h3 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">امکان حذف این پکیج
