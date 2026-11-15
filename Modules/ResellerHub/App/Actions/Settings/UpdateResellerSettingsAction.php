@@ -204,6 +204,70 @@ class UpdateResellerSettingsAction
             $data[ResellerSettingKey::OnboardingTourSteps->value] = $this->normalizeTourSteps($rawSteps);
         }
 
+        // 8. Portal & Public Pricing Settings
+        if ($request->has(ResellerSettingKey::PortalHeroEnabled->value)) {
+            $data[ResellerSettingKey::PortalHeroEnabled->value] = $request->boolean(ResellerSettingKey::PortalHeroEnabled->value);
+        }
+        if (array_key_exists(ResellerSettingKey::PortalHeroBadge->value, $validated)) {
+            $data[ResellerSettingKey::PortalHeroBadge->value] = trim((string)($validated[ResellerSettingKey::PortalHeroBadge->value] ?? ''));
+        }
+        if (array_key_exists(ResellerSettingKey::PortalHeroTitle->value, $validated)) {
+            $data[ResellerSettingKey::PortalHeroTitle->value] = trim((string)($validated[ResellerSettingKey::PortalHeroTitle->value] ?? ''));
+        }
+        if (array_key_exists(ResellerSettingKey::PortalHeroSubtitle->value, $validated)) {
+            $data[ResellerSettingKey::PortalHeroSubtitle->value] = trim((string)($validated[ResellerSettingKey::PortalHeroSubtitle->value] ?? ''));
+        }
+        if (array_key_exists(ResellerSettingKey::PortalHeroTrustBadges->value, $validated)) {
+            $badges = $validated[ResellerSettingKey::PortalHeroTrustBadges->value];
+            $data[ResellerSettingKey::PortalHeroTrustBadges->value] = is_array($badges) ? array_values(array_filter(array_map('trim', $badges))) : [];
+        }
+        if (array_key_exists(ResellerSettingKey::PortalDefaultPeriod->value, $validated)) {
+            $data[ResellerSettingKey::PortalDefaultPeriod->value] = $validated[ResellerSettingKey::PortalDefaultPeriod->value] ?? 'monthly_price';
+        }
+        if (array_key_exists(ResellerSettingKey::PortalAllowedPeriods->value, $validated)) {
+            $periods = $validated[ResellerSettingKey::PortalAllowedPeriods->value];
+            $data[ResellerSettingKey::PortalAllowedPeriods->value] = is_array($periods) ? array_values(array_filter($periods)) : [];
+        }
+        if (array_key_exists(ResellerSettingKey::PortalGridColumns->value, $validated)) {
+            $data[ResellerSettingKey::PortalGridColumns->value] = $validated[ResellerSettingKey::PortalGridColumns->value] ?? '3';
+        }
+        if (array_key_exists(ResellerSettingKey::PortalPackageSort->value, $validated)) {
+            $data[ResellerSettingKey::PortalPackageSort->value] = $validated[ResellerSettingKey::PortalPackageSort->value] ?? 'features_desc';
+        }
+        if (array_key_exists(ResellerSettingKey::PortalFeaturedPackageId->value, $validated)) {
+            $data[ResellerSettingKey::PortalFeaturedPackageId->value] = !empty($validated[ResellerSettingKey::PortalFeaturedPackageId->value])
+                ? (int)$validated[ResellerSettingKey::PortalFeaturedPackageId->value]
+                : null;
+        }
+        if ($request->has(ResellerSettingKey::PortalShowDailyPrice->value)) {
+            $data[ResellerSettingKey::PortalShowDailyPrice->value] = $request->boolean(ResellerSettingKey::PortalShowDailyPrice->value);
+        }
+        if ($request->has(ResellerSettingKey::PortalShowSetupFee->value)) {
+            $data[ResellerSettingKey::PortalShowSetupFee->value] = $request->boolean(ResellerSettingKey::PortalShowSetupFee->value);
+        }
+        if (array_key_exists(ResellerSettingKey::PortalCtaText->value, $validated)) {
+            $data[ResellerSettingKey::PortalCtaText->value] = trim((string)($validated[ResellerSettingKey::PortalCtaText->value] ?? 'انتخاب و شروع'));
+        }
+        if ($request->has(ResellerSettingKey::PortalEnableFilters->value)) {
+            $data[ResellerSettingKey::PortalEnableFilters->value] = $request->boolean(ResellerSettingKey::PortalEnableFilters->value);
+        }
+        if ($request->has(ResellerSettingKey::PortalEnableModuleFilter->value)) {
+            $data[ResellerSettingKey::PortalEnableModuleFilter->value] = $request->boolean(ResellerSettingKey::PortalEnableModuleFilter->value);
+        }
+        if (array_key_exists(ResellerSettingKey::PortalComparisonMode->value, $validated)) {
+            $data[ResellerSettingKey::PortalComparisonMode->value] = $validated[ResellerSettingKey::PortalComparisonMode->value] ?? 'collapsible';
+        }
+        if ($request->has(ResellerSettingKey::PortalFaqEnabled->value)) {
+            $data[ResellerSettingKey::PortalFaqEnabled->value] = $request->boolean(ResellerSettingKey::PortalFaqEnabled->value);
+        }
+        if (array_key_exists(ResellerSettingKey::PortalFaqItems->value, $validated)) {
+            $items = $validated[ResellerSettingKey::PortalFaqItems->value];
+            $data[ResellerSettingKey::PortalFaqItems->value] = is_array($items) ? $items : [];
+        }
+        if ($request->has(ResellerSettingKey::PortalCheckoutFastTrack->value)) {
+            $data[ResellerSettingKey::PortalCheckoutFastTrack->value] = $request->boolean(ResellerSettingKey::PortalCheckoutFastTrack->value);
+        }
+
         return $data;
     }
 
