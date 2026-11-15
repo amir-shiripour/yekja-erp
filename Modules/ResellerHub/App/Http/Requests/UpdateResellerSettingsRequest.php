@@ -64,6 +64,40 @@ class UpdateResellerSettingsRequest extends FormRequest
                 $this->merge(['onboarding_tour_steps' => $decoded]);
             }
         }
+
+        if ($this->has('portal_featured_package_id') && ($this->input('portal_featured_package_id') === '' || $this->input('portal_featured_package_id') === '0')) {
+            $this->merge(['portal_featured_package_id' => null]);
+        }
+
+        if ($this->has('portal_hero_trust_badges') && is_string($this->input('portal_hero_trust_badges'))) {
+            $decoded = json_decode($this->input('portal_hero_trust_badges'), true);
+            if (is_array($decoded)) {
+                $this->merge(['portal_hero_trust_badges' => array_values(array_filter(array_map('trim', $decoded)))]);
+            }
+        }
+
+        if ($this->has('portal_allowed_periods') && is_string($this->input('portal_allowed_periods'))) {
+            $decoded = json_decode($this->input('portal_allowed_periods'), true);
+            if (is_array($decoded)) {
+                $this->merge(['portal_allowed_periods' => array_values(array_filter($decoded))]);
+            }
+        }
+
+        if ($this->has('portal_faq_items') && is_string($this->input('portal_faq_items'))) {
+            $decoded = json_decode($this->input('portal_faq_items'), true);
+            if (is_array($decoded)) {
+                $cleanFaq = [];
+                foreach ($decoded as $item) {
+                    if (is_array($item) && (!empty(trim((string)($item['q'] ?? ''))) || !empty(trim((string)($item['a'] ?? ''))))) {
+                        $cleanFaq[] = [
+                            'q' => trim((string)($item['q'] ?? '')),
+                            'a' => trim((string)($item['a'] ?? '')),
+                        ];
+                    }
+                }
+                $this->merge(['portal_faq_items' => $cleanFaq]);
+            }
+        }
     }
 
     /**
@@ -133,6 +167,27 @@ class UpdateResellerSettingsRequest extends FormRequest
             'onboarding_tour_optional_reminder_enabled' => ['nullable', 'boolean'],
             'onboarding_tour_optional_reminder_interval_days' => ['nullable', 'integer', 'min:0', 'max:365'],
             'onboarding_tour_optional_reminder_mode' => ['nullable', 'string', 'in:pill,card,banner'],
+
+            // Portal & Public Pricing Settings
+            'portal_hero_enabled' => ['nullable', 'boolean'],
+            'portal_hero_badge' => ['nullable', 'string', 'max:150'],
+            'portal_hero_title' => ['nullable', 'string', 'max:255'],
+            'portal_hero_subtitle' => ['nullable', 'string', 'max:1000'],
+            'portal_hero_trust_badges' => ['nullable', 'array'],
+            'portal_default_period' => ['nullable', 'string', 'max:50'],
+            'portal_allowed_periods' => ['nullable', 'array'],
+            'portal_grid_columns' => ['nullable', 'string', 'in:2,3,4'],
+            'portal_package_sort' => ['nullable', 'string', 'in:features_desc,price_asc,price_desc,sort_order'],
+            'portal_featured_package_id' => ['nullable', 'integer', 'exists:reseller_packages,id'],
+            'portal_show_daily_price' => ['nullable', 'boolean'],
+            'portal_show_setup_fee' => ['nullable', 'boolean'],
+            'portal_cta_text' => ['nullable', 'string', 'max:100'],
+            'portal_enable_filters' => ['nullable', 'boolean'],
+            'portal_enable_module_filter' => ['nullable', 'boolean'],
+            'portal_comparison_mode' => ['nullable', 'string', 'in:collapsible,expanded,disabled'],
+            'portal_faq_enabled' => ['nullable', 'boolean'],
+            'portal_faq_items' => ['nullable', 'array'],
+            'portal_checkout_fast_track' => ['nullable', 'boolean'],
 
             // Branding fields
             'company_name' => ['nullable', 'string', 'max:150'],

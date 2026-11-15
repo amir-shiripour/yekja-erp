@@ -114,6 +114,25 @@ class ResellerSetting extends Model
         'onboarding_tour_optional_reminder_enabled',
         'onboarding_tour_optional_reminder_interval_days',
         'onboarding_tour_optional_reminder_mode',
+        'portal_hero_enabled',
+        'portal_hero_badge',
+        'portal_hero_title',
+        'portal_hero_subtitle',
+        'portal_hero_trust_badges',
+        'portal_default_period',
+        'portal_allowed_periods',
+        'portal_grid_columns',
+        'portal_package_sort',
+        'portal_featured_package_id',
+        'portal_show_daily_price',
+        'portal_show_setup_fee',
+        'portal_cta_text',
+        'portal_enable_filters',
+        'portal_enable_module_filter',
+        'portal_comparison_mode',
+        'portal_faq_enabled',
+        'portal_faq_items',
+        'portal_checkout_fast_track',
     ];
 
     protected $casts = [
@@ -146,6 +165,17 @@ class ResellerSetting extends Model
         'onboarding_tour_steps' => 'array',
         'onboarding_tour_optional_reminder_enabled' => 'boolean',
         'onboarding_tour_optional_reminder_interval_days' => 'integer',
+        'portal_hero_enabled' => 'boolean',
+        'portal_hero_trust_badges' => 'array',
+        'portal_allowed_periods' => 'array',
+        'portal_featured_package_id' => 'integer',
+        'portal_show_daily_price' => 'boolean',
+        'portal_show_setup_fee' => 'boolean',
+        'portal_enable_filters' => 'boolean',
+        'portal_enable_module_filter' => 'boolean',
+        'portal_faq_enabled' => 'boolean',
+        'portal_faq_items' => 'array',
+        'portal_checkout_fast_track' => 'boolean',
     ];
 
     /**

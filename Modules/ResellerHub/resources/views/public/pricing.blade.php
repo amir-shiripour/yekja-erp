@@ -1,6 +1,57 @@
 @php
     use Modules\ResellerHub\App\Helpers\ResellerHelper;
     use Modules\ResellerHub\App\Enums\PackageIcon;
+
+    $settings = $settings ?? [];
+    $heroEnabled = $settings['portal_hero_enabled'] ?? true;
+    $heroBadge = $settings['portal_hero_badge'] ?? 'تعرفه‌ها و پکیج‌های رسمی سامانه';
+    $heroTitle = $settings['portal_hero_title'] ?? 'سرمایه‌گذاری روی رشد کسب‌وکار، با تعرفه‌های شفاف';
+    $heroSubtitle = $settings['portal_hero_subtitle'] ?? 'شفاف، بدون هزینه‌های پنهان، با قابلیت ارتقاء و تغییر دوره در هر زمان.';
+    $heroTrustBadges = $settings['portal_hero_trust_badges'] ?? [
+        'بدون هزینه‌های پنهان',
+        'فعال‌سازی آنی پس از پرداخت',
+        'امکان تغییر دوره یا ارتقاء پکیج',
+    ];
+    if (is_string($heroTrustBadges)) {
+        $heroTrustBadges = json_decode($heroTrustBadges, true) ?: [];
+    }
+
+    $gridColumns = (string)($settings['portal_grid_columns'] ?? '3');
+    $gridColsClass = match ($gridColumns) {
+        '2' => 'grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto',
+        '4' => 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+        default => 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3',
+    };
+
+    $featuredPackageId = $settings['portal_featured_package_id'] ?? null;
+    $showDailyPrice = $settings['portal_show_daily_price'] ?? true;
+    $showSetupFee = $settings['portal_show_setup_fee'] ?? true;
+    $ctaText = !empty(trim((string)($settings['portal_cta_text'] ?? ''))) ? $settings['portal_cta_text'] : 'انتخاب و شروع';
+
+    $enableFilters = $settings['portal_enable_filters'] ?? true;
+    $enableModuleFilter = $settings['portal_enable_module_filter'] ?? true;
+    $comparisonMode = $settings['portal_comparison_mode'] ?? 'collapsible';
+
+    $faqEnabled = $settings['portal_faq_enabled'] ?? true;
+    $faqItems = $settings['portal_faq_items'] ?? [
+        [
+            'q' => 'آیا امکان تغییر دوره یا ارتقاء پکیج پس از خرید وجود دارد؟',
+            'a' => 'بله، در هر لحظه از پنل کاربری می‌توانید پکیج خود را ارتقاء داده یا دوره اشتراک را تمدید فرمایید.',
+        ],
+        [
+            'q' => 'راه‌اندازی سامانه چقدر زمان می‌برد؟',
+            'a' => 'فرآیند ایجاد پایگاه داده و پیکربندی اولیه به صورت ۱۰۰٪ خودکار و آنی بلافاصله پس از پرداخت انجام می‌شود.',
+        ],
+        [
+            'q' => 'آیا امکان اتصال دامنه اختصاصی وجود دارد؟',
+            'a' => 'بله، علاوه بر آدرس رایگان ساب‌دامین، می‌توانید دامنه اختصاصی شرکت خود را به سامانه متصل فرمایید.',
+        ],
+    ];
+    if (is_string($faqItems)) {
+        $faqItems = json_decode($faqItems, true) ?: [];
+    }
+
+    $allModulesInPackages = $packages->flatMap(fn($p) => is_array($p->modules) ? $p->modules : [])->unique()->values();
 @endphp
 
 @extends('layouts.web')
@@ -9,43 +60,53 @@
 
 @section('content')
     <div class="w-full min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-32"
-         x-data="{ currentPeriod: '{{ $defaultPeriod }}' }">
+         x-data="{
+            currentPeriod: '{{ $defaultPeriod }}',
+            searchQuery: '',
+            selectedModule: 'all',
+            filterPackage(name, modules) {
+                const q = (this.searchQuery || '').trim().toLowerCase();
+                const matchName = !q || name.toLowerCase().includes(q);
+                const matchModule = this.selectedModule === 'all' || (Array.isArray(modules) && modules.includes(this.selectedModule));
+                return matchName && matchModule;
+            }
+         }">
         <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <div class="mx-auto max-w-3xl text-center mb-12">
-                <div
-                    class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs mb-4">
-                    <span>تعرفه‌ها و پکیج‌های رسمی سامانه</span>
+            @if($heroEnabled)
+                <div class="mx-auto max-w-3xl text-center mb-12">
+                    @if(!empty($heroBadge))
+                        <div
+                            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs mb-4">
+                            <span>{{ $heroBadge }}</span>
+                        </div>
+                    @endif
+                    @if(!empty($heroTitle))
+                        <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-gray-900 dark:text-white leading-tight">
+                            {{ $heroTitle }}
+                        </h1>
+                    @endif
+                    @if(!empty($heroSubtitle))
+                        <p class="mt-4 text-sm sm:text-base text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
+                            {{ $heroSubtitle }}
+                        </p>
+                    @endif
+
+                    @if(!empty($heroTrustBadges))
+                        <div
+                            class="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-bold text-gray-500 dark:text-gray-400">
+                            @foreach($heroTrustBadges as $badge)
+                                <span class="inline-flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24"
+                                         stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round"
+                                                                     stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    {{ $badge }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
-                <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-gray-900 dark:text-white leading-tight">
-                    سرمایه‌گذاری روی رشد کسب‌وکار، <span
-                        class="text-indigo-600 dark:text-indigo-400">با تعرفه‌های شفاف</span>
-                </h1>
-                <p class="mt-4 text-sm sm:text-base text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                    شفاف، بدون هزینه‌های پنهان، با قابلیت ارتقاء و تغییر دوره در هر زمان.
-                </p>
-                <div
-                    class="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-bold text-gray-500 dark:text-gray-400">
-                    <span class="inline-flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round"
-                                                         stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        بدون هزینه‌های پنهان
-                    </span>
-                    <span class="inline-flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round"
-                                                         stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        فعال‌سازی آنی پس از پرداخت
-                    </span>
-                    <span class="inline-flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round"
-                                                         stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        امکان تغییر دوره یا ارتقاء پکیج
-                    </span>
-                </div>
-            </div>
+            @endif
 
             {{-- Subscription Period Tabs (Responsive Hybrid Pattern matching Package Upgrade) --}}
             @if($packages->isNotEmpty() && !empty($availablePeriods))
@@ -212,7 +273,44 @@
                         است.</p>
                 </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+                {{-- Interactive Search & Filters Bar --}}
+                @if($enableFilters && $packages->isNotEmpty())
+                    <div class="mb-10 max-w-4xl mx-auto space-y-3.5">
+                        <div class="flex flex-col sm:flex-row items-center gap-3">
+                            <div class="relative w-full sm:flex-1">
+                                <input type="text"
+                                       x-model="searchQuery"
+                                       placeholder="جستجوی سریع پکیج مورد نظر (بر اساس نام)..."
+                                       class="w-full rounded-2xl border border-gray-200/90 dark:border-gray-700 bg-white/90 dark:bg-gray-800/90 px-4 py-2.5 ps-10 text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 shadow-xs transition-all">
+                                <svg class="w-4 h-4 text-gray-400 absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        @if($enableModuleFilter && $allModulesInPackages->isNotEmpty())
+                            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                                <span class="text-[11px] font-bold text-gray-400 shrink-0 ms-1">فیلتر ماژول:</span>
+                                <button type="button"
+                                        @click="selectedModule = 'all'"
+                                        :class="selectedModule === 'all' ? 'bg-indigo-600 text-white shadow-xs font-black' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700 hover:bg-gray-50 font-bold'"
+                                        class="px-3 py-1.5 rounded-xl text-xs transition-all shrink-0 cursor-pointer">
+                                    همه
+                                </button>
+                                @foreach($allModulesInPackages as $mSlug)
+                                    <button type="button"
+                                            @click="selectedModule = '{{ $mSlug }}'"
+                                            :class="selectedModule === '{{ $mSlug }}' ? 'bg-indigo-600 text-white shadow-xs font-black' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200/80 dark:border-gray-700 hover:bg-gray-50 font-bold'"
+                                            class="px-3 py-1.5 rounded-xl text-xs transition-all shrink-0 cursor-pointer">
+                                        {{ ResellerHelper::getModuleTitle($mSlug) }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                <div class="grid {{ $gridColsClass }} gap-6 lg:gap-8 items-stretch">
                     @foreach($packages as $pkg)
                         @php
                             $pkgModules = is_array($pkg->modules) ? $pkg->modules : [];
@@ -237,10 +335,22 @@
                                 if (count($keyHighlights) >= 6) break;
                                 $keyHighlights[] = ['type' => 'feature', 'text' => ResellerHelper::getFeatureTitle($fKey)];
                             }
+                            $isFeatured = ($featuredPackageId && (int)$featuredPackageId === (int)$pkg->id);
                         @endphp
 
                         <div
-                            class="group flex flex-col justify-between hover:shadow-xl hover:-translate-y-0.5 hover:border-indigo-400/80 dark:hover:border-indigo-600 transition-all duration-300 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/90 dark:border-gray-800 p-6 sm:p-7 relative">
+                            x-show="filterPackage('{{ addslashes($pkg->name) }}', {{ json_encode($pkgModules) }})"
+                            class="group flex flex-col justify-between hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 rounded-2xl bg-white dark:bg-gray-900 border p-6 sm:p-7 relative {{ $isFeatured ? 'border-indigo-500 dark:border-indigo-400 ring-2 ring-indigo-500/20 shadow-lg' : 'border-gray-200/90 dark:border-gray-800 hover:border-indigo-400/80 dark:hover:border-indigo-600' }}">
+
+                            @if($isFeatured)
+                                <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-[11px] font-black bg-indigo-600 text-white shadow-md flex items-center gap-1 whitespace-nowrap z-10">
+                                    <svg class="w-3.5 h-3.5 text-amber-300 fill-current" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                    <span>پیشنهاد ما</span>
+                                </div>
+                            @endif
+
                             <div class="flex flex-col">
                                 <div class="flex items-start gap-4 mb-5">
                                     <div
@@ -363,7 +473,7 @@
 
                                             <a href="{{ route('portal.get-started', ['package' => $pkg->id]) }}"
                                                class="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-black transition-all shadow-md shadow-indigo-600/20 active:scale-[0.99] cursor-pointer">
-                                                <span>انتخاب و شروع</span>
+                                                <span>{{ $ctaText }}</span>
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                      viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -419,7 +529,7 @@
                                                     </div>
 
                                                     {{-- Prominent Daily & Monthly Equivalent Box for All Periods --}}
-                                                    @if($dailyEquivalent > 0)
+                                                    @if($showDailyPrice && $dailyEquivalent > 0)
                                                         <div
                                                             class="px-3.5 py-2.5 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800/70 flex items-center justify-between shadow-2xs gap-2">
                                                             <span
@@ -442,7 +552,7 @@
 
 
                                                     {{-- Meta: Expiry & Setup Fee --}}
-                                                    @if(($hasDiscount && $discountExpJalali) || $pkg->setup_fee > 0)
+                                                    @if(($hasDiscount && $discountExpJalali) || ($showSetupFee && $pkg->setup_fee > 0))
                                                         <div
                                                             class="pt-2.5 border-t border-gray-200/60 dark:border-gray-700/50 flex flex-col gap-2 text-xs">
                                                             @if($hasDiscount && $discountExpJalali)
@@ -458,7 +568,7 @@
                                                                     <span>مهلت تخفیف ویژه: تا {{ ResellerHelper::toPersianDigits($discountExpJalali) }}</span>
                                                                 </div>
                                                             @endif
-                                                            @if($pkg->setup_fee > 0)
+                                                            @if($showSetupFee && $pkg->setup_fee > 0)
                                                                 <div
                                                                     class="text-gray-600 dark:text-gray-300 flex items-center justify-between px-1">
                                                                     <span
@@ -472,7 +582,7 @@
 
                                                     <a href="{{ route('portal.get-started', ['package' => $pkg->id, 'period' => $pKey]) }}"
                                                        class="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-black transition-all shadow-md shadow-indigo-600/20 active:scale-[0.99] cursor-pointer">
-                                                        <span>انتخاب و شروع</span>
+                                                        <span>{{ $ctaText }}</span>
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                              viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -543,12 +653,12 @@
             @endif
 
             {{-- Plan Comparison Matrix with Minimal Toggle Button --}}
-            @if($allPackages->count() > 1 && !empty($comparisonData['groups']))
+            @if($comparisonMode !== 'disabled' && $allPackages->count() > 1 && !empty($comparisonData['groups']))
                 @php
                     $totalComparisonFeatures = collect($comparisonData['groups'])->sum(fn($g) => count($g['rows'] ?? []));
                 @endphp
                 <div id="plan-comparison-section"
-                     x-data="{ showComparison: window.location.hash === '#plan-comparison-section' }"
+                     x-data="{ showComparison: {{ $comparisonMode === 'expanded' ? 'true' : "window.location.hash === '#plan-comparison-section'" }} }"
                      class="mt-16 sm:mt-24 scroll-mt-20">
 
                     {{-- Minimalist Toggle Card --}}
@@ -602,6 +712,50 @@
                             'availablePeriods' => $availablePeriods,
                             'packagePeriods'   => $packagePeriods ?? [],
                         ])
+                    </div>
+                </div>
+            @endif
+
+            {{-- FAQ Section --}}
+            @if($faqEnabled && !empty($faqItems))
+                <div class="mt-16 sm:mt-24 max-w-4xl mx-auto scroll-mt-20" id="faq-section">
+                    <div class="text-center mb-10">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs mb-3">
+                            <span>پاسخ به ابهامات متداول</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
+                            سوالات متداول خریداران
+                        </h2>
+                    </div>
+
+                    <div class="space-y-3" x-data="{ activeFaq: null }">
+                        @foreach($faqItems as $fIdx => $fItem)
+                            @if(!empty(trim($fItem['q'] ?? '')))
+                                <div class="rounded-2xl border border-gray-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden shadow-2xs transition-all">
+                                    <button type="button"
+                                            @click="activeFaq = (activeFaq === {{ $fIdx }} ? null : {{ $fIdx }})"
+                                            class="w-full flex items-center justify-between p-4 sm:p-5 text-right font-black text-xs sm:text-sm text-gray-900 dark:text-white cursor-pointer hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                                        <span class="flex items-center gap-3">
+                                            <span class="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-black shrink-0">
+                                                ؟
+                                            </span>
+                                            <span>{{ $fItem['q'] }}</span>
+                                        </span>
+                                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 shrink-0"
+                                             :class="activeFaq === {{ $fIdx }} ? 'rotate-180 text-indigo-600 dark:text-indigo-400' : ''"
+                                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+                                    <div x-show="activeFaq === {{ $fIdx }}"
+                                         x-collapse
+                                         x-cloak
+                                         class="px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed border-t border-gray-100 dark:border-gray-800">
+                                        {{ $fItem['a'] ?? '' }}
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
                     </div>
                 </div>
             @endif

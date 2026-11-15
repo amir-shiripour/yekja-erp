@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
 use Modules\ResellerHub\App\Enums\QuotaKey;
 use Modules\ResellerHub\App\Helpers\ResellerHelper;
+use Modules\ResellerHub\App\Models\Reseller;
 use Modules\ResellerHub\App\Models\ResellerPackage;
+use Modules\ResellerHub\App\Models\ResellerSetting;
 
 class PublicPricingController extends Controller
 {
@@ -16,6 +18,17 @@ class PublicPricingController extends Controller
      */
     public function index(): View
     {
+        $reseller = null;
+        if (auth()->check()) {
+            $user = auth()->user();
+            $reseller = $user->reseller ?? Reseller::where('user_id', $user->id)->first();
+        }
+        if (!$reseller) {
+            $reseller = Reseller::first();
+        }
+
+        $settings = $reseller ? ResellerSetting::allForReseller($reseller->id) : [];
+
         $validFeatureSlugs = collect(QuotaKey::cases())
             ->filter(static fn(QuotaKey $q) => $q->isFeature())
             ->map(static fn(QuotaKey $q) => $q->value)
@@ -27,40 +40,61 @@ class PublicPricingController extends Controller
             $featureAdoption[$slug] = $allActive->filter(static fn(ResellerPackage $p) => in_array($slug, is_array($p->features) ? $p->features : [], true))->count();
         }
 
-        // Rank packages: Rightmost (Column 0) has most green checks (Pyramid Apex/Base)
-        $packages = $allActive->sort(static function (ResellerPackage $a, ResellerPackage $b) use ($validFeatureSlugs, $featureAdoption) {
-            $aFeats = count(array_intersect(is_array($a->features) ? $a->features : [], $validFeatureSlugs));
-            $bFeats = count(array_intersect(is_array($b->features) ? $b->features : [], $validFeatureSlugs));
+        $packageSort = $settings['portal_package_sort'] ?? 'features_desc';
+        if ($packageSort === 'sort_order') {
+            $packages = $allActive->sortBy('sort_order')->values();
+        } elseif ($packageSort === 'price_asc') {
+            $packages = $allActive->sortBy(fn($p) => (int)($p->monthly_price ?: $p->yearly_price ?: 0))->values();
+        } elseif ($packageSort === 'price_desc') {
+            $packages = $allActive->sortByDesc(fn($p) => (int)($p->monthly_price ?: $p->yearly_price ?: 0))->values();
+        } else {
+            // Rank packages: Rightmost (Column 0) has most green checks (Pyramid Apex/Base)
+            $packages = $allActive->sort(static function (ResellerPackage $a, ResellerPackage $b) use ($validFeatureSlugs, $featureAdoption) {
+                $aFeats = count(array_intersect(is_array($a->features) ? $a->features : [], $validFeatureSlugs));
+                $bFeats = count(array_intersect(is_array($b->features) ? $b->features : [], $validFeatureSlugs));
 
-            if ($aFeats !== $bFeats) {
-                return $bFeats <=> $aFeats; // DESC: 10 checks, 7 checks, 4 checks, 2 checks...
-            }
+                if ($aFeats !== $bFeats) {
+                    return $bFeats <=> $aFeats; // DESC: 10 checks, 7 checks, 4 checks, 2 checks...
+                }
 
-            // Tie breaker: alignment with common features stack
-            $aScore = 0;
-            foreach ($a->features ?? [] as $f) {
-                $aScore += ($featureAdoption[$f] ?? 0);
-            }
-            $bScore = 0;
-            foreach ($b->features ?? [] as $f) {
-                $bScore += ($featureAdoption[$f] ?? 0);
-            }
+                // Tie breaker: alignment with common features stack
+                $aScore = 0;
+                foreach ($a->features ?? [] as $f) {
+                    $aScore += ($featureAdoption[$f] ?? 0);
+                }
+                $bScore = 0;
+                foreach ($b->features ?? [] as $f) {
+                    $bScore += ($featureAdoption[$f] ?? 0);
+                }
 
-            if ($aScore !== $bScore) {
-                return $bScore <=> $aScore;
-            }
+                if ($aScore !== $bScore) {
+                    return $bScore <=> $aScore;
+                }
 
-            $aModules = is_array($a->modules) ? count($a->modules) : 0;
-            $bModules = is_array($b->modules) ? count($b->modules) : 0;
-            if ($aModules !== $bModules) {
-                return $bModules <=> $aModules;
-            }
+                $aModules = is_array($a->modules) ? count($a->modules) : 0;
+                $bModules = is_array($b->modules) ? count($b->modules) : 0;
+                if ($aModules !== $bModules) {
+                    return $bModules <=> $aModules;
+                }
 
-            return $b->id <=> $a->id;
-        })->values();
+                return $b->id <=> $a->id;
+            })->values();
+        }
 
         $availablePeriods = ResellerHelper::getAllAvailablePeriods();
-        $defaultPeriod = 'monthly_price';
+        $allowedPeriods = $settings['portal_allowed_periods'] ?? null;
+        if (is_array($allowedPeriods) && !empty($allowedPeriods)) {
+            $filteredPeriods = array_intersect_key($availablePeriods, array_flip($allowedPeriods));
+            if (!empty($filteredPeriods)) {
+                $availablePeriods = $filteredPeriods;
+            }
+        }
+
+        $defaultPeriod = $settings['portal_default_period'] ?? 'monthly_price';
+        if (!isset($availablePeriods[$defaultPeriod])) {
+            $defaultPeriod = array_key_first($availablePeriods) ?? 'monthly_price';
+        }
+
         $allPackages = $packages;
         $packagePeriods = [];
         foreach ($allPackages as $pkg) {
@@ -76,6 +110,7 @@ class PublicPricingController extends Controller
             'allPackages',
             'comparisonData',
             'packagePeriods',
+            'settings',
         ));
     }
 

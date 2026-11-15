@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 return new class extends Migration
 {
@@ -38,8 +39,18 @@ return new class extends Migration
 
         // 4. Missing composite index on tenants (TEN-05)
         if (Schema::hasTable('tenants')) {
-            $hasIndex = Schema::hasIndex('tenants', 'idx_tenants_reseller_status_expiry')
-                || Schema::hasIndex('tenants', ['reseller_id', 'status', 'plan_expires_at']);
+            $hasIndex = false;
+            try {
+                $existing = DB::select("SHOW INDEX FROM `tenants` WHERE Key_name = ?", ['idx_tenants_reseller_status_expiry']);
+                $hasIndex = !empty($existing);
+            } catch (Throwable) {
+                $hasIndex = false;
+            }
+
+            if (!$hasIndex) {
+                $hasIndex = Schema::hasIndex('tenants', 'idx_tenants_reseller_status_expiry')
+                    || Schema::hasIndex('tenants', ['reseller_id', 'status', 'plan_expires_at']);
+            }
 
             if (!$hasIndex) {
                 try {
@@ -48,7 +59,9 @@ return new class extends Migration
                     });
                 } catch (Throwable $e) {
                     // Gracefully suppress if index was already created or duplicate key error occurs
-                    if (!str_contains($e->getMessage(), 'Duplicate key name') && !str_contains($e->getMessage(), '1061')) {
+                    if (!str_contains($e->getMessage(), 'Duplicate key name')
+                        && !str_contains($e->getMessage(), '1061')
+                        && !str_contains($e->getMessage(), 'already exists')) {
                         throw $e;
                     }
                 }
@@ -58,10 +71,14 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (Schema::hasTable('tenants') && Schema::hasIndex('tenants', 'idx_tenants_reseller_status_expiry')) {
-            Schema::table('tenants', function (Blueprint $table) {
-                $table->dropIndex('idx_tenants_reseller_status_expiry');
-            });
+        if (Schema::hasTable('tenants')) {
+            try {
+                Schema::table('tenants', function (Blueprint $table) {
+                    $table->dropIndex('idx_tenants_reseller_status_expiry');
+                });
+            } catch (Throwable) {
+                // Ignore if index does not exist
+            }
         }
 
         if (Schema::hasTable('resellers') && Schema::hasColumn('resellers', 'deleted_at')) {

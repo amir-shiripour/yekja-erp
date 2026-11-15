@@ -46,6 +46,7 @@ class ResellerSettingController extends Controller
         $currency = $settings['currency'] ?? 'toman';
         $currencyLabel = ResellerHelper::currencyLabel($currency);
         $resellerPackages = ResellerPackage::where('reseller_id', $reseller->id)->orderBy('sort_order')->get();
+        $availablePeriods = ResellerHelper::getAllAvailablePeriods();
         $subAccountCustomFields = (Schema::hasTable('custom_user_fields') && Schema::hasColumn('custom_user_fields', 'entity_type'))
             ? CustomUserField::where('entity_type', CustomUserField::ENTITY_SUB_ACCOUNT)->get()
             : collect();
@@ -132,6 +133,7 @@ class ResellerSettingController extends Controller
             'currency',
             'currencyLabel',
             'resellerPackages',
+            'availablePeriods',
             'subAccountCustomFields',
             'tenancyHealth',
             'discoveredModels',

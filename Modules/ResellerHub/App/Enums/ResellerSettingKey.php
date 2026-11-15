@@ -74,6 +74,27 @@ enum ResellerSettingKey: string
     case OnboardingTourOptionalReminderIntervalDays = 'onboarding_tour_optional_reminder_interval_days';
     case OnboardingTourOptionalReminderMode = 'onboarding_tour_optional_reminder_mode';
 
+    // Portal & Public Pricing Settings
+    case PortalHeroEnabled = 'portal_hero_enabled';
+    case PortalHeroBadge = 'portal_hero_badge';
+    case PortalHeroTitle = 'portal_hero_title';
+    case PortalHeroSubtitle = 'portal_hero_subtitle';
+    case PortalHeroTrustBadges = 'portal_hero_trust_badges';
+    case PortalDefaultPeriod = 'portal_default_period';
+    case PortalAllowedPeriods = 'portal_allowed_periods';
+    case PortalGridColumns = 'portal_grid_columns';
+    case PortalPackageSort = 'portal_package_sort';
+    case PortalFeaturedPackageId = 'portal_featured_package_id';
+    case PortalShowDailyPrice = 'portal_show_daily_price';
+    case PortalShowSetupFee = 'portal_show_setup_fee';
+    case PortalCtaText = 'portal_cta_text';
+    case PortalEnableFilters = 'portal_enable_filters';
+    case PortalEnableModuleFilter = 'portal_enable_module_filter';
+    case PortalComparisonMode = 'portal_comparison_mode';
+    case PortalFaqEnabled = 'portal_faq_enabled';
+    case PortalFaqItems = 'portal_faq_items';
+    case PortalCheckoutFastTrack = 'portal_checkout_fast_track';
+
     /**
      * Resolve ResellerSettingKey instance safely from string or self.
      */
