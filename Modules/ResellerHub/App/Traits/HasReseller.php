@@ -28,30 +28,20 @@ trait HasReseller
 
         $user = Auth::user();
 
-        // 1. If SuperAdmin, never block: pick first active reseller or auto-create a master reseller
         if ($this->isSuperAdmin($user)) {
-            $fallback = Reseller::where('status', Reseller::STATUS_ACTIVE)->orderBy('id')->first()
-                ?: Reseller::orderBy('id')->first();
+            $message = 'برای دسترسی به این بخش، ابتدا از داشبورد نماینده مورد نظر را انتخاب کنید.';
 
-            if ($fallback) {
-                return $fallback;
+            if (request()->expectsJson() || request()->ajax()) {
+                abort(403, $message);
             }
 
-            try {
-                return Reseller::firstOrCreate(
-                    ['user_id' => $user->id],
-                    [
-                        'company_name' => $user->name ?: 'مدیریت کل سیستم',
-                        'brand_title' => config('app.name', 'CRM'),
-                        'status' => Reseller::STATUS_ACTIVE,
-                    ]
+            if (Route::has('reseller.dashboard')) {
+                throw new HttpResponseException(
+                    redirect()->route('reseller.dashboard')->with('error', $message)
                 );
-            } catch (Throwable $e) {
-                $lastResort = Reseller::first();
-                if ($lastResort) {
-                    return $lastResort;
-                }
             }
+
+            abort(403, $message);
         }
 
         // 2. If user has reseller role, auto-provision initial Reseller row if missing
@@ -126,8 +116,8 @@ trait HasReseller
 
         $reseller = Reseller::where('user_id', $user->id)->orderBy('id')->first();
 
-        // If no reseller record exists yet, but the user has a reseller or super-admin role, auto-provision
-        if (!$reseller && method_exists($user, 'hasRole') && ($user->hasRole('reseller') || $user->hasRole('reseller-owner') || $user->hasRole('reseller-super-admin') || $user->hasRole('super-admin'))) {
+        // If no reseller record exists yet, but the user has a reseller role, auto-provision
+        if (!$reseller && method_exists($user, 'hasRole') && ($user->hasRole('reseller') || $user->hasRole('reseller-owner') || $user->hasRole('reseller-super-admin'))) {
             try {
                 $name = !empty($user->name) ? $user->name : ('نمایندگی ' . $user->id);
                 $reseller = Reseller::firstOrCreate(
@@ -154,7 +144,7 @@ trait HasReseller
     }
 
     /**
-     * Operational guard: acting as a suspended reseller is never allowed (except for super-admin).
+     * Operational guard: acting as a suspended reseller is never allowed.
      */
     private function assertResellerOperable(Reseller $reseller): void
     {
@@ -163,7 +153,7 @@ trait HasReseller
         }
 
         if ($this->isSuperAdmin(Auth::user())) {
-            return;
+            abort(403, 'این نمایندگی در وضعیت معلق است؛ برای انجام عملیات ابتدا وضعیت آن را فعال کنید.');
         }
 
         abort(403, 'حساب نمایندگی شما در وضعیت معلق قرار دارد و دسترسی به پنل امکان‌پذیر نیست.');

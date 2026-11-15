@@ -28,7 +28,8 @@ use Modules\ResellerHub\App\Livewire\Portal\Checkout;
 
 // Public routes for Customer Acquisition & Gateway Callbacks
 Route::middleware(['web'])->group(function () {
-    Route::get('/resellerhub/pricing', [PublicPricingController::class, 'index'])->name('resellerhub.pricing');
+    Route::get('/user/reseller/pricing', [PublicPricingController::class, 'index'])->name('resellerhub.pricing');
+    Route::get('/resellerhub/pricing', fn() => redirect()->route('resellerhub.pricing', [], 301));
 
     // Portal for Customer Acquisition / Registration
     Route::view('/get-started', 'resellerhub::portal.index')->name('portal.get-started');
@@ -46,12 +47,14 @@ Route::middleware(['web'])->group(function () {
     });
 
     // Online gateway payment callback - accessible without auth so bank POST/GET callbacks are never blocked
-    Route::match(['get', 'post'], '/reseller/invoices/{invoice}/verify/{gateway?}', [ResellerInvoiceController::class, 'verifyOnlinePayment'])
+    Route::match(['get', 'post'], '/user/reseller/invoices/{invoice}/verify/{gateway?}', [ResellerInvoiceController::class, 'verifyOnlinePayment'])
         ->middleware('throttle:10,1')
         ->name('reseller.invoices.verify');
+    Route::match(['get', 'post'], '/reseller/invoices/{invoice}/verify/{gateway?}', [ResellerInvoiceController::class, 'verifyOnlinePayment'])
+        ->middleware('throttle:10,1');
 });
 
-Route::middleware(['web', 'auth', 'role_or_permission:super-admin|resellerhub.view'])->prefix('reseller')->name('reseller.')->group(function () {
+Route::middleware(['web', 'auth', 'role_or_permission:super-admin|resellerhub.view'])->prefix('user/reseller')->name('reseller.')->group(function () {
     Route::get('/', [ResellerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard', [ResellerDashboardController::class, 'index'])->name('dashboard.index');
     Route::post('/switch-context', [ResellerDashboardController::class, 'switchContext'])->name('switch-context');
@@ -99,7 +102,7 @@ Route::middleware(['web', 'auth', 'role_or_permission:super-admin|resellerhub.vi
         ->name('tenants.update-domain');
 
     // Tenant Database & SQL Data Export (Super Admin Only)
-    Route::middleware('role:super-admin')->group(function () {
+    Route::middleware('role_or_permission:super-admin|resellerhub.tenants.export')->group(function () {
         Route::get('/tenants-export', [TenantDataExportController::class, 'index'])->name('tenants.export');
 
         Route::middleware('throttle:10,1')->group(function () {
@@ -234,7 +237,7 @@ Route::middleware(['web', 'auth', 'role_or_permission:super-admin|resellerhub.vi
 });
 
 // Reseller Invoice Payment & Print routes - accessible by authenticated invoice parties (reseller or customer)
-Route::middleware(['web', 'auth', 'throttle:30,1'])->prefix('reseller')->name('reseller.')->group(function () {
+Route::middleware(['web', 'auth', 'throttle:30,1'])->prefix('user/reseller')->name('reseller.')->group(function () {
     Route::get('/invoices/{invoice}/print', [ResellerInvoiceController::class, 'print'])
         ->middleware('role_or_permission:super-admin|resellerhub.invoices.print|resellerhub.invoices.view')
         ->name('invoices.print');
@@ -252,10 +255,17 @@ Route::middleware(['web', 'auth', 'throttle:30,1'])->prefix('reseller')->name('r
 
 $ssoRateLimit = max(1, (int)config('resellerhub.sso.rate_limit', 20));
 
-Route::middleware(['web', 'throttle:' . $ssoRateLimit . ',1'])->prefix('reseller')->group(function () {
+Route::middleware(['web', 'throttle:' . $ssoRateLimit . ',1'])->prefix('user/reseller')->group(function () {
     Route::get('/sso-login', [TenantSsoController::class, 'handle'])->name('tenant.sso-login');
     Route::get('/sso-return', [TenantSsoController::class, 'handleReturn'])->name('tenant.sso-return');
     Route::post('/exit-impersonation', [TenantSsoController::class, 'exitImpersonation'])->name('tenant.exit-impersonation');
+});
+
+// Legacy SSO fallback for backward compatibility
+Route::middleware(['web', 'throttle:' . $ssoRateLimit . ',1'])->prefix('reseller')->group(function () {
+    Route::get('/sso-login', [TenantSsoController::class, 'handle']);
+    Route::get('/sso-return', [TenantSsoController::class, 'handleReturn']);
+    Route::post('/exit-impersonation', [TenantSsoController::class, 'exitImpersonation']);
 });
 
 // Tenant Subscription & Reseller Quotas View (accessible by tenant users/admin)
@@ -271,7 +281,19 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/user/tenant/branding', [TenantDomainBrandingController::class, 'updateBranding'])->name('tenant.branding.update');
 });
 
-Route::middleware(['web', 'auth'])->prefix('resellerhub')->group(function () {
+Route::middleware(['web', 'auth'])->prefix('user/reseller')->group(function () {
     Route::get('/splash/registered', [SplashController::class, 'registered'])->name('splash.registered');
     Route::get('/splash/welcome-back', [SplashController::class, 'welcomeBack'])->name('splash.welcome-back');
+});
+
+Route::middleware(['web', 'auth'])->prefix('resellerhub')->group(function () {
+    Route::get('/splash/registered', fn() => redirect()->route('splash.registered'));
+    Route::get('/splash/welcome-back', fn() => redirect()->route('splash.welcome-back'));
+});
+
+// Fallback redirect for legacy /reseller GET routes to ensure zero breakage of bookmarks and links
+Route::middleware(['web'])->prefix('reseller')->group(function () {
+    Route::get('/{any?}', function ($any = '') {
+        return redirect('/user/reseller' . ($any ? '/' . $any : ''), 301);
+    })->where('any', '.*');
 });

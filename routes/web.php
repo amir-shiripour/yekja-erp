@@ -108,7 +108,7 @@ if (app()->environment('local', 'testing')) {
             auth()->login($user);
             session()->regenerate();
         }
-        $target = request('redirect', '/reseller/dashboard');
+        $target = request('redirect', '/user/reseller/dashboard');
         return redirect($target);
     });
 }

@@ -36,12 +36,12 @@ class RouteRegistrationTest extends TestCase
 
     public function test_the_public_pricing_page_resolves_to_the_module(): void
     {
-        $this->assertSame('resellerhub.pricing', $this->resolve('/resellerhub/pricing')->getName());
+        $this->assertSame('resellerhub.pricing', $this->resolve('/user/reseller/pricing')->getName());
     }
 
     public function test_impersonation_exit_is_a_post_route(): void
     {
-        $route = $this->resolve('/reseller/exit-impersonation', 'POST');
+        $route = $this->resolve('/user/reseller/exit-impersonation', 'POST');
 
         $this->assertSame('tenant.exit-impersonation', $route->getName());
         $this->assertContains('POST', $route->methods());
@@ -50,7 +50,7 @@ class RouteRegistrationTest extends TestCase
 
     public function test_tenant_login_as_is_protected_by_its_own_permission(): void
     {
-        $route = $this->resolve('/reseller/tenants/1/login-as', 'POST');
+        $route = $this->resolve('/user/reseller/tenants/1/login-as', 'POST');
 
         $this->assertSame('reseller.tenants.login-as', $route->getName());
         $this->assertContains(
