@@ -152,10 +152,10 @@ class FortifyServiceProvider extends ServiceProvider
                     if ($user && method_exists($user, 'hasRole') && $user->hasRole('reseller')) {
                         // نماینده بدون مستاجر به پنل نمایندگی مرکزی هدایت می‌شود
                         $intended = session()->pull('url.intended');
-                        $target = '/reseller/dashboard';
+                        $target = '/user/reseller/dashboard';
                         if ($intended) {
                             $parsedPath = parse_url($intended, PHP_URL_PATH) ?? '';
-                            if (str_starts_with($parsedPath, '/reseller/')) {
+                            if (str_starts_with($parsedPath, '/user/reseller/') || str_starts_with($parsedPath, '/reseller/')) {
                                 $target = $parsedPath;
                             }
                         }

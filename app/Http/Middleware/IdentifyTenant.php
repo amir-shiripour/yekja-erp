@@ -148,7 +148,7 @@ class IdentifyTenant
                     try {
                         $userTenant = Tenant::find($user->tenant_id);
                         if ($userTenant) {
-                            if ($request->is('livewire/*') || $request->is('get-started/*') || $request->is('get-started') || $request->is('reseller/invoices/*') || $request->is('reseller/invoices') || $request->is('portal/*') || $request->is('portal')) {
+                            if ($request->is('livewire/*') || $request->is('get-started/*') || $request->is('get-started') || $request->is('user/reseller/invoices/*') || $request->is('user/reseller/invoices') || $request->is('reseller/invoices/*') || $request->is('reseller/invoices') || $request->is('portal/*') || $request->is('portal')) {
                                 $tenantManager->setTenant($userTenant);
                                 app()->instance('currentTenant', $userTenant);
                                 view()->share('currentTenant', $userTenant);

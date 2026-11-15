@@ -67,7 +67,7 @@ class SplashController extends Controller
             if ($user && method_exists($user, 'hasRole') && $user->hasRole('super-admin')) {
                 $redirectUrl = url('/admin/dashboard');
             } elseif ($user && method_exists($user, 'hasRole') && $user->hasRole('reseller')) {
-                $redirectUrl = url('/reseller/dashboard');
+                $redirectUrl = Route::has('reseller.dashboard') ? route('reseller.dashboard') : url('/user/reseller/dashboard');
             } elseif ($user && $user->tenant_id) {
                 try {
                     $tenant = Tenant::find($user->tenant_id);

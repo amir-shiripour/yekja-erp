@@ -227,7 +227,7 @@ class TenantSsoController extends Controller
         }
 
         $isPrivileged = method_exists($user, 'hasRole') && ($user->hasRole('reseller') || $user->hasRole('super-admin'));
-        $targetPath = ($isPrivileged && Route::has('reseller.dashboard')) ? '/reseller/dashboard' : '/user/dashboard';
+        $targetPath = ($isPrivileged && Route::has('reseller.dashboard')) ? route('reseller.dashboard') : '/user/dashboard';
 
         return redirect($targetPath)->with('success', __('resellerhub::messages.sso.return_success'));
     }

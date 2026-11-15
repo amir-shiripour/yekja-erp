@@ -14,9 +14,21 @@ use Modules\ContentForge\Entities\ContentSetting;
 
 // --- Short Link Redirect Route ---
 Route::middleware(['web'])->group(function() {
-    $shortLinkPrefix = ContentSetting::getValue('short_link.prefix', 's');
+    $shortLinkPrefix = 's';
+    try {
+        if (class_exists(ContentSetting::class)) {
+            $shortLinkPrefix = ContentSetting::getValue('short_link.prefix', 's') ?: 's';
+        }
+    } catch (\Throwable) {
+        $shortLinkPrefix = 's';
+    }
+
     Route::get("/{$shortLinkPrefix}/{code}", [ShortLinkController::class, 'redirect'])
          ->name('content.short-link');
+
+    if ($shortLinkPrefix !== 's') {
+        Route::get("/s/{code}", [ShortLinkController::class, 'redirect']);
+    }
 });
 
 // --- Public Frontend Routes (Flat & Clean SEO Structure) ---
@@ -30,9 +42,9 @@ Route::middleware(['web'])->group(function() {
     Route::get('/feed.xml', [ContentFrontController::class, 'feedDefault'])->name('content.feed.default');
 
     // 2. Fallback direct root route for posts, pages, and entity archives
-    // Constrained to avoid matching system keywords
-    Route::match(['get', 'post'], '/{slug}', [ContentFrontController::class, 'showDefault'])
-         ->where('slug', '^(?!(user|admin|api|reseller|resellerhub|login|logout|register|storage|js|css|fonts|images|sitemap\.xml|feed\.xml|blog|s/|livewire|settings|booking|shop|cart|checkout|install|ping|chat)).+')
+    // Constrained to strictly avoid shadowing any system keywords, auth paths, or module prefixes
+    Route::get('/{slug}', [ContentFrontController::class, 'showDefault'])
+         ->where('slug', '^(?!(user|admin|api|_e2e|_ignition|assets|blog|booking|broadcasting|build|cart|chat|checkout|clients|css|debug-attributes|email|external|external-api|feed\.xml|fieldservice|fonts|forgot-password|get-started|images|install|js|livewire|login|logout|market|password|payment|ping|properties|register|reseller|resellerhub|reset-password|s|sanctum|settings|shop|sitemap\.xml|storage|two-factor-challenge)).+')
          ->name('content.show.default');
 });
 
