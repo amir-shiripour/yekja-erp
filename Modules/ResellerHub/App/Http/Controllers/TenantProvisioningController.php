@@ -113,7 +113,7 @@ class TenantProvisioningController extends Controller
 
         $perPage = $this->resolvePerPage();
 
-        $tenants = $query->with(['modules', 'subAccount', 'reseller', 'package'])
+        $tenants = $query->with(['modules', 'subAccount', 'reseller', 'package', 'invoices.package'])
             ->paginate($perPage, ['*'], 'page')
             ->withQueryString();
 
