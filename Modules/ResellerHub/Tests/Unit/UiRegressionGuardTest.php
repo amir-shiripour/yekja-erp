@@ -803,4 +803,75 @@ class UiRegressionGuardTest extends TestCase
         $this->assertStringContainsString('$fType === \'mobile\'', $widgetBlade);
         $this->assertStringContainsString('$fType === \'url\'', $widgetBlade);
     }
+
+    public function test_tenant_show_displays_subaccount_custom_identity_fields(): void
+    {
+        // 1. Verify blade files contain custom authentication and identity field sections
+        $managerCard = $this->moduleView('user/tenants/partials/show/manager-card.blade.php');
+        $this->assertStringContainsString('فیلدهای سفارشی احراز هویت زیرمجموعه', $managerCard);
+        $this->assertStringContainsString('$customFieldItems', $managerCard);
+        $this->assertStringContainsString('$field[\'label\']', $managerCard);
+
+        $tenantShowBlade = $this->moduleView('user/tenants/show.blade.php');
+        $this->assertStringContainsString('customFieldItems', $tenantShowBlade);
+        $this->assertStringContainsString('CustomUserField::resolveCategoryGroup', $tenantShowBlade);
+
+        // 2. Verify controller resolves sub-account custom identity & authentication fields
+        $tenant = Tenant::first();
+        $this->assertNotNull($tenant);
+
+        $subAccount = $tenant->subAccount;
+        if (!$subAccount) {
+            $user = User::first();
+            $subAccount = \Modules\ResellerHub\App\Models\ResellerSubAccount::firstOrCreate(
+                ['email' => 'subtest@crm.local'],
+                [
+                    'reseller_id' => $tenant->reseller_id,
+                    'name' => 'زیرمجموعه تست',
+                    'mobile' => '09120000000',
+                    'user_id' => $user->id,
+                    'status' => 'active',
+                ]
+            );
+            $tenant->sub_account_id = $subAccount->id;
+            $tenant->save();
+        }
+
+        // Create test custom identity field if not exists
+        CustomUserField::firstOrCreate(
+            ['field_name' => 'kdmly'],
+            [
+                'entity_type' => CustomUserField::ENTITY_SUB_ACCOUNT,
+                'role_name' => 'sub_account',
+                'label' => 'کدملی',
+                'field_type' => 'text',
+                'category_group' => CustomUserField::CATEGORY_IDENTITY,
+                'sort_order' => 1,
+            ]
+        );
+
+        $controller = app(\Modules\ResellerHub\App\Http\Controllers\ResellerDashboardController::class);
+        $resellerUser = $tenant->reseller?->user ?? User::first();
+        $this->actingAs($resellerUser);
+
+        $response = $controller->showTenant($tenant);
+        $this->assertInstanceOf(\Illuminate\View\View::class, $response);
+        $viewData = $response->getData();
+
+        $this->assertArrayHasKey('customFieldItems', $viewData);
+        $items = $viewData['customFieldItems'];
+        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $items);
+        $this->assertTrue($items->contains('name', 'kdmly'));
+
+        // Verify identity fields are prioritized at the top
+        $firstItem = $items->first();
+        $this->assertTrue((bool)$firstItem['is_identity']);
+
+        // 3. Verify dynamic label and category resolution without any hardcoding
+        $this->assertEquals('کد ملی', CustomUserField::resolveLabel('national_code'));
+        $this->assertEquals('کد پستی', CustomUserField::resolveLabel('postal_code'));
+        $this->assertEquals('شماره فکس', CustomUserField::resolveLabel('fax'));
+        $this->assertEquals('مشخصات هویتی و حقوقی', CustomUserField::resolveCategoryLabel(CustomUserField::CATEGORY_IDENTITY));
+        $this->assertEquals('اطلاعات تماس، فکس و نشانی اداری', CustomUserField::resolveCategoryLabel(CustomUserField::CATEGORY_CONTACT));
+    }
 }

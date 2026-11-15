@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Modules\ResellerHub\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\CustomUserField;
 use App\Models\Module;
 use App\Models\Tenant;
 use App\Models\TenantModule;
+use App\Models\UserCustomValue;
+use App\Tenancy\TenantManager;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -200,8 +203,15 @@ class ResellerDashboardController extends Controller
 
         $this->authorizeTenantAccess($tenant);
 
-        app(\App\Tenancy\TenantManager::class)->bypass(function () use ($tenant) {
-            $tenant->load(['modules', 'owner', 'subAccount', 'reseller.user', 'package', 'orders.invoice']);
+        app(TenantManager::class)->bypass(function () use ($tenant) {
+            $tenant->load([
+                'modules',
+                'owner.customValues',
+                'subAccount.user.customValues',
+                'reseller.user',
+                'package',
+                'orders.invoice',
+            ]);
 
             // Auto-sync package modules if tenant has a package but 0 tenant_modules
             if ($tenant->modules->isEmpty() && $tenant->package && is_array($tenant->package->modules)) {
@@ -237,6 +247,98 @@ class ResellerDashboardController extends Controller
             ->whereNotIn('slug', ['resellerhub', 'settings', 'admin', 'core'])
             ->get();
 
+        // Subaccount custom authentication & identity fields resolution
+        $subAccount = $tenant->subAccount;
+        $subAccountUser = $subAccount?->user ?? $tenant->owner;
+        $subAccountRoles = $subAccountUser ? $subAccountUser->roles->pluck('name')->toArray() : ['sub_account'];
+
+        $userCustomValues = $subAccountUser
+            ? ($subAccountUser->relationLoaded('customValues')
+                ? $subAccountUser->customValues->keyBy('field_name')
+                : UserCustomValue::where('user_id', $subAccountUser->id)->get()->keyBy('field_name'))
+            : collect();
+
+        $tenantCustomSettings = is_array(data_get($tenant->settings, 'custom_fields'))
+            ? data_get($tenant->settings, 'custom_fields')
+            : [];
+
+        $subAccountCustomSettings = is_array(data_get($subAccount?->settings, 'custom_fields'))
+            ? data_get($subAccount->settings, 'custom_fields')
+            : [];
+
+        // All field names present across subaccount/user values and tenant settings
+        $relevantFieldNames = array_unique(array_filter(array_merge(
+            $userCustomValues->keys()->toArray(),
+            array_keys($tenantCustomSettings),
+            array_keys($subAccountCustomSettings)
+        )));
+
+        // Load all matching CustomUserField definitions dynamically from database
+        $customFields = CustomUserField::query()
+            ->where(function ($query) use ($subAccountRoles, $relevantFieldNames) {
+                $query->whereIn('entity_type', [CustomUserField::ENTITY_SUB_ACCOUNT, CustomUserField::ENTITY_USER])
+                    ->orWhereIn('role_name', array_merge(['sub_account'], $subAccountRoles));
+
+                if (!empty($relevantFieldNames)) {
+                    $query->orWhereIn('field_name', $relevantFieldNames);
+                }
+            })
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->unique('field_name')
+            ->values();
+
+        // Map database-defined fields dynamically
+        $customFieldItems = $customFields->map(function ($field) use ($userCustomValues, $tenantCustomSettings, $subAccountCustomSettings) {
+            $rawVal = $userCustomValues->get($field->field_name)?->value
+                ?? ($tenantCustomSettings[$field->field_name] ?? null)
+                ?? ($subAccountCustomSettings[$field->field_name] ?? null);
+
+            $categoryGroup = CustomUserField::resolveCategoryGroup($field->field_name, $field->category_group);
+
+            return [
+                'id' => $field->id,
+                'name' => $field->field_name,
+                'label' => CustomUserField::resolveLabel($field->field_name, $field->label),
+                'field_type' => $field->field_type ?? 'text',
+                'category_group' => $categoryGroup,
+                'category_label' => CustomUserField::resolveCategoryLabel($categoryGroup),
+                'is_identity' => ($categoryGroup === CustomUserField::CATEGORY_IDENTITY),
+                'is_required' => (bool)$field->is_required,
+                'value' => $rawVal,
+                'has_value' => ($rawVal !== null && $rawVal !== ''),
+            ];
+        });
+
+        // Any leftover field keys without a database record resolve dynamically via CustomUserField helpers
+        $knownFieldNames = $customFields->pluck('field_name')->toArray();
+        $missingKeys = array_diff($relevantFieldNames, $knownFieldNames);
+
+        foreach ($missingKeys as $extraKey) {
+            $rawVal = $userCustomValues->get($extraKey)?->value
+                ?? ($tenantCustomSettings[$extraKey] ?? null)
+                ?? ($subAccountCustomSettings[$extraKey] ?? null);
+
+            $categoryGroup = CustomUserField::resolveCategoryGroup($extraKey, null);
+
+            $customFieldItems->push([
+                'id' => null,
+                'name' => $extraKey,
+                'label' => CustomUserField::resolveLabel($extraKey),
+                'field_type' => 'text',
+                'category_group' => $categoryGroup,
+                'category_label' => CustomUserField::resolveCategoryLabel($categoryGroup),
+                'is_identity' => ($categoryGroup === CustomUserField::CATEGORY_IDENTITY),
+                'is_required' => false,
+                'value' => $rawVal,
+                'has_value' => ($rawVal !== null && $rawVal !== ''),
+            ]);
+        }
+
+        // Identity & authentication fields are prioritized at the top
+        $customFieldItems = $customFieldItems->sortByDesc('is_identity')->values();
+
         return view('resellerhub::user.tenants.show', compact(
             'reseller',
             'tenant',
@@ -245,7 +347,8 @@ class ResellerDashboardController extends Controller
             'availablePeriods',
             'tenantInvoices',
             'quotasSummary',
-            'systemModulesList'
+            'systemModulesList',
+            'customFieldItems'
         ));
     }
 

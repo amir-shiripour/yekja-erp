@@ -1,5 +1,5 @@
 @php
-    use App\Tenancy\TenantManager;
+    use App\Models\CustomUserField;use App\Tenancy\TenantManager;
     use Modules\ResellerHub\App\Helpers\ResellerHelper;
     use Modules\ResellerHub\App\Models\ResellerInvoice;
     use Modules\ResellerHub\App\Services\TenantQuotaService;
@@ -34,6 +34,56 @@
     if ($activeModulesCount === 0 && $tenant->package && is_array($tenant->package->modules)) {
         $activeModulesCount = count($tenant->package->modules);
     }
+
+    $customFieldItems = $customFieldItems ?? collect();
+    if ($customFieldItems->isEmpty() && ($tenant->subAccount || $tenant->owner_id)) {
+        $subAccountUser = $subAccount?->user ?? $tenant->owner;
+        $subAccountRoles = $subAccountUser ? $subAccountUser->roles->pluck('name')->toArray() : ['sub_account'];
+
+        $subAccountCustomFields = CustomUserField::query()
+            ->where(function ($query) use ($subAccountRoles) {
+                $query->whereIn('entity_type', [CustomUserField::ENTITY_SUB_ACCOUNT, CustomUserField::ENTITY_USER])
+                    ->orWhereIn('role_name', array_merge(['sub_account'], $subAccountRoles));
+            })
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+            ->unique('field_name')
+            ->values();
+
+        $userCustomValues = $subAccountUser
+            ? \App\Models\UserCustomValue::where('user_id', $subAccountUser->id)->get()->keyBy('field_name')
+            : collect();
+
+        $tenantCustomSettings = is_array(data_get($tenant->settings, 'custom_fields'))
+            ? data_get($tenant->settings, 'custom_fields')
+            : [];
+
+        $subAccountCustomSettings = is_array(data_get($subAccount?->settings, 'custom_fields'))
+            ? data_get($subAccount->settings, 'custom_fields')
+            : [];
+
+        $customFieldItems = $subAccountCustomFields->map(function ($field) use ($userCustomValues, $tenantCustomSettings, $subAccountCustomSettings) {
+            $rawVal = $userCustomValues->get($field->field_name)?->value
+                ?? ($tenantCustomSettings[$field->field_name] ?? null)
+                ?? ($subAccountCustomSettings[$field->field_name] ?? null);
+
+            $categoryGroup = CustomUserField::resolveCategoryGroup($field->field_name, $field->category_group);
+
+            return [
+                'id' => $field->id,
+                'name' => $field->field_name,
+                'label' => CustomUserField::resolveLabel($field->field_name, $field->label),
+                'field_type' => $field->field_type ?? 'text',
+                'category_group' => $categoryGroup,
+                'category_label' => CustomUserField::resolveCategoryLabel($categoryGroup),
+                'is_identity' => ($categoryGroup === CustomUserField::CATEGORY_IDENTITY),
+                'is_required' => (bool)$field->is_required,
+                'value' => $rawVal,
+                'has_value' => ($rawVal !== null && $rawVal !== ''),
+            ];
+        })->sortByDesc('is_identity')->values();
+    }
 @endphp
 @extends('layouts.user')
 
@@ -41,8 +91,14 @@
 
 @section('content')
     <style>
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 
     @include('resellerhub::user.packages.partials.icons-script')
@@ -59,9 +115,10 @@
         <div
             class="bg-white dark:bg-gray-800 rounded-2xl border border-slate-200/80 dark:border-gray-700/80 p-1.5 shadow-xs relative">
             {{-- Desktop Full Tab Navigation (sm and up) --}}
-            <nav class="hidden sm:flex items-center gap-1.5 overflow-x-auto hide-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-                 style="scrollbar-width: none; -ms-overflow-style: none;"
-                 aria-label="Tabs Desktop">
+            <nav
+                class="hidden sm:flex items-center gap-1.5 overflow-x-auto hide-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                style="scrollbar-width: none; -ms-overflow-style: none;"
+                aria-label="Tabs Desktop">
                 {{-- Tab 1: Overview & Subscription --}}
                 <button type="button"
                         @click="setTab('overview')"
@@ -120,7 +177,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
                     </svg>
-                    <span>برندینگ و تم (White-Label)</span>
+                    <span>برندینگ و تم</span>
                 </button>
 
                 {{-- Tab 5: Invoices & Financial --}}
@@ -211,14 +268,19 @@
                                 :class="activeTab === 'quotas' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-black' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/60 font-bold'"
                                 class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition cursor-pointer text-right">
                             <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                 </svg>
                                 <span>سهمیه‌ها و مصرف منابع</span>
                             </div>
                             <template x-if="activeTab === 'quotas'">
-                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                          d="M5 13l4 4L19 7"/>
+                                </svg>
                             </template>
                         </button>
 
@@ -228,14 +290,19 @@
                                 :class="activeTab === 'branding' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-black' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/60 font-bold'"
                                 class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition cursor-pointer text-right">
                             <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
                                 </svg>
                                 <span>برندینگ و تم (White-Label)</span>
                             </div>
                             <template x-if="activeTab === 'branding'">
-                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                          d="M5 13l4 4L19 7"/>
+                                </svg>
                             </template>
                         </button>
 
@@ -245,13 +312,15 @@
                                 :class="activeTab === 'invoices' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-black' : 'text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/60 font-bold'"
                                 class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition cursor-pointer text-right">
                             <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 shrink-0 text-slate-500" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                                 </svg>
                                 <span>سوابق مالی و فاکتورها</span>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300">
+                            <span
+                                class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300">
                                 {{ reseller_fa_num($tenantInvoices->count()) }}
                             </span>
                         </button>
