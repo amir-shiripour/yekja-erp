@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 
 class DatabaseSeeder extends Seeder
 {
@@ -28,6 +29,9 @@ class DatabaseSeeder extends Seeder
         // سپس تم‌ها و نیازمندی‌های ماژولی آن‌ها ثبت شوند
         $this->call(ThemeSeeder::class);
         $this->call(RolePermissionSeeder::class);
+
+        // اطمینان از ایزولاسیون کامل جداول در هنگام سید اولیه دیتابیس
+        Artisan::call('tenancy:isolate-tables');
     }
 }
 

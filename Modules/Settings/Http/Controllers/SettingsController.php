@@ -195,6 +195,19 @@ class SettingsController extends Controller
             'app_logo.max' => 'حجم تصویر لوگو نباید بیشتر از ۵ مگابایت باشد.',
         ]);
 
+        // Validate any arbitrary uploaded settings files
+        foreach ($request->allFiles() as $fileKey => $fileObj) {
+            if ($fileKey === 'identity_seal_signature' || $fileKey === 'app_logo') {
+                continue;
+            }
+            $request->validate([
+                $fileKey => 'file|mimes:jpg,jpeg,png,webp,svg,pdf,ico|max:10240',
+            ], [
+                "{$fileKey}.mimes" => 'فرمت فایل انتخابی برای ' . $fileKey . ' نامعتبر است (فرمت‌های مجاز: jpg, png, webp, svg, pdf, ico).',
+                "{$fileKey}.max" => 'حجم فایل نباید بیشتر از ۱۰ مگابایت باشد.',
+            ]);
+        }
+
         $activeTab = $request->input('active_tab');
         $data = $request->except(['_token', 'active_tab']);
         $this->handleIdentitySealUpload($request);
@@ -257,10 +270,10 @@ class SettingsController extends Controller
                 $value = str_replace(',', '', trim($value));
             }
 
-            // Handle file uploads
+            // Handle file uploads safely with randomized hashName
             if ($request->hasFile($key)) {
                 $file = $request->file($key);
-                $filename = time() . '_' . $file->getClientOriginalName();
+                $filename = $file->hashName();
                 $file->move(public_path('uploads/settings'), $filename);
                 $value = 'uploads/settings/' . $filename;
             }

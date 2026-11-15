@@ -318,7 +318,7 @@
                                     </div>
 
                                     <div class="h-48 bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden flex items-center justify-center border border-gray-200 dark:border-gray-700 relative group">
-                                        <img src="{{ Storage::url($doc->file_path) }}" alt="مدرک" class="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform duration-300" onclick="window.open(this.src, '_blank')">
+                                        <img src="{{ route('user.market.vendors.document', $doc->id) }}" alt="مدرک" class="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform duration-300" onclick="window.open(this.src, '_blank')">
                                         <div class="absolute bottom-2 left-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">کلیک برای بزرگنمایی</div>
                                     </div>
 

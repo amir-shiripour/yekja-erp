@@ -63,12 +63,13 @@ class ProjectsDocumentController extends Controller
             $file = $request->file('file');
             $originalName = $file->getClientOriginalName();
 
-            $path = $this->uploadFile($file, 'projects/documents/' . $project->id, 'public');
+            // ذخیره در دیسک امن local جهت جلوگیری از دسترسی بدون احراز هویت به اسناد پروژه‌ها
+            $path = $this->uploadFile($file, 'projects/documents/' . $project->id, 'local');
 
             $data['file_path'] = $path;
             $data['file_original_name'] = $originalName;
-            $data['file_mime'] = Storage::disk('public')->exists($path) ? Storage::disk('public')->mimeType($path) : $file->getClientMimeType();
-            $data['file_size'] = Storage::disk('public')->exists($path) ? Storage::disk('public')->size($path) : $file->getSize();
+            $data['file_mime'] = Storage::disk('local')->exists($path) ? Storage::disk('local')->mimeType($path) : $file->getClientMimeType();
+            $data['file_size'] = Storage::disk('local')->exists($path) ? Storage::disk('local')->size($path) : $file->getSize();
         }
 
         $document = ProjectDocument::create($data);
@@ -102,19 +103,27 @@ class ProjectsDocumentController extends Controller
             abort(403, 'شما دسترسی لازم برای دانلود اسناد این دسته‌بندی را ندارید.');
         }
 
-        if ($document->type !== 'file' || !$document->file_path || !Storage::disk('public')->exists($document->file_path)) {
+        $disk = ($document->file_path && Storage::disk('local')->exists($document->file_path))
+            ? 'local'
+            : (($document->file_path && Storage::disk('public')->exists($document->file_path)) ? 'public' : null);
+
+        if ($document->type !== 'file' || !$document->file_path || !$disk) {
             abort(404, 'فایل مورد نظر یافت نشد.');
         }
 
-        return Storage::disk('public')->download($document->file_path, $document->file_original_name ?? $document->title);
+        return Storage::disk($disk)->download($document->file_path, $document->file_original_name ?? $document->title);
     }
 
     public function destroy(Project $project, ProjectDocument $document)
     {
         $this->authorize('deleteDocument', $project);
 
-        if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
-            Storage::disk('public')->delete($document->file_path);
+        if ($document->file_path) {
+            if (Storage::disk('local')->exists($document->file_path)) {
+                Storage::disk('local')->delete($document->file_path);
+            } elseif (Storage::disk('public')->exists($document->file_path)) {
+                Storage::disk('public')->delete($document->file_path);
+            }
         }
 
         $document->delete();

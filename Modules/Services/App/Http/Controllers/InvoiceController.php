@@ -57,9 +57,10 @@ class InvoiceController extends Controller
             ->when(!$canViewAll, fn($q) => $q->where('created_by', $user->id))
             ->when(
                 $request->search,
-                fn($q, $s) => $q
-                    ->where('invoice_number', 'like', "%$s%")
-                    ->orWhere('client_name', 'like', "%$s%")
+                fn($q, $s) => $q->where(function ($sub) use ($s) {
+                    $sub->where('invoice_number', 'like', "%$s%")
+                        ->orWhere('client_name', 'like', "%$s%");
+                })
             )
             ->when($request->status_id, fn($q, $v) => $q->where('status_id', $v))
             ->when($request->payment_mode, fn($q, $v) => $q->where('payment_mode', $v))
@@ -81,9 +82,10 @@ class InvoiceController extends Controller
             ->when(!$canViewAll, fn($q) => $q->where('created_by', $user->id))
             ->when(
                 $request->search,
-                fn($q, $s) => $q
-                    ->where('invoice_number', 'like', "%$s%")
-                    ->orWhere('client_name', 'like', "%$s%")
+                fn($q, $s) => $q->where(function ($sub) use ($s) {
+                    $sub->where('invoice_number', 'like', "%$s%")
+                        ->orWhere('client_name', 'like', "%$s%");
+                })
             )
             ->when($request->status_id, fn($q, $v) => $q->where('status_id', $v))
             ->when($request->payment_mode, fn($q, $v) => $q->where('payment_mode', $v))
@@ -129,9 +131,10 @@ class InvoiceController extends Controller
             ->when(!$canViewAll, fn($q) => $q->where('created_by', $user->id))
             ->when(
                 $request->search,
-                fn($q, $s) => $q
-                    ->where('proforma_invoice_number', 'like', "%$s%")
-                    ->orWhere('client_name', 'like', "%$s%")
+                fn($q, $s) => $q->where(function ($sub) use ($s) {
+                    $sub->where('proforma_invoice_number', 'like', "%$s%")
+                        ->orWhere('client_name', 'like', "%$s%");
+                })
             )
             ->when($request->customer_id, fn($q, $v) => $q->where('customer_id', $v))
             ->latest();

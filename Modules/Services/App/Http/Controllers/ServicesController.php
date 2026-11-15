@@ -49,7 +49,9 @@ class ServicesController extends Controller
 
         $services = Service::with('category', 'status')
             ->withSum(['invoices as revenue' => fn($q) => $q->whereHas('status', fn($s) => $s->where('name', 'paid'))], 'total')
-            ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%$s%")->orWhere('code', 'like', "%$s%"))
+            ->when($request->search, fn($q, $s) => $q->where(function ($sub) use ($s) {
+                $sub->where('name', 'like', "%$s%")->orWhere('code', 'like', "%$s%");
+            }))
             ->when($request->category_id, fn($q, $v) => $q->where('category_id', $v))
             ->when($request->status_id, fn($q, $v) => $q->where('status_id', $v))
             ->when($request->billing_type, fn($q, $v) => $q->where('billing_type', $v))

@@ -16,4 +16,9 @@ class VendorDocument extends Model
     {
         return $this->belongsTo(Vendor::class, 'vendor_id');
     }
+
+    public function getUrlAttribute(): string
+    {
+        return route('user.market.vendors.document', $this->id);
+    }
 }

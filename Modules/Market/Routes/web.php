@@ -76,6 +76,7 @@ Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['web', 'auth
 
         // Admin Section
         Route::middleware([CheckMultiVendorMode::class])->group(function () {
+            Route::get('vendors/documents/{document}', [VendorController::class, 'viewDocument'])->name('vendors.document');
             Route::get('vendors', [VendorController::class, 'index'])->name('vendors.index')->middleware('permission:market.vendors.view');
             Route::resource('vendors', VendorController::class)->except(['index', 'show'])->middleware('permission:market.vendors.manage');
             Route::get('vendors/{vendor}', [VendorController::class, 'show'])->name('vendors.show')->middleware('permission:market.vendors.view');

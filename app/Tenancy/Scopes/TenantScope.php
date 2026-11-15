@@ -7,6 +7,7 @@ use App\Tenancy\TenantManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 class TenantScope implements Scope
@@ -32,6 +33,11 @@ class TenantScope implements Scope
         }
 
         if (!static::$hasColumnCache[$table]) {
+            if ($tenantManager->hasTenant()) {
+                Log::warning(
+                    "[TenantScope] Table '{$table}' is missing 'tenant_id' column in active tenant context [{$tenantManager->getTenantId()}]. Run 'php artisan tenancy:isolate-tables'."
+                );
+            }
             return;
         }
 

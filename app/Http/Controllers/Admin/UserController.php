@@ -83,7 +83,10 @@ class UserController extends Controller
             'roles'    => ['required', 'array'],
             'roles.*'  => ['string', 'exists:roles,name'],
             'superior_ids'   => ['nullable', 'array'],
-            'superior_ids.*' => ['exists:users,id'],
+            'superior_ids.*' => [
+                'integer',
+                Rule::exists('users', 'id')->where(fn($q) => $tenantId ? $q->where('tenant_id', $tenantId) : $q->whereNull('tenant_id'))
+            ],
         ]);
 
         // جلوگیری از ایجاد کاربر با نقش super-admin توسط ادمین عادی
@@ -191,7 +194,10 @@ class UserController extends Controller
             'roles'    => ['required', 'array'],
             'roles.*'  => ['string', 'exists:roles,name'],
             'superior_ids'   => ['nullable', 'array'],
-            'superior_ids.*' => ['exists:users,id'],
+            'superior_ids.*' => [
+                'integer',
+                Rule::exists('users', 'id')->where(fn($q) => $tenantId ? $q->where('tenant_id', $tenantId) : $q->whereNull('tenant_id'))
+            ],
         ]);
 
         // جلوگیری از اختصاص نقش super-admin به کاربر توسط ادمین عادی

@@ -14,6 +14,8 @@ return new class extends Migration
 
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('tenant_id')->nullable()->index();
+            $table->foreign('tenant_id')->references('id')->on('tenants')->nullOnDelete();
             $table->morphs('holder'); // holder_type, holder_id
             $table->string('slug')->default('default'); // e.g., 'default', 'gift', 'system_credit'
             $table->string('name')->nullable();
@@ -23,7 +25,7 @@ return new class extends Migration
             $table->json('meta')->nullable();
             $table->timestamps();
 
-            $table->unique(['holder_type', 'holder_id', 'slug']);
+            $table->unique(['tenant_id', 'holder_type', 'holder_id', 'slug'], 'wallets_tenant_holder_slug_unique');
         });
     }
 

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -111,11 +112,25 @@ class IdentifyTenant
 
                 $isSuperAdmin = method_exists($user, 'hasRole') && $user->hasRole('super-admin');
 
-                if (!$isSuperAdmin && !empty($user->tenant_id) && (int)$user->tenant_id !== (int)$tenant->id) {
+                if (!$isSuperAdmin && (empty($user->tenant_id) || (int)$user->tenant_id !== (int)$tenant->id)) {
                     Auth::guard('web')->logout();
 
-                    return redirect()->route('login')->withErrors([
+                    $loginRoute = Route::has('login') ? route('login') : '/login';
+                    return redirect($loginRoute)->withErrors([
                         'email' => 'حساب کاربری شما متعلق به این سازمان یا کلینیک نمی‌باشد.',
+                    ]);
+                }
+            }
+
+            if (Auth::guard('client')->check()) {
+                $clientUser = Auth::guard('client')->user();
+
+                if (empty($clientUser->tenant_id) || (int)$clientUser->tenant_id !== (int)$tenant->id) {
+                    Auth::guard('client')->logout();
+
+                    $clientLoginRoute = Route::has('client.login') ? route('client.login') : (Route::has('login') ? route('login') : '/');
+                    return redirect($clientLoginRoute)->withErrors([
+                        'username' => 'حساب کاربری شما متعلق به این سازمان یا کلینیک نمی‌باشد.',
                     ]);
                 }
             }
