@@ -42,18 +42,6 @@
                              class="w-16 h-20 object-contain mx-auto"
                              onerror="this.classList.add('hidden'); document.getElementById('enamad-fallback-badge')?.classList.remove('hidden');"
                         >
-                        {{-- فال‌بک تصویری اینماد هنگام لود در محیط لوکال/توسعه که سرور اینماد خطای ۴۰۳ می‌دهد --}}
-                        <div id="enamad-fallback-badge" class="flex flex-col items-center justify-center text-center">
-                            <svg class="w-12 h-12 mb-1 drop-shadow-xs" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="50" cy="50" r="46" fill="#F8FAFC" stroke="#0284C7" stroke-width="3"/>
-                                <path d="M50 18 C34 18 24 28 24 42 C24 58 40 70 52 74 C58 76 64 74 68 70 C72 66 74 60 72 54 C70 48 64 45 58 46 C52 47 48 51 46 56 C44 61 46 66 50 67 C44 67 36 60 36 50 C36 40 44 32 54 32 C62 32 68 37 68 44 C68 48 66 52 62 54" stroke="#0369A1" stroke-width="4.5" stroke-linecap="round"/>
-                                <circle cx="50" cy="26" r="3.5" fill="#F59E0B"/>
-                                <path d="M42 82 L44 78 L46 82 L50 82 L47 84 L48 88 L44 85 L40 88 L41 84 L38 82 Z" fill="#F59E0B"/>
-                                <path d="M54 82 L56 78 L58 82 L62 82 L59 84 L60 88 L56 85 L52 88 L53 84 L50 82 Z" fill="#F59E0B"/>
-                            </svg>
-                            <span class="text-[10px] font-bold text-sky-800 dark:text-sky-300 leading-tight">نماد اعتماد</span>
-                            <span class="text-[9px] text-gray-600 dark:text-gray-400 mt-0.5 dir-ltr font-mono">id: 8588364</span>
-                        </div>
                     </a>
                 </div>
             </div>
