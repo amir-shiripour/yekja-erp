@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 /**
@@ -56,13 +58,42 @@ class CustomUserField extends Model
 
     public function getCategoryLabelAttribute(): string
     {
-        return match ($this->category_group) {
+        return static::resolveCategoryLabel($this->category_group);
+    }
+
+    /**
+     * Resolve a translated human-readable title for a category group.
+     */
+    public static function resolveCategoryLabel(?string $group): string
+    {
+        return match ($group) {
             self::CATEGORY_IDENTITY => __('resellerhub::messages.profile.categories.identity_title'),
             self::CATEGORY_CONTACT => __('resellerhub::messages.profile.categories.contact_title'),
             self::CATEGORY_BUSINESS => __('resellerhub::messages.profile.categories.business_title'),
             self::CATEGORY_SYSTEM => __('resellerhub::messages.profile.categories.system_title'),
             default => __('resellerhub::messages.profile.categories.general_title'),
         };
+    }
+
+    /**
+     * Dynamically resolve human-readable Persian label for any field name.
+     * Prioritizes: explicit label -> translation attributes -> module messages -> clean headline.
+     */
+    public static function resolveLabel(string $fieldName, ?string $explicitLabel = null): string
+    {
+        if (!empty($explicitLabel)) {
+            return $explicitLabel;
+        }
+
+        if (Lang::has("validation.attributes.{$fieldName}")) {
+            return __("validation.attributes.{$fieldName}");
+        }
+
+        if (Lang::has("resellerhub::messages.fields.{$fieldName}")) {
+            return __("resellerhub::messages.fields.{$fieldName}");
+        }
+
+        return Str::headline(str_replace('_', ' ', $fieldName));
     }
 
     /**
