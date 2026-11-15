@@ -30,6 +30,7 @@ use Modules\ResellerHub\App\Livewire\Portal\Checkout;
 Route::middleware(['web'])->group(function () {
     Route::get('/user/reseller/pricing', [PublicPricingController::class, 'index'])->name('resellerhub.pricing');
     Route::get('/resellerhub/pricing', fn() => redirect()->route('resellerhub.pricing', [], 301));
+    Route::get('/pricing', fn() => redirect()->route('resellerhub.pricing', [], 301));
 
     // Portal for Customer Acquisition / Registration
     Route::view('/get-started', 'resellerhub::portal.index')->name('portal.get-started');
