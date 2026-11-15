@@ -193,6 +193,17 @@
                         $displayUrl = $tenantManager->getTenantDisplayUrl($tenant);
                         $fullTenantUrl = $tenantManager->getTenantUrl($tenant);
                         $tPackage = $tenant->package;
+                        if (!$tPackage && $tenant->relationLoaded('invoices')) {
+                            $tPackage = $tenant->invoices->sortByDesc('id')->firstWhere('package_id')?->package;
+                        }
+                        if (!$tPackage && $tenant->relationLoaded('orders')) {
+                            $tPackage = $tenant->orders->sortByDesc('id')->first(fn($o) => $o->invoice?->package)?->invoice?->package;
+                        }
+                        $tModulesCount = $tenant->relationLoaded('modules') ? $tenant->modules->where('is_active', true)->count() : 0;
+                        if ($tModulesCount === 0 && $tenant->relationLoaded('modules')) {
+                            $tModulesCount = $tenant->modules->count();
+                        }
+                        $tPackageName = $tPackage?->name ?? ($tModulesCount > 0 ? ('پکیج سفارشی (' . reseller_fa_num($tModulesCount) . ' ماژول)') : 'بدون پکیج');
                         $tPriceType = $tPackage?->getPriceTypeEnum();
                         $canRenew = $tPackage ? $tPriceType->hasRenewal() : true;
                         $tPeriods = $canRenew ? reseller_tenant_renewal_periods($tenant) : [];
@@ -351,12 +362,12 @@
                                         </span>
                                     </div>
                                 </div>
-                            @else
+                            @elseif($tModulesCount > 0)
                                 <div class="flex items-center gap-2.5 whitespace-nowrap">
                                     <span
                                         class="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-950/60 dark:to-indigo-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0 border border-violet-200/70 dark:border-violet-800/60 shadow-2xs">
                                         <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
                                         </svg>
                                     </span>
                                     <div class="min-w-0">
@@ -365,7 +376,25 @@
                                             پکیج سفارشی
                                         </span>
                                         <span class="text-[11px] font-bold text-violet-600 dark:text-violet-400 block">
-                                            منابع و ماژول‌های اختصاصی
+                                            {{ reseller_fa_num($tModulesCount) }} ماژول فعال
+                                        </span>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="flex items-center gap-2.5 whitespace-nowrap">
+                                    <span
+                                        class="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 flex items-center justify-center shrink-0 border border-gray-200/70 dark:border-gray-700/60 shadow-2xs">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </span>
+                                    <div class="min-w-0">
+                                        <span
+                                            class="font-bold text-xs sm:text-sm text-gray-600 dark:text-gray-400 block truncate">
+                                            بدون پکیج
+                                        </span>
+                                        <span class="text-[11px] font-medium text-gray-400 dark:text-gray-500 block">
+                                            تعریف نشده
                                         </span>
                                     </div>
                                 </div>
@@ -430,7 +459,7 @@
                                             data-id="{{ $tenant->id }}"
                                             data-name="{{ e($tenant->name) }}"
                                             data-subdomain="{{ e($displayUrl) }}"
-                                            data-package="{{ e($tPackage?->name ?? '') }}"
+                                            data-package="{{ e($tPackageName) }}"
                                             data-expires="{{ e($tenant->jalali_plan_expires_at ?? 'نامحدود') }}"
                                             data-periods="{{ e(json_encode($tPeriods, JSON_THROW_ON_ERROR)) }}"
                                             data-url="{{ route('reseller.tenants.renew', $tenant->id) }}"
@@ -746,6 +775,17 @@
                     $displayUrl = $tenantManager->getTenantDisplayUrl($tenant);
                     $fullTenantUrl = $tenantManager->getTenantUrl($tenant);
                     $tPackage = $tenant->package;
+                    if (!$tPackage && $tenant->relationLoaded('invoices')) {
+                        $tPackage = $tenant->invoices->sortByDesc('id')->firstWhere('package_id')?->package;
+                    }
+                    if (!$tPackage && $tenant->relationLoaded('orders')) {
+                        $tPackage = $tenant->orders->sortByDesc('id')->first(fn($o) => $o->invoice?->package)?->invoice?->package;
+                    }
+                    $tModulesCount = $tenant->relationLoaded('modules') ? $tenant->modules->where('is_active', true)->count() : 0;
+                    if ($tModulesCount === 0 && $tenant->relationLoaded('modules')) {
+                        $tModulesCount = $tenant->modules->count();
+                    }
+                    $tPackageName = $tPackage?->name ?? ($tModulesCount > 0 ? ('پکیج سفارشی (' . reseller_fa_num($tModulesCount) . ' ماژول)') : 'بدون پکیج');
                     $tPriceType = $tPackage?->getPriceTypeEnum();
                     $canRenew = $tPackage ? $tPriceType->hasRenewal() : true;
                     $tPeriods = $canRenew ? reseller_tenant_renewal_periods($tenant) : [];
@@ -836,12 +876,19 @@
                                     {!! $mPkgIcon->svg('w-3.5 h-3.5') !!}
                                     <span>{{ $tPackage->name }}</span>
                                 </span>
-                            @else
+                            @elseif($tModulesCount > 0)
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-black bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-950/50 dark:to-indigo-950/50 text-violet-700 dark:text-violet-300 border border-violet-200/80 dark:border-violet-800/60 shadow-2xs">
                                     <svg class="w-3.5 h-3.5 text-violet-600 dark:text-violet-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/>
                                     </svg>
-                                    <span>پکیج سفارشی</span>
+                                    <span>سفارشی ({{ reseller_fa_num($tModulesCount) }} ماژول)</span>
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 border border-gray-200/80 dark:border-gray-700/60">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                    </svg>
+                                    <span>بدون پکیج</span>
                                 </span>
                             @endif
                         </div>
@@ -882,7 +929,7 @@
                                         data-id="{{ $tenant->id }}"
                                         data-name="{{ e($tenant->name) }}"
                                         data-subdomain="{{ e($displayUrl) }}"
-                                        data-package="{{ e($tPackage?->name ?? '') }}"
+                                        data-package="{{ e($tPackageName) }}"
                                         data-expires="{{ e($tenant->jalali_plan_expires_at ?? 'نامحدود') }}"
                                         data-periods="{{ e(json_encode($tPeriods, JSON_THROW_ON_ERROR)) }}"
                                         data-url="{{ route('reseller.tenants.renew', $tenant->id) }}"
