@@ -38,24 +38,32 @@ return new class extends Migration
 
         // 4. Missing composite index on tenants (TEN-05)
         if (Schema::hasTable('tenants')) {
-            $connection = Schema::getConnection();
-            $dbName = $connection->getDatabaseName();
-            $exists = DB::select(
-                "SELECT COUNT(1) AS cnt FROM information_schema.statistics
-                 WHERE table_schema = ? AND table_name = ? AND index_name = ?",
-                [$dbName, 'tenants', 'idx_tenants_reseller_status_expiry']
-            );
+            $hasIndex = Schema::hasIndex('tenants', 'idx_tenants_reseller_status_expiry')
+                || Schema::hasIndex('tenants', ['reseller_id', 'status', 'plan_expires_at']);
 
-            if (empty($exists) || (int)$exists[0]->cnt === 0) {
-                Schema::table('tenants', function (Blueprint $table) {
-                    $table->index(['reseller_id', 'status', 'plan_expires_at'], 'idx_tenants_reseller_status_expiry');
-                });
+            if (!$hasIndex) {
+                try {
+                    Schema::table('tenants', function (Blueprint $table) {
+                        $table->index(['reseller_id', 'status', 'plan_expires_at'], 'idx_tenants_reseller_status_expiry');
+                    });
+                } catch (Throwable $e) {
+                    // Gracefully suppress if index was already created or duplicate key error occurs
+                    if (!str_contains($e->getMessage(), 'Duplicate key name') && !str_contains($e->getMessage(), '1061')) {
+                        throw $e;
+                    }
+                }
             }
         }
     }
 
     public function down(): void
     {
+        if (Schema::hasTable('tenants') && Schema::hasIndex('tenants', 'idx_tenants_reseller_status_expiry')) {
+            Schema::table('tenants', function (Blueprint $table) {
+                $table->dropIndex('idx_tenants_reseller_status_expiry');
+            });
+        }
+
         if (Schema::hasTable('resellers') && Schema::hasColumn('resellers', 'deleted_at')) {
             Schema::table('resellers', function (Blueprint $table) {
                 $table->dropSoftDeletes();
