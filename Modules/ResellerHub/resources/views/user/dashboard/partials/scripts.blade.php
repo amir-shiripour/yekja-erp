@@ -850,7 +850,7 @@
                                         if (c.dataset.yAxisID === 'yRevenue') {
                                             return ' درآمد وصولی: ' + window.toFaDigits(Number(c.parsed.y).toLocaleString('en-US')) + ' {{ $currencyLabel }}';
                                         }
-                                        return ' سامانه جدید: ' + window.toFaDigits(c.parsed.y) + ' CRM';
+                                        return ' سامانه جدید: ' + window.toFaDigits(c.parsed.y) + ' سامانه';
                                     }
                                 }
                             }
@@ -869,6 +869,7 @@
                                 type: 'linear',
                                 position: 'left',
                                 beginAtZero: true,
+                                suggestedMax: 5,
                                 ticks: {
                                     color: textColor,
                                     precision: 0,
@@ -884,11 +885,13 @@
                                 type: 'linear',
                                 position: 'right',
                                 beginAtZero: true,
+                                suggestedMax: 1000000,
                                 ticks: {
                                     color: textColor,
+                                    precision: 0,
                                     font: {family: chartFontFamily, size: 11},
                                     callback: function (v) {
-                                        if (v === 0) return '۰';
+                                        if (!v || v === 0 || Math.round(v) <= 0) return '۰';
                                         return window.toFaDigits(Math.round(v).toLocaleString('en-US')) + ' {{ $currencyLabel }}';
                                     }
                                 },
@@ -1110,13 +1113,15 @@
                                 type: 'linear',
                                 position: 'left',
                                 beginAtZero: true,
+                                suggestedMax: 5,
                                 ticks: {
                                     color: textColor,
                                     precision: 0,
+                                    maxTicksLimit: 6,
                                     font: {family: chartFontFamily, size: 11},
                                     padding: 8,
                                     callback: function (v) {
-                                        return window.toFaDigits(v) + ' CRM';
+                                        return window.toFaDigits(v) + ' سامانه';
                                     }
                                 },
                                 grid: {color: isDark ? 'rgba(255, 255, 255, 0.04)' : gridColor},
@@ -1126,12 +1131,15 @@
                                 type: 'linear',
                                 position: 'right',
                                 beginAtZero: true,
+                                suggestedMax: 1000000,
                                 ticks: {
                                     color: textColor,
+                                    precision: 0,
+                                    maxTicksLimit: 6,
                                     font: {family: chartFontFamily, size: 11},
                                     padding: 8,
                                     callback: function (v) {
-                                        if (v === 0) return '۰';
+                                        if (!v || v === 0 || Math.round(v) <= 0) return '۰';
                                         return window.toFaDigits(Math.round(v).toLocaleString('en-US')) + ' {{ $currencyLabel }}';
                                     }
                                 },

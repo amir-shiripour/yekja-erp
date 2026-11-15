@@ -4,6 +4,7 @@ namespace Modules\Wallet\App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Tenancy\TenantManager;
 use Illuminate\Http\Request;
 use Modules\Clients\Entities\Client;
 use Modules\Wallet\App\Enums\TransactionStatus;
@@ -16,7 +17,9 @@ class WalletController extends Controller
 {
     public function __construct(
         protected WalletService $walletService
-    ) {}
+    )
+    {
+    }
 
     public function index(Request $request)
     {
@@ -28,7 +31,7 @@ class WalletController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('slug', 'like', "%{$search}%");
+                    ->orWhere('slug', 'like', "%{$search}%");
             });
         }
 
@@ -65,7 +68,7 @@ class WalletController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('uuid', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -81,89 +84,98 @@ class WalletController extends Controller
     public function searchHolders(Request $request)
     {
         if (auth()->check()) {
-            $canView = auth()->user()->can('wallet.view') 
-                    || auth()->user()->can('wallet.deposit') 
-                    || auth()->user()->can('wallet.withdraw');
-            if (! $canView) {
+            $canView = auth()->user()->can('wallet.view')
+                || auth()->user()->can('wallet.deposit')
+                || auth()->user()->can('wallet.withdraw');
+            if (!$canView) {
                 abort(403, 'شما مجاز به انجام این عملیات نمی‌باشید.');
             }
         }
 
-        $query = trim((string) $request->input('q', ''));
+        $query = trim((string)$request->input('q', ''));
         $type = $request->input('type', 'all'); // all, client, user
-        $limit = min(50, max(5, (int) $request->input('limit', 20)));
+        $limit = min(50, max(5, (int)$request->input('limit', 20)));
 
         $sysCurrency = $this->walletService->getSystemCurrency();
         $sysLabel = ($sysCurrency === 'rial' || $sysCurrency === 'IRR') ? 'ریال' : 'تومان';
 
         $results = [];
 
+        $tenantManager = app(TenantManager::class);
+        $isSuperAdmin = auth()->check() && method_exists(auth()->user(), 'hasRole') && auth()->user()->hasRole('super-admin');
+
         if ($type === 'all' || $type === 'client') {
             $clientsQuery = Client::query();
+            if ($tenantManager->hasTenant() && !$isSuperAdmin) {
+                $clientsQuery->where('tenant_id', $tenantManager->getTenantId());
+            }
             if ($query !== '') {
                 $clientsQuery->where(function ($q) use ($query) {
                     $q->where('full_name', 'like', "%{$query}%")
-                      ->orWhere('username', 'like', "%{$query}%")
-                      ->orWhere('phone', 'like', "%{$query}%")
-                      ->orWhere('email', 'like', "%{$query}%")
-                      ->orWhere('national_code', 'like', "%{$query}%")
-                      ->orWhere('id', $query);
+                        ->orWhere('username', 'like', "%{$query}%")
+                        ->orWhere('phone', 'like', "%{$query}%")
+                        ->orWhere('email', 'like', "%{$query}%")
+                        ->orWhere('national_code', 'like', "%{$query}%")
+                        ->orWhere('id', $query);
                 });
             }
             $clients = $clientsQuery->limit($limit)->get();
 
             foreach ($clients as $client) {
                 $wallet = $client->defaultWallet;
-                $balance = $wallet ? (float) $wallet->balance : (float) $client->getBalance();
+                $balance = $wallet ? (float)$wallet->balance : (float)$client->getBalance();
                 $currencyCode = $wallet ? $wallet->currency : $sysCurrency;
                 $currLabel = ($currencyCode === 'rial' || $currencyCode === 'IRR') ? 'ریال' : 'تومان';
 
                 $results[] = [
-                    'id'             => $client->id,
-                    'holder_type'    => 'client',
-                    'holder_name'    => $client->full_name ?: ($client->username ?: 'کلاینت #' . $client->id),
-                    'phone'          => $client->phone ?: '—',
-                    'email'          => $client->email ?: '',
-                    'badge'          => 'کلاینت',
-                    'balance'        => $balance,
-                    'currency'       => $currencyCode,
+                    'id' => $client->id,
+                    'holder_type' => 'client',
+                    'holder_name' => $client->full_name ?: ($client->username ?: 'کلاینت #' . $client->id),
+                    'phone' => $client->phone ?: '—',
+                    'email' => $client->email ?: '',
+                    'badge' => 'کلاینت',
+                    'balance' => $balance,
+                    'currency' => $currencyCode,
                     'currency_label' => $currLabel,
-                    'is_active'      => $wallet ? (bool) $wallet->is_active : true,
-                    'wallet_id'      => $wallet?->id,
+                    'is_active' => $wallet ? (bool)$wallet->is_active : true,
+                    'wallet_id' => $wallet?->id,
                 ];
             }
         }
 
         if ($type === 'all' || $type === 'user') {
             $usersQuery = User::query();
+            if ($tenantManager->hasTenant() && !$isSuperAdmin) {
+                $usersQuery->where('tenant_id', $tenantManager->getTenantId());
+            }
             if ($query !== '') {
                 $usersQuery->where(function ($q) use ($query) {
                     $q->where('name', 'like', "%{$query}%")
-                      ->orWhere('mobile', 'like', "%{$query}%")
-                      ->orWhere('email', 'like', "%{$query}%")
-                      ->orWhere('id', $query);
+                        ->orWhere('mobile', 'like', "%{$query}%")
+                        ->orWhere('email', 'like', "%{$query}%")
+                        ->orWhere('id', $query);
                 });
             }
             $users = $usersQuery->limit($limit)->get();
 
             foreach ($users as $user) {
                 $wallet = $user->defaultWallet;
-                $balance = $wallet ? (float) $wallet->balance : (float) $user->getBalance();
+                $balance = $wallet ? (float)$wallet->balance : (float)$user->getBalance();
                 $currencyCode = $wallet ? $wallet->currency : $sysCurrency;
                 $currLabel = ($currencyCode === 'rial' || $currencyCode === 'IRR') ? 'ریال' : 'تومان';
 
                 $results[] = [
-                    'id'             => $user->id,
-                    'holder_type'    => 'user',
-                    'holder_name'    => $user->name ?: ('کاربر #' . $user->id),
-                    'phone'          => $user->mobile ?: '—',
-                    'email'          => $user->email ?: '',
-                    'badge'          => 'کاربر سیستم',
-                    'balance'        => $balance,
-                    'currency'       => $currencyCode,
+                    'id' => $user->id,
+                    'holder_type' => 'user',
+                    'holder_name' => $user->name ?: ('کاربر #' . $user->id),
+                    'phone' => $user->mobile ?: '—',
+                    'email' => $user->email ?: '',
+                    'badge' => 'کاربر سیستم',
+                    'balance' => $balance,
+                    'currency' => $currencyCode,
                     'currency_label' => $currLabel,
-                    'is_active'      => $wallet ? (bool) $wallet->is_active : true,
-                    'wallet_id'      => $wallet?->id,
+                    'is_active' => $wallet ? (bool)$wallet->is_active : true,
+                    'wallet_id' => $wallet?->id,
                 ];
             }
         }
@@ -176,7 +188,7 @@ class WalletController extends Controller
         $this->authorizePermission('wallet.deposit');
 
         if ($request->has('amount')) {
-            $rawAmount = (string) $request->input('amount');
+            $rawAmount = (string)$request->input('amount');
             $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
             $arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
             $num = range(0, 9);
@@ -188,8 +200,8 @@ class WalletController extends Controller
 
         $request->validate([
             'holder_type' => 'required|string|in:user,client',
-            'holder_id'   => 'required|integer',
-            'amount'      => 'required|numeric|min:1',
+            'holder_id' => 'required|integer',
+            'amount' => 'required|numeric|min:1',
             'description' => 'nullable|string|max:255',
         ]);
 
@@ -197,10 +209,12 @@ class WalletController extends Controller
             ? User::findOrFail($request->holder_id)
             : Client::findOrFail($request->holder_id);
 
+        $this->checkHolderTenantAccess($holder);
+
         try {
             $this->walletService->deposit(
                 holder: $holder,
-                amount: (float) $request->amount,
+                amount: (float)$request->amount,
                 type: TransactionType::DEPOSIT,
                 description: $request->description ?? 'شارژ دستی توسط مدیریت',
                 meta: ['admin_user_id' => auth()->id()]
@@ -217,7 +231,7 @@ class WalletController extends Controller
         $this->authorizePermission('wallet.withdraw');
 
         if ($request->has('amount')) {
-            $rawAmount = (string) $request->input('amount');
+            $rawAmount = (string)$request->input('amount');
             $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
             $arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
             $num = range(0, 9);
@@ -229,8 +243,8 @@ class WalletController extends Controller
 
         $request->validate([
             'holder_type' => 'required|string|in:user,client',
-            'holder_id'   => 'required|integer',
-            'amount'      => 'required|numeric|min:1',
+            'holder_id' => 'required|integer',
+            'amount' => 'required|numeric|min:1',
             'description' => 'nullable|string|max:255',
         ]);
 
@@ -238,10 +252,12 @@ class WalletController extends Controller
             ? User::findOrFail($request->holder_id)
             : Client::findOrFail($request->holder_id);
 
+        $this->checkHolderTenantAccess($holder);
+
         try {
             $this->walletService->withdraw(
                 holder: $holder,
-                amount: (float) $request->amount,
+                amount: (float)$request->amount,
                 type: TransactionType::WITHDRAW,
                 description: $request->description ?? 'برداشت دستی توسط مدیریت',
                 meta: ['admin_user_id' => auth()->id()]
@@ -257,7 +273,7 @@ class WalletController extends Controller
     {
         $this->authorizePermission('wallet.manage');
 
-        $wallet->is_active = ! $wallet->is_active;
+        $wallet->is_active = !$wallet->is_active;
         $wallet->save();
 
         $statusStr = $wallet->is_active ? 'فعال' : 'غیرفعال';
@@ -271,5 +287,28 @@ class WalletController extends Controller
         }
 
         abort(403, 'شما مجاز به انجام این عملیات نمی‌باشید.');
+    }
+
+    /**
+     * اطمینان از تعلق صاحب کیف پول به تننت و کلینیک جاری جهت جلوگیری از IDOR
+     */
+    protected function checkHolderTenantAccess($holder): void
+    {
+        $tenantManager = app(TenantManager::class);
+        $user = auth()->user();
+        $isSuperAdmin = $user && method_exists($user, 'hasRole') && $user->hasRole('super-admin');
+
+        if ($isSuperAdmin) {
+            return;
+        }
+
+        if ($tenantManager->hasTenant()) {
+            $currentTenantId = (int)$tenantManager->getTenantId();
+            $holderTenantId = $holder->tenant_id ? (int)$holder->tenant_id : null;
+
+            if ($holderTenantId !== $currentTenantId) {
+                abort(403, 'شما اجازه دسترسی به کیف پول کاربران سایر سازمان‌ها یا کلینیک‌ها را ندارید.');
+            }
+        }
     }
 }

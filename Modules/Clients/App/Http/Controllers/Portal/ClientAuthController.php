@@ -3,9 +3,11 @@
 namespace Modules\Clients\App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
+use App\Tenancy\TenantManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Modules\Clients\Entities\Client;
 use Modules\Clients\Entities\ClientSetting;
 use Modules\Sms\Entities\SmsOtp;
@@ -484,7 +486,7 @@ class ClientAuthController extends Controller
         $rules = [
             'username' => ['required', 'string'],
         ];
-        
+
         $messages = [
             'username.required' => 'نام کاربری الزامی است.',
         ];
@@ -522,32 +524,56 @@ class ClientAuthController extends Controller
                 }
             }
 
+            $currentTenantId = app(TenantManager::class)->getTenantId();
+
             if ($fieldType === 'email') {
                 $fieldRules[] = 'email';
                 if ($fid === 'email') {
-                    $fieldRules[] = 'unique:clients,email';
+                    $uniqueRule = Rule::unique('clients', 'email');
+                    if ($currentTenantId) {
+                        $uniqueRule->where('tenant_id', $currentTenantId);
+                    } else {
+                        $uniqueRule->whereNull('tenant_id');
+                    }
+                    $fieldRules[] = $uniqueRule;
                 }
             } elseif ($fieldType === 'number') {
                 $fieldRules[] = 'numeric';
             } elseif ($fieldType === 'file' || $fieldType === 'profile-photo') {
                 $fieldRules[] = 'file';
+                $fieldRules[] = 'mimes:jpg,jpeg,png,webp,pdf';
+                $fieldRules[] = 'max:5120';
             }
 
             if ($fid === 'phone') {
-                $fieldRules[] = 'unique:clients,phone';
+                $uniqueRule = Rule::unique('clients', 'phone');
+                if ($currentTenantId) {
+                    $uniqueRule->where('tenant_id', $currentTenantId);
+                } else {
+                    $uniqueRule->whereNull('tenant_id');
+                }
+                $fieldRules[] = $uniqueRule;
             } elseif ($fid === 'national_code') {
-                $fieldRules[] = 'unique:clients,national_code';
+                $uniqueRule = Rule::unique('clients', 'national_code');
+                if ($currentTenantId) {
+                    $uniqueRule->where('tenant_id', $currentTenantId);
+                } else {
+                    $uniqueRule->whereNull('tenant_id');
+                }
+                $fieldRules[] = $uniqueRule;
             }
 
             $rules[$fid] = $fieldRules;
             $messages["{$fid}.required"] = "فیلد {$field['label']} الزامی است.";
             $messages["{$fid}.unique"] = "این {$field['label']} قبلاً در سیستم ثبت شده است.";
+            $messages["{$fid}.mimes"] = "فرمت فایل {$field['label']} نامعتبر است (فرمت‌های مجاز: jpg, jpeg, png, webp, pdf).";
+            $messages["{$fid}.max"] = "حجم فایل {$field['label']} نباید بیشتر از ۵ مگابایت باشد.";
         }
 
         $validated = $request->validate($rules, $messages);
 
         $strategy = ClientSetting::getValue('username_strategy', 'email_local');
-        
+
         $phoneVal = $validated['phone'] ?? $request->input('phone');
         $emailVal = $validated['email'] ?? $request->input('email');
         $nationalCodeVal = $validated['national_code'] ?? $request->input('national_code');
@@ -650,16 +676,17 @@ class ClientAuthController extends Controller
         $username = $data['username'];
         $normalizedPhone = self::normalizePhoneNumber($username);
 
-        $clientQuery = Client::query()
-            ->where('username', $username)
-            ->orWhere('email', $username)
-            ->orWhere('phone', $username)
-            ->orWhere('national_code', $username);
+        $clientQuery = Client::query()->where(function ($q) use ($username, $normalizedPhone) {
+            $q->where('username', $username)
+              ->orWhere('email', $username)
+              ->orWhere('phone', $username)
+              ->orWhere('national_code', $username);
 
-        if (strlen($normalizedPhone) === 11 && str_starts_with($normalizedPhone, '09')) {
-            $clientQuery->orWhere('phone', $normalizedPhone)
-                        ->orWhere('username', $normalizedPhone);
-        }
+            if (strlen($normalizedPhone) === 11 && str_starts_with($normalizedPhone, '09')) {
+                $q->orWhere('phone', $normalizedPhone)
+                  ->orWhere('username', $normalizedPhone);
+            }
+        });
 
         $client = $clientQuery->first();
         $registerEnabled = (bool) ClientSetting::getValue('auth.register_enabled', false);

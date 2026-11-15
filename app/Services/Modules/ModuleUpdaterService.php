@@ -56,6 +56,9 @@ class ModuleUpdaterService
                     '--force' => true
                 ]);
 
+                // ایزولاسیون فوری جداول جدید ماژول برای چندمستأجری
+                Artisan::call('tenancy:isolate-tables');
+
                 // 6. بازسازی کش سیستم برای شناسایی تغییرات جدید
                 Artisan::call('optimize:clear');
 

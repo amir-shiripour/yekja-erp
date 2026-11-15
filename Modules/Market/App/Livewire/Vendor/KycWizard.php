@@ -216,9 +216,9 @@ class KycWizard extends Component
             ]
         );
 
-        // ۳. ذخیره مدارک (فقط در صورتی که فایل جدیدی آپلود شده باشه)
+        // ۳. ذخیره مدارک (در دیسک امن local جهت جلوگیری از افشای مدارک هویتی)
         if ($this->nationalCardFile) {
-            $path = $this->nationalCardFile->store('vendor-documents', 'public');
+            $path = $this->nationalCardFile->store('vendor-documents', 'local');
             VendorDocument::updateOrCreate(
                 ['vendor_id' => $this->vendor->id, 'type' => 'national_card'],
                 ['file_path' => $path, 'status' => 'pending', 'rejection_reason' => null]
@@ -226,7 +226,7 @@ class KycWizard extends Component
         }
 
         if ($this->businessLicenseFile) {
-            $path = $this->businessLicenseFile->store('vendor-documents', 'public');
+            $path = $this->businessLicenseFile->store('vendor-documents', 'local');
             VendorDocument::updateOrCreate(
                 ['vendor_id' => $this->vendor->id, 'type' => 'business_license'],
                 ['file_path' => $path, 'status' => 'pending', 'rejection_reason' => null]

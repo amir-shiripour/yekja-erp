@@ -118,6 +118,9 @@ class InstallController extends Controller
             Log::info('[INSTALL] مایگریشن‌ها با موفقیت اجرا شدند', [
                 'output' => $migrationOutput
             ]);
+
+            // تضمین ایزولاسیون چندمستأجری در تمام جداول ماژول‌ها پس از نصب تمیز
+            Artisan::call('tenancy:isolate-tables');
         } catch (\Exception $e) {
             Log::error('[INSTALL] خطا در اجرای مایگریشن‌ها', [
                 'message' => $e->getMessage(),

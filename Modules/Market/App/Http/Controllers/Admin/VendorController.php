@@ -7,6 +7,8 @@ use Modules\Market\Entities\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use App\Models\User;
+use Modules\Market\Entities\VendorDocument;
+use Illuminate\Support\Facades\Storage;
 
 class VendorController extends Controller
 {
@@ -75,5 +77,33 @@ class VendorController extends Controller
         $vendor->delete();
         return redirect()->route('user.market.vendors.index')
             ->with('success', 'فروشگاه با موفقیت حذف شد.');
+    }
+
+    /**
+     * استریم امن مدارک هویتی فروشندگان فقط برای ادمین یا خود فروشنده
+     */
+    public function viewDocument(VendorDocument $document)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            abort(401);
+        }
+
+        $isOwner = $document->vendor && (int)$document->vendor->user_id === (int)$user->id;
+        $canManage = $user->can('market.vendors.view') || $user->can('market.vendors.manage') || $user->hasRole('super-admin') || $user->hasRole('admin');
+
+        if (!$isOwner && !$canManage) {
+            abort(403, 'شما اجازه دسترسی به این مدرک را ندارید.');
+        }
+
+        $disk = Storage::disk('local')->exists($document->file_path)
+            ? 'local'
+            : (Storage::disk('public')->exists($document->file_path) ? 'public' : null);
+
+        if (!$disk) {
+            abort(404, 'فایل مدرک یافت نشد.');
+        }
+
+        return Storage::disk($disk)->response($document->file_path);
     }
 }

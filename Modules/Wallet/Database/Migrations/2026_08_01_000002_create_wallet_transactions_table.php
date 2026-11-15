@@ -14,6 +14,8 @@ return new class extends Migration
 
         Schema::create('wallet_transactions', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('tenant_id')->nullable()->index();
+            $table->foreign('tenant_id')->references('id')->on('tenants')->nullOnDelete();
             $table->foreignId('wallet_id')->constrained('wallets')->cascadeOnDelete();
 
             $table->string('type', 30); // deposit, withdraw, payment, refund, transfer, commission, bonus

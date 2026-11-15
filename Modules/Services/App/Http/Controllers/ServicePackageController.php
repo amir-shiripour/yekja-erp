@@ -43,7 +43,9 @@ class ServicePackageController extends Controller
         $this->authorize('viewAny', Service::class);
 
         $packages = ServicePackage::withCount('items')
-            ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%")->orWhere('code', 'like', "%{$s}%"))
+            ->when($request->search, fn($q, $s) => $q->where(function ($sub) use ($s) {
+                $sub->where('name', 'like', "%{$s}%")->orWhere('code', 'like', "%{$s}%");
+            }))
             ->when($request->status, fn($q, $v) => $q->where('status', $v))
             ->latest()
             ->paginate(20)
