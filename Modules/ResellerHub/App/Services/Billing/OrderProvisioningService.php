@@ -115,7 +115,6 @@ class OrderProvisioningService
                         ],
                         [
                             'is_active' => true,
-                            'activated_at' => Carbon::now(),
                             'expires_at' => $expiresAt,
                         ]
                     );
@@ -565,7 +564,6 @@ class OrderProvisioningService
                                 ],
                                 [
                                     'is_active' => true,
-                                    'installed_at' => now(),
                                     'expires_at' => $order->end_date ?? now()->addMonths($durationMonths),
                                 ]
                             );
@@ -689,7 +687,6 @@ class OrderProvisioningService
                             ],
                             [
                                 'is_active' => true,
-                                'installed_at' => now(),
                                 'expires_at' => $order->end_date ?? now()->addMonths($durationMonths),
                             ]
                         );

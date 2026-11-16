@@ -446,7 +446,29 @@
                         @endphp
                         @php
                             $stepUrl = $this->getStepActionUrl($sData);
-                            $isExternal = in_array(strtolower($sData->actionType), ['external', 'link'], true);
+                            $isExternal = false;
+                            if (!empty($stepUrl) && preg_match('#^https?://#i', $stepUrl)) {
+                                $parsedHost = parse_url($stepUrl, PHP_URL_HOST);
+                                $requestHost = request()->getHttpHost();
+                                $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+                                $centralDomains = app()->bound(\App\Tenancy\TenantManager::class) ? app(\App\Tenancy\TenantManager::class)->getCentralDomains() : [];
+
+                                $isInternalHost = false;
+                                if ($parsedHost) {
+                                    if ($requestHost && strcasecmp($parsedHost, $requestHost) === 0) {
+                                        $isInternalHost = true;
+                                    } elseif ($appHost && strcasecmp($parsedHost, (string)$appHost) === 0) {
+                                        $isInternalHost = true;
+                                    } elseif (in_array(strtolower($parsedHost), array_map('strtolower', $centralDomains), true)) {
+                                        $isInternalHost = true;
+                                    } elseif (str_ends_with(strtolower($parsedHost), 'yekja.app')) {
+                                        $isInternalHost = true;
+                                    }
+                                }
+                                if (!$isInternalHost) {
+                                    $isExternal = true;
+                                }
+                            }
                             $stepTitleColor = 'text-gray-400';
                             if ($isDone) {
                                 $stepTitleColor = 'text-emerald-600 dark:text-emerald-400';
@@ -685,7 +707,29 @@
                                 {{-- Enterprise Custom / Modular Step Actions --}}
                                 @php
                                     $stepUrl = $this->getStepActionUrl($sData);
-                                    $isExternal = in_array(strtolower($sData->actionType), ['external', 'link'], true);
+                                    $isExternal = false;
+                                    if (!empty($stepUrl) && preg_match('#^https?://#i', $stepUrl)) {
+                                        $parsedHost = parse_url($stepUrl, PHP_URL_HOST);
+                                        $requestHost = request()->getHttpHost();
+                                        $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+                                        $centralDomains = app()->bound(\App\Tenancy\TenantManager::class) ? app(\App\Tenancy\TenantManager::class)->getCentralDomains() : [];
+
+                                        $isInternalHost = false;
+                                        if ($parsedHost) {
+                                            if ($requestHost && strcasecmp($parsedHost, $requestHost) === 0) {
+                                                $isInternalHost = true;
+                                            } elseif ($appHost && strcasecmp($parsedHost, (string)$appHost) === 0) {
+                                                $isInternalHost = true;
+                                            } elseif (in_array(strtolower($parsedHost), array_map('strtolower', $centralDomains), true)) {
+                                                $isInternalHost = true;
+                                            } elseif (str_ends_with(strtolower($parsedHost), 'yekja.app')) {
+                                                $isInternalHost = true;
+                                            }
+                                        }
+                                        if (!$isInternalHost) {
+                                            $isExternal = true;
+                                        }
+                                    }
                                     $isQuotaLocked = !empty($item['is_quota_locked']);
                                 @endphp
 

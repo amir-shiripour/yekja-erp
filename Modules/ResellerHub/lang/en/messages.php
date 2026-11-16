@@ -741,8 +741,9 @@ return [
 
         'routes' => [
             'clients_create' => 'Create Client (Clients Create)',
-            'users_create' => 'Create Staff / User (User Create)',
-            'users_list' => 'Team & Users List (Users List)',
+            'users_create' => 'Create User (User Create)',
+            'users_list' => 'Users List (Users List)',
+            'booking_providers' => 'Booking Providers (Booking Providers)',
             'sms_settings' => 'SMS Gateway & Templates (SMS Settings)',
             'wallet_gateway' => 'Wallet & Payment Gateway (Wallet & Gateway)',
             'booking_calendar' => 'Work & Booking Calendar (Booking Calendar)',

@@ -2,7 +2,11 @@
 
 @php
     $isEdit = $user && $user->exists;
-    $title = $isEdit ? 'ویرایش کاربر: ' . $user->name : 'ایجاد کاربر جدید';
+    $indexRoute = $indexRoute ?? (request()->routeIs('user.users.*') ? 'user.users.index' : 'admin.users.index');
+    $storeRoute = $storeRoute ?? (request()->routeIs('user.users.*') ? 'user.users.store' : 'admin.users.store');
+    $updateRoute = $updateRoute ?? (request()->routeIs('user.users.*') ? 'user.users.update' : 'admin.users.update');
+    $destroyRoute = $destroyRoute ?? (request()->routeIs('user.users.*') ? 'user.users.destroy' : 'admin.users.destroy');
+    $title = $pageTitle ?? ($isEdit ? 'ویرایش کاربر: ' . $user->name : 'ایجاد کاربر جدید');
 
     // 🚨 هشدارهای معماری: این لاجیک‌ها باید در Controller انجام شوند
     $selectedRolesOld = old('roles');
@@ -112,7 +116,7 @@
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
                     @endif
                 </span>
-                    {{ $isEdit ? 'ویرایش کاربر' : 'ایجاد کاربر جدید' }}
+                    {{ $pageTitle ?? ($isEdit ? 'ویرایش کاربر' : 'ایجاد کاربر جدید') }}
                 </h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mr-10">
                     {{ $isEdit ? 'به‌روزرسانی اطلاعات حساب، رمز عبور و نقش کاربر.' : 'اطلاعات کاربری، رمز عبور و نقش سیستم را تنظیم کنید.' }}
@@ -120,14 +124,14 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
+                <a href="{{ route($indexRoute) }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                     بازگشت
                 </a>
 
                 @if($isEdit)
                     @can('users.delete')
-                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="inline-block" onsubmit="return confirm('آیا از حذف این کاربر اطمینان کامل دارید؟ این عملیات غیرقابل بازگشت است.')">
+                        <form method="POST" action="{{ route($destroyRoute, $user) }}" class="inline-block" onsubmit="return confirm('آیا از حذف این کاربر اطمینان کامل دارید؟ این عملیات غیرقابل بازگشت است.')">
                             @csrf @method('DELETE')
                             <button class="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition-colors border border-transparent dark:border-red-800">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -154,7 +158,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ $isEdit ? route('admin.users.update', $user) : route('admin.users.store') }}" enctype="multipart/form-data" autocomplete="off" @submit="isSubmitting = true" class="space-y-6 pb-10">
+        <form method="POST" action="{{ $isEdit ? route($updateRoute, $user) : route($storeRoute) }}" enctype="multipart/form-data" autocomplete="off" @submit="isSubmitting = true" class="space-y-6 pb-10">
             @csrf
             @if($isEdit)
                 @method('PUT')
@@ -300,8 +304,8 @@
                     {{-- انتخاب نقش (کامپوننت سفارشی) --}}
                     <div class="max-w-full" x-data="setupRoleMultiSelect({
                         name: 'roles',
-                        options: {{ json_encode($roleOptionsForSelect) }},
-                        oldValues: {{ json_encode($selectedRoles) }}
+                        options: {{ json_encode($roleOptionsForSelect, JSON_UNESCAPED_UNICODE) }},
+                        oldValues: {{ json_encode($selectedRoles, JSON_UNESCAPED_UNICODE) }}
                     })" @click.away="open = false">
                         <label class="{{ $labelClass }}">نقش‌های کاربر در سیستم <span class="text-red-500">*</span></label>
 
@@ -515,8 +519,8 @@
                     {{-- اتصال به سایر کاربران --}}
                     <div class="max-w-full" x-data="setupRoleMultiSelect({
                         name: 'superiors',
-                        options: {{ json_encode($userOptionsForSelect) }},
-                        oldValues: {{ json_encode($selectedSuperiors) }}
+                        options: {{ json_encode($userOptionsForSelect, JSON_UNESCAPED_UNICODE) }},
+                        oldValues: {{ json_encode($selectedSuperiors, JSON_UNESCAPED_UNICODE) }}
                     })" @click.away="open = false">
                         <label class="{{ $labelClass }}">اتصال به سایر کاربران (پزشک / سرپرست)</label>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">شما می‌توانید این کاربر (مثلاً پذیرش) را به یک یا چند کاربر دیگر (مثلاً پزشک) متصل کنید.</p>

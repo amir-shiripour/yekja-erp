@@ -1318,7 +1318,7 @@
                     </div>
                 </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 lg:gap-6 items-stretch">
                     @foreach($packages as $pkg)
                         @php
                             $pkgModules = $pkg->modules ?? [];
@@ -1360,23 +1360,23 @@
                         <x-resellerhub::card
                             class="group h-full flex flex-col hover:shadow-lg hover:-translate-y-0.5 hover:border-indigo-300 dark:hover:border-indigo-700">
 
-                            <div class="p-6 flex flex-col flex-1 gap-4">
+                            <div class="p-4 sm:p-5 lg:p-6 flex flex-col flex-1 gap-3.5 sm:gap-4">
 
                                 {{-- Header --}}
-                                <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-start justify-between gap-2.5 sm:gap-3">
                                     <a href="{{ route('reseller.packages.show', $pkg->id) }}"
-                                       class="flex items-center gap-3 min-w-0">
+                                       class="flex items-start gap-2.5 sm:gap-3 min-w-0 flex-1">
                                     <span
-                                        class="w-11 h-11 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-md"
+                                        class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-md"
                                         style="{{ $pkg->bg_style }}">
                                         @include('resellerhub::user.packages.partials.icon', ['icon' => $pkg->icon, 'class' => 'w-5 h-5'])
                                     </span>
-                                        <div class="shrink-0">
-                                            <h3 class="font-black text-sm sm:text-base text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition"
+                                        <div class="min-w-0 flex-1">
+                                            <h3 class="font-black text-sm sm:text-base text-gray-900 dark:text-white line-clamp-2 leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition"
                                                 title="{{ $pkg->name }}">
                                                 {{ $pkg->name }}
                                             </h3>
-                                            <div class="flex items-center gap-1.5 flex-wrap mt-1">
+                                            <div class="flex items-center gap-1.5 flex-wrap mt-1.5">
                                             <span
                                                 class="inline-flex px-2 py-0.5 rounded-lg text-xs font-black {{ $ptLabel['class'] }}">
                                                 {{ $ptLabel['label'] }}
@@ -1396,9 +1396,9 @@
                                         </div>
                                     </a>
 
-                                    <div class="flex items-center gap-0.5 shrink-0">
+                                    <div class="flex items-center gap-0.5 shrink-0 pt-0.5">
                                         <button type="button" @click="openStatusModalById({{ $pkg->id }})"
-                                                class="p-2 {{ $pkg->isActive() ? 'text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40' : 'text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' }} rounded-xl transition cursor-pointer"
+                                                class="p-1.5 sm:p-2 {{ $pkg->isActive() ? 'text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40' : 'text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40' }} rounded-xl transition cursor-pointer"
                                                 title="{{ $pkg->isActive() ? 'غیرفعال‌سازی این پکیج' : 'فعال‌سازی مجدد این پکیج' }}">
                                             @if($pkg->isActive())
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -1420,7 +1420,7 @@
                                             @endif
                                         </button>
                                         <a href="{{ route('reseller.packages.show', $pkg->id) }}"
-                                           class="p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/60 rounded-xl transition cursor-pointer"
+                                           class="p-1.5 sm:p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/60 rounded-xl transition cursor-pointer"
                                            title="مشاهده جزئیات پکیج">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1430,7 +1430,7 @@
                                             </svg>
                                         </a>
                                         <a href="{{ route('reseller.packages.edit', $pkg->id) }}"
-                                           class="p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/60 rounded-xl transition cursor-pointer"
+                                           class="p-1.5 sm:p-2 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/60 rounded-xl transition cursor-pointer"
                                            title="ویرایش پکیج">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1438,7 +1438,7 @@
                                             </svg>
                                         </a>
                                         <button type="button" @click="openDeleteModalById({{ $pkg->id }})"
-                                                class="p-2 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition cursor-pointer"
+                                                class="p-1.5 sm:p-2 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition cursor-pointer"
                                                 title="حذف پکیج">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

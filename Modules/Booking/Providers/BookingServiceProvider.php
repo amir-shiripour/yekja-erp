@@ -30,6 +30,7 @@ class BookingServiceProvider extends ServiceProvider
 
         \Modules\Booking\Entities\BookingPayment::observe(\Modules\Booking\App\Observers\BookingPaymentObserver::class);
         \Modules\Booking\Entities\Appointment::observe(\Modules\Booking\App\Observers\AppointmentObserver::class);
+        \Modules\Booking\Entities\BookingService::observe(\Modules\Booking\App\Observers\BookingServiceObserver::class);
 
         // Load migrations unconditionally
         $this->loadMigrationsFrom(module_path($this->moduleName, 'Database/Migrations'));

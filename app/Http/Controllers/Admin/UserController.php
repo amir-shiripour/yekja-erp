@@ -285,14 +285,14 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'کاربر حذف شد.');
     }
 
-    /* ===================== Private helpers ===================== */
+    /* ===================== Protected helpers ===================== */
 
-    private function fieldsForRoles(array $roleNames): Collection
+    protected function fieldsForRoles(array $roleNames): Collection
     {
         return CustomUserField::whereIn('role_name', $roleNames)->orderBy('id')->get()->unique('field_name');
     }
 
-    private function dynamicRules(Collection $fields): array
+    protected function dynamicRules(Collection $fields): array
     {
         $rules = [];
 
@@ -358,7 +358,7 @@ class UserController extends Controller
         return $rules;
     }
 
-    private function persistCustomValues(User $user, Collection $fields, Request $request): void
+    protected function persistCustomValues(User $user, Collection $fields, Request $request): void
     {
         foreach ($fields as $f) {
             $type = strtolower($f->field_type ?? 'text');

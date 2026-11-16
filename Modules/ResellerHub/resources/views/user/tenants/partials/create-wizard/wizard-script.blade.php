@@ -88,7 +88,7 @@
                         this.subAccounts = [newSub, ...(this.subAccounts || [])];
                         this.selectSubAccount(newSub);
                         this.quickSubModalOpen = false;
-                        this.showToast('حساب زیرمجموعه جدید با موفقیت ایجاد و انتخاب گردید.', 'success');
+                        this.showToast('حساب کاربری زیرمجموعه جدید با موفقیت ایجاد و انتخاب گردید.', 'success');
                     }
                 } catch (e) {
                     if (e.response && e.response.data && e.response.data.errors) {

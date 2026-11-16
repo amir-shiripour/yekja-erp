@@ -19,14 +19,21 @@ class ClientSetting extends Model
     public static function getValue(string $key, $default = null)
     {
         $cacheKey = static::getCacheKey($key);
-        return cache()->remember($cacheKey, 3600, function () use ($key, $default) {
+        try {
+            return cache()->remember($cacheKey, 3600, function () use ($key, $default) {
+                return optional(static::query()->where('key', $key)->first())->value ?? $default;
+            });
+        } catch (\Throwable) {
             return optional(static::query()->where('key', $key)->first())->value ?? $default;
-        });
+        }
     }
 
     public static function setValue(string $key, $value): void
     {
         static::updateOrCreate(['key' => $key], ['value' => $value]);
-        cache()->forget(static::getCacheKey($key));
+        try {
+            cache()->forget(static::getCacheKey($key));
+        } catch (\Throwable) {
+        }
     }
 }

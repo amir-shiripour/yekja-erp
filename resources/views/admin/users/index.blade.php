@@ -1,7 +1,9 @@
 @extends('layouts.user')
 
 @php
-    $title = 'مدیریت کاربران';
+    $createRoute = $createRoute ?? (request()->routeIs('user.users.*') ? 'user.users.create' : 'admin.users.create');
+    $editRoute = $editRoute ?? (request()->routeIs('user.users.*') ? 'user.users.edit' : 'admin.users.edit');
+    $title = $pageTitle ?? 'مدیریت کاربران';
 @endphp
 
 @section('content')
@@ -14,15 +16,15 @@
                 <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 </span>
-                    مدیریت کاربران
+                    {{ $pageTitle ?? 'مدیریت کاربران' }}
                 </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mr-10">مشاهده و مدیریت کاربران سیستم و دسترسی‌های آن‌ها</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 mr-10">{{ $pageSubtitle ?? 'مشاهده و مدیریت کاربران سیستم و دسترسی‌های آن‌ها' }}</p>
             </div>
 
             {{-- دکمه افزودن کاربر جدید --}}
             @can('users.create')
-                @if (Route::has('admin.users.create'))
-                    <a href="{{ route('admin.users.create') }}"
+                @if (Route::has($createRoute))
+                    <a href="{{ route($createRoute) }}"
                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-sm shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:shadow-indigo-500/50 hover:-translate-y-0.5 transition-all active:scale-95">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         افزودن کاربر جدید
@@ -89,7 +91,7 @@
                             <td class="px-6 py-4 text-left">
                                 <div class="flex items-center justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
                                     @can('users.update')
-                                        <a href="{{ route('admin.users.edit', $user) }}"
+                                        <a href="{{ route($editRoute, $user) }}"
                                            class="p-2 rounded-lg text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 transition-colors"
                                            title="ویرایش">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>

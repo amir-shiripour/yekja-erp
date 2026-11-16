@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Schema;
 class TenantScope implements Scope
 {
     protected static array $hasColumnCache = [];
+    protected static array $loggedWarnings = [];
 
     public function apply(Builder $builder, Model $model): void
     {
@@ -33,7 +34,9 @@ class TenantScope implements Scope
         }
 
         if (!static::$hasColumnCache[$table]) {
-            if ($tenantManager->hasTenant()) {
+            $warningKey = $table . '_' . $tenantManager->getTenantId();
+            if ($tenantManager->hasTenant() && !isset(static::$loggedWarnings[$warningKey])) {
+                static::$loggedWarnings[$warningKey] = true;
                 Log::warning(
                     "[TenantScope] Table '{$table}' is missing 'tenant_id' column in active tenant context [{$tenantManager->getTenantId()}]. Run 'php artisan tenancy:isolate-tables'."
                 );

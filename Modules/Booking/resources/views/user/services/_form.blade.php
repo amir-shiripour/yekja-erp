@@ -116,6 +116,11 @@
     }
     $effectiveProviderIds = array_map('intval', (array)$effectiveProviderIds);
 
+    // Solo Mode UX: When exactly 1 provider is eligible and creating a new service, pre-select that provider
+    if (empty($effectiveProviderIds) && !$service->exists && $providers->count() === 1) {
+        $effectiveProviderIds = [(int) $providers->first()->id];
+    }
+
     $effectiveFormId = old('appointment_form_id');
     if ($effectiveFormId === null) {
     $effectiveFormId = ($editingPublicAsProvider && $serviceProvider && $serviceProvider->override_appointment_form_id !==

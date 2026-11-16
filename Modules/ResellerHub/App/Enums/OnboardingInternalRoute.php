@@ -5,12 +5,13 @@ namespace Modules\ResellerHub\App\Enums;
 enum OnboardingInternalRoute: string
 {
     case CLIENTS_CREATE = 'user/clients/create';
-    case USERS_CREATE = 'admin/users/create';
+    case USERS_CREATE = 'user/users/create';
     case USERS_LIST = 'user/users';
-    case SMS_SETTINGS = 'user/sms';
-    case WALLET_GATEWAY = 'user/wallet';
+    case BOOKING_PROVIDERS = 'user/booking/providers';
     case BOOKING_CALENDAR = 'user/booking';
-    case INVOICES_CREATE = 'user/invoices/create';
+    case SMS_SETTINGS = 'user/sms/settings';
+    case WALLET_GATEWAY = 'user/wallet';
+    case INVOICES_CREATE = 'user/services/invoices/create';
     case WORKFLOWS = 'user/workflows';
     case SETTINGS = 'user/settings';
     case CUSTOM = 'custom';
@@ -21,6 +22,7 @@ enum OnboardingInternalRoute: string
             self::CLIENTS_CREATE => __('resellerhub::messages.onboarding.routes.clients_create'),
             self::USERS_CREATE => __('resellerhub::messages.onboarding.routes.users_create'),
             self::USERS_LIST => __('resellerhub::messages.onboarding.routes.users_list'),
+            self::BOOKING_PROVIDERS => __('resellerhub::messages.onboarding.routes.booking_providers'),
             self::SMS_SETTINGS => __('resellerhub::messages.onboarding.routes.sms_settings'),
             self::WALLET_GATEWAY => __('resellerhub::messages.onboarding.routes.wallet_gateway'),
             self::BOOKING_CALENDAR => __('resellerhub::messages.onboarding.routes.booking_calendar'),

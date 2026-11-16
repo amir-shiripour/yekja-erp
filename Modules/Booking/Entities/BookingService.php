@@ -5,6 +5,7 @@ namespace Modules\Booking\Entities;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
 class BookingService extends Model
@@ -92,7 +93,7 @@ class BookingService extends Model
 
         $slug = $base;
         $i = 1;
-        while (static::query()->where('slug', $slug)->exists()) {
+        while (static::withoutGlobalScope(\App\Tenancy\Scopes\TenantScope::class)->where('slug', $slug)->exists()) {
             $slug = $base . '-' . $i;
             $i++;
         }
@@ -138,5 +139,55 @@ class BookingService extends Model
     public function scopeActive($query)
     {
         return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    /**
+     * Ensures that this service has at least one active provider.
+     * In solo mode or when no specialist is assigned, automatically binds
+     * the tenant manager/admin or service owner as the default provider.
+     */
+    public function ensureDefaultProvider(): ?BookingServiceProvider
+    {
+        $activeProvider = $this->serviceProviders()->where('is_active', true)->first();
+        if ($activeProvider) {
+            return $activeProvider;
+        }
+
+        $providerUser = null;
+        if ($this->owner_user_id) {
+            $providerUser = \App\Models\User::find($this->owner_user_id);
+        }
+
+        if (! $providerUser && $this->tenant_id) {
+            $providerUser = \App\Models\User::query()
+                ->where('tenant_id', $this->tenant_id)
+                ->whereHas('roles', fn ($r) => $r->where('name', 'admin'))
+                ->first()
+                ?? \App\Models\User::query()
+                    ->where('tenant_id', $this->tenant_id)
+                    ->orderBy('id', 'asc')
+                    ->first();
+        }
+
+        if (! $providerUser && auth()->check()) {
+            $providerUser = auth()->user();
+        }
+
+        if ($providerUser) {
+            return BookingServiceProvider::updateOrCreate(
+                [
+                    'service_id' => $this->id,
+                    'provider_user_id' => $providerUser->id,
+                ],
+                [
+                    'tenant_id' => $this->tenant_id ?? $providerUser->tenant_id,
+                    'is_active' => true,
+                    'customization_enabled' => true,
+                    'override_status_mode' => BookingServiceProvider::OVERRIDE_MODE_INHERIT,
+                ]
+            );
+        }
+
+        return null;
     }
 }

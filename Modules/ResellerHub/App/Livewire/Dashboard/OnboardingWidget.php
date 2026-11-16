@@ -895,33 +895,82 @@ class OnboardingWidget extends Component
 
     public function getStepActionUrl($step): ?string
     {
-        $stepData = is_array($step) ? ($step['step'] ?? null) : $step;
+        $stepData = is_array($step) ? ($step['step'] ?? $step) : $step;
         if (!$stepData) {
             return null;
         }
 
-        $actionUrl = is_object($stepData) ? ($stepData->actionUrl ?? null) : ($stepData['action_url'] ?? null);
-        $actionType = strtolower((string)(is_object($stepData) ? ($stepData->actionType ?? '') : ($stepData['action_type'] ?? '')));
+        $actionUrl = is_object($stepData)
+            ? ($stepData->actionUrl ?? $stepData->action_url ?? null)
+            : ($stepData['action_url'] ?? $stepData['actionUrl'] ?? null);
 
         if (empty($actionUrl)) {
             return null;
         }
 
-        if (in_array($actionType, ['external', 'link'], true)) {
-            return $actionUrl;
-        }
+        $tenant = $this->getTenant();
 
-        if ($actionType === 'internal') {
-            $tenant = $this->getTenant();
-            $path = ltrim($actionUrl, '/');
-            if ($tenant) {
-                return app(TenantManager::class)->getTenantUrl($tenant, $path);
+        // 1. If it starts with http:// or https://, check if it's truly external or points to this app
+        if (preg_match('#^https?://#i', (string)$actionUrl)) {
+            $parsedHost = parse_url($actionUrl, PHP_URL_HOST);
+            $currentHost = request()->getHttpHost();
+            $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+            $centralDomains = app()->bound(TenantManager::class) ? app(TenantManager::class)->getCentralDomains() : [];
+
+            $isInternalDomain = false;
+            if ($parsedHost) {
+                if ($currentHost && strcasecmp($parsedHost, $currentHost) === 0) {
+                    $isInternalDomain = true;
+                } elseif ($appHost && strcasecmp($parsedHost, (string)$appHost) === 0) {
+                    $isInternalDomain = true;
+                } elseif (in_array(strtolower($parsedHost), array_map('strtolower', $centralDomains), true)) {
+                    $isInternalDomain = true;
+                } elseif (str_ends_with(strtolower($parsedHost), 'yekja.app')) {
+                    $isInternalDomain = true;
+                }
             }
 
-            return url($path);
+            // Truly external domain (e.g. t.me, instagram.com, etc.)
+            if (!$isInternalDomain) {
+                return $actionUrl;
+            }
+
+            // Points to this CRM instance, extract path and query
+            $extractedPath = parse_url($actionUrl, PHP_URL_PATH) ?? '';
+            $query = parse_url($actionUrl, PHP_URL_QUERY);
+            if ($query) {
+                $extractedPath .= '?' . $query;
+            }
+            $actionUrl = $extractedPath;
         }
 
-        return $actionUrl;
+        // 2. Clean up relative path
+        $cleanPath = ltrim((string)$actionUrl, '/');
+
+        // If the path already includes the tenant subdomain, strip it so getTenantUrl doesn't duplicate it
+        if ($tenant && !empty($tenant->subdomain) && str_starts_with($cleanPath, $tenant->subdomain . '/')) {
+            $cleanPath = substr($cleanPath, strlen($tenant->subdomain) + 1);
+        }
+
+        // Normalize legacy or central admin routes to proper tenant routes
+        if (str_starts_with($cleanPath, 'admin/users/create') || $cleanPath === 'user/users/create') {
+            $cleanPath = 'user/users/create';
+        } elseif (str_starts_with($cleanPath, 'admin/users') || $cleanPath === 'user/users') {
+            $cleanPath = 'user/users';
+        } elseif (str_starts_with($cleanPath, 'user/booking/providers')) {
+            $cleanPath = 'user/booking/providers';
+        } elseif ($cleanPath === 'user/sms') {
+            $cleanPath = 'user/sms/settings';
+        } elseif ($cleanPath === 'user/invoices/create') {
+            $cleanPath = 'user/services/invoices/create';
+        }
+
+        // 3. Return full tenant URL
+        if ($tenant) {
+            return app(TenantManager::class)->getTenantUrl($tenant, $cleanPath);
+        }
+
+        return url($cleanPath);
     }
 
     public function completeCustomStep(string $stepSlug): void
