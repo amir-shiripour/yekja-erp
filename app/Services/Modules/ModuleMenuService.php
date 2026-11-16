@@ -18,9 +18,25 @@ class ModuleMenuService
         $moduleGroups = [];
         $settingsItems = [];
 
-        // Core menu
+        $tenantManager = app(TenantManager::class);
+        $tenant = $tenantManager->hasTenant() ? $tenantManager->getTenant() : null;
+        if (!$tenant && app()->bound('currentTenant')) {
+            $tenant = app('currentTenant');
+        }
+        if (!$tenant && view()->shared('currentTenant')) {
+            $tenant = view()->shared('currentTenant');
+        }
+        if (!$tenant && $user) {
+            $tenant = $user->tenant ?? ($user->tenant_id ? \App\Models\Tenant::find($user->tenant_id) : null);
+        }
+        if (!$tenant && auth()->check()) {
+            $tenant = auth()->user()->tenant ?? (auth()->user()->tenant_id ? \App\Models\Tenant::find(auth()->user()->tenant_id) : null);
+        }
+
+        // Core menu (Central platform administration - skip inside tenant workspace or user dashboard)
+        $isUserWorkspace = request()->is('user*') || request()->is('*/user*') || $tenant !== null;
         $coreMenuPath = resource_path('menu.php');
-        if (file_exists($coreMenuPath)) {
+        if (!$isUserWorkspace && file_exists($coreMenuPath)) {
             try {
                 $coreMenu = include $coreMenuPath;
                 if (is_array($coreMenu)) {
@@ -56,7 +72,7 @@ class ModuleMenuService
                     if (count($coreItems) > 1) {
                         $moduleGroups[] = [
                             'module' => 'admin',
-                            'module_name' => __('menu.system_management'),
+                            'module_name' => __('menu.system_management') ?: 'مدیریت سیستم',
                             'items' => $coreItems,
                         ];
                     } elseif (count($coreItems) === 1) {
@@ -68,6 +84,19 @@ class ModuleMenuService
             } catch (\Throwable $e) {
                 \Log::warning("Failed to load core menu: " . $e->getMessage());
             }
+        }
+
+        // User management menu item for tenant workspace
+        if ($user->can('users.view')) {
+            $items[] = [
+                'title' => 'مدیریت کاربران',
+                'route' => 'user.users.index',
+                'active_routes' => ['user.users.*'],
+                'permission' => 'users.view',
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>',
+                'group' => null,
+                'position' => 12,
+            ];
         }
 
         $modules = Module::where('installed', true)->where('active', true)->get();
@@ -181,8 +210,24 @@ class ModuleMenuService
         $moduleGroups = [];
         $settingsItems = [];
 
+        $tenantManager = app(TenantManager::class);
+        $tenant = $tenantManager->hasTenant() ? $tenantManager->getTenant() : null;
+        if (!$tenant && app()->bound('currentTenant')) {
+            $tenant = app('currentTenant');
+        }
+        if (!$tenant && view()->shared('currentTenant')) {
+            $tenant = view()->shared('currentTenant');
+        }
+        if (!$tenant && $user) {
+            $tenant = $user->tenant ?? ($user->tenant_id ? \App\Models\Tenant::find($user->tenant_id) : null);
+        }
+        if (!$tenant && auth()->check()) {
+            $tenant = auth()->user()->tenant ?? (auth()->user()->tenant_id ? \App\Models\Tenant::find(auth()->user()->tenant_id) : null);
+        }
+
+        $isUserWorkspace = request()->is('user*') || request()->is('*/user*') || $tenant !== null;
         $coreMenuPath = resource_path('menu.php');
-        if (file_exists($coreMenuPath)) {
+        if (!$isUserWorkspace && file_exists($coreMenuPath)) {
             try {
                 $coreMenu = include $coreMenuPath;
                 if (is_array($coreMenu)) {
@@ -203,7 +248,7 @@ class ModuleMenuService
                     if (count($coreItems) > 1) {
                         $moduleGroups[] = [
                             'module' => 'admin',
-                            'module_name' => __('menu.system_management'),
+                            'module_name' => __('menu.system_management') ?: 'مدیریت سیستم',
                             'items' => $coreItems,
                         ];
                     } elseif (count($coreItems) === 1) {
@@ -215,6 +260,17 @@ class ModuleMenuService
                 \Log::warning("Failed to load core raw menu: " . $e->getMessage());
             }
         }
+
+        // User management menu item for tenant workspace
+        $items[] = [
+            'title' => 'مدیریت کاربران',
+            'route' => 'user.users.index',
+            'active_routes' => ['user.users.*'],
+            'permission' => 'users.view',
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>',
+            'group' => null,
+            'position' => 12,
+        ];
 
         $modules = Module::where('installed', true)->where('active', true)->get();
 
@@ -294,7 +350,8 @@ class ModuleMenuService
     public function resolveModuleGroupTitle(string $moduleSlug, string $moduleName): string
     {
         if ($moduleSlug === 'admin') {
-            return __('menu.system_management');
+            $trans = __('menu.system_management');
+            return ($trans !== 'menu.system_management' && !empty($trans)) ? $trans : 'مدیریت سیستم';
         }
         if ($moduleSlug === 'clients') {
             return 'مدیریت ' . config('clients.labels.plural', 'مشتریان');

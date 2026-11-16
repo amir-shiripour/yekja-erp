@@ -95,6 +95,31 @@ class BookingSetting extends Model
             'appointment_statuses' => 'array',
         ];
 
+        public static function defaultAllowedRoleIds(): array
+        {
+            try {
+                $adminRole = \Spatie\Permission\Models\Role::query()->where('name', 'admin')->first();
+                return $adminRole ? [(int) $adminRole->id] : [];
+            } catch (\Throwable) {
+                return [];
+            }
+        }
+
+        public function getAllowedRolesAttribute($value): array
+        {
+            $roles = [];
+            if (!empty($value)) {
+                $decoded = is_array($value) ? $value : json_decode($value, true);
+                $roles = is_array($decoded) ? $decoded : [];
+            }
+
+            if (empty($roles)) {
+                return static::defaultAllowedRoleIds();
+            }
+
+            return array_values(array_filter(array_map('intval', (array) $roles), fn ($id) => $id > 0));
+        }
+
         public static function isLaboratoryEnabled(): bool
         {
             $setting = static::current();
@@ -521,7 +546,7 @@ class BookingSetting extends Model
                     'default_capacity_per_slot' => $defaults['capacity_per_slot'] ?? 1,
                     'default_capacity_per_day' => $defaults['capacity_per_day'] ?? null,
                     'allow_role_service_creation' => false,
-                    'allowed_roles' => [],
+                    'allowed_roles' => static::defaultAllowedRoleIds(),
                     'statement_roles' => [],
                     'category_management_scope' => 'ALL',
                     'form_management_scope' => 'ALL',

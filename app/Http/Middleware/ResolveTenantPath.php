@@ -116,8 +116,8 @@ class ResolveTenantPath
 
         $remainingPath = '/' . implode('/', $remainingSegments);
 
-        if ($remainingPath === '/' || empty($remainingSegments)) {
-            $remainingPath = '/login';
+        if (empty($remainingSegments) || $remainingPath === '') {
+            $remainingPath = '/';
         }
 
         $ref = new ReflectionClass($request);

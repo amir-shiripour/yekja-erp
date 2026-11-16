@@ -120,12 +120,12 @@ enum OnboardingStepPreset: string
     public function actionUrl(): ?string
     {
         return match ($this) {
-            self::TEAM_MEMBER => '/admin/users/create',
+            self::TEAM_MEMBER => '/user/users/create',
             self::NEW_CLIENT => '/user/clients/create',
-            self::SMS_SETUP => '/user/sms',
+            self::SMS_SETUP => '/user/sms/settings',
             self::WALLET_GATEWAY => '/user/wallet',
             self::BOOKING_SETUP => '/user/booking',
-            self::FIRST_INVOICE => '/user/invoices/create',
+            self::FIRST_INVOICE => '/user/services/invoices/create',
             self::COMMUNITY_CHANNEL => 'https://t.me',
             self::MANUAL_TASK, self::OFFICE_DETAILS, self::BUSINESS_TARGET => null,
         };

@@ -261,6 +261,23 @@ class TenantProvisioningService
                     ['is_active' => true]
                 );
 
+                if (class_exists(\Modules\Booking\Entities\BookingSetting::class)) {
+                    try {
+                        \Modules\Booking\Entities\BookingSetting::firstOrCreate(
+                            ['tenant_id' => $tenant->id],
+                            [
+                                'allowed_roles' => [$role->id],
+                                'currency_unit' => 'IRR',
+                                'global_online_booking_enabled' => true,
+                                'default_slot_duration_minutes' => 30,
+                                'default_capacity_per_slot' => 1,
+                            ]
+                        );
+                    } catch (Throwable) {
+                        // Ignore if booking module or table is not ready
+                    }
+                }
+
                 // Assign specific feature permissions to the user if defined
                 $featuresList = $settings['features'] ?? [];
                 if (!empty($featuresList)) {
@@ -351,7 +368,6 @@ class TenantProvisioningService
                                 'module_slug' => $slug,
                             ], [
                                 'is_active' => !$shouldIssueInvoice,
-                                'installed_at' => now(),
                                 'expires_at' => now()->addMonths($expiresInMonths),
                             ]);
                         }

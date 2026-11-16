@@ -743,8 +743,9 @@ return array(
             'routes' =>
                 array(
                     'clients_create' => 'ثبت مشتری جدید (Clients Create)',
-                    'users_create' => 'تعریف همکار / کارمند جدید (User Create)',
-                    'users_list' => 'لیست همکاران و تیم (Users List)',
+                    'users_create' => 'ایجاد کاربر جدید (User Create)',
+                    'users_list' => 'لیست کاربران (Users List)',
+                    'booking_providers' => 'ارائه‌دهندگان نوبت‌دهی (Booking Providers)',
                     'sms_settings' => 'تنظیمات خط و الگوهای پیامک (SMS Settings)',
                     'wallet_gateway' => 'شارژ کیف پول و پرداخت (Wallet & Gateway)',
                     'booking_calendar' => 'تقویم کاری و نوبت‌دهی (Booking Calendar)',

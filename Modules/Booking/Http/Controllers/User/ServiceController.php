@@ -13,6 +13,8 @@ use Modules\Booking\Entities\BookingForm;
 use Modules\Booking\Entities\BookingService;
 use Modules\Booking\Entities\BookingSetting;
 use Spatie\Permission\Models\Role;
+use Carbon\Carbon;
+use Morilog\Jalali\Jalalian;
 use Modules\Booking\Entities\BookingServiceProvider;
 
 
@@ -196,8 +198,8 @@ class ServiceController extends Controller
         $data['auto_confirm_online_booking'] = (bool)($data['auto_confirm_online_booking'] ?? false);
         $data['credit_client_wallet'] = (bool)($data['credit_client_wallet'] ?? false);
 
-        $data['discount_from'] = $data['discount_from'] ?: null;
-        $data['discount_to']   = $data['discount_to']   ?: null;
+        $data['discount_from'] = $this->parseJalaliDateTime($data['discount_from'] ?? null);
+        $data['discount_to']   = $this->parseJalaliDateTime($data['discount_to'] ?? null);
         $data['color']         = $data['color']         ?: '#4f46e5';
 
         $data['owner_user_id'] = $authUser?->id;
@@ -346,8 +348,8 @@ class ServiceController extends Controller
                 'payment_amount_value' => ['nullable', 'numeric', 'min:0'],
             ]);
 
-            $data['discount_from'] = $data['discount_from'] ?: null;
-            $data['discount_to']   = $data['discount_to']   ?: null;
+            $data['discount_from'] = $this->parseJalaliDateTime($data['discount_from'] ?? null);
+            $data['discount_to']   = $this->parseJalaliDateTime($data['discount_to'] ?? null);
 
             $sp = BookingServiceProvider::query()->firstOrNew([
                 'service_id'       => $service->id,
@@ -448,8 +450,8 @@ class ServiceController extends Controller
             $data['sort_order'] = isset($data['sort_order']) ? (int) $data['sort_order'] : 0;
         }
 
-        $data['discount_from'] = $data['discount_from'] ?: null;
-        $data['discount_to']   = $data['discount_to']   ?: null;
+        $data['discount_from'] = $this->parseJalaliDateTime($data['discount_from'] ?? null);
+        $data['discount_to']   = $this->parseJalaliDateTime($data['discount_to'] ?? null);
 
         if ($isAdminUser) {
             $data['provider_can_customize'] = (bool)($data['provider_can_customize'] ?? false);
@@ -956,5 +958,40 @@ class ServiceController extends Controller
         return redirect()
             ->route('user.booking.services.installments', $service->id)
             ->with('success', 'تنظیمات پرداخت قسطی با موفقیت ذخیره شد.');
+    }
+
+    /**
+     * Convert incoming Jalali datetime string to standard Gregorian datetime string.
+     */
+    protected function parseJalaliDateTime(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $persian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹','٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+        $latin   = ['0','1','2','3','4','5','6','7','8','9','0','1','2','3','4','5','6','7','8','9'];
+        $value = trim(str_replace($persian, $latin, (string)$value));
+        $normalized = str_replace('-', '/', $value);
+
+        if (preg_match('/^(13|14)\d{2}\/\d{1,2}\/\d{1,2}/', $normalized)) {
+            try {
+                if (preg_match('/\d{1,2}:\d{1,2}:\d{1,2}/', $normalized)) {
+                    return Jalalian::fromFormat('Y/m/d H:i:s', $normalized)->toCarbon()->format('Y-m-d H:i:s');
+                }
+                if (preg_match('/\d{1,2}:\d{1,2}/', $normalized)) {
+                    return Jalalian::fromFormat('Y/m/d H:i', $normalized)->toCarbon()->format('Y-m-d H:i:s');
+                }
+                return Jalalian::fromFormat('Y/m/d', $normalized)->toCarbon()->startOfDay()->format('Y-m-d H:i:s');
+            } catch (\Throwable) {
+                // fallback
+            }
+        }
+
+        try {
+            return Carbon::parse($value)->format('Y-m-d H:i:s');
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

@@ -83,6 +83,16 @@ Route::middleware(['web', 'auth'])->prefix('user')->name('user.')->group(functio
     Route::put('/calendar/events/{id}', [CalendarController::class, 'updateEvent'])->name('calendar.events.update');
     Route::delete('/calendar/events/{id}', [CalendarController::class, 'deleteEvent'])->name('calendar.events.delete');
     Route::get('/calendar/widget-data', [CalendarController::class, 'widgetData'])->name('calendar.widget-data');
+
+    // مدیریت کاربران تننت
+    Route::prefix('users')->name('users.')->middleware(['permission:users.view'])->group(function () {
+        Route::get('/', [\App\Http\Controllers\User\TenantUserController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\User\TenantUserController::class, 'create'])->name('create')->middleware('permission:users.create');
+        Route::post('/', [\App\Http\Controllers\User\TenantUserController::class, 'store'])->name('store')->middleware('permission:users.create');
+        Route::get('/{user}/edit', [\App\Http\Controllers\User\TenantUserController::class, 'edit'])->name('edit')->middleware('permission:users.update');
+        Route::put('/{user}', [\App\Http\Controllers\User\TenantUserController::class, 'update'])->name('update')->middleware('permission:users.update');
+        Route::delete('/{user}', [\App\Http\Controllers\User\TenantUserController::class, 'destroy'])->name('destroy')->middleware('permission:users.delete');
+    });
 });
 
 // Override Fortify's default register routes
@@ -103,7 +113,14 @@ Route::get('/ping', function() { return 'pong-crm'; });
 
 if (app()->environment('local', 'testing')) {
     Route::middleware('web')->get('/_e2e/login', function () {
-        $user = \App\Models\User::first();
+        $user = null;
+        if (request('email')) {
+            $user = \App\Models\User::where('email', request('email'))->first();
+        } elseif (request('user_id')) {
+            $user = \App\Models\User::find(request('user_id'));
+        } else {
+            $user = \App\Models\User::first();
+        }
         if ($user) {
             auth()->login($user);
             session()->regenerate();

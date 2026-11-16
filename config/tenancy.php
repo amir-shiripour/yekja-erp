@@ -15,7 +15,6 @@ return [
     'models' => [
         'App\\Models\\ActivityLog',
         'App\\Models\\CalendarEvent',
-        'App\\Models\\TenantModule',
         'Modules\\Accounting\\App\\Models\\AccountingSetting',
         'Modules\\Accounting\\App\\Models\\Category',
         'Modules\\Accounting\\App\\Models\\Document',
