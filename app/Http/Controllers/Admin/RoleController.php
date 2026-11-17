@@ -5,25 +5,39 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreRoleRequest;
 use App\Http\Requests\Admin\UpdateRoleRequest;
+use App\Models\User;
+use App\Models\WidgetSetting;
+use App\Support\PermissionCatalog;
+use App\Support\WidgetRegistry;
+use App\Tenancy\TenantManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use App\Support\PermissionCatalog;
-use App\Support\WidgetRegistry;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
-use App\Models\WidgetSetting;
 
 class RoleController extends Controller
 {
     public function index()
     {
+        $tenantManager = app(TenantManager::class);
+        $tenantId = $tenantManager->hasTenant() ? $tenantManager->getTenantId() : null;
+
         $query = Role::query();
 
         // اگر کاربر لاگین شده super-admin نیست، نقش super-admin را از لیست حذف کن
         if (!auth()->user()->hasRole('super-admin')) {
             $query->where('name', '!=', 'super-admin');
+        }
+
+        // فقط نقش‌های قابل دسترس برای بافت جاری
+        if ($tenantId) {
+            $query->where(function ($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)->orWhereNull('tenant_id');
+            });
+        } else {
+            $query->whereNull('tenant_id');
         }
 
         $roles = $query->when(
@@ -36,7 +50,11 @@ class RoleController extends Controller
         $roleUserCounts = [];
         foreach ($roles as $role) {
             $roleUserCounts[$role->name] = DB::table('model_has_roles')
-                ->where('role_id', $role->id)->count();
+                ->join('users', 'model_has_roles.model_id', '=', 'users.id')
+                ->where('model_has_roles.model_type', User::class)
+                ->where('model_has_roles.role_id', $role->id)
+                ->when($tenantId, fn($q) => $q->where('users.tenant_id', $tenantId), fn($q) => $q->whereNull('users.tenant_id'))
+                ->count();
         }
 
         return view('admin.roles.index', compact('roles', 'roleUserCounts'));
