@@ -51,7 +51,7 @@ class ModuleMenuService
                         }
 
                         if (isset($m['show'])) {
-                            $show = is_callable($m['show']) ? $m['show']() : (bool) $m['show'];
+                            $show = is_callable($m['show']) ? $m['show']() : (bool)$m['show'];
                             if (!$show) {
                                 continue;
                             }
@@ -97,6 +97,15 @@ class ModuleMenuService
                 'group' => null,
                 'position' => 12,
             ];
+            $items[] = [
+                'title' => 'نقش‌ها و دسترسی‌ها',
+                'route' => 'user.roles.index',
+                'active_routes' => ['user.roles.*'],
+                'permission' => 'users.view',
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /></svg>',
+                'group' => null,
+                'position' => 13,
+            ];
         }
 
         $modules = Module::where('installed', true)->where('active', true)->get();
@@ -132,7 +141,7 @@ class ModuleMenuService
                             }
 
                             if (isset($m['show'])) {
-                                $show = is_callable($m['show']) ? $m['show']() : (bool) $m['show'];
+                                $show = is_callable($m['show']) ? $m['show']() : (bool)$m['show'];
                                 if (!$show) {
                                     continue;
                                 }
@@ -270,6 +279,15 @@ class ModuleMenuService
             'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>',
             'group' => null,
             'position' => 12,
+        ];
+        $items[] = [
+            'title' => 'نقش‌ها و دسترسی‌ها',
+            'route' => 'user.roles.index',
+            'active_routes' => ['user.roles.*'],
+            'permission' => 'users.view',
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /></svg>',
+            'group' => null,
+            'position' => 13,
         ];
 
         $modules = Module::where('installed', true)->where('active', true)->get();

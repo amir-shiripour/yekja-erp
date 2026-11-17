@@ -47,7 +47,7 @@ class TenantUserController extends Controller
             abort(403, 'دسترسی غیرمجاز. شناسه تننت معتبر یافت نشد.');
         }
 
-        return (int) $tenantId;
+        return (int)$tenantId;
     }
 
     /**
@@ -55,7 +55,7 @@ class TenantUserController extends Controller
      */
     protected function getTenantAllowedRoles()
     {
-        return $this->roleBoundary->getAllowedRoles();
+        return $this->roleBoundary->getAllowedRoles($this->getTenantId());
     }
 
     public function index(Request $request)
@@ -119,7 +119,7 @@ class TenantUserController extends Controller
         ]);
 
         $roles = $request->input('roles', []);
-        if (!$this->roleBoundary->areRolesAllowed($roles)) {
+        if (!$this->roleBoundary->areRolesAllowed($roles, $tenantId)) {
             return back()->withInput()->withErrors(['roles.0' => 'انتساب نقش‌های فراتر از سقف دسترسی سازمان مجاز نمی‌باشد.']);
         }
 
@@ -133,7 +133,7 @@ class TenantUserController extends Controller
             'superior_ids' => ['nullable', 'array'],
             'superior_ids.*' => [
                 'integer',
-                Rule::exists('users', 'id')->where(fn ($q) => $q->where('tenant_id', $tenantId)),
+                Rule::exists('users', 'id')->where(fn($q) => $q->where('tenant_id', $tenantId)),
             ],
         ];
 
@@ -168,7 +168,7 @@ class TenantUserController extends Controller
     {
         $tenantId = $this->getTenantId();
 
-        if ((int) $user->tenant_id !== $tenantId) {
+        if ((int)$user->tenant_id !== $tenantId) {
             abort(404);
         }
 
@@ -202,7 +202,7 @@ class TenantUserController extends Controller
     {
         $tenantId = $this->getTenantId();
 
-        if ((int) $user->tenant_id !== $tenantId) {
+        if ((int)$user->tenant_id !== $tenantId) {
             abort(404);
         }
 
@@ -216,7 +216,7 @@ class TenantUserController extends Controller
         ]);
 
         $roles = $request->input('roles', []);
-        if (!$this->roleBoundary->areRolesAllowed($roles)) {
+        if (!$this->roleBoundary->areRolesAllowed($roles, $tenantId)) {
             return back()->withInput()->withErrors(['roles.0' => 'انتساب نقش‌های فراتر از سقف دسترسی سازمان مجاز نمی‌باشد.']);
         }
 
@@ -230,7 +230,7 @@ class TenantUserController extends Controller
             'superior_ids' => ['nullable', 'array'],
             'superior_ids.*' => [
                 'integer',
-                Rule::exists('users', 'id')->where(fn ($q) => $q->where('tenant_id', $tenantId)->where('id', '!=', $user->id)),
+                Rule::exists('users', 'id')->where(fn($q) => $q->where('tenant_id', $tenantId)->where('id', '!=', $user->id)),
             ],
         ];
 
@@ -264,7 +264,7 @@ class TenantUserController extends Controller
     {
         $tenantId = $this->getTenantId();
 
-        if ((int) $user->tenant_id !== $tenantId) {
+        if ((int)$user->tenant_id !== $tenantId) {
             abort(404);
         }
 
