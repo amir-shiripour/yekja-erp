@@ -14,7 +14,7 @@
     $steps = $journeyData['steps'] ?? [];
 
     $tourConfig = $tourConfig ?? ResellerSetting::getOnboardingTourConfig($tenant->reseller_id);
-    $celebrationTitle = !empty($tourConfig['celebration_title']) ? $tourConfig['celebration_title'] : 'تبریک! سامانه CRM شما ۱۰۰٪ پیکربندی و فعال شد';
+    $celebrationTitle = !empty($tourConfig['celebration_title']) ? $tourConfig['celebration_title'] : 'تبریک! سامانه شما ۱۰۰٪ پیکربندی و فعال شد';
     $celebrationMessage = !empty($tourConfig['celebration_message']) ? $tourConfig['celebration_message'] : 'احراز هویت، دامنه اختصاصی، برند وایت‌لیبل و پکیج شما فعال هستند. تمامی ماژول‌ها در سایدبار در دسترس شما قرار دارند.';
     $displayMode = $tourConfig['display_mode'] ?? 'bento';
 @endphp
@@ -156,7 +156,7 @@
                         <div class="flex items-center gap-2 flex-wrap">
                             <span
                                 class="text-sm font-black text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                راه‌اندازی سامانه CRM
+                                راه‌اندازی سامانه
                             </span>
                             <span
                                 class="px-2 py-0.5 text-xs font-black rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800 shrink-0">
@@ -323,7 +323,7 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2">
                             <h2 class="text-sm sm:text-base md:text-lg font-black text-gray-900 dark:text-white">
-                                مراحل راه‌اندازی و فعال‌سازی سامانه CRM
+                                مراحل راه‌اندازی و فعال‌سازی سامانه
                             </h2>
                             <span
                                 class="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shrink-0">
