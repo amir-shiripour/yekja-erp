@@ -142,7 +142,6 @@ class TenantManager
     }
 
 
-
     public function getCentralDomains(): array
     {
         $domains = [];
@@ -266,11 +265,25 @@ class TenantManager
     /**
      * Get a tenant-isolated storage path.
      */
-    public function getStoragePath(string $path = ''): string
+    public function getStoragePath(string $path = '', ?int $tenantId = null): string
     {
-        $tenantId = $this->getTenantId() ?? 'direct';
-        $cleanPath = ltrim($path, '/');
-        return "tenants/{$tenantId}/" . $cleanPath;
+        return TenantStorage::path($path, $tenantId);
+    }
+
+    /**
+     * Get the tenant storage accessor.
+     */
+    public function storage(): TenantStorage
+    {
+        return app(TenantStorage::class);
+    }
+
+    /**
+     * Get the tenant cache accessor.
+     */
+    public function cache(): TenantCache
+    {
+        return app(TenantCache::class);
     }
 
     /**

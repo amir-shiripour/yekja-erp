@@ -3,6 +3,9 @@
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\User\CalendarController;
+use App\Http\Controllers\User\TenantRoleController;
+use App\Http\Controllers\User\TenantUserController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use Modules\Properties\Entities\PropertyAttribute;
@@ -20,12 +23,7 @@ use App\Http\Controllers\Auth\OtpLoginController;
 |
 */
 
-// --- بخش نصب‌کننده ---
-// این بخش دارای میدل‌ور 'prevent.if.installed' است تا پس از نصب، این روت‌ها در دسترس نباشند
-// همچنین نیاز به middleware 'web' دارد برای session و CSRF
 Route::prefix('install')->middleware(['web', 'prevent.if.installed'])->group(function () {
-
-    // --- اصلاح شد: از 'showStep1' به 'step1' تغییر کرد ---
     Route::get('/', [InstallController::class, 'step1'])->name('install.step1');
     Route::post('/', [InstallController::class, 'processStep1'])->name('install.processStep1');
 
@@ -37,21 +35,14 @@ Route::prefix('install')->middleware(['web', 'prevent.if.installed'])->group(fun
 });
 
 
-// --- بخش اصلی سایت (عمومی و داشبورد) ---
-
-
-// این روت‌ها دارای میدل‌ور 'redirect.if.not.installed' هستند تا قبل از نصب، در دسترس نباشند
 Route::middleware([
     'redirect.if.not.installed',
-    'web', // اطمینان از اجرای میدل‌ورهای وب (مخصوصاً سشن)
+    'web',
 ])->group(function () {
 
-    // روت صفحه اصلی سایت
     Route::get('/', [PageController::class, 'home'])->name('home');
 
-
-
-    Route::get('/debug-attributes', function() {
+    Route::get('/debug-attributes', function () {
         $details = PropertyAttribute::where('section', 'details')->get(['id', 'name']);
         $features = PropertyAttribute::where('section', 'features')->get(['id', 'name']);
         return response()->json(['details' => $details, 'features' => $features]);
@@ -76,7 +67,7 @@ Route::middleware(['web', 'auth'])->prefix('user')->name('user.')->group(functio
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/layout', [UserDashboardController::class, 'updateLayout'])->name('dashboard.update-layout');
 
-    // روت‌های ویجت و صفحه تقویم
+    // widget and calendar
     Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
     Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
     Route::post('/calendar/events', [CalendarController::class, 'storeEvent'])->name('calendar.events.store');
@@ -84,14 +75,24 @@ Route::middleware(['web', 'auth'])->prefix('user')->name('user.')->group(functio
     Route::delete('/calendar/events/{id}', [CalendarController::class, 'deleteEvent'])->name('calendar.events.delete');
     Route::get('/calendar/widget-data', [CalendarController::class, 'widgetData'])->name('calendar.widget-data');
 
-    // مدیریت کاربران تننت
+    //tenant user management
     Route::prefix('users')->name('users.')->middleware(['permission:users.view'])->group(function () {
-        Route::get('/', [\App\Http\Controllers\User\TenantUserController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\User\TenantUserController::class, 'create'])->name('create')->middleware('permission:users.create');
-        Route::post('/', [\App\Http\Controllers\User\TenantUserController::class, 'store'])->name('store')->middleware('permission:users.create');
-        Route::get('/{user}/edit', [\App\Http\Controllers\User\TenantUserController::class, 'edit'])->name('edit')->middleware('permission:users.update');
-        Route::put('/{user}', [\App\Http\Controllers\User\TenantUserController::class, 'update'])->name('update')->middleware('permission:users.update');
-        Route::delete('/{user}', [\App\Http\Controllers\User\TenantUserController::class, 'destroy'])->name('destroy')->middleware('permission:users.delete');
+        Route::get('/', [TenantUserController::class, 'index'])->name('index');
+        Route::get('/create', [TenantUserController::class, 'create'])->name('create')->middleware('permission:users.create');
+        Route::post('/', [TenantUserController::class, 'store'])->name('store')->middleware('permission:users.create');
+        Route::get('/{user}/edit', [TenantUserController::class, 'edit'])->name('edit')->middleware('permission:users.update');
+        Route::put('/{user}', [TenantUserController::class, 'update'])->name('update')->middleware('permission:users.update');
+        Route::delete('/{user}', [TenantUserController::class, 'destroy'])->name('destroy')->middleware('permission:users.delete');
+    });
+
+    // role management
+    Route::prefix('roles')->name('roles.')->middleware(['permission:users.view'])->group(function () {
+        Route::get('/', [TenantRoleController::class, 'index'])->name('index');
+        Route::get('/create', [TenantRoleController::class, 'create'])->name('create');
+        Route::post('/', [TenantRoleController::class, 'store'])->name('store');
+        Route::get('/{role}/edit', [TenantRoleController::class, 'edit'])->name('edit');
+        Route::put('/{role}', [TenantRoleController::class, 'update'])->name('update');
+        Route::delete('/{role}', [TenantRoleController::class, 'destroy'])->name('destroy');
     });
 });
 
@@ -109,17 +110,19 @@ Route::middleware(['web', 'guest'])->prefix('login')->name('login.')->group(func
 });
 
 
-Route::get('/ping', function() { return 'pong-crm'; });
+Route::get('/ping', function () {
+    return 'pong-crm';
+});
 
 if (app()->environment('local', 'testing')) {
     Route::middleware('web')->get('/_e2e/login', function () {
         $user = null;
         if (request('email')) {
-            $user = \App\Models\User::where('email', request('email'))->first();
+            $user = User::where('email', request('email'))->first();
         } elseif (request('user_id')) {
-            $user = \App\Models\User::find(request('user_id'));
+            $user = User::find(request('user_id'));
         } else {
-            $user = \App\Models\User::first();
+            $user = User::first();
         }
         if ($user) {
             auth()->login($user);
