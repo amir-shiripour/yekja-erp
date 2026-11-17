@@ -25,9 +25,9 @@
             <div class="flex items-center justify-between gap-2 mb-2.5">
                 <div class="flex items-center gap-1.5 min-w-0">
                     <span
-                        class="w-2 h-2 rounded-full @if($hasActivePlan) bg-emerald-500 animate-pulse @else bg-amber-500 @endif shrink-0"></span>
+                        class="w-2 h-2 rounded-full @if($hasActivePlan) bg-emerald-500 @else bg-amber-500 @endif shrink-0"></span>
                     <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300 truncate">
-                        {{ $hasActivePlan ? 'پکیج جاری سامانه:' : 'وضعیت پکیج:' }}
+                        {{ $hasActivePlan ? 'پکیج فعلی سامانه:' : 'وضعیت پکیج:' }}
                     </span>
                 </div>
                 <span

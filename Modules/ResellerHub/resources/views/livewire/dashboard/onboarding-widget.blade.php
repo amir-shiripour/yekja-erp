@@ -117,14 +117,14 @@
                 </div>
                 <div class="flex items-center gap-2 self-start sm:self-center">
                     <button type="button"
-                        wire:click="openPackageModal"
-                        class="px-4 py-2.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-bold rounded-xl transition-all border border-indigo-200 dark:border-indigo-800 cursor-pointer"
+                            wire:click="openPackageModal"
+                            class="px-4 py-2.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-bold rounded-xl transition-all border border-indigo-200 dark:border-indigo-800 cursor-pointer"
                     >
                         مدیریت پکیج و تمدید
                     </button>
                     <button type="button"
-                        wire:click="dismiss"
-                        class="px-4 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-xl transition-all cursor-pointer"
+                            wire:click="dismiss"
+                            class="px-4 py-2.5 text-xs font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-xl transition-all cursor-pointer"
                     >
                         بستن پیام
                     </button>
@@ -307,30 +307,30 @@
         {{-- State 4: Expanded Stepper --}}
     @else
         <div
-            class="relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs p-6 sm:p-8 space-y-7">
+            class="relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/60 shadow-xs p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-7">
 
 
             {{-- Header Row --}}
-            <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div class="flex items-start gap-4">
+            <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-3.5 sm:gap-4">
+                <div class="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
                     <span
-                        class="flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 dark:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 shrink-0">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-indigo-600 dark:bg-indigo-500 text-white shadow-md sm:shadow-lg shadow-indigo-600/30 shrink-0">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
                     </span>
-                    <div>
-                        <div class="flex items-center gap-3">
-                            <h2 class="text-base sm:text-lg font-black text-gray-900 dark:text-white">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="text-sm sm:text-base md:text-lg font-black text-gray-900 dark:text-white">
                                 مراحل راه‌اندازی و فعال‌سازی سامانه CRM
                             </h2>
                             <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                                class="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-black bg-indigo-50 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shrink-0">
                                 {{ reseller_fa_num($percentage) }}٪ تکمیل شده
                             </span>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-5">
                             {{ reseller_fa_num($completedCount) }} از {{ reseller_fa_num($totalCount) }} مرحله تکمیل شده
                             است. @fa(4) مرحله
                             کلیدی زیر را برای آغاز به کار سامانه طی کنید.
@@ -338,12 +338,12 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 self-end md:self-auto flex-wrap">
+                <div class="flex items-center gap-2 self-end md:self-auto shrink-0 flex-wrap">
                     @if(!empty($onlyOptionalRemaining))
                         <button
                             type="button"
                             wire:click="postponeOptionalTour"
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer shrink-0"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer shrink-0"
                             title="ورود به پیشخوان و تکمیل موارد اختیاری در آینده"
                         >
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -359,8 +359,8 @@
                     @endif
 
                     <button type="button"
-                        wire:click="toggleCollapse"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-all border border-gray-200/80 dark:border-gray-600 cursor-pointer"
+                            wire:click="toggleCollapse"
+                            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-all border border-gray-200/80 dark:border-gray-600 cursor-pointer"
                     >
                         <span>جمع کردن</span>
                         <svg class="w-3.5 h-3.5 text-gray-500 dark:text-gray-300" fill="none" viewBox="0 0 24 24"
@@ -369,9 +369,9 @@
                         </svg>
                     </button>
                     <button type="button"
-                        wire:click="dismiss"
-                        title="مخفی کردن موقت"
-                        class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-200/80 dark:border-gray-600 cursor-pointer"
+                            wire:click="dismiss"
+                            title="مخفی کردن موقت"
+                            class="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-gray-200/80 dark:border-gray-600 cursor-pointer"
                     >
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -423,11 +423,16 @@
 
             {{-- Interactive Enterprise 4-Step Connected Progress Stepper --}}
             <div
-                class="bg-gray-50/80 dark:bg-gray-900/60 rounded-2xl p-5 border border-gray-100 dark:border-gray-700/60 shadow-2xs">
-                <div class="relative flex items-center justify-between max-w-4xl mx-auto px-4 sm:px-8">
+                class="bg-gray-50/80 dark:bg-gray-900/60 rounded-2xl p-3 sm:p-5 border border-gray-100 dark:border-gray-700/60 shadow-2xs overflow-hidden">
+                <div class="relative flex items-center justify-between max-w-4xl mx-auto px-1 sm:px-8">
                     {{-- Connected Background Track --}}
+                    @php
+                        $stepCount = max(1, count($steps));
+                        $halfColPercent = (100 / $stepCount) / 2;
+                    @endphp
                     <div
-                        class="absolute top-5 start-8 end-8 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full -translate-y-1/2 z-0">
+                        class="absolute top-4 sm:top-5 h-1 sm:h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full -translate-y-1/2 z-0"
+                        style="inset-inline-start: {{ $halfColPercent }}%; inset-inline-end: {{ $halfColPercent }}%;">
                         {{-- Filled Progress Track Line --}}
                         <div
                             class="h-full rounded-full bg-indigo-600 transition-all duration-700 shadow-xs"
@@ -494,8 +499,8 @@
                                     wire:click="completeCustomStep('{{ $sData->slug }}')"
                                 @endif
                                 @endif
-                                class="relative z-10 flex flex-col items-center group {{ $isAccessible ? 'cursor-pointer' : 'cursor-not-allowed opacity-60' }} focus:outline-hidden">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm transition-all duration-300 shadow-xs
+                                class="relative z-10 flex-1 min-w-0 flex flex-col items-center group {{ $isAccessible ? 'cursor-pointer' : 'cursor-not-allowed opacity-60' }} focus:outline-hidden">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-black text-xs sm:text-sm transition-all duration-300 shadow-xs
                                 @if ($isDone)
                                     bg-emerald-500 text-white shadow-emerald-500/20 scale-105
                                 @elseif ($isSkipped)
@@ -509,14 +514,16 @@
                                 @endif
                             ">
                                 @if ($isDone)
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                               d="M5 13l4 4L19 7"/>
                                     </svg>
                                 @elseif ($isSkipped)
                                     <span class="text-xs">رد شد</span>
                                 @elseif ($isQuotaLocked)
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                     </svg>
@@ -524,10 +531,12 @@
                                     <span>@fa($stepNum)</span>
                                 @endif
                             </div>
-                            <div class="text-center mt-2 max-w-[110px]">
+                            <div class="text-center mt-1.5 sm:mt-2 w-full px-0.5 sm:max-w-[110px]">
                                 <span
-                                    class="text-xs font-bold block truncate transition-colors {{ $stepTitleColor }}">
-                                    @fa($stepNum). {{ $sData->title }}
+                                    class="text-[11px] sm:text-xs font-bold block truncate transition-colors {{ $stepTitleColor }}"
+                                    title="{{ $sData->title }}">
+                                    <span class="sm:hidden">گام @fa($stepNum)</span>
+                                    <span class="hidden sm:inline">@fa($stepNum). {{ $sData->title }}</span>
                                 </span>
                                 <span class="text-xs hidden sm:block mt-0.5">
                                     @if ($isDone)
