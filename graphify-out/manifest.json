@@ -1999,8 +1999,8 @@
   },
   "Modules/Booking/docs/ddl.sql": {
     "mtime": 1779347077.0,
-    "seen": 1794898849.8304458,
-    "ast_hash": "",
+    "seen": 1794914251.4598122,
+    "ast_hash": "85435d79af99ec3c68cac40cb5e9e2af",
     "semantic_hash": ""
   },
   "Modules/Booking/install-tables.php": {
@@ -13374,10 +13374,10 @@
     "semantic_hash": "504012cc8a4cde1353b2fd1b003a37cd"
   },
   "app/Http/Controllers/Admin/RoleController.php": {
-    "mtime": 1792312601.4444976,
-    "seen": 1794898849.8325691,
-    "ast_hash": "334817addbcd302ea92d0d0097202a05",
-    "semantic_hash": "334817addbcd302ea92d0d0097202a05"
+    "mtime": 1794917887.002761,
+    "seen": 1794918781.773122,
+    "ast_hash": "421d8269d4178708382222cba4c4abd6",
+    "semantic_hash": ""
   },
   "app/Http/Controllers/Admin/UserController.php": {
     "mtime": 1794818457.012897,
@@ -13440,9 +13440,9 @@
     "semantic_hash": "9ec7fb194ac434c7e1148f46d9d6328f"
   },
   "app/Http/Controllers/User/TenantUserController.php": {
-    "mtime": 1794906637.151134,
-    "seen": 1794908943.9026215,
-    "ast_hash": "4e6660993a5b270882c3001658c54948",
+    "mtime": 1794914096.161951,
+    "seen": 1794914251.4634573,
+    "ast_hash": "cc35bd7b9649ffe97cdd62cdf632f477",
     "semantic_hash": ""
   },
   "app/Http/Kernel.php": {
@@ -13728,9 +13728,9 @@
     "semantic_hash": "ceaaadc1b521ff9153c44493da85fddb"
   },
   "app/Providers/TenancyServiceProvider.php": {
-    "mtime": 1794912188.7595408,
-    "seen": 1794912540.8940246,
-    "ast_hash": "c44ea80132f57a7ce8adaae81b2353b1",
+    "mtime": 1794913638.1293461,
+    "seen": 1794914251.4635549,
+    "ast_hash": "35d9c00909d674edfa8965c2d52949c9",
     "semantic_hash": ""
   },
   "app/Providers/ThemeServiceProvider.php": {
@@ -13824,9 +13824,9 @@
     "semantic_hash": "8cdc4faa6ddc19335b950b63e9ba5354"
   },
   "app/Services/Modules/ModuleMenuService.php": {
-    "mtime": 1794906951.396835,
-    "seen": 1794908943.9094748,
-    "ast_hash": "0e10137850401dcb9101e1ae095da3d9",
+    "mtime": 1794917977.336567,
+    "seen": 1794918781.773254,
+    "ast_hash": "52310b1fbec2a32d19a4b5009a1f8da8",
     "semantic_hash": ""
   },
   "app/Services/Modules/ModuleUpdaterService.php": {
@@ -13878,9 +13878,9 @@
     "semantic_hash": "a78af86008e9a2c3946eb98d2f2cf793"
   },
   "app/Tenancy/TenantManager.php": {
-    "mtime": 1794912033.652071,
-    "seen": 1794912540.8968725,
-    "ast_hash": "6af3edb990d3f934ca5e21a222b57e74",
+    "mtime": 1794914096.1739838,
+    "seen": 1794914251.4636056,
+    "ast_hash": "f14864a5d7ea659a0d97f30b933d1c76",
     "semantic_hash": ""
   },
   "app/Tenancy/TenantModuleActivator.php": {
@@ -13890,9 +13890,9 @@
     "semantic_hash": "aa773d56d8e52ba79ec754d6d3711a4f"
   },
   "app/Tenancy/TenantRoleBoundary.php": {
-    "mtime": 1794906441.7469327,
-    "seen": 1794908943.9105425,
-    "ast_hash": "87c97722cb9fe761b4ed9d547376511b",
+    "mtime": 1794914096.1850114,
+    "seen": 1794914251.463609,
+    "ast_hash": "9d3590190f8a0f0bb8fcf25910a9c89a",
     "semantic_hash": ""
   },
   "app/Tenancy/Traits/BelongsToTenant.php": {
@@ -14574,21 +14574,21 @@
     "semantic_hash": "68b8b16a5610b15afd876c0cac21c9ea"
   },
   "resources/views/admin/roles/create.blade.php": {
-    "mtime": 1794907304.626196,
-    "seen": 1794908943.924942,
-    "ast_hash": "503da8b25172d2354fb368b463a3d8a2",
+    "mtime": 1794913454.7983773,
+    "seen": 1794914251.463834,
+    "ast_hash": "f4910984c12334e096d3c1b1ce3d23be",
     "semantic_hash": ""
   },
   "resources/views/admin/roles/edit.blade.php": {
-    "mtime": 1794907426.947418,
-    "seen": 1794908943.924945,
-    "ast_hash": "6d6a81861baa60e846270f52e20c63e3",
+    "mtime": 1794913454.7406015,
+    "seen": 1794914251.4638357,
+    "ast_hash": "c64fcb910ecd894ac6f93efda0e1686c",
     "semantic_hash": ""
   },
   "resources/views/admin/roles/index.blade.php": {
-    "mtime": 1794907977.5892363,
-    "seen": 1794908943.924948,
-    "ast_hash": "5cc2eeb4110b0c5f720c9f38099fa2e3",
+    "mtime": 1794913454.7586486,
+    "seen": 1794914251.4638379,
+    "ast_hash": "3ba9029d5d96327e497162e4215ea427",
     "semantic_hash": ""
   },
   "resources/views/admin/users/create.blade.php": {
@@ -14604,10 +14604,10 @@
     "semantic_hash": "0180d96294688484377c2b347c6bb991"
   },
   "resources/views/admin/users/index.blade.php": {
-    "mtime": 1794821582.216166,
-    "seen": 1794898849.8327732,
-    "ast_hash": "69d21d7b60b9b7eab5802fe93a62955d",
-    "semantic_hash": "69d21d7b60b9b7eab5802fe93a62955d"
+    "mtime": 1794918079.8324885,
+    "seen": 1794918781.773475,
+    "ast_hash": "3420b74ffa3089868a26f084ad634921",
+    "semantic_hash": ""
   },
   "resources/views/admin/version_control/create.blade.php": {
     "mtime": 1793512631.5901237,
@@ -15246,9 +15246,9 @@
     "semantic_hash": "a3512a1de8101877b7fedc7a44e49dbc"
   },
   "routes/web.php": {
-    "mtime": 1794906783.2444665,
-    "seen": 1794908943.9391332,
-    "ast_hash": "2e0540c8ea645d59dd1464d6f55bb703",
+    "mtime": 1794914096.1378584,
+    "seen": 1794914251.464038,
+    "ast_hash": "ee33b538680f8d134b56f080da35435c",
     "semantic_hash": ""
   },
   "tailwind.config.js": {
@@ -15438,15 +15438,15 @@
     "semantic_hash": "618a250e705c7dbef08cb6d281b4e039"
   },
   "app/Http/Controllers/User/TenantRoleController.php": {
-    "mtime": 1794907600.7949748,
-    "seen": 1794908943.9026165,
-    "ast_hash": "ecf5173661caa2271bf376b6ed1f6c68",
+    "mtime": 1794914096.111599,
+    "seen": 1794914251.463455,
+    "ast_hash": "6e97452dc0c0e8365357d2a998bb1291",
     "semantic_hash": ""
   },
   "app/Models/Role.php": {
-    "mtime": 1794906192.0577066,
-    "seen": 1794908943.905873,
-    "ast_hash": "fadd71ceffa4a2764fa7d38d30813d0e",
+    "mtime": 1794914096.1248243,
+    "seen": 1794914251.4635236,
+    "ast_hash": "2a7609019d7186b24aa70fd907f744ca",
     "semantic_hash": ""
   },
   "database/migrations/2026_11_17_123037_add_tenant_id_to_roles_table.php": {
@@ -15882,9 +15882,9 @@
     "semantic_hash": ""
   },
   "app/Tenancy/Middleware/PropagateTenantContext.php": {
-    "mtime": 1794912091.015256,
-    "seen": 1794912540.8965929,
-    "ast_hash": "8de2da590678b60c5071d49b3b6ecd49",
+    "mtime": 1794914096.1499207,
+    "seen": 1794914251.4635978,
+    "ast_hash": "6ac3463b4812877e725abb384de74275",
     "semantic_hash": ""
   },
   "app/Tenancy/TenantCache.php": {
@@ -15900,15 +15900,21 @@
     "semantic_hash": ""
   },
   "app/Tenancy/Traits/TenantAwareJob.php": {
-    "mtime": 1794912106.2080054,
-    "seen": 1794912540.8972297,
-    "ast_hash": "bab123ed7c1b021ebc73c6574895931f",
+    "mtime": 1794914096.0795147,
+    "seen": 1794914251.4636147,
+    "ast_hash": "b03751de687c466e4167b5c1a228183c",
     "semantic_hash": ""
   },
   "tests/Feature/TenantArchitectureAdvancementsTest.php": {
     "mtime": 1794912425.3977056,
     "seen": 1794912540.9289901,
     "ast_hash": "b1436a41d5147ce3c4180cd78d9fde95",
+    "semantic_hash": ""
+  },
+  "tests/Feature/AdminUserRoleScopingTest.php": {
+    "mtime": 1794918378.5267594,
+    "seen": 1794918781.773654,
+    "ast_hash": "d2808c1c703c5f26a04a8e1635fe4a1e",
     "semantic_hash": ""
   },
   "package-lock.json": {
