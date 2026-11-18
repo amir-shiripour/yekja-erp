@@ -259,14 +259,14 @@ $ssoRateLimit = max(1, (int)config('resellerhub.sso.rate_limit', 20));
 Route::middleware(['web', 'throttle:' . $ssoRateLimit . ',1'])->prefix('user/reseller')->group(function () {
     Route::get('/sso-login', [TenantSsoController::class, 'handle'])->name('tenant.sso-login');
     Route::get('/sso-return', [TenantSsoController::class, 'handleReturn'])->name('tenant.sso-return');
-    Route::post('/exit-impersonation', [TenantSsoController::class, 'exitImpersonation'])->name('tenant.exit-impersonation');
+    Route::match(['get', 'post'], '/exit-impersonation', [TenantSsoController::class, 'exitImpersonation'])->name('tenant.exit-impersonation');
 });
 
 // Legacy SSO fallback for backward compatibility
 Route::middleware(['web', 'throttle:' . $ssoRateLimit . ',1'])->prefix('reseller')->group(function () {
     Route::get('/sso-login', [TenantSsoController::class, 'handle']);
     Route::get('/sso-return', [TenantSsoController::class, 'handleReturn']);
-    Route::post('/exit-impersonation', [TenantSsoController::class, 'exitImpersonation']);
+    Route::match(['get', 'post'], '/exit-impersonation', [TenantSsoController::class, 'exitImpersonation']);
 });
 
 // Tenant Subscription & Reseller Quotas View (accessible by tenant users/admin)

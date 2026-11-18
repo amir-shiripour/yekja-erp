@@ -13824,9 +13824,9 @@
     "semantic_hash": "8cdc4faa6ddc19335b950b63e9ba5354"
   },
   "app/Services/Modules/ModuleMenuService.php": {
-    "mtime": 1794917977.336567,
-    "seen": 1794918781.773254,
-    "ast_hash": "52310b1fbec2a32d19a4b5009a1f8da8",
+    "mtime": 1794985502.6056907,
+    "seen": 1794985588.3148506,
+    "ast_hash": "fd09246f3c4f3ec3f92e4c6c096cdfc4",
     "semantic_hash": ""
   },
   "app/Services/Modules/ModuleUpdaterService.php": {
@@ -15915,6 +15915,12 @@
     "mtime": 1794983254.4740386,
     "seen": 1794983447.670355,
     "ast_hash": "ecc7fc951412aa944f1dc1a2921aacf4",
+    "semantic_hash": ""
+  },
+  "tests/Feature/SidebarMenuDeduplicationTest.php": {
+    "mtime": 1794985215.0490663,
+    "seen": 1794985288.1633866,
+    "ast_hash": "ca4f9d957243e1e9ed3c0f6943c5b6fb",
     "semantic_hash": ""
   },
   "package-lock.json": {
