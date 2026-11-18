@@ -8760,9 +8760,9 @@
     "semantic_hash": "0a0bd2e8fb6b3aab15bbfab618b8e493"
   },
   "Modules/ResellerHub/App/Services/Support/ModuleTitleResolver.php": {
-    "mtime": 1794983327.8506882,
-    "seen": 1794983447.670091,
-    "ast_hash": "3acc920fc95ed59d6d44aeb713d6ef26",
+    "mtime": 1794983587.726654,
+    "seen": 1794983792.7900083,
+    "ast_hash": "0983b16b401596e48ba9209b2bdf1612",
     "semantic_hash": ""
   },
   "Modules/ResellerHub/App/Services/Support/MoneyFormatter.php": {
@@ -13824,9 +13824,9 @@
     "semantic_hash": "8cdc4faa6ddc19335b950b63e9ba5354"
   },
   "app/Services/Modules/ModuleMenuService.php": {
-    "mtime": 1794917977.336567,
-    "seen": 1794918781.773254,
-    "ast_hash": "52310b1fbec2a32d19a4b5009a1f8da8",
+    "mtime": 1794985069.762498,
+    "seen": 1794985288.1629767,
+    "ast_hash": "933d7d60b2aa23472238a61938dc7297",
     "semantic_hash": ""
   },
   "app/Services/Modules/ModuleUpdaterService.php": {
@@ -15915,6 +15915,12 @@
     "mtime": 1794983254.4740386,
     "seen": 1794983447.670355,
     "ast_hash": "ecc7fc951412aa944f1dc1a2921aacf4",
+    "semantic_hash": ""
+  },
+  "tests/Feature/SidebarMenuDeduplicationTest.php": {
+    "mtime": 1794985215.0490663,
+    "seen": 1794985288.1633866,
+    "ast_hash": "ca4f9d957243e1e9ed3c0f6943c5b6fb",
     "semantic_hash": ""
   },
   "package-lock.json": {
