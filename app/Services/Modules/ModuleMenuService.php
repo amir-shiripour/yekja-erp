@@ -5,7 +5,9 @@ namespace App\Services\Modules;
 use App\Models\Module;
 use App\Tenancy\TenantManager;
 use Illuminate\Support\Str;
+use Log;
 use Modules\ResellerHub\App\Services\Support\ModuleTitleResolver;
+use Throwable;
 
 class ModuleMenuService
 {
@@ -81,13 +83,17 @@ class ModuleMenuService
 
                     $settingsItems = array_merge($settingsItems, $coreSettings);
                 }
-            } catch (\Throwable $e) {
-                \Log::warning("Failed to load core menu: " . $e->getMessage());
+            } catch (Throwable $e) {
+                Log::warning("Failed to load core menu: " . $e->getMessage());
             }
         }
 
-        // User and role management menu items (auto-routes to admin or user workspace based on tenancy context)
-        if ($user->can('users.view')) {
+        // User and role management menu items (auto-routes to admin or user workspace based on tenancy context, only if not already provided by core menu)
+        $alreadyHasUserManagement = collect($coreItems ?? [])->contains(function ($m) {
+            return in_array($m['route'] ?? '', ['admin.users.index', 'user.users.index'], true);
+        });
+
+        if (!$alreadyHasUserManagement && $user->can('users.view')) {
             $isTenantContext = $tenant !== null;
             $userRoute = $isTenantContext ? 'user.users.index' : 'admin.users.index';
             $roleRoute = $isTenantContext ? 'user.roles.index' : 'admin.roles.index';
@@ -181,8 +187,8 @@ class ModuleMenuService
 
                         $settingsItems = array_merge($settingsItems, $moduleSettings);
                     }
-                } catch (\Throwable $e) {
-                    \Log::warning("Failed to load menu for module {$moduleName}: " . $e->getMessage());
+                } catch (Throwable $e) {
+                    Log::warning("Failed to load menu for module {$moduleName}: " . $e->getMessage());
                     continue;
                 }
             }
@@ -210,8 +216,8 @@ class ModuleMenuService
 
         try {
             return app(MenuCustomizationService::class)->applyOverrides($result, $user);
-        } catch (\Throwable $e) {
-            \Log::warning("MenuCustomizationService failed: " . $e->getMessage());
+        } catch (Throwable $e) {
+            Log::warning("MenuCustomizationService failed: " . $e->getMessage());
             return $result;
         }
     }
@@ -271,30 +277,42 @@ class ModuleMenuService
                     }
                     $settingsItems = array_merge($settingsItems, $coreSettings);
                 }
-            } catch (\Throwable $e) {
-                \Log::warning("Failed to load core raw menu: " . $e->getMessage());
+            } catch (Throwable $e) {
+                Log::warning("Failed to load core raw menu: " . $e->getMessage());
             }
         }
 
-        // User management menu item for tenant workspace
-        $items[] = [
-            'title' => 'مدیریت کاربران',
-            'route' => 'user.users.index',
-            'active_routes' => ['user.users.*'],
-            'permission' => 'users.view',
-            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>',
-            'group' => null,
-            'position' => 12,
-        ];
-        $items[] = [
-            'title' => 'نقش‌ها و دسترسی‌ها',
-            'route' => 'user.roles.index',
-            'active_routes' => ['user.roles.*'],
-            'permission' => 'users.view',
-            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /></svg>',
-            'group' => null,
-            'position' => 13,
-        ];
+        // User management menu item for tenant workspace (only if not already provided by core menu)
+        $alreadyHasUserManagement = collect($coreItems ?? [])->contains(function ($m) {
+            return in_array($m['route'] ?? '', ['admin.users.index', 'user.users.index'], true);
+        });
+
+        if (!$alreadyHasUserManagement) {
+            $isTenantContext = $tenant !== null;
+            $userRoute = $isTenantContext ? 'user.users.index' : 'admin.users.index';
+            $roleRoute = $isTenantContext ? 'user.roles.index' : 'admin.roles.index';
+            $userActiveRoutes = $isTenantContext ? ['user.users.*'] : ['admin.users.*'];
+            $roleActiveRoutes = $isTenantContext ? ['user.roles.*'] : ['admin.roles.*'];
+
+            $items[] = [
+                'title' => 'مدیریت کاربران',
+                'route' => $userRoute,
+                'active_routes' => $userActiveRoutes,
+                'permission' => 'users.view',
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>',
+                'group' => null,
+                'position' => 12,
+            ];
+            $items[] = [
+                'title' => 'نقش‌ها و دسترسی‌ها',
+                'route' => $roleRoute,
+                'active_routes' => $roleActiveRoutes,
+                'permission' => 'users.view',
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /></svg>',
+                'group' => null,
+                'position' => 13,
+            ];
+        }
 
         $modules = Module::where('installed', true)->where('active', true)->get();
 
@@ -340,8 +358,8 @@ class ModuleMenuService
                         }
                         $settingsItems = array_merge($settingsItems, $moduleSettings);
                     }
-                } catch (\Throwable $e) {
-                    \Log::warning("Failed to load raw menu for module {$moduleName}: " . $e->getMessage());
+                } catch (Throwable $e) {
+                    Log::warning("Failed to load raw menu for module {$moduleName}: " . $e->getMessage());
                     continue;
                 }
             }

@@ -8760,9 +8760,9 @@
     "semantic_hash": "0a0bd2e8fb6b3aab15bbfab618b8e493"
   },
   "Modules/ResellerHub/App/Services/Support/ModuleTitleResolver.php": {
-    "mtime": 1794982302.2308161,
-    "seen": 1794982546.9898746,
-    "ast_hash": "214df6f3c59115e1be917e34575db5e3",
+    "mtime": 1794983587.726654,
+    "seen": 1794983792.7900083,
+    "ast_hash": "0983b16b401596e48ba9209b2bdf1612",
     "semantic_hash": ""
   },
   "Modules/ResellerHub/App/Services/Support/MoneyFormatter.php": {
@@ -10008,9 +10008,9 @@
     "semantic_hash": "ad89f9d00cd48722697135b61b9b1552"
   },
   "Modules/ResellerHub/resources/views/user/packages/show.blade.php": {
-    "mtime": 1794981756.6604986,
-    "seen": 1794982546.9903607,
-    "ast_hash": "d4c81f79703c94c73f648e6022d40d17",
+    "mtime": 1794982777.267984,
+    "seen": 1794983447.6707401,
+    "ast_hash": "65a1e4b064f526f895630f9b997dcfc4",
     "semantic_hash": ""
   },
   "Modules/ResellerHub/resources/views/user/pricings/index.blade.php": {
@@ -15912,9 +15912,9 @@
     "semantic_hash": ""
   },
   "Modules/ResellerHub/Tests/Unit/ModuleTitleUnificationTest.php": {
-    "mtime": 1794982424.6413906,
-    "seen": 1794982546.9900684,
-    "ast_hash": "29e0dbe76dd0f11fa2b92fe3724e4ebc",
+    "mtime": 1794983254.4740386,
+    "seen": 1794983447.670355,
+    "ast_hash": "ecc7fc951412aa944f1dc1a2921aacf4",
     "semantic_hash": ""
   },
   "package-lock.json": {
