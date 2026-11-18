@@ -65,15 +65,16 @@
             'discount_type' => 'amount',
             'discount_value' => (int)($p->discount_value ?? 0),
 
-            'modules_titles' => collect($pMods)->map(fn($s) => $modulesMap[$s]->title ?? $s)->values(),
+            'modules_titles' => collect($pMods)->map(fn($s) => ResellerHelper::getModuleTitle($s))->values(),
         ];
     })->values();
 
     $modulesListForJs = $availableModules->map(function ($m) {
+        $title = ResellerHelper::getModuleTitle($m->slug);
         return [
             'slug' => $m->slug,
-            'name' => $m->name,
-            'title' => $m->title,
+            'name' => $title,
+            'title' => $title,
             'is_allowed' => $m->is_allowed,
         ];
     })->values();
@@ -892,7 +893,7 @@
 
                 getModuleTitle(slug) {
                     const found = (this.modules || []).find(m => m.slug === slug);
-                    return found ? (found.title || found.name || slug) : slug;
+                    return found ? (found.title || found.name || slug) : (this.catalog?.find(c => c.slug === slug)?.title || slug);
                 },
 
                 getModuleFeatureCount(slug) {
@@ -1494,7 +1495,7 @@
                                             @forelse($modsShown as $slug)
                                                 <span
                                                     class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300">
-                                                {{ $modulesMap[$slug]->title ?? $slug }}
+                                                {{ ResellerHelper::getModuleTitle($slug) }}
                                             </span>
                                             @empty
                                                 <span class="text-xs text-gray-400">ماژولی انتخاب نشده</span>
@@ -1502,7 +1503,7 @@
                                             @if($modsRest > 0)
                                                 <span
                                                     class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-black bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/60"
-                                                    title="{{ collect(array_slice($pkgModules, 4))->map(fn($s) => $modulesMap[$s]->title ?? $s)->implode('، ') }}">
+                                                    title="{{ collect(array_slice($pkgModules, 4))->map(fn($s) => ResellerHelper::getModuleTitle($s))->implode('، ') }}">
                                                 +{{ reseller_fa_num($modsRest) }} مورد دیگر
                                             </span>
                                             @endif
@@ -1520,7 +1521,7 @@
                                                         class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-100 dark:border-amber-800/50">
                                                     @php
                                                         $qEnum = QuotaKey::tryFrom($lSlug);
-                                                        $limitTitle = $qEnum ? $qEnum->shortTitle() : ($modulesMap[$lSlug]->title ?? $lSlug);
+                                                        $limitTitle = $qEnum ? $qEnum->shortTitle() : ResellerHelper::getModuleTitle($lSlug);
                                                         $limitFormatted = $qEnum ? $qEnum->formatLimit((int)$lVal) : ($lVal == -1 ? 'نامحدود' : reseller_fa_num($lVal));
                                                     @endphp
                                                     <span>{{ $limitTitle }}:</span>

@@ -32,18 +32,17 @@ class ResellerPackageController extends Controller
 
     protected function getAvailableModules(Reseller $reseller): Collection
     {
-        $menuService = app(ModuleMenuService::class);
         $systemModules = Module::where('installed', true)
             ->where('active', true)
             ->whereNotIn('slug', ['resellerhub', 'settings', 'admin', 'core'])
             ->get();
 
-        return $systemModules->map(static function ($mod) use ($menuService, $reseller) {
-            $title = $menuService->resolveModuleGroupTitle($mod->slug, $mod->name);
+        return $systemModules->map(static function ($mod) use ($reseller) {
+            $title = ResellerHelper::getModuleTitle($mod->slug);
             return (object)[
-                'name' => $mod->name,
+                'name' => $title,
                 'slug' => $mod->slug,
-                'title' => $title ?: $mod->name,
+                'title' => $title,
                 'description' => $mod->description ?? null,
                 'is_allowed' => $reseller->canSellModule($mod->slug) || $reseller->canSellModule($mod->name),
             ];
