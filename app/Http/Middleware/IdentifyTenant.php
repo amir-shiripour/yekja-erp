@@ -145,6 +145,20 @@ class IdentifyTenant
                 $isReseller = method_exists($user, 'hasRole') && $user->hasRole('reseller');
 
                 if (!$isSuperAdmin && !$isReseller && !empty($user->tenant_id)) {
+                    // Do not trap impersonation exit, sso-return, or logout in tenant redirection loops
+                    if ($request->is('user/reseller/exit-impersonation') ||
+                        $request->is('reseller/exit-impersonation') ||
+                        $request->is('*/exit-impersonation') ||
+                        $request->is('exit-impersonation') ||
+                        $request->is('user/reseller/sso-return') ||
+                        $request->is('reseller/sso-return') ||
+                        $request->is('*/sso-return') ||
+                        $request->is('logout') ||
+                        $request->is('*/logout')
+                    ) {
+                        return $next($request);
+                    }
+
                     try {
                         $userTenant = Tenant::find($user->tenant_id);
                         if ($userTenant) {

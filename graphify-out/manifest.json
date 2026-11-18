@@ -8208,10 +8208,10 @@
     "semantic_hash": ""
   },
   "Modules/ResellerHub/App/Http/Controllers/TenantSsoController.php": {
-    "mtime": 1794726753.578371,
-    "seen": 1794898849.8315694,
-    "ast_hash": "ae17672a0b4dbc374de8e1c840a7cdb0",
-    "semantic_hash": "ae17672a0b4dbc374de8e1c840a7cdb0"
+    "mtime": 1794988326.4175105,
+    "seen": 1794988686.0178328,
+    "ast_hash": "9ed3db93bd7ae453548195752a780da6",
+    "semantic_hash": ""
   },
   "Modules/ResellerHub/App/Http/Controllers/TenantSubscriptionController.php": {
     "mtime": 1794125681.6130116,
@@ -9372,16 +9372,16 @@
     "semantic_hash": "d00b96e8321bd60e3fcc17e0b12786a5"
   },
   "Modules/ResellerHub/lang/en/messages.php": {
-    "mtime": 1794821679.117587,
-    "seen": 1794898849.8317697,
-    "ast_hash": "1c9cee2a21db0d1ecddaee1c099fa8d2",
-    "semantic_hash": "1c9cee2a21db0d1ecddaee1c099fa8d2"
+    "mtime": 1794988381.0274532,
+    "seen": 1794988686.0187469,
+    "ast_hash": "a20f128452e47681c83aca0d7004caf2",
+    "semantic_hash": ""
   },
   "Modules/ResellerHub/lang/fa/messages.php": {
-    "mtime": 1794821671.4603658,
-    "seen": 1794898849.8317707,
-    "ast_hash": "9f95f6243ece3b55793f74e344286ed8",
-    "semantic_hash": "9f95f6243ece3b55793f74e344286ed8"
+    "mtime": 1794988370.1617362,
+    "seen": 1794988686.018752,
+    "ast_hash": "9de89e711d7346a28091c19f9760b75b",
+    "semantic_hash": ""
   },
   "Modules/ResellerHub/lang/fa/resellerhub.php": {
     "mtime": 1794478014.5944707,
@@ -10338,10 +10338,10 @@
     "semantic_hash": "5eff7023ad4df5fce67c27d8fc28b91c"
   },
   "Modules/ResellerHub/routes/web.php": {
-    "mtime": 1794737275.978357,
-    "seen": 1794898849.8319387,
-    "ast_hash": "5726aa0e571b1811061fac517d187eed",
-    "semantic_hash": "5726aa0e571b1811061fac517d187eed"
+    "mtime": 1794988243.6625035,
+    "seen": 1794988686.0194728,
+    "ast_hash": "cb1bd9de7ef572c479701ade247bdc4e",
+    "semantic_hash": ""
   },
   "Modules/ResellerHub/vite.config.js": {
     "mtime": 1789198079.2134717,
@@ -13476,10 +13476,10 @@
     "semantic_hash": "bc150703e36f5f92aa7e5839bc732aeb"
   },
   "app/Http/Middleware/IdentifyTenant.php": {
-    "mtime": 1794726710.4571705,
-    "seen": 1794898849.832586,
-    "ast_hash": "4ad502b88ffc55da2b59db7ea8e4e3b5",
-    "semantic_hash": "4ad502b88ffc55da2b59db7ea8e4e3b5"
+    "mtime": 1794988573.44102,
+    "seen": 1794988686.0221407,
+    "ast_hash": "aa25d09b8587599ec511a8a44d2ca252",
+    "semantic_hash": ""
   },
   "app/Http/Middleware/PreventRequestsDuringMaintenance.php": {
     "mtime": 1767509576.1909077,
@@ -13536,10 +13536,10 @@
     "semantic_hash": "77676d93770a50e14db60bb5e06a8c86"
   },
   "app/Http/Middleware/VerifyCsrfToken.php": {
-    "mtime": 1791362474.7626479,
-    "seen": 1794898849.8325958,
-    "ast_hash": "203193fecec5191ba44f24e64b2ebe4a",
-    "semantic_hash": "203193fecec5191ba44f24e64b2ebe4a"
+    "mtime": 1794988232.9504042,
+    "seen": 1794988686.0221884,
+    "ast_hash": "2bfcd9ef5e54776f0f10fa624de5ef0d",
+    "semantic_hash": ""
   },
   "app/Http/Requests/Admin/StoreRoleRequest.php": {
     "mtime": 1767532972.9371362,
@@ -13824,9 +13824,9 @@
     "semantic_hash": "8cdc4faa6ddc19335b950b63e9ba5354"
   },
   "app/Services/Modules/ModuleMenuService.php": {
-    "mtime": 1794985069.762498,
-    "seen": 1794985288.1629767,
-    "ast_hash": "933d7d60b2aa23472238a61938dc7297",
+    "mtime": 1794985502.6056907,
+    "seen": 1794985588.3148506,
+    "ast_hash": "fd09246f3c4f3ec3f92e4c6c096cdfc4",
     "semantic_hash": ""
   },
   "app/Services/Modules/ModuleUpdaterService.php": {
@@ -15180,10 +15180,10 @@
     "semantic_hash": "6882a1682f8a41bdeb689a01c44bba2e"
   },
   "resources/views/user/partials/topbar.blade.php": {
-    "mtime": 1792915751.7600212,
-    "seen": 1794898849.832871,
-    "ast_hash": "697bb2d08611c703a68829baa636d398",
-    "semantic_hash": "697bb2d08611c703a68829baa636d398"
+    "mtime": 1794988361.40362,
+    "seen": 1794988686.0233936,
+    "ast_hash": "463a7ae5d4b67f8c68e48ef55d68b12f",
+    "semantic_hash": ""
   },
   "resources/views/vendor/pagination/tailwind.blade.php": {
     "mtime": 1778416519.8225074,
@@ -15917,10 +15917,10 @@
     "ast_hash": "ecc7fc951412aa944f1dc1a2921aacf4",
     "semantic_hash": ""
   },
-  "tests/Feature/SidebarMenuDeduplicationTest.php": {
-    "mtime": 1794985215.0490663,
-    "seen": 1794985288.1633866,
-    "ast_hash": "ca4f9d957243e1e9ed3c0f6943c5b6fb",
+  "tests/Feature/TenantExitImpersonationTest.php": {
+    "mtime": 1794988578.9063022,
+    "seen": 1794988686.0236187,
+    "ast_hash": "566e3ab97301550fa2ca61c021e7dcd1",
     "semantic_hash": ""
   },
   "package-lock.json": {

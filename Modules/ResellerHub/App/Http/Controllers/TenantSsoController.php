@@ -126,7 +126,25 @@ class TenantSsoController extends Controller
         }
 
         $targetUrl = app(TenantManager::class)->getTenantUrl($tenant, 'user/dashboard');
-        return redirect()->away($targetUrl)->with('success', __('resellerhub::messages.sso.login_success', ['name' => $tenant->name]));
+        $response = redirect()->away($targetUrl)->with('success', __('resellerhub::messages.sso.login_success', ['name' => $tenant->name]));
+
+        if ($impersonatorId) {
+            $response->withCookie(cookie(
+                'impersonator_token',
+                encrypt([
+                    'impersonator_id' => (int)$impersonatorId,
+                    'tenant_id' => (int)$tenantId,
+                    'created_at' => now()->timestamp,
+                ]),
+                1440, // 24 hours fallback validity
+                null,
+                null,
+                $request->isSecure(),
+                true
+            ));
+        }
+
+        return $response;
     }
 
     /**
@@ -136,6 +154,20 @@ class TenantSsoController extends Controller
     {
         $impersonatorId = session('impersonated_by');
         $tenantId = session('impersonated_tenant_id');
+
+        // Resilience: Fallback to encrypted cookie if session timed out or was garbage collected
+        if (!$impersonatorId && $request->hasCookie('impersonator_token')) {
+            try {
+                $payload = decrypt((string)$request->cookie('impersonator_token'));
+                if (is_array($payload) && !empty($payload['impersonator_id'])) {
+                    $impersonatorId = (int)$payload['impersonator_id'];
+                    $tenantId = $tenantId ?: ($payload['tenant_id'] ?? null);
+                }
+            } catch (Throwable $e) {
+                Log::debug('[TenantSso] Impersonator cookie decrypt failed: ' . $e->getMessage());
+            }
+        }
+
         if ($impersonatorId && $tenantId) {
             $t = Tenant::find($tenantId);
             if ($t) {
@@ -150,26 +182,31 @@ class TenantSsoController extends Controller
         /** @var TenantManager $tenantManager */
         $tenantManager = app(TenantManager::class);
         $tenantManager->setTenant(null);
+        app()->instance('currentTenant', null);
+        view()->share('currentTenant', null);
 
-        $protocol = $request->isSecure() ? 'https://' : 'http://';
-
-        $isTenantHost = false;
-        $subdomain = $tenantManager->extractSubdomain($request->getHost());
-        if ($subdomain) {
-            $isTenantHost = true;
-        } else {
-            $tenantWithDomain = Tenant::where('custom_domain', $request->getHost())->first();
-            if ($tenantWithDomain) {
+        // Always resolve central base URL cleanly from app.url or current scheme and host
+        $centralBase = rtrim(config('app.url', ''), '/');
+        if (empty($centralBase) || !filter_var($centralBase, FILTER_VALIDATE_URL)) {
+            $protocol = $request->isSecure() ? 'https://' : 'http://';
+            $isTenantHost = false;
+            $subdomain = $tenantManager->extractSubdomain($request->getHost());
+            if ($subdomain) {
                 $isTenantHost = true;
+            } else {
+                $tenantWithDomain = Tenant::where('custom_domain', $request->getHost())->first();
+                if ($tenantWithDomain) {
+                    $isTenantHost = true;
+                }
             }
-        }
 
-        if (!$isTenantHost) {
-            $centralBase = $request->getSchemeAndHttpHost();
-        } else {
-            $centralDomains = $tenantManager->getCentralDomains();
-            $targetCentral = $centralDomains[0] ?? $request->getHost();
-            $centralBase = $protocol . $targetCentral;
+            if (!$isTenantHost) {
+                $centralBase = $request->getSchemeAndHttpHost();
+            } else {
+                $centralDomains = $tenantManager->getCentralDomains();
+                $targetCentral = $centralDomains[0] ?? $request->getHost();
+                $centralBase = $protocol . $targetCentral;
+            }
         }
 
         Auth::guard('web')->logout();
@@ -181,19 +218,35 @@ class TenantSsoController extends Controller
         if ($impersonatorId) {
             $returnToken = Str::random(64);
             Cache::put('sso_return_' . $returnToken, [
-                'user_id' => $impersonatorId,
+                'user_id' => (int)$impersonatorId,
                 'ip_address' => $request->ip(),
                 'user_agent_hash' => md5((string)$request->userAgent()),
                 'created_at' => now()->timestamp,
             ], now()->addSeconds($this->ssoTtl()));
-            return redirect()->away($centralBase . '/reseller/sso-return?token=' . $returnToken);
+
+            $response = redirect()->away($centralBase . '/user/reseller/sso-return?token=' . $returnToken);
+        } else {
+            $response = redirect()->away($centralBase . '/login')
+                ->with('info', __('resellerhub::messages.sso.session_expired_exit') ?: 'نشست شما منقضی شده بود و با موفقیت خارج شدید. لطفاً مجدداً وارد حساب خود شوید.');
         }
 
-        return redirect()->away($centralBase . '/login');
+        $response->withCookie(cookie()->forget('impersonator_token'));
+        if ($tenantId) {
+            $tenantCookie = 'crm_sess_' . substr(md5('tenant_' . $tenantId), 0, 10);
+            $response->withCookie(cookie()->forget($tenantCookie));
+        }
+
+        return $response;
     }
 
     public function handleReturn(Request $request): RedirectResponse
     {
+        /** @var TenantManager $tenantManager */
+        $tenantManager = app(TenantManager::class);
+        $tenantManager->setTenant(null);
+        app()->instance('currentTenant', null);
+        view()->share('currentTenant', null);
+
         $token = (string)$request->query('token');
         if (empty($token)) {
             return redirect()->route('login')->withErrors(['email' => __('resellerhub::messages.sso.missing_token')]);
@@ -223,13 +276,17 @@ class TenantSsoController extends Controller
 
         Auth::guard('web')->login($user, true);
         if ($request->hasSession()) {
+            $request->session()->forget(['impersonated_by', 'impersonated_tenant_id', 'impersonated_at', 'tenant_id']);
             $request->session()->regenerate();
         }
 
         $isPrivileged = method_exists($user, 'hasRole') && ($user->hasRole('reseller') || $user->hasRole('super-admin'));
         $targetPath = ($isPrivileged && Route::has('reseller.dashboard')) ? route('reseller.dashboard') : '/user/dashboard';
 
-        return redirect($targetPath)->with('success', __('resellerhub::messages.sso.return_success'));
+        $response = redirect($targetPath)->with('success', __('resellerhub::messages.sso.return_success'));
+        $response->withCookie(cookie()->forget('impersonator_token'));
+
+        return $response;
     }
 
     /**

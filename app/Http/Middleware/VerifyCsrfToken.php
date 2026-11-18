@@ -24,5 +24,9 @@ class VerifyCsrfToken extends Middleware
         'get-started/checkout/verify/*',
         'reseller/invoices/*/verify',
         'reseller/invoices/*/verify/*',
+        'user/reseller/exit-impersonation',
+        'reseller/exit-impersonation',
+        '*/exit-impersonation',
+        'exit-impersonation',
     ];
 }

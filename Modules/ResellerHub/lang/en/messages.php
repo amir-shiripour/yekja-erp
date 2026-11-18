@@ -603,6 +603,7 @@ return [
         'admin_not_found' => 'Admin account for this tenant was not found.',
         'login_success' => 'Logged in successfully as admin for ":name".',
         'return_success' => 'Returned successfully to your central account.',
+        'session_expired_exit' => 'Your session had expired and you were signed out safely. Please log in again.',
     ],
 
     'quotas' => [
