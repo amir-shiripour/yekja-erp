@@ -13374,10 +13374,10 @@
     "semantic_hash": "504012cc8a4cde1353b2fd1b003a37cd"
   },
   "app/Http/Controllers/Admin/RoleController.php": {
-    "mtime": 1792312601.4444976,
-    "seen": 1794898849.8325691,
-    "ast_hash": "334817addbcd302ea92d0d0097202a05",
-    "semantic_hash": "334817addbcd302ea92d0d0097202a05"
+    "mtime": 1794917887.002761,
+    "seen": 1794918781.773122,
+    "ast_hash": "421d8269d4178708382222cba4c4abd6",
+    "semantic_hash": ""
   },
   "app/Http/Controllers/Admin/UserController.php": {
     "mtime": 1794818457.012897,
@@ -13824,9 +13824,9 @@
     "semantic_hash": "8cdc4faa6ddc19335b950b63e9ba5354"
   },
   "app/Services/Modules/ModuleMenuService.php": {
-    "mtime": 1794913454.7813327,
-    "seen": 1794914251.4635863,
-    "ast_hash": "a6856d0a303408c5f4f2e99ea3642eca",
+    "mtime": 1794917977.336567,
+    "seen": 1794918781.773254,
+    "ast_hash": "52310b1fbec2a32d19a4b5009a1f8da8",
     "semantic_hash": ""
   },
   "app/Services/Modules/ModuleUpdaterService.php": {
@@ -14604,10 +14604,10 @@
     "semantic_hash": "0180d96294688484377c2b347c6bb991"
   },
   "resources/views/admin/users/index.blade.php": {
-    "mtime": 1794821582.216166,
-    "seen": 1794898849.8327732,
-    "ast_hash": "69d21d7b60b9b7eab5802fe93a62955d",
-    "semantic_hash": "69d21d7b60b9b7eab5802fe93a62955d"
+    "mtime": 1794918079.8324885,
+    "seen": 1794918781.773475,
+    "ast_hash": "3420b74ffa3089868a26f084ad634921",
+    "semantic_hash": ""
   },
   "resources/views/admin/version_control/create.blade.php": {
     "mtime": 1793512631.5901237,
@@ -15909,6 +15909,12 @@
     "mtime": 1794912425.3977056,
     "seen": 1794912540.9289901,
     "ast_hash": "b1436a41d5147ce3c4180cd78d9fde95",
+    "semantic_hash": ""
+  },
+  "tests/Feature/AdminUserRoleScopingTest.php": {
+    "mtime": 1794918378.5267594,
+    "seen": 1794918781.773654,
+    "ast_hash": "d2808c1c703c5f26a04a8e1635fe4a1e",
     "semantic_hash": ""
   },
   "package-lock.json": {

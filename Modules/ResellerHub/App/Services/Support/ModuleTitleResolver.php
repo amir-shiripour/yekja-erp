@@ -7,6 +7,7 @@ use App\Services\Modules\ModuleMenuService;
 use App\Support\PermissionCatalog;
 use App\Support\WidgetRegistry;
 use Illuminate\Support\Facades\Cache;
+use Modules\ResellerHub\App\Enums\QuotaKey;
 use Throwable;
 
 class ModuleTitleResolver
@@ -21,9 +22,10 @@ class ModuleTitleResolver
             return '';
         }
 
-        $cacheKey = "resellerhub_module_title_{$slugLower}";
+        $cleanKey = str_replace(['-', '_', ' '], '', $slugLower);
+        $cacheKey = "resellerhub_module_title_{$cleanKey}";
 
-        return Cache::rememberForever($cacheKey, function () use ($slugLower) {
+        return Cache::rememberForever($cacheKey, function () use ($slugLower, $cleanKey) {
             // 1. Resolve directly from PermissionCatalog (Guaranteed STRICTLY PERSIAN, zero English)
             $catalogTitle = $this->resolveFromPermissionCatalog($slugLower);
             if (!empty($catalogTitle)) {
@@ -35,47 +37,55 @@ class ModuleTitleResolver
             if (class_exists(ModuleMenuService::class)) {
                 $menuService = app(ModuleMenuService::class);
                 $resolved = $menuService->resolveModuleGroupTitle($slugLower, $title);
-                if (!empty($resolved) && $resolved !== $title && $resolved !== $slugLower) {
+                if (!empty($resolved) && $resolved !== $title && $resolved !== $slugLower && preg_match('/[\x{0600}-\x{06FF}]/u', $resolved)) {
                     return $this->cleanPersianTitle($resolved, true);
                 }
             }
 
-            $candidates = [ucfirst($slugLower), strtoupper($slugLower), $slugLower];
+            // 2. Check Module translation keys (Defined by the module itself, e.g. lang/fa/menu.php)
+            foreach ([
+                "{$slugLower}::menu.group_title", "{$slugLower}::general.title", "menu.{$slugLower}",
+                "{$cleanKey}::menu.group_title", "{$cleanKey}::general.title", "menu.{$cleanKey}"
+            ] as $transKey) {
+                $t = trans($transKey);
+                if ($t !== $transKey && !empty($t) && preg_match('/[\x{0600}-\x{06FF}]/u', $t)) {
+                    return $this->cleanPersianTitle($t, true);
+                }
+            }
+
+            // 3. Check Database Module record (if title column is set in Persian)
+            $dbMod = Module::whereRaw('LOWER(slug) = ?', [$slugLower])
+                ->orWhereRaw('LOWER(name) = ?', [$slugLower])
+                ->orWhereRaw('LOWER(REPLACE(REPLACE(slug, "_", ""), "-", "")) = ?', [$cleanKey])
+                ->orWhereRaw('LOWER(REPLACE(REPLACE(name, "_", ""), "-", "")) = ?', [$cleanKey])
+                ->first();
+
+            if ($dbMod) {
+                if (!empty($dbMod->title) && preg_match('/[\x{0600}-\x{06FF}]/u', $dbMod->title)) {
+                    return $this->cleanPersianTitle($dbMod->title, true);
+                }
+                if (class_exists(ModuleMenuService::class)) {
+                    $menuService = app(ModuleMenuService::class);
+                    $resolved = $menuService->resolveModuleGroupTitle($dbMod->slug, $dbMod->name);
+                    if (!empty($resolved) && $resolved !== ucfirst($slugLower) && preg_match('/[\x{0600}-\x{06FF}]/u', $resolved)) {
+                        return $this->cleanPersianTitle($resolved, true);
+                    }
+                }
+            }
+
+            // 4. Check Module menu files (Fallback to first menu item title if no group title defined)
+            $candidates = [ucfirst($slugLower), strtoupper($slugLower), $slugLower, ucfirst($cleanKey), $cleanKey];
             foreach ($candidates as $cand) {
                 $menuPath = base_path("Modules/{$cand}/resources/menu.php");
                 if (file_exists($menuPath)) {
                     try {
                         $items = include $menuPath;
-                        if (is_array($items) && !empty($items[0]['title'])) {
+                        if (is_array($items) && !empty($items[0]['title']) && preg_match('/[\x{0600}-\x{06FF}]/u', $items[0]['title'])) {
                             return $this->cleanPersianTitle($items[0]['title'], true);
                         }
                     } catch (Throwable $e) {
                         // ignore
                     }
-                }
-            }
-
-            $dbMod = Module::whereRaw('LOWER(slug) = ?', [$slugLower])
-                ->orWhereRaw('LOWER(name) = ?', [$slugLower])
-                ->first();
-
-            if ($dbMod) {
-                if (class_exists(ModuleMenuService::class)) {
-                    $menuService = app(ModuleMenuService::class);
-                    $resolved = $menuService->resolveModuleGroupTitle($dbMod->slug, $dbMod->name);
-                    if (!empty($resolved) && $resolved !== ucfirst($slugLower)) {
-                        return $this->cleanPersianTitle($resolved, true);
-                    }
-                }
-                if (!empty($dbMod->title)) {
-                    return $this->cleanPersianTitle($dbMod->title, true);
-                }
-            }
-
-            foreach (["{$slugLower}::menu.group_title", "{$slugLower}::general.title", "menu.{$slugLower}"] as $transKey) {
-                $t = trans($transKey);
-                if ($t !== $transKey && !empty($t)) {
-                    return $this->cleanPersianTitle($t, true);
                 }
             }
 
@@ -89,10 +99,6 @@ class ModuleTitleResolver
      */
     public function resolveFromPermissionCatalog(string $slug): ?string
     {
-        if (!class_exists(PermissionCatalog::class)) {
-            return null;
-        }
-
         $slugLower = strtolower(trim($slug));
         if ($slugLower === '') {
             return null;
@@ -102,32 +108,44 @@ class ModuleTitleResolver
         $cleanKey = str_replace(['-', '_', ' '], '', $slugLower);
 
         // 1. Check PermissionCatalog::groups()
-        $groups = PermissionCatalog::groups();
+        if (class_exists(PermissionCatalog::class)) {
+            $groups = PermissionCatalog::groups();
 
-        // Direct key match
-        if (isset($groups[$normalized])) {
-            $clean = $this->cleanPersianTitle($groups[$normalized]['title'], true);
-            if (!empty($clean)) {
-                return $clean;
-            }
-        }
-
-        // Clean key match (e.g. clientcalls vs client_calls, smsreseller vs sms_reseller)
-        foreach ($groups as $key => $data) {
-            $keyClean = str_replace(['-', '_', ' '], '', $key);
-            if ($keyClean === $cleanKey) {
-                $clean = $this->cleanPersianTitle($data['title'], true);
+            // Direct key match
+            if (isset($groups[$normalized])) {
+                $clean = $this->cleanPersianTitle($groups[$normalized]['title'], true);
                 if (!empty($clean)) {
                     return $clean;
                 }
             }
-        }
 
-        // Matchers in groups (e.g. client-calls. matches clientcalls)
-        foreach ($groups as $data) {
-            foreach ($data['matchers'] as $m) {
-                $mClean = str_replace(['.', '-', '_'], '', $m);
-                if ($mClean === $cleanKey || $mClean === $slugLower) {
+            // Clean key match (e.g. clientcalls vs client_calls, smsreseller vs sms_reseller)
+            foreach ($groups as $key => $data) {
+                $keyClean = str_replace(['-', '_', ' '], '', $key);
+                if ($keyClean === $cleanKey) {
+                    $clean = $this->cleanPersianTitle($data['title'], true);
+                    if (!empty($clean)) {
+                        return $clean;
+                    }
+                }
+            }
+
+            // Matchers in groups (e.g. client-calls. matches clientcalls)
+            foreach ($groups as $data) {
+                foreach ($data['matchers'] as $m) {
+                    $mClean = str_replace(['.', '-', '_'], '', $m);
+                    if ($mClean === $cleanKey || $mClean === $slugLower) {
+                        $clean = $this->cleanPersianTitle($data['title'], true);
+                        if (!empty($clean)) {
+                            return $clean;
+                        }
+                    }
+                }
+            }
+
+            // Prefix match on groups (e.g. reseller_admin matches reseller)
+            foreach ($groups as $key => $data) {
+                if (str_starts_with($key, $normalized . '_') || str_starts_with($normalized, $key . '_')) {
                     $clean = $this->cleanPersianTitle($data['title'], true);
                     if (!empty($clean)) {
                         return $clean;
@@ -136,46 +154,46 @@ class ModuleTitleResolver
             }
         }
 
-        // Prefix match on groups (e.g. resellerhub_admin matches resellerhub)
-        foreach ($groups as $key => $data) {
-            if (str_starts_with($key, $normalized . '_') || str_starts_with($normalized, $key . '_')) {
-                $clean = $this->cleanPersianTitle($data['title'], true);
+        // 2. Check QuotaKey if applicable (e.g. appointments, invoices, warehouses, products)
+        if (class_exists(QuotaKey::class)) {
+            $qEnum = QuotaKey::tryFrom($slugLower)
+                ?? QuotaKey::tryFrom($normalized)
+                ?? QuotaKey::tryFrom($cleanKey);
+            if ($qEnum) {
+                return $qEnum->shortTitle();
+            }
+        }
+
+        // 2. Check PermissionCatalog::translate()
+        foreach ([$slug, $slugLower, $normalized, $cleanKey] as $attempt) {
+            $translated = PermissionCatalog::translate($attempt);
+            if ($translated !== $attempt && !empty($translated) && preg_match('/[\x{0600}-\x{06FF}]/u', $translated)) {
+                $clean = $this->cleanPersianTitle($translated, false);
                 if (!empty($clean)) {
                     return $clean;
                 }
             }
         }
 
-        // 2. Check PermissionCatalog::translate()
-        $translated = PermissionCatalog::translate($slug);
-        if ($translated !== $slug && !empty($translated) && preg_match('/[\x{0600}-\x{06FF}]/u', $translated)) {
-            $clean = $this->cleanPersianTitle($translated, false);
-            if (!empty($clean)) {
-                return $clean;
-            }
-        }
-
-        // 3. Check WidgetRegistry (e.g., calendar_widget -> تقویم و رویدادها)
+        // 3. Check WidgetRegistry
         if (class_exists(WidgetRegistry::class)) {
-            $widget = WidgetRegistry::get($slugLower) ?: WidgetRegistry::get($normalized);
+            $widget = WidgetRegistry::get($slugLower) ?: (WidgetRegistry::get($normalized) ?: WidgetRegistry::get($cleanKey));
             if ($widget && !empty($widget['label'])) {
                 return $this->cleanPersianTitle($widget['label'], false);
             }
         }
 
-        // 4. Core system aliases (Pure Persian ONLY, zero English)
+        // 5. Non-module core system aliases (Virtual entities that are not standalone modules in Modules/)
         $coreAliases = [
             'crm' => 'سامانه ارتباط با مشتری',
             'core' => 'سامانه ارتباط با مشتری',
+            'admin' => 'مدیریت سیستم',
             'calendar' => 'تقویم و رویدادها',
             'events' => 'رویدادها',
             'chat' => 'چت و گفتگوی آنلاین',
-            'smartbot' => 'دستیار هوشمند',
-            'contentforge' => 'تولید محتوا',
-            'admin' => 'مدیریت سیستم',
         ];
 
-        return $coreAliases[$normalized] ?? null;
+        return $coreAliases[$cleanKey] ?? $coreAliases[$normalized] ?? null;
     }
 
     /**
@@ -207,6 +225,8 @@ class ModuleTitleResolver
     public function invalidate(string $slug): void
     {
         $slugLower = strtolower(trim($slug));
+        $cleanKey = str_replace(['-', '_', ' '], '', $slugLower);
         Cache::forget("resellerhub_module_title_{$slugLower}");
+        Cache::forget("resellerhub_module_title_{$cleanKey}");
     }
 }

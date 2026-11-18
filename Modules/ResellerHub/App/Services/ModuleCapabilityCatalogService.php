@@ -7,6 +7,7 @@ use App\Services\Modules\ModuleMenuService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Modules\ResellerHub\App\Enums\QuotaKey;
+use Modules\ResellerHub\App\Helpers\ResellerHelper;
 use Modules\ResellerHub\App\Models\Reseller;
 use Modules\ResellerHub\App\Models\ResellerModulePricing;
 
@@ -73,7 +74,7 @@ class ModuleCapabilityCatalogService
 
         return $systemModules->map(function ($mod) {
             $slug = strtolower(trim($mod->slug));
-            $title = $this->menuService->resolveModuleGroupTitle($slug, $mod->name) ?: $mod->name;
+            $title = ResellerHelper::getModuleTitle($slug);
             $commercialFeatures = $this->getModuleCommercialFeatures($slug);
 
             $features = collect($commercialFeatures)->map(function ($f) {
@@ -130,7 +131,7 @@ class ModuleCapabilityCatalogService
 
         return $systemModules->map(function ($mod) use ($reseller, $existingPricings) {
             $slug = strtolower(trim($mod->slug));
-            $title = $this->menuService->resolveModuleGroupTitle($slug, $mod->name) ?: $mod->name;
+            $title = ResellerHelper::getModuleTitle($slug);
             $isAllowed = $reseller->canSellModule($slug);
             $commercialFeatures = $this->getModuleCommercialFeatures($slug);
 

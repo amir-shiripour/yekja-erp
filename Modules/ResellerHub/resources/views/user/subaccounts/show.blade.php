@@ -42,15 +42,16 @@
             'discount_type' => $p->discount_type ?? 'percent',
             'discount_value' => (float)($p->discount_value ?? 0),
 
-            'modules_titles' => collect($pMods)->map(fn($s) => $modulesMap[$s]->title ?? $s)->values(),
+            'modules_titles' => collect($pMods)->map(fn($s) => ResellerHelper::getModuleTitle($s))->values(),
         ];
     })->values();
 
     $modulesListForJs = ($availableModules ?? collect())->map(function ($m) {
+        $title = ResellerHelper::getModuleTitle($m->slug);
         return [
             'slug' => $m->slug,
-            'name' => $m->name,
-            'title' => $m->title,
+            'name' => $title,
+            'title' => $title,
             'is_allowed' => $m->is_allowed,
         ];
     })->values();
@@ -938,7 +939,7 @@
                                 <div class="min-w-0">
                                         <span
                                             class="text-xs sm:text-sm font-black text-gray-900 dark:text-white block truncate">
-                                            {{ $mod['title'] }}
+                                            {{ ResellerHelper::getModuleTitle($mod['slug'] ?? $mod['module_slug'] ?? '') ?: ($mod['title'] ?? '') }}
                                         </span>
                                     <span
                                         class="text-xs text-gray-400 block dir-ltr text-start truncate mt-0.5">
@@ -1867,7 +1868,7 @@
 
                 getModuleTitle(slug) {
                     const found = (this.modules || []).find(m => m.slug === slug);
-                    return found ? (found.title || found.name || slug) : slug;
+                    return found ? (found.title || found.name || slug) : (this.catalog?.find(c => c.slug === slug)?.title || slug);
                 },
 
                 getModuleFeatureCount(slug) {

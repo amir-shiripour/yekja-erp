@@ -207,15 +207,13 @@ class TenantProvisioningController extends Controller
         }
 
         $availableModules = $systemModules->map(function ($mod) use ($reseller) {
-
-            $title = $this->titleResolver->resolve($mod->slug) ?: $mod->name;
-
+            $title = $this->titleResolver->resolve($mod->slug);
             $isAllowed = $reseller->canSellModule($mod->slug) || $reseller->canSellModule($mod->name);
 
             return (object)[
-                'name' => $mod->name,
+                'name' => $title,
                 'slug' => $mod->slug,
-                'title' => $title ?: $mod->name,
+                'title' => $title,
                 'description' => $mod->description ?? null,
                 'is_allowed' => $isAllowed,
                 'is_default' => $isAllowed,
@@ -545,12 +543,12 @@ class TenantProvisioningController extends Controller
         $activeModuleSlugs = $tenant->modules->pluck('module_slug')->toArray();
 
         $availableModules = $systemModules->map(function ($mod) use ($reseller, $activeModuleSlugs) {
-            $title = $this->titleResolver->resolve($mod->slug) ?: $mod->name;
+            $title = $this->titleResolver->resolve($mod->slug);
 
             return (object)[
-                'name' => $mod->name,
+                'name' => $title,
                 'slug' => $mod->slug,
-                'title' => $title ?: $mod->name,
+                'title' => $title,
                 'description' => $mod->description ?? null,
                 'is_allowed' => $reseller->canSellModule($mod->slug) || $reseller->canSellModule($mod->name),
                 'is_active' => in_array($mod->slug, $activeModuleSlugs, true),
