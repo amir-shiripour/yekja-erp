@@ -3474,15 +3474,15 @@
     "semantic_hash": "7863ef4e556cc37d887ace51d76f42f9"
   },
   "Modules/ContentForge/Entities/ContentSetting.php": {
-    "mtime": 1794998085.783109,
-    "seen": 1794998680.0203667,
-    "ast_hash": "36cde924fdc8e97f244ec6a439e0fd68",
+    "mtime": 1795005005.7717946,
+    "seen": 1795068361.9272833,
+    "ast_hash": "a31259cb42947297b7e43c9fdfb8ac0e",
     "semantic_hash": ""
   },
   "Modules/ContentForge/Installer.php": {
-    "mtime": 1795004552.0595827,
-    "seen": 1795004734.8019657,
-    "ast_hash": "fd92cb2998f4a3c004b17793b592c00a",
+    "mtime": 1795005005.7858317,
+    "seen": 1795068361.927288,
+    "ast_hash": "af2898954b9640b76f5dabc189920a69",
     "semantic_hash": ""
   },
   "Modules/ContentForge/Providers/ContentForgeServiceProvider.php": {
@@ -11778,9 +11778,9 @@
     "semantic_hash": "b422f13f31f4430857071743fb82a427"
   },
   "Modules/Settings/Http/Controllers/SettingsController.php": {
-    "mtime": 1795004294.994636,
-    "seen": 1795004734.804885,
-    "ast_hash": "f2ac4cd95aeb0b0fa9721a167efc11b4",
+    "mtime": 1795005005.755753,
+    "seen": 1795068361.9327917,
+    "ast_hash": "8e51eb5afbccaccf2c8ef4c7b49bac36",
     "semantic_hash": ""
   },
   "Modules/Settings/Http/Controllers/UserPaymentSettingsController.php": {
@@ -13848,9 +13848,9 @@
     "semantic_hash": ""
   },
   "app/Services/ViewOverrideResolver.php": {
-    "mtime": 1795004466.7331972,
-    "seen": 1795004734.8058639,
-    "ast_hash": "9db78a645349368da9bcc9f6d618d5b1",
+    "mtime": 1795005005.7206619,
+    "seen": 1795068361.9345498,
+    "ast_hash": "9af3dd3450c503fb50497702663cd904",
     "semantic_hash": ""
   },
   "app/Support/PermissionCatalog.php": {
@@ -14922,10 +14922,10 @@
     "semantic_hash": "c20405402391037668c55af02b62178c"
   },
   "resources/views/layouts/user.blade.php": {
-    "mtime": 1794216993.6645412,
-    "seen": 1794898849.8328266,
-    "ast_hash": "7e08c70932e937551b3248984e2abcfd",
-    "semantic_hash": "7e08c70932e937551b3248984e2abcfd"
+    "mtime": 1795070046.722319,
+    "seen": 1795070165.3238947,
+    "ast_hash": "0220198062c712b29a239c732495be11",
+    "semantic_hash": ""
   },
   "resources/views/layouts/web.blade.php": {
     "mtime": 1793260785.9078546,
@@ -15936,9 +15936,9 @@
     "semantic_hash": ""
   },
   "Modules/ContentForge/App/Livewire/Admin/ThemeStudio.php": {
-    "mtime": 1795004660.0697253,
-    "seen": 1795004734.8019059,
-    "ast_hash": "964d50400cc8a437ab9202071a878032",
+    "mtime": 1795068010.8198783,
+    "seen": 1795068361.9271433,
+    "ast_hash": "5bfbb6d77d2df406eb65a15bd30c3cbf",
     "semantic_hash": ""
   },
   "Modules/ContentForge/resources/views/livewire/admin/theme-studio.blade.php": {
@@ -15951,6 +15951,144 @@
     "mtime": 1795001895.4477055,
     "seen": 1795002230.564043,
     "ast_hash": "b5e5e01f7427ec9cf2505193f6ab2f32",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/card-to-card.blade.php": {
+    "mtime": 1795069894.1175516,
+    "seen": 1795070165.32384,
+    "ast_hash": "ef57d6023e76e4df04cd6452a0d30f7d",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/color-picker.blade.php": {
+    "mtime": 1795069761.5934556,
+    "seen": 1795070165.3238447,
+    "ast_hash": "f04fb282851be882937fa746bafa6f47",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/command-palette.blade.php": {
+    "mtime": 1795069971.7700024,
+    "seen": 1795070165.3238475,
+    "ast_hash": "78256e5f280b6b7af5a070dc5c7d79d1",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/context-menu.blade.php": {
+    "mtime": 1795069786.5630627,
+    "seen": 1795070165.3238492,
+    "ast_hash": "c24197bf1550b4d64554d311c3c3cf31",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/copy-button.blade.php": {
+    "mtime": 1795069732.1422863,
+    "seen": 1795070165.3238509,
+    "ast_hash": "2c373e402030f29caa26a0a9aea13575",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/delete-button.blade.php": {
+    "mtime": 1795069746.4043949,
+    "seen": 1795070165.323852,
+    "ast_hash": "38e607bf3abdc5f8e4ed6c6bb44ed6be",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/dock.blade.php": {
+    "mtime": 1795070026.3990648,
+    "seen": 1795070165.3238535,
+    "ast_hash": "64703351ddefcddee9c062531d9349c4",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/empty-state.blade.php": {
+    "mtime": 1795069811.8169744,
+    "seen": 1795070165.3238552,
+    "ast_hash": "cf2aa124d5171f663b0df0c4b4c1e108",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/file-upload.blade.php": {
+    "mtime": 1795069778.1673713,
+    "seen": 1795070165.3238568,
+    "ast_hash": "5e6c2f5e503e0f4172293ce5e0f9fed9",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/iban-input.blade.php": {
+    "mtime": 1795069869.0460124,
+    "seen": 1795070165.3238587,
+    "ast_hash": "7e6ad3ebbf97e909b5290bc1681cea91",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/menu-notch.blade.php": {
+    "mtime": 1795069935.4609623,
+    "seen": 1795070165.3238597,
+    "ast_hash": "56c235943f7c606aed4895b44a858d52",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/national-id-input.blade.php": {
+    "mtime": 1795069849.2564733,
+    "seen": 1795070165.3238616,
+    "ast_hash": "698b730a483b8c004468be204fc4bf99",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/otp-input.blade.php": {
+    "mtime": 1795069920.7818315,
+    "seen": 1795070165.323863,
+    "ast_hash": "398b8a8cb43adc58b0583da740c771d6",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/payment-methods.blade.php": {
+    "mtime": 1795069909.777803,
+    "seen": 1795070165.3238645,
+    "ast_hash": "49929e29ceb772b2ba0d7a2cb16477a3",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/price-input.blade.php": {
+    "mtime": 1795069835.561206,
+    "seen": 1795070165.323866,
+    "ast_hash": "156509d66feffd536d4768ccaa57e5a7",
+    "semantic_hash": ""
+  },
+  "tests/Feature/UiComponentsTest.php": {
+    "mtime": 1795071445.8892763,
+    "seen": 1795071525.9936016,
+    "ast_hash": "b6a171ed6a0176fe5b1d5cbdb60ef903",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/alert.blade.php": {
+    "mtime": 1795071187.9219792,
+    "seen": 1795071525.9933233,
+    "ast_hash": "4ac3b526b9661ab0e682463a1df411fa",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/badge.blade.php": {
+    "mtime": 1795071361.8827052,
+    "seen": 1795071525.9933295,
+    "ast_hash": "f99468a0f0aa4e8f9139fb361db360c4",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/card-number-input.blade.php": {
+    "mtime": 1795071415.7233646,
+    "seen": 1795071525.9933324,
+    "ast_hash": "808d4b21b1e72c1ab96983730fa392e8",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/password-input.blade.php": {
+    "mtime": 1795071396.9490643,
+    "seen": 1795071525.9933684,
+    "ast_hash": "30225f168cc7f395392aef4a38e1ab31",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/price.blade.php": {
+    "mtime": 1795071383.2822802,
+    "seen": 1795071525.9933758,
+    "ast_hash": "9c0c16dcee07906f6f75314452a03223",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/progress.blade.php": {
+    "mtime": 1795071236.115419,
+    "seen": 1795071525.9933772,
+    "ast_hash": "98b354d179ac84ef28babc732834f151",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/toast.blade.php": {
+    "mtime": 1795071292.5623806,
+    "seen": 1795071525.9933789,
+    "ast_hash": "34f0054fafbf07feeb08506ebe96cd6e",
     "semantic_hash": ""
   },
   "package-lock.json": {
