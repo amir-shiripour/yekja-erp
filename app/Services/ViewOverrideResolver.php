@@ -5,56 +5,97 @@ declare(strict_types=1);
 namespace App\Services;
 
 use Illuminate\Support\Facades\File;
+use Modules\ContentForge\Entities\ContentSetting;
+use Throwable;
 
 final class ViewOverrideResolver
 {
-    public function __construct(private ThemeManager $themeManager) {}
+    public function __construct(private ThemeManager $themeManager)
+    {
+    }
+
+
+    public function isCrmView(string $viewName): bool
+    {
+        if (str_starts_with($viewName, 'user.') || str_starts_with($viewName, 'layouts.user') || str_starts_with($viewName, 'layouts.auth')) {
+            return true;
+        }
+
+        if (str_contains($viewName, '::user.') || str_contains($viewName, '::livewire.admin.') || str_contains($viewName, '::admin.')) {
+            return true;
+        }
+
+        try {
+            $request = request();
+            if ($request && ($request->is('user*') || $request->is('*/user*') || $request->is('reseller*'))) {
+                return true;
+            }
+        } catch (Throwable) {
+        }
+
+        return false;
+    }
 
     /**
-     * بررسی می‌کند که آیا فایل override اختصاصی برای view درخواستی در تم فعال وجود دارد یا خیر.
+     * بررسی می‌کند که آیا فایل override اختصاصی برای view درخواستی در تم‌های فعال وجود دارد یا خیر.
+     * پشتیبانی کامل از تمامی ۲۴ ماژول سیستم و ویوهای هسته CRM.
      *
-     * ورودی: 'smartbot::page.chat' یا 'market::web.index' یا 'themes.default.index'
-     * خروجی: مسری فایل جاگزین فیزیکی یا null
+     * ورودی: 'smartbot::page.chat' یا 'accounting::invoices.index' یا 'user.dashboard' یا 'layouts.user'
+     * خروجی: مسیر فایل جایگزین فیزیکی یا null
      */
     public function findOverridePath(string $viewName): ?string
     {
-        $entity = $this->themeManager->getActiveEntity();
-        if (!$entity || empty($entity->theme_key)) {
-            return null;
-        }
-
-        $themeKey = strtolower($entity->theme_key);
-
-        // ۱. اگر نام view دارای namespace ماژول است (مانند smartbot::page.chat)
         if (str_contains($viewName, '::')) {
             [$namespace, $relativeView] = explode('::', $viewName, 2);
-            $relativePath = str_replace('.', '/', $relativeView);
+            $relativePath = $namespace . '/' . str_replace('.', '/', $relativeView);
+        } else {
+            $relativePath = str_replace('.', '/', $viewName);
+        }
 
-            // مسیر فایل override در تم اختصاصی مشتری
-            // resources/views/themes/{theme_key}/overrides/{namespace}/{relative_path}.blade.php
-            $overrideFilePath = resource_path("views/themes/{$themeKey}/overrides/{$namespace}/{$relativePath}.blade.php");
+        if ($this->themeManager->isCrmOverrideEnabled()) {
+            $crmTheme = $this->themeManager->getActiveCrmTheme();
+            if ($crmTheme) {
+                $crmOverridePath = resource_path("views/themes/{$crmTheme}/overrides/{$relativePath}.blade.php");
+                if (File::exists($crmOverridePath)) {
+                    return $crmOverridePath;
+                }
+            }
+        }
 
-            if (File::exists($overrideFilePath)) {
-                return $overrideFilePath;
+        $entity = $this->themeManager->getActiveEntity();
+        if ($entity && !empty($entity->theme_key)) {
+            $entityTheme = strtolower((string)$entity->theme_key);
+            $entityOverridePath = resource_path("views/themes/{$entityTheme}/overrides/{$relativePath}.blade.php");
+            if (File::exists($entityOverridePath)) {
+                return $entityOverridePath;
             }
 
-            // چک اولویت دوم: اگر ماژول مبدا تعریف شده است (مثلا module_source = market)
             if (!empty($entity->module_source)) {
-                $moduleSource = strtolower($entity->module_source);
-                $moduleOverridePath = resource_path("views/themes/{$themeKey}/overrides/{$moduleSource}/{$relativePath}.blade.php");
+                $moduleSource = strtolower((string)$entity->module_source);
+                $moduleOverridePath = resource_path("views/themes/{$entityTheme}/overrides/{$moduleSource}/{$relativePath}.blade.php");
                 if (File::exists($moduleOverridePath)) {
                     return $moduleOverridePath;
                 }
             }
-        } else {
-            // ۲. اگر نام view یک view عمومی است (مانند themes.default.index یا layouts.web)
-            // امکان override فایل‌های عمومی نیز در پوشه overrides وجود دارد
-            $relativePath = str_replace('.', '/', $viewName);
-            $overrideFilePath = resource_path("views/themes/{$themeKey}/overrides/{$relativePath}.blade.php");
+        }
 
-            if (File::exists($overrideFilePath)) {
-                return $overrideFilePath;
+        if (class_exists(ContentSetting::class)) {
+            try {
+                $defaultWebTheme = ContentSetting::getValue('general.default_theme_key');
+                if (!empty($defaultWebTheme) && !in_array($defaultWebTheme, ['content', 'default'], true)) {
+                    $webTheme = strtolower((string)$defaultWebTheme);
+                    $webOverridePath = resource_path("views/themes/{$webTheme}/overrides/{$relativePath}.blade.php");
+                    if (File::exists($webOverridePath)) {
+                        return $webOverridePath;
+                    }
+                }
+            } catch (Throwable) {
             }
+        }
+
+        $defaultOverridePath = resource_path("views/themes/default/overrides/{$relativePath}.blade.php");
+        if (File::exists($defaultOverridePath)) {
+            return $defaultOverridePath;
         }
 
         return null;

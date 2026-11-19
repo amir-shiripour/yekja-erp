@@ -120,7 +120,20 @@
                               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                اطلاعات پایه و ظاهر
+                اطلاعات پایه
+            </button>
+            <button type="button" @click="activeTab = 'themes'"
+                    :class="activeTab === 'themes' ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 font-bold shadow-sm' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800/50'"
+                    class="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-200 text-sm">
+                <div
+                    :class="activeTab === 'themes' ? 'bg-purple-100 text-purple-600 dark:bg-purple-800/50 dark:text-purple-300' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'"
+                    class="p-1 rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                    </svg>
+                </div>
+                قالب‌ها و ظاهر سامانه
             </button>
             <button type="button" @click="activeTab = 'identity'"
                     :class="activeTab === 'identity' ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 font-bold shadow-sm' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800/50'"
@@ -259,107 +272,6 @@
                                 <input type="text" class="{{ $inputClass }}" id="app_name" name="app_name"
                                        value="{{ $settings['app_name'] ?? config('app.name') }}">
                             </div>
-
-                            <div>
-                                <label for="app_theme" class="{{ $labelClass }}">قالب اصلی سایت (Theme)</label>
-                                <div class="select-wrapper relative">
-                                    <select class="{{ $selectClass }} !pl-10" id="app_theme" name="app_theme"
-                                            onchange="document.querySelectorAll('.theme-color-panel').forEach(p => p.classList.add('hidden')); const p = document.getElementById('panel-color-' + this.value); if(p) { p.classList.remove('hidden'); p.classList.add('block', 'animate-in', 'fade-in'); }">
-                                        <option
-                                            value="default" {{ ($settings['app_theme'] ?? 'default') == 'default' ? 'selected' : '' }}>
-                                            پیش‌فرض (شرکتی/خدماتی)
-                                        </option>
-                                        <option
-                                            value="booking" {{ ($settings['app_theme'] ?? '') == 'booking' ? 'selected' : '' }}>
-                                            کلینیک درمانی و پزشکی (Booking)
-                                        </option>
-                                        <option
-                                            value="market" {{ ($settings['app_theme'] ?? '') == 'market' ? 'selected' : '' }}>
-                                            فروشگاهی (Market)
-                                        </option>
-                                        <option
-                                            value="properties" {{ ($settings['app_theme'] ?? '') == 'properties' ? 'selected' : '' }}>
-                                            املاک (Properties)
-                                        </option>
-                                        <option
-                                            value="fieldservice" {{ ($settings['app_theme'] ?? '') == 'fieldservice' ? 'selected' : '' }}>
-                                            خدمات میدانی و اعزام تکنسین (نصاب‌باشی)
-                                        </option>
-                                    </select>
-                                    <div
-                                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">با تغییر این گزینه،
-                                    صفحه اول و استایل‌های سایت تغییر
-                                    خواهد کرد.</p>
-                            </div>
-
-                            <div>
-                                <label for="site_display_type" class="{{ $labelClass }}">قالب نمایش سایت</label>
-                                <div class="select-wrapper relative">
-                                    <select class="{{ $selectClass }} !pl-10" id="site_display_type"
-                                            name="site_display_type">
-                                        <option
-                                            value="landing" {{ ($settings['site_display_type'] ?? 'landing') == 'landing' ? 'selected' : '' }}>
-                                            لندینگ پیج
-                                        </option>
-                                        <option
-                                            value="theme" {{ ($settings['site_display_type'] ?? '') == 'theme' ? 'selected' : '' }}>
-                                            صفحه اصلی تم
-                                        </option>
-                                        <option
-                                            value="admin" {{ ($settings['site_display_type'] ?? '') == 'admin' ? 'selected' : '' }}>
-                                            پنل مدیران
-                                        </option>
-                                    </select>
-                                    <div
-                                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
-                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                  d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">نحوه نمایش صفحه اول
-                                    سایت را انتخاب کنید.</p>
-                            </div>
-
-                            @if($isContentForgeActive && $contentEntities->isNotEmpty())
-                                <div>
-                                    <label for="content_entity_id" class="{{ $labelClass }}">موجودیت قالب اختصاصی
-                                        (چند‌کسب‌وکاری)</label>
-                                    <div class="select-wrapper relative">
-                                        <select class="{{ $selectClass }} !pl-10" id="content_entity_id"
-                                                name="content_entity_id">
-                                            <option value="">-- غیرفعال (استفاده از قالب سیستم) --</option>
-                                            @foreach($contentEntities as $entity)
-                                                <option
-                                                    value="{{ $entity->id }}" {{ ($settings['content_entity_id'] ?? '') == $entity->id ? 'selected' : '' }}>
-                                                    {{ $entity->name }}
-                                                    ({{ $entity->theme_key ? 'تم: ' . $entity->theme_key : 'بدون تم' }}
-                                                    )
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <div
-                                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
-                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                                 stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                      stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">با انتخاب یک
-                                        موجودیت، هدر، فوتر و سایر فایل‌ها ابتدا از پوشه قالب اختصاصی آن لود
-                                        می‌شوند.</p>
-                                </div>
-                            @endif
 
                             <div>
                                 <label for="app_logo" class="{{ $labelClass }}">لوگو</label>
@@ -604,6 +516,246 @@
                     </div>
 
                 </div> {{-- پایان تب عمومی --}}
+
+                {{-- تب قالب‌ها و ظاهر سامانه --}}
+                <div x-show="activeTab === 'themes'" style="display: none;"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-4"
+                     x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
+
+                    {{-- کارت ۱: پوسته پنل مدیریت CRM --}}
+                    @if($isContentForgeActive)
+                        <div class="{{ $cardClass }}">
+                            <div class="{{ $headerClass }} justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-base font-bold text-gray-900 dark:text-white">اعمال پوسته پنل
+                                            مدیریت CRM</h2>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">انتخاب و فعال‌سازی
+                                            پوسته‌های ساخته‌شده در ماژول ContentForge برای پنل کاربری</p>
+                                    </div>
+                                </div>
+                                @if(\Illuminate\Support\Facades\Route::has('user.content.themes'))
+                                    <a href="{{ route('user.content.themes') }}"
+                                       class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all shrink-0">
+                                        ساخت و ویرایش پوسته‌ها در ContentForge ←
+                                    </a>
+                                @endif
+                            </div>
+
+                            <div class="p-6 space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="crm_theme_key" class="{{ $labelClass }}">پوسته فعال پنل CRM</label>
+                                        <div class="select-wrapper relative">
+                                            <select class="{{ $selectClass }} !pl-10" id="crm_theme_key"
+                                                    name="crm_theme_key">
+                                                @foreach($availableThemes as $tKey => $theme)
+                                                    <option
+                                                        value="{{ $tKey }}" {{ ($crmThemeKey ?? 'default') === $tKey ? 'selected' : '' }}>
+                                                        {{ $theme['name'] }} ({{ $tKey }})
+                                                        @if(!empty($theme['total_overrides']))
+                                                            — [{{ $theme['total_overrides'] }} فایل اورراید]
+                                                        @endif
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <div
+                                                class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                                     stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">این پوسته ظاهر
+                                            داشبورد، سایدبار، فرم‌ها و صفحات داخلی CRM را کنترل می‌کند.</p>
+                                    </div>
+
+                                    <div>
+                                        <label for="crm_enable_overrides" class="{{ $labelClass }}">وضعیت موتور بازنویسی
+                                            (View Overrides)</label>
+                                        <div class="select-wrapper relative">
+                                            <select class="{{ $selectClass }} !pl-10" id="crm_enable_overrides"
+                                                    name="crm_enable_overrides">
+                                                <option
+                                                    value="true" {{ ($crmEnableOverrides ?? 'true') === 'true' ? 'selected' : '' }}>
+                                                    فعال (اعمال فایل‌های سفارشی پوسته منتخب)
+                                                </option>
+                                                <option
+                                                    value="false" {{ ($crmEnableOverrides ?? 'true') === 'false' ? 'selected' : '' }}>
+                                                    غیرفعال (بازگشت موقت به ظاهر استاندارد هسته)
+                                                </option>
+                                            </select>
+                                            <div
+                                                class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                                     stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">با غیرفعال کردن این
+                                            گزینه، بلافاصله تمام صفحات به پیش‌فرض سیستم برمی‌گردند.</p>
+                                    </div>
+                                </div>
+
+                                {{-- اطلاعات پوسته فعلی --}}
+                                @php $selectedCrmMeta = $availableThemes[$crmThemeKey ?? 'default'] ?? null; @endphp
+                                @if($selectedCrmMeta)
+                                    <div
+                                        class="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+                                        <div class="space-y-1">
+                                            <div
+                                                class="font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                                <span>مشخصات پوسته فعال: {{ $selectedCrmMeta['name'] }}</span>
+                                                <span
+                                                    class="px-2 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 font-mono text-[10px]">v{{ $selectedCrmMeta['version'] }}</span>
+                                            </div>
+                                            <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ $selectedCrmMeta['description'] }}
+                                                — سازنده: {{ $selectedCrmMeta['author'] }}</p>
+                                        </div>
+                                        <div class="flex items-center gap-2 shrink-0">
+                                            <span
+                                                class="px-3 py-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-bold {{ $selectedCrmMeta['total_overrides'] > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500' }}">
+                                                {{ $selectedCrmMeta['total_overrides'] }} فایل اورراید فعال
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- کارت ۲: پوسته وب‌سایت عمومی (صفحه اول و لندینگ) --}}
+                    <div class="{{ $cardClass }}">
+                        <div class="{{ $headerClass }}">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center text-sky-600 dark:text-sky-400">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-gray-900 dark:text-white">اعمال پوسته وب‌سایت
+                                    عمومی</h2>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">تنظیم قالب صفحه اول سایت،
+                                    لندینگ پیج و وبلاگ</p>
+                            </div>
+                        </div>
+
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="app_theme" class="{{ $labelClass }}">قالب اصلی وب‌سایت (Theme)</label>
+                                <div class="select-wrapper relative">
+                                    <select class="{{ $selectClass }} !pl-10" id="app_theme" name="app_theme"
+                                            onchange="document.querySelectorAll('.theme-color-panel').forEach(p => p.classList.add('hidden')); const p = document.getElementById('panel-color-' + this.value); if(p) { p.classList.remove('hidden'); p.classList.add('block', 'animate-in', 'fade-in'); }">
+                                        <option
+                                            value="default" {{ ($settings['app_theme'] ?? 'default') == 'default' ? 'selected' : '' }}>
+                                            پیش‌فرض (شرکتی/خدماتی)
+                                        </option>
+                                        <option
+                                            value="booking" {{ ($settings['app_theme'] ?? '') == 'booking' ? 'selected' : '' }}>
+                                            کلینیک درمانی و پزشکی (Booking)
+                                        </option>
+                                        <option
+                                            value="market" {{ ($settings['app_theme'] ?? '') == 'market' ? 'selected' : '' }}>
+                                            فروشگاهی (Market)
+                                        </option>
+                                        <option
+                                            value="properties" {{ ($settings['app_theme'] ?? '') == 'properties' ? 'selected' : '' }}>
+                                            املاک (Properties)
+                                        </option>
+                                        <option
+                                            value="fieldservice" {{ ($settings['app_theme'] ?? '') == 'fieldservice' ? 'selected' : '' }}>
+                                            خدمات میدانی و اعزام تکنسین (نصاب‌باشی)
+                                        </option>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">مخصوص صفحه اول و لندینگ
+                                    عمومی وب‌سایت.</p>
+                            </div>
+
+                            <div>
+                                <label for="site_display_type" class="{{ $labelClass }}">نحوه نمایش صفحه اول
+                                    سایت</label>
+                                <div class="select-wrapper relative">
+                                    <select class="{{ $selectClass }} !pl-10" id="site_display_type"
+                                            name="site_display_type">
+                                        <option
+                                            value="landing" {{ ($settings['site_display_type'] ?? 'landing') == 'landing' ? 'selected' : '' }}>
+                                            لندینگ پیج
+                                        </option>
+                                        <option
+                                            value="theme" {{ ($settings['site_display_type'] ?? '') == 'theme' ? 'selected' : '' }}>
+                                            صفحه اصلی تم
+                                        </option>
+                                        <option
+                                            value="admin" {{ ($settings['site_display_type'] ?? '') == 'admin' ? 'selected' : '' }}>
+                                            پنل مدیران
+                                        </option>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">نوع صفحه پیش‌فرض هنگام باز
+                                    کردن آدرس اصلی سایت.</p>
+                            </div>
+
+                            @if($isContentForgeActive && $contentEntities->isNotEmpty())
+                                <div>
+                                    <label for="content_entity_id" class="{{ $labelClass }}">موجودیت قالب اختصاصی
+                                        (چند‌کسب‌وکاری)</label>
+                                    <div class="select-wrapper relative">
+                                        <select class="{{ $selectClass }} !pl-10" id="content_entity_id"
+                                                name="content_entity_id">
+                                            <option value="">-- غیرفعال (استفاده از قالب سیستم) --</option>
+                                            @foreach($contentEntities as $entity)
+                                                <option
+                                                    value="{{ $entity->id }}" {{ ($settings['content_entity_id'] ?? '') == $entity->id ? 'selected' : '' }}>
+                                                    {{ $entity->name }}
+                                                    ({{ $entity->theme_key ? 'تم: ' . $entity->theme_key : 'بدون تم' }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div
+                                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 text-gray-500 dark:text-gray-400">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">مخصوص وبلاگ و پورتال
+                                        عمومی چندکسب‌وکاری.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                </div> {{-- پایان تب قالب‌ها و ظاهر سامانه --}}
 
                 {{-- تب اطلاعات هویتی --}}
                 <div x-show="activeTab === 'identity'" style="display: none;"

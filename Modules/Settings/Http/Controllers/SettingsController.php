@@ -3,6 +3,7 @@
 namespace Modules\Settings\Http\Controllers;
 
 use App\Services\JalaliHolidayService;
+use App\Services\ThemeManager;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\Booking\Entities\BookingCategory;
 use Modules\ContentForge\App\Models\ContentEntity;
+use Modules\ContentForge\App\Services\ThemeResolver;
+use Modules\ContentForge\Entities\ContentSetting;
 use Modules\Properties\Entities\PropertyCategory;
 use Modules\Properties\Entities\PropertyStatus;
 use Modules\Settings\Entities\ApiKey;
@@ -161,8 +164,21 @@ class SettingsController extends Controller
         // واکشی پویای موجودیت‌های محتوا جهت انتخاب قالب داینامیک
         $isContentForgeActive = NModule::has('ContentForge') && NModule::isEnabled('ContentForge');
         $contentEntities = collect();
-        if ($isContentForgeActive && class_exists(ContentEntity::class) && Schema::hasTable('content_entities')) {
-            $contentEntities = ContentEntity::where('is_active', true)->get();
+        $availableThemes = [];
+        $crmThemeKey = 'default';
+        $crmEnableOverrides = 'true';
+
+        if ($isContentForgeActive) {
+            if (class_exists(ContentEntity::class) && Schema::hasTable('content_entities')) {
+                $contentEntities = ContentEntity::where('is_active', true)->get();
+            }
+            if (class_exists(ThemeResolver::class)) {
+                $availableThemes = app(ThemeResolver::class)->getAvailableThemes();
+            }
+            if (class_exists(ContentSetting::class)) {
+                $crmThemeKey = (string) ContentSetting::getValue('crm.theme_key', 'default');
+                $crmEnableOverrides = (string) ContentSetting::getValue('crm.enable_overrides', 'true');
+            }
         }
 
         return view('settings::index', compact(
@@ -173,6 +189,9 @@ class SettingsController extends Controller
             'isBookingActive',
             'isContentForgeActive',
             'contentEntities',
+            'availableThemes',
+            'crmThemeKey',
+            'crmEnableOverrides',
             'availableServices',
             'apiKeys',
             'propertyStatuses',
@@ -255,6 +274,21 @@ class SettingsController extends Controller
             if (!empty($errors)) {
                 return redirect()->back()->withErrors($errors)->withInput();
             }
+        }
+
+        if (array_key_exists('crm_theme_key', $data) || array_key_exists('crm_enable_overrides', $data)) {
+            if (class_exists(ContentSetting::class)) {
+                if (isset($data['crm_theme_key'])) {
+                    ContentSetting::setValue('crm.theme_key', (string) $data['crm_theme_key']);
+                }
+                if (isset($data['crm_enable_overrides'])) {
+                    ContentSetting::setValue('crm.enable_overrides', (string) $data['crm_enable_overrides']);
+                }
+            }
+            if (app()->bound(ThemeManager::class)) {
+                app(ThemeManager::class)->clearCache();
+            }
+            unset($data['crm_theme_key'], $data['crm_enable_overrides']);
         }
 
         foreach ($data as $key => $value) {

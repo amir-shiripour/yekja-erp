@@ -3216,10 +3216,10 @@
     "semantic_hash": "5494588fe47c068ceecfd116202b0cd0"
   },
   "Modules/ContentForge/App/Http/Controllers/User/ContentPanelController.php": {
-    "mtime": 1783326385.7196045,
-    "seen": 1794898849.83066,
-    "ast_hash": "472bb6006e0dd3d55a8abfe5288a172c",
-    "semantic_hash": "472bb6006e0dd3d55a8abfe5288a172c"
+    "mtime": 1795001917.135188,
+    "seen": 1795002230.5638735,
+    "ast_hash": "451fc671dd20293e6f59c4155ad9c067",
+    "semantic_hash": ""
   },
   "Modules/ContentForge/App/Http/Resources/CategoryResource.php": {
     "mtime": 1783326406.4271588,
@@ -3252,10 +3252,10 @@
     "semantic_hash": "a98b4677197713d24030d7b16e53c90b"
   },
   "Modules/ContentForge/App/Livewire/Admin/ContentSettings.php": {
-    "mtime": 1783326488.7445831,
-    "seen": 1794898849.8306665,
-    "ast_hash": "60b34d68aeb34266894aa471cb387f81",
-    "semantic_hash": "60b34d68aeb34266894aa471cb387f81"
+    "mtime": 1795004295.0267243,
+    "seen": 1795004734.8018932,
+    "ast_hash": "8c40f61331c351ab8ffa48103f7e43b3",
+    "semantic_hash": ""
   },
   "Modules/ContentForge/App/Livewire/Admin/EntityManager.php": {
     "mtime": 1783326477.811095,
@@ -3366,10 +3366,10 @@
     "semantic_hash": "7cfb28b878ac2f712a1a1dbd1df21102"
   },
   "Modules/ContentForge/App/Providers/ContentForgeServiceProvider.php": {
-    "mtime": 1783326428.3057585,
-    "seen": 1794898849.8306868,
-    "ast_hash": "c93180a02e61ec39e6fbdb61f9c78ef1",
-    "semantic_hash": "c93180a02e61ec39e6fbdb61f9c78ef1"
+    "mtime": 1795001835.5960772,
+    "seen": 1795002230.5639262,
+    "ast_hash": "6ca8f3263f233e583982ce207f3e8a48",
+    "semantic_hash": ""
   },
   "Modules/ContentForge/App/Providers/RouteServiceProvider.php": {
     "mtime": 1783326259.7088926,
@@ -3402,10 +3402,10 @@
     "semantic_hash": "7d7d53ddd720d62b4e45e8df9eae2776"
   },
   "Modules/ContentForge/App/Services/ThemeResolver.php": {
-    "mtime": 1784630776.7898204,
-    "seen": 1794898849.8306935,
-    "ast_hash": "7fe465319dacbdf49958be40295db60a",
-    "semantic_hash": "7fe465319dacbdf49958be40295db60a"
+    "mtime": 1795004466.7757072,
+    "seen": 1795004734.8019397,
+    "ast_hash": "7284f197bfcd5ae764003bee2b4959d4",
+    "semantic_hash": ""
   },
   "Modules/ContentForge/Database/Migrations/2026_07_06_120000_create_content_settings_table.php": {
     "mtime": 1783326300.74175,
@@ -3474,16 +3474,16 @@
     "semantic_hash": "7863ef4e556cc37d887ace51d76f42f9"
   },
   "Modules/ContentForge/Entities/ContentSetting.php": {
-    "mtime": 1783590063.9180236,
-    "seen": 1794898849.8307061,
-    "ast_hash": "cb6d3c26117400a6cdb828d0055468fb",
-    "semantic_hash": "cb6d3c26117400a6cdb828d0055468fb"
+    "mtime": 1794998085.783109,
+    "seen": 1794998680.0203667,
+    "ast_hash": "36cde924fdc8e97f244ec6a439e0fd68",
+    "semantic_hash": ""
   },
   "Modules/ContentForge/Installer.php": {
-    "mtime": 1784622417.0827918,
-    "seen": 1794898849.8307073,
-    "ast_hash": "09c2d3280aa87034f8225f390d43e749",
-    "semantic_hash": "09c2d3280aa87034f8225f390d43e749"
+    "mtime": 1795004552.0595827,
+    "seen": 1795004734.8019657,
+    "ast_hash": "fd92cb2998f4a3c004b17793b592c00a",
+    "semantic_hash": ""
   },
   "Modules/ContentForge/Providers/ContentForgeServiceProvider.php": {
     "mtime": 1783326257.2286336,
@@ -3498,10 +3498,10 @@
     "semantic_hash": "428b04ee7eb757bc4f5e7c8b6bafb0df"
   },
   "Modules/ContentForge/Routes/web.php": {
-    "mtime": 1794729998.233847,
-    "seen": 1794898849.8307104,
-    "ast_hash": "4c07794d9bd52fb29f24704e74d84a29",
-    "semantic_hash": "4c07794d9bd52fb29f24704e74d84a29"
+    "mtime": 1795004610.5506706,
+    "seen": 1795004734.8019707,
+    "ast_hash": "ae3e600cdb79cbf2e5f966934a6e6f82",
+    "semantic_hash": ""
   },
   "Modules/ContentForge/composer.json": {
     "mtime": 1783326254.776708,
@@ -3528,10 +3528,10 @@
     "semantic_hash": "2f76b3419986c5e79bcbd79d55f5894d"
   },
   "Modules/ContentForge/resources/menu.php": {
-    "mtime": 1783326679.999362,
-    "seen": 1794898849.830716,
-    "ast_hash": "6a7debfe96a33df3c2a2a94fe309775e",
-    "semantic_hash": "6a7debfe96a33df3c2a2a94fe309775e"
+    "mtime": 1795004650.8093505,
+    "seen": 1795004734.8019805,
+    "ast_hash": "ae3041b18a3f14ea302a936ff2d9747d",
+    "semantic_hash": ""
   },
   "Modules/ContentForge/resources/views/components/seo.blade.php": {
     "mtime": 1783326628.7893362,
@@ -3552,10 +3552,10 @@
     "semantic_hash": "46b48ccc8d20600bef89c88c5d9426f2"
   },
   "Modules/ContentForge/resources/views/livewire/admin/content-settings.blade.php": {
-    "mtime": 1783326599.9596448,
-    "seen": 1794898849.83072,
-    "ast_hash": "5dad6d76c41d0d64dbd58ed9420d3559",
-    "semantic_hash": "5dad6d76c41d0d64dbd58ed9420d3559"
+    "mtime": 1795004006.3399525,
+    "seen": 1795004734.801988,
+    "ast_hash": "dcc5e7881da57591fbc19bd6c0ab6b3e",
+    "semantic_hash": ""
   },
   "Modules/ContentForge/resources/views/livewire/admin/entity-manager.blade.php": {
     "mtime": 1783326585.2646983,
@@ -11778,10 +11778,10 @@
     "semantic_hash": "b422f13f31f4430857071743fb82a427"
   },
   "Modules/Settings/Http/Controllers/SettingsController.php": {
-    "mtime": 1794723676.164972,
-    "seen": 1794898849.8321836,
-    "ast_hash": "a6eda61fbebce4fb3152046f248670c7",
-    "semantic_hash": "a6eda61fbebce4fb3152046f248670c7"
+    "mtime": 1795004294.994636,
+    "seen": 1795004734.804885,
+    "ast_hash": "f2ac4cd95aeb0b0fa9721a167efc11b4",
+    "semantic_hash": ""
   },
   "Modules/Settings/Http/Controllers/UserPaymentSettingsController.php": {
     "mtime": 1791120350.556993,
@@ -11868,10 +11868,10 @@
     "semantic_hash": "7f6d797655d5eaa7377a07f2b424938b"
   },
   "Modules/Settings/resources/views/index.blade.php": {
-    "mtime": 1793858830.9789093,
-    "seen": 1794898849.832199,
-    "ast_hash": "c3defba4ed410860590902feeda90910",
-    "semantic_hash": "c3defba4ed410860590902feeda90910"
+    "mtime": 1795004294.9436705,
+    "seen": 1795004734.804915,
+    "ast_hash": "b2bb6a4cae616b447807f7777279859e",
+    "semantic_hash": ""
   },
   "Modules/Settings/resources/views/layouts/master.blade.php": {
     "mtime": 1771227549.8847325,
@@ -13842,22 +13842,22 @@
     "semantic_hash": "59604e70a32d43a901201fc97a8524bf"
   },
   "app/Services/ThemeManager.php": {
-    "mtime": 1785052762.754264,
-    "seen": 1794898849.8326461,
-    "ast_hash": "27f90784d9492d9a84b0c4c639c8fddd",
-    "semantic_hash": "27f90784d9492d9a84b0c4c639c8fddd"
+    "mtime": 1795004294.9737499,
+    "seen": 1795004734.8058622,
+    "ast_hash": "9d731d23b75612ac68831edc248b73d8",
+    "semantic_hash": ""
   },
   "app/Services/ViewOverrideResolver.php": {
-    "mtime": 1785052252.5757856,
-    "seen": 1794898849.832647,
-    "ast_hash": "f6f16a3e79f97f92657cff456857b9ff",
-    "semantic_hash": "f6f16a3e79f97f92657cff456857b9ff"
+    "mtime": 1795004466.7331972,
+    "seen": 1795004734.8058639,
+    "ast_hash": "9db78a645349368da9bcc9f6d618d5b1",
+    "semantic_hash": ""
   },
   "app/Support/PermissionCatalog.php": {
-    "mtime": 1793614823.2486558,
-    "seen": 1794898849.832648,
-    "ast_hash": "2670adc7e0bbd258a818f9b41502b1ff",
-    "semantic_hash": "2670adc7e0bbd258a818f9b41502b1ff"
+    "mtime": 1795004584.2361605,
+    "seen": 1795004734.8058662,
+    "ast_hash": "2cd4c8ea9e8dc2ae412e37cfa776c68a",
+    "semantic_hash": ""
   },
   "app/Support/WidgetRegistry.php": {
     "mtime": 1767509576.2024193,
@@ -15180,9 +15180,9 @@
     "semantic_hash": "6882a1682f8a41bdeb689a01c44bba2e"
   },
   "resources/views/user/partials/topbar.blade.php": {
-    "mtime": 1794988361.40362,
-    "seen": 1794988686.0233936,
-    "ast_hash": "463a7ae5d4b67f8c68e48ef55d68b12f",
+    "mtime": 1794989477.7869751,
+    "seen": 1794989565.8708937,
+    "ast_hash": "156276a245570cba0a7ce89a4f5fc6a9",
     "semantic_hash": ""
   },
   "resources/views/vendor/pagination/tailwind.blade.php": {
@@ -15921,6 +15921,36 @@
     "mtime": 1794988578.9063022,
     "seen": 1794988686.0236187,
     "ast_hash": "566e3ab97301550fa2ca61c021e7dcd1",
+    "semantic_hash": ""
+  },
+  "Modules/ContentForge/App/Console/Commands/ThemeOverrideCommand.php": {
+    "mtime": 1795004466.8229656,
+    "seen": 1795004734.8018625,
+    "ast_hash": "0f8a387e9484af70d5fe1a116fd38b35",
+    "semantic_hash": ""
+  },
+  "tests/Feature/CrmThemeOverrideTest.php": {
+    "mtime": 1795004678.463636,
+    "seen": 1795004734.80638,
+    "ast_hash": "abfa288677e2fec8c7dfdcb019597f9f",
+    "semantic_hash": ""
+  },
+  "Modules/ContentForge/App/Livewire/Admin/ThemeStudio.php": {
+    "mtime": 1795004660.0697253,
+    "seen": 1795004734.8019059,
+    "ast_hash": "964d50400cc8a437ab9202071a878032",
+    "semantic_hash": ""
+  },
+  "Modules/ContentForge/resources/views/livewire/admin/theme-studio.blade.php": {
+    "mtime": 1795004466.75026,
+    "seen": 1795004734.8020017,
+    "ast_hash": "8469ee929921219ec0cfca55b07bb560",
+    "semantic_hash": ""
+  },
+  "Modules/ContentForge/resources/views/user/themes.blade.php": {
+    "mtime": 1795001895.4477055,
+    "seen": 1795002230.564043,
+    "ast_hash": "b5e5e01f7427ec9cf2505193f6ab2f32",
     "semantic_hash": ""
   },
   "package-lock.json": {

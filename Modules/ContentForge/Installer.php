@@ -4,12 +4,16 @@ namespace Modules\ContentForge;
 
 use App\Services\Modules\BaseModuleInstaller;
 use Illuminate\Support\Facades\DB;
+use Modules\ContentForge\App\Models\ContentEntity;
+use Modules\ContentForge\Entities\ContentSetting;
+use Modules\Settings\Entities\Setting;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\PermissionRegistrar;
+use Throwable;
 
 class Installer extends BaseModuleInstaller
 {
@@ -27,24 +31,25 @@ class Installer extends BaseModuleInstaller
     ];
 
     protected array $permissions = [
-        'content.manage'             => 'مدیریت کلان محتوا (Super Admin)',
-        'content.dashboard.view'     => 'مشاهده داشبورد محتوا',
-        'content.posts.view'         => 'مشاهده برگه‌ها و نوشته‌ها',
-        'content.posts.create'       => 'ایجاد برگه/نوشته',
-        'content.posts.edit'         => 'ویرایش برگه/نوشته',
-        'content.posts.edit.own'     => 'ویرایش نوشته‌های خود',
-        'content.posts.delete'       => 'حذف برگه/نوشته',
-        'content.posts.publish'      => 'انتشار برگه/نوشته',
-        'content.categories.manage'  => 'مدیریت دسته‌بندی‌ها',
-        'content.tags.manage'        => 'مدیریت برچسب‌ها',
-        'content.comments.manage'    => 'مدیریت نظرات',
-        'content.comments.approve'   => 'تایید نظرات',
-        'content.media.upload'       => 'آپلود رسانه',
-        'content.entities.manage'    => 'مدیریت موجودیت‌های محتوا',
-        'content.settings.manage'    => 'مدیریت تنظیمات محتوا',
-        'content.redirects.manage'   => 'مدیریت ریدایرکت‌ها',
-        'content.shortlinks.manage'  => 'مدیریت لینک‌های کوتاه',
-        'content.seo.manage'         => 'مدیریت SEO صفحات',
+        'content.manage' => 'مدیریت کلان محتوا (Super Admin)',
+        'content.dashboard.view' => 'مشاهده داشبورد محتوا',
+        'content.posts.view' => 'مشاهده برگه‌ها و نوشته‌ها',
+        'content.posts.create' => 'ایجاد برگه/نوشته',
+        'content.posts.edit' => 'ویرایش برگه/نوشته',
+        'content.posts.edit.own' => 'ویرایش نوشته‌های خود',
+        'content.posts.delete' => 'حذف برگه/نوشته',
+        'content.posts.publish' => 'انتشار برگه/نوشته',
+        'content.categories.manage' => 'مدیریت دسته‌بندی‌ها',
+        'content.tags.manage' => 'مدیریت برچسب‌ها',
+        'content.comments.manage' => 'مدیریت نظرات',
+        'content.comments.approve' => 'تایید نظرات',
+        'content.media.upload' => 'آپلود رسانه',
+        'content.entities.manage' => 'مدیریت موجودیت‌های محتوا',
+        'content.settings.manage' => 'مدیریت تنظیمات محتوا',
+        'content.themes.manage' => 'مدیریت استودیو پوسته‌ها و ظاهر CRM',
+        'content.redirects.manage' => 'مدیریت ریدایرکت‌ها',
+        'content.shortlinks.manage' => 'مدیریت لینک‌های کوتاه',
+        'content.seo.manage' => 'مدیریت SEO صفحات',
     ];
 
     public function __construct()
@@ -54,7 +59,7 @@ class Installer extends BaseModuleInstaller
 
     protected function trackerPath(): string
     {
-        return storage_path('app/module-installer/'.$this->moduleSlug.'/created.json');
+        return storage_path('app/module-installer/' . $this->moduleSlug . '/created.json');
     }
 
     protected function loadTracker(): array
@@ -70,7 +75,7 @@ class Installer extends BaseModuleInstaller
     {
         $path = $this->trackerPath();
         File::ensureDirectoryExists(dirname($path));
-        File::put($path, json_encode($data, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
+        File::put($path, json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     }
 
     public function install(): void
@@ -145,7 +150,7 @@ class Installer extends BaseModuleInstaller
         }
 
         $tracker['permissions'] = array_values(array_unique($tracker['permissions']));
-        $tracker['roles']       = array_values(array_unique($tracker['roles']));
+        $tracker['roles'] = array_values(array_unique($tracker['roles']));
         $this->saveTracker($tracker);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
@@ -162,7 +167,7 @@ class Installer extends BaseModuleInstaller
     {
         try {
             $destDir = resource_path('views/themes/content');
-            
+
             if (!File::exists($destDir)) {
                 File::makeDirectory($destDir, 0755, true);
             }
@@ -179,19 +184,17 @@ class Installer extends BaseModuleInstaller
 
             foreach ($files as $file) {
                 $destFile = $destDir . '/' . $file;
-                
-                // فقط در صورتی که فایل وجود نداشته باشد آن را ایجاد/کپی می‌کنیم
+
                 if (!File::exists($destFile)) {
                     $sourceFile = $sourceDir . '/' . $file;
                     if (File::exists($sourceFile)) {
                         File::copy($sourceFile, $destFile);
                     } else {
-                        // در صورتی که فایل مبدا در وب پیدا نشد، یک فایل پیش‌فرض ساده ایجاد می‌کنیم تا سیستم با خطا مواجه نشود
                         File::put($destFile, "{{-- Default ContentForge {$file} Template --}}");
                     }
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error("ContentForge Installer publishDefaultThemeFiles failed: " . $e->getMessage());
         }
     }
@@ -199,18 +202,18 @@ class Installer extends BaseModuleInstaller
     protected function seedDefaultEntity(): void
     {
         try {
-            $appName = \Modules\Settings\Entities\Setting::where('key', 'app_name')->value('value') ?? 'سامانه مرکزی';
-            \Modules\ContentForge\App\Models\ContentEntity::firstOrCreate(
+            $appName = Setting::where('key', 'app_name')->value('value') ?? 'سامانه مرکزی';
+            ContentEntity::firstOrCreate(
                 ['is_default' => true],
                 [
-                    'name'       => $appName,
-                    'slug'       => 'main',
-                    'theme_key'  => 'content',
-                    'is_active'  => true,
-                    'settings'   => [],
+                    'name' => $appName,
+                    'slug' => 'main',
+                    'theme_key' => 'content',
+                    'is_active' => true,
+                    'settings' => [],
                 ]
             );
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error("ContentForge Installer seedDefaultEntity failed: " . $e->getMessage());
         }
     }
@@ -219,29 +222,28 @@ class Installer extends BaseModuleInstaller
     {
         try {
             $defaults = [
-                'general.posts_per_page'            => '12',
-                'general.default_theme_key'         => 'content',
-                'general.enable_comments'           => 'true',
-                'general.enable_tags'               => 'true',
-                'general.reading_time_wpm'          => '200',
-                'seo.auto_generate_description'     => 'true',
-                'seo.description_length'            => '160',
-                'seo.auto_schema_markup'            => 'true',
-                'short_link.enabled'                => 'true',
-                'short_link.prefix'                 => 's',
-                'short_link.code_length'            => '6',
-                'editor.default_editor'             => 'tiptap',
-                'editor.enable_ai'                  => 'false',
+                'general.posts_per_page' => '12',
+                'general.default_theme_key' => 'content',
+                'general.enable_comments' => 'true',
+                'general.enable_tags' => 'true',
+                'general.reading_time_wpm' => '200',
+                'seo.auto_generate_description' => 'true',
+                'seo.description_length' => '160',
+                'seo.auto_schema_markup' => 'true',
+                'short_link.enabled' => 'true',
+                'short_link.prefix' => 's',
+                'short_link.code_length' => '6',
+                'editor.default_editor' => 'tiptap',
+                'editor.enable_ai' => 'false',
             ];
 
             foreach ($defaults as $key => $value) {
-                // با استفاده از updateOrCreate مطمئن می‌شویم که پیش‌فرض‌ها در صورت ریست یا نصب مجدد بازنویسی/ایجاد می‌شوند
-                \Modules\ContentForge\Entities\ContentSetting::updateOrCreate(
+                ContentSetting::updateOrCreate(
                     ['key' => $key],
                     ['value' => $value]
                 );
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error("ContentForge Installer seedDefaultSettings failed: " . $e->getMessage());
         }
     }
@@ -258,7 +260,7 @@ class Installer extends BaseModuleInstaller
             Schema::enableForeignKeyConstraints();
 
             DB::table('migrations')->where('migration', 'like', '%content_forge%')->delete();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::error("ContentForge Installer DB Cleanup failed: " . $e->getMessage());
         }
 
@@ -294,9 +296,9 @@ class Installer extends BaseModuleInstaller
             }
 
             DB::commit();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             DB::rollBack();
-            Log::error("ContentForge Installer: removeModuleOwnedPermissionsAndRoles failed: ".$e->getMessage());
+            Log::error("ContentForge Installer: removeModuleOwnedPermissionsAndRoles failed: " . $e->getMessage());
             throw $e;
         } finally {
             app(PermissionRegistrar::class)->forgetCachedPermissions();

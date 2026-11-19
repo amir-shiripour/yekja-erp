@@ -1,240 +1,240 @@
 # Graph Report - crm-laravel  (2026-11-18)
 
 ## Corpus Check
-- 2640 files · ~2,086,952 words
+- 2645 files · ~2,093,527 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 108 file(s) not represented in the graph (top: .stub 48, (none) 40, .scss 7)
 
 ## Summary
-- 16778 nodes · 34573 edges · 1582 communities (375 shown, 1207 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 2095 edges (avg confidence: 0.85)
+- 16840 nodes · 34714 edges · 1676 communities (389 shown, 1287 thin omitted)
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 2110 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `51b2dcc9`
+- Built from commit: `9d4e3e63`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Illuminate\Database\Schema\Blueprint
 - Illuminate\Database\Eloquent\Model
-- Illuminate\Http\JsonResponse
-- Illuminate\Support\Facades\Schema
-- Modules\ResellerHub\App\Http\Controllers\TenantSubscriptionController
+- ResellerInvoicePayment
+- Illuminate\Database\Migrations\Migration
+- BookingLaboratoryOrder
 - Illuminate\Database\Eloquent\Relations\BelongsTo
-- Category
+- Document
 - Illuminate\Support\Facades\DB
-- .current
-- ResellerHub: OrderProvisionStatus
-- Illuminate\Support\ServiceProvider
-- Illuminate\Database\Eloquent\Relations\HasMany
-- UpdateResellerOrderRequest
+- .config
+- ResellerInvoice
+- .register
+- Illuminate\Database\Eloquent\Relations\MorphTo
+- ConcurrencyAndIdempotencyTest
 - Illuminate\Database\Seeder
-- Morilog\Jalali\Jalalian
-- Accounting: MoneyCast
-- .log
-- User
+- Illuminate\Support\Facades\Schema
+- CurrencyService
+- ProjectActivity
+- Project.php
 - Property
-- OrderForm
-- Modules\ResellerHub\App\Http\Controllers\ResellerDashboardController
+- .groupAndTranslate
+- UpdateFundAccountRequest
 - Booking: ScheduleManager
-- FollowUpController
-- ClientCall
+- OrderStatus
+- UpdateCategoryRequest
 - BookingWaitlist
-- routes/admin.php
-- Booking: IsolateTenancyTablesComman
-- Illuminate\Foundation\Http\FormRequest
+- CustomUserField
+- Illuminate\Support\ServiceProvider
+- SearchController.php
 - public
 - ResellerHub: ResellerSettingKey
 - ExpenseController.php
-- ResellerInvoice
-- ResellerHub: QuotaKey
-- FortifyServiceProvider.php
-- ContentPost
-- Deal360View
+- Carbon\Carbon
+- CampaignLeadsTab
+- Illuminate\Http\Resources\Json\AnonymousResourceCollection
+- ProjectsServiceProvider
+- App/Providers/MarketServiceProvider.php
 - ResellerHub: PaymentRecorded
-- BookingAvailabilityException
+- Illuminate\Http\Request
 - resources
-- Illuminate\Support\Str
+- ShippingManager.php
 - Exception
-- ClientSetting
 - ResellerHub: ResellerAuditService
-- InvoiceStatus
-- Illuminate\Validation\Rule
-- ContentPanelController
-- BookingSetting
+- Modules\ResellerHub\App\Http\Requests\StoreTenantRequest
+- StoreTenantRequest
+- ContentPost
+- WorkflowEngine
 - ProjectTask
-- ProjectStatus
+- Projects/routes/web.php
 - ProvisionTenantJob.php
-- Services/routes/web.php
-- UserFactory.php
+- SalesDeal
+- BookingCategory
 - Reminders: Reminder
-- Tenant
-- Appointment
+- QuotaKey
+- .current
 - ResellerHub: PortalCheckoutRequest
 - Market: ShippingManager
 - Services: InvoiceController
-- VendorForm
-- BookingService
-- BillingCycle
+- Vendor
+- BookingSetting
+- Web/CheckoutModal.php
 - PopupCart
 - DomainManager: DomainController
 - Workflow
-- Cheque
-- DaServer
+- Illuminate\Validation\Rule
+- BillingCycle
 - Market: PendingSyncs
-- SmsResellerApiService
-- ResellerHub: Automated Tests
-- UpdateUserProfileInformation.php
+- ResellerAuditService
+- PaymentSecurityHardeningTest.php
+- Workflow
 - SmsMessage
 - caveman-compress/README.md
-- WorkflowEngine.php
-- Document
+- WorkflowNode
+- .now
 - Market: AdminOrderForm
-- Transaction
-- Contract
+- .redirect
+- ChatWidget
 - .getValue
 - Booking: ClinicLiveMonitoring
-- Illuminate\Foundation\Testing\RefreshDatabase
+- TestCase
 - Illuminate\Database\Eloquent\Builder
-- Booking: BookingStatement
-- .config
+- OrderForm
+- ClientInvoiceController.php
 - ResellerHub: OnboardingWidget
 - ResellerHub: Automated Tests
-- ApiKey
-- TestCase
+- .isEnabled
+- MapIrMapService
 - Workflows: ClientWorkflowService
 - resources
-- Payment
-- .redirect
-- Booking: CureController
-- MenuCustomizationService.php
+- ProjectsController.php
+- .get
+- Project
+- ProjectsTemplateController.php
 - ResellerHub: PackageIcon
 - Market: resources
-- ProjectsServiceProvider
-- Vendor
+- Reseller
+- FortifyServiceProvider.php
 - .agents: AnthropicSdkUnavailable
 - ResellerHub: Money
-- CampaignLeadsTab
+- WarehouseStock
 - Rules
-- ProductManager.php
+- VersionControlController
 - ProjectStatus
 - TenancyModelRegistry
 - Market: CheckoutModal
 - Controller
-- WorkflowEngine
+- WorkflowTrigger
 - Services: ServicePackageController
-- ProjectsService.php
-- MasterProduct
+- DaServer
+- CheckoutModal
 - RecordAccountingDocumentRequest
 - ResellerSubAccount
-- Booking: User/AppointmentController
-- Projects: ProjectsTemplateControlle
-- User/CheckoutModal.php
-- LimoSmsDriver
-- WarehouseStockController.php
-- OnboardingRegistry
-- OnboardingStateService
-- ResellerHub: Automated Tests
-- Service
-- AccountController.php
+- CampaignContactManager
+- CockpitGoalManager
+- ContentSettings
+- BookingLaboratoryStage
+- FollowUpController
+- Closure
+- HasResellerTest.php
+- GatewayAmountResolver
+- Illuminate\Bus\Queueable
 - Booking: BookingWaitlistManager
-- RoleController.php
+- Order
 - Market: OrderController
 - Market: WarehouseStockController
-- Services: Invoice
-- ClientForm
-- TriggerResellerWorkflowListener
-- PendingPaymentLifecycleTest
+- User
+- BookingForm
+- Transaction
+- GapGPTService
 - ResellerHub: OnboardingStepIcon
-- JetstreamServiceProvider.php
+- ClientCall
 - Sales: CampaignLeadManager
 - Status
-- ResellerBillingService
+- InvoiceItemType
 - DirectAdminClient
-- MasterProductForm
+- .setTenant
 - ResellerHub: OnboardingStepPreset
 - .agents: ValidationResult
 - Booking: resources
 - ResellerPackage
-- EntityManager
-- WorkflowTrigger
-- ResellerHub: OnboardingStep
-- UiRegressionGuardTest
-- TaskTab
-- Core App: PaymentService
 - TenantManager
-- EmailVerificationTest.php
-- .getValue
-- KycWizard
+- AccountController.php
+- OnboardingStep
+- UiRegressionGuardTest
+- .reset
+- Core App: PaymentService
+- MarketServiceProvider
+- Modules\ResellerHub\App\Http\Controllers\TenantProvisioningController
+- .__construct
+- TenantProvisioningProgress
 - Sales: CallCenterTab
 - ProductForm
-- Clients: ClientForm
-- Illuminate\Database\Eloquent\Relations\MorphTo
-- ServicesController
-- DomainManager: SearchController
+- Morilog\Jalali\Jalalian
+- Illuminate\Database\Eloquent\Relations\HasMany
+- Service
+- Illuminate\Routing\Controller
 - Task
-- CheckoutPage.php
-- AccountStatus
+- WorkflowStage
+- DomainVerificationService
 - .computeTotals
 - SmsManager
-- 2026_09_16_000022_add_period_prices_and_renewal_fields.php
-- Status
+- MasterProduct
+- .session
 - ResellerHub: PackagePriceType
-- ResellerHub: Automated Tests
-- CronTask
+- NoInvoiceProvisioningTest
+- Illuminate\Http\JsonResponse
 - Illuminate\Support\Collection
-- TenantStorage
+- Tenant
 - Booking: BookingWaitlistModal
-- StepData
+- Properties/Routes/web.php
 - API Contracts (نمونه Request/Response)
+- Installer
 - package.json
-- ResellerHubServiceProvider
-- App\Tenancy\TenancyModelRegistry
+- ClientForm
+- TenantScope
 - Core App: GoogleCalendarToken
-- channels.php
+- BookingEngine
 - package.json: AlignClass
 - get_setting
 - Market: CatalogImporter
-- PasswordResetTest.php
+- 2026_09_16_000022_add_period_prices_and_renewal_fields.php
 - CockpitMain
-- CockpitGoalManager
+- QueryBudgetTest
 - TenantUserController
-- ChatWidget
-- Livewire\Component
+- WorkflowEngine.php
 - Core App: ThemeManager
-- ContractForge/Routes/web.php
-- ClientController
+- Notification
+- routes/web.php
+- ContentForgeServiceProvider
 - ResellerHub: ResellerHub/composerjson
 - Sales: DealTab
-- AttributeManager
-- .install
-- CockpitMain.php
+- OnboardingRegistry
+- .uninstall
+- Payment
 - BookingServiceProvider
 - cavecrew/SKILL.md
 - Caveman Help
-- CheckoutModal
-- ResellerHelper
+- WarehouseStockController.php
+- TenantStorage
 - .agents: Path
 - ClientsServiceProvider
 - ResellerHub
 - composer.json
-- ServicesController.php
+- HardDeleteSafetyGuardTest
+- StatementController
 - Market: DisplayCategoryManager
 - package.json
 - .agents: Path
-- Throwable
-- Illuminate\Http\Resources\Json\JsonResource
+- CronTask
+- TenantRoleController
 - ClientCalls: ClientCalls/packagejso
 - Clients: ClientDashboardController
 - Clients: ClientAddressManager
 - Clients: ClientFormBuilder
 - Clients: Clients/packagejson
-- ClientInvoiceController.php
-- ServiceCategory
+- TenantArchitectureAdvancementsTest.php
+- TriggerResellerWorkflowListener
 - Projects: Projects/packagejson
 - ResellerHub: BrandColor
-- ResellerHub: InvoiceItemType
+- Models/Invoice.php
 - ResellerHub: ResellerQuotaServiceProvider
 - ResellerHub: ResellerHub/packagejson
 - ResellerHub
@@ -243,52 +243,50 @@
 - CategoryManager
 - SmsReseller: SmsReseller/packagejso
 - .agents: Body of compressfile; runs
-- CommentManager
+- PropertyStatusesManager
 - ClientCalls: ClientCalls/composerjs
 - Clients: Clients/composerjson
 - ContentForge: ContentForge/composer
-- TenantExitImpersonationTest
+- StoreTransactionRequest
 - Market: Market/composerjson
-- Notifications: PruneNotificationsCo
+- NotificationService
 - Projects: Projects/composerjson
 - ResellerHub: OnboardingInternalRoute
 - Sales: Sales/composerjson
-- .generate
+- TreatmentPlan
 - Services: Services/composerjson
 - SmartBot: SmartBot/composerjson
 - SmsReseller: SmsReseller/composerjs
-- VendorController.php
-- App\Models\Tenant
+- SmsResellerController.php
+- TenantExitImpersonationTest
 - Market: resources
-- MapIrMapService
-- LocalQnAAdapter
-- ChangeAccountPasswordRequest
+- AIController.php
+- LimoSmsDriver
 - ResellerHub: ResellerHub/resources/views/user/settings/indexbladephp
 - ResellerHub
 - Rules
 - PipelineKanban
-- Modules\ResellerHub\App\Http\Controllers\TenantProvisioningController
+- .store
 - Rules
 - JalaliHolidayService
 - Booking: resources
 - OnboardingStepStatus
-- Accounting: TransactionController
-- ContractForgeServiceProvider
+- AccountDetailController.php
+- TenantCache
 - Booking: resources
-- WalletTransaction
+- UserFactory.php
 - Clients: CsvImporter
-- 0001_01_01_000002_create_jobs_table.php
-- TwoFactorAuthenticationSettingsTest.php
-- Notification
-- LaboratoryDailyBoard
-- UpdatePasswordTest.php
-- UpdateCategoryRequest
+- Services/routes/web.php
+- LaboratoryDailyBoard.php
 - Installer
-- ModuleMenuService
+- LaboratoryDailyBoard
+- TaskController
+- ClientStatusesManager
+- Installer
+- QnAManager
 - Sales: resources
 - package.json: ClientCalls/viteconfi
 - DirectAdmin: Installer
-- DomainManager: Installer
 - Market: OrderStatusManager
 - ResellerHub
 - Caveman Compress
@@ -301,95 +299,93 @@
 - RBAC (نقش‌ها و مجوزها)
 - Projects: Installer
 - Properties: PropertiesDatabaseSeede
-- Modules\ResellerHub\App\Http\Controllers\ResellerSubAccountController
+- Modules\ResellerHub\App\Http\Controllers\ResellerPackageController
 - QueryBudgetTest.php
-- .__construct
-- Reseller
+- Cheque
+- Controllers/PropertyController.php
 - caveman-commit
-- DoctorProfileServiceProvider
+- InstallController
 - ResellerHub: ResellerHub/resources/views/user/orders/showbladephp
 - Services: Installer
 - Settings: Settings/composerjson
-- ContractController.php
-- RedirectManager
+- CsvExporter
+- TagManager
 - tests
 - caveman-review
 - Market: Market/resources/views/live
 - composer.json
+- Installer
 - database
-- database
-- ContractTemplate
-- SettingsController
-- ContractableEntity
+- Contract
+- PriceRoundingService
+- Installer
 - Market: resources
 - ResellerHub: ResellerHub/resources/views/user/dashboard/indexbladephp
 - ResellerHub
 - ResellerHub
-- Livewire\WithPagination
-- CsvExporter
-- ResellerQuotaServiceProvider
+- QuestionManager
+- Installer
+- .getValue
 - SmsReseller: SmsResellerServiceProv
-- 2026_10_24_000045_add_rounding_settings_to_reseller_settings_table.php
-- tests
+- PropertyBuilding
+- Installer
 - .agents
 - .agents
 - GoogleCalendarImportService
-- SettingsServiceProvider
-- PriceRoundingService
+- Illuminate\Database\Eloquent\Collection
+- ReconcileChequeRequest
 - Market: resources
 - Sales: resources
 - Market: resources
-- MarketServiceProvider
-- Illuminate\Foundation\Auth\Access\AuthorizesRequests
-- QuestionManager
-- 2025_11_06_185923_create_custom_user_fields_table.php
-- ContentForge: Installer
+- Installer
+- Modules\ContentForge\App\Models\ContentPost
+- PropertiesServiceProvider
+- theme-studio.blade.php
+- Installer
 - DomainManager: DomainManager/compos
-- UnifiedAuth
-- SalesSettings
+- Installer
+- ContractForgeServiceProvider
 - Market: Installer
 - Market: resources
 - Projects: resources
 - Illuminate\Support\Facades\Facade
 - Ponytail Help
 - ClientCallsServiceProvider
-- TagManager
+- AccountStatus
 - Booking Module (Appointments / Online Booking)
 - 2026_10_22_000001_drop_owner_id_from_tenants_table.php
 - Sales: SalesServiceProvider
-- ClientStatusesManager
+- ModuleInstallerInterface
 - Workflows: Workflows/composerjson
 - Market: resources
 - .agents: Path
 - Review Caveman evidence
-- ProfileInformationTest.php
-- CampaignLeadsTab.php
+- Appointment.php
+- CockpitGoal
 - Sales: resources
 - resources
 - Booking: resources
 - Manage eval-gated experiments
 - Accounting: ValidIban
 - caveman-setup/SKILL.md
-- Clients: Installer
-- StoreCategoryRequest
+- LaboratoryManager.php
+- LaboratoryIntegrationService
 - Installer
-- ContractForge: Installer
-- Installer
-- ContentForgeServiceProvider
-- AccountingServiceProvider
+- ClientAdminController
+- 2026_09_29_130000_add_tenant_id_to_all_module_tables.php
+- 2026_10_24_000045_add_rounding_settings_to_reseller_settings_table.php
+- ClientFormService
+- SmartBotServiceProvider
+- SalesSettings
+- 2025_11_06_185923_create_custom_user_fields_table.php
+- ResellerHub
 - 2025_03_01_000006_add_hierarchy_to_accounting_categories_table.php
-- 2026_08_11_000001_add_category_id_to_accounting_invoice_items_table.php
-- StoreFundAccountRequest
-- Illuminate\Support\Facades\Route
 - ResellerHub
-- 2025_12_14_000013_create_booking_audit_logs_table.php
-- ResellerHub
-- EntityResolverService.php
 - DirectAdminServiceProvider
 - Sales: SalesServiceProvider
-- Services: ServicesServiceProvider
-- 2025_12_14_000015_add_entry_exit_times_to_appointments.php
-- 2026_02_28_000000_add_tax_settings_to_booking_settings_table.php
+- ServicesServiceProvider
+- 2026_08_11_000001_add_category_id_to_accounting_invoice_items_table.php
+- PropagateTenantContext
 - Market: resources
 - Market: resources
 - .agents: Return the first non-blank
@@ -398,74 +394,71 @@
 - Sales: resources
 - composer.json
 - composer.json
-- Installer
+- ProductManager.php
 - database
-- Accounting: UpdateChequeRequest
-- TreatmentPlanWorkflowController
-- 2026_05_30_130114_add_custom_prices_to_services_table.php
+- 2025_12_14_000015_add_entry_exit_times_to_appointments.php
+- NoInvoiceProvisioningTest
+- StepData
 - 2026_06_06_135732_add_patient_id_to_treatment_plans_table.php
 - Clients: Database
-- 2026_08_17_000003_add_stats_to_doctor_profiles_table.php
-- Installer
+- OnboardingJourney
+- TestCase
 - Notifications: Installer
-- Installer
-- SmsSendController.php
-- 2026_09_22_150824_update_pricing_fields_on_reseller_packages_table.php
-- Sales: Installer
+- DoctorProfileServiceProvider
+- 2026_09_03_000001_add_sort_order_to_booking_categories_table.php
+- 2026_09_03_000002_add_sort_order_to_booking_services_table.php
+- StoreResellerInvoiceRequest
 - Services: Database
-- Settings: Settings/resources/views/
-- ManualPaymentGuardTest
+- Settings/resources/views/index.blade.php
+- TaskTab
 - Evaluate an optimization observation
 - caveman-stats
-- Tasks: Installer
+- 2026_10_17_000040_add_explicit_columns_to_orders_and_invoices.php
 - package.json: resources
 - Clients: resources
 - ContentForge: resources
-- 2026_09_03_000001_add_sort_order_to_booking_categories_table.php
-- 2026_09_03_000002_add_sort_order_to_booking_services_table.php
-- Core App: ModuleInstallerInterface
+- .initiateGatewayPayment
 - Clients: resources
 - composer.json: App\\
 - Market: resources
-- QnAManager
+- EntityManager
 - Market: resources
 - Booking Engine (Slot generation + merge policy)
-- UserController.php
-- Accounting: ReconcileChequeRequest
-- UsernameGenerator.php
+- CategoryManager
+- 2026_08_17_100816_add_pin_fields_to_projects_messages_table.php
+- 2026_09_29_000003_add_host_and_rental_fields_to_properties_table.php
 - UX Flow & Screens (پیشنهادی + وضعیت پیاده‌سازی)
-- Booking: RouteServiceProvider
+- ResellerHubServiceProvider
 - Clients: RouteServiceProvider
 - Clients: resources
 - Clients: resources
-- Installer
 - DirectAdmin: DirectAdmin/composerjs
-- HasMarketVendor
-- 2026_08_17_100816_add_pin_fields_to_projects_messages_table.php
-- 2026_09_29_000003_add_host_and_rental_fields_to_properties_table.php
-- PropertiesServiceProvider
-- SaveModulePricingsRequest
+- 2026_10_11_000032_add_subdomain_pattern_to_reseller_settings_table.php
+- PropertyCreateWizard
+- EventServiceProvider.php
+- 2026_09_22_150824_update_pricing_fields_on_reseller_packages_table.php
+- CustomerTab
 - Market: resources
 - Market: resources
-- OnboardingServiceProvider
-- 2026_10_12_000030_add_period_discounts_to_reseller_packages_table.php
-- 2026_10_27_000042_add_renewal_applied_at_to_reseller_invoices_table.php
-- ResellerHub: SaveTenantBrandingRequest
+- 2026_02_27_000000_add_time_range_to_booking_statements_table.php
+- TenantUserManagementTest
+- Illuminate\Foundation\Http\FormRequest
 - 2026_06_23_102200_add_tax_percent_to_service_invoices_table.php
-- Installer
+- 2026_09_15_191550_add_custom_fields_discounts_to_service_package_items_table.php
+- channels.php
 - ExportProjectContext
 - ResellerHub: Schema & Migrations
-- UpdateInvoiceRequest
+- Installer
 - ResellerHub: Schema & Migrations
 - ResellerHub: Schema & Migrations
 - ResellerHub
 - ResellerHub
 - ResellerHub
 - 2026_06_19_163730_add_installment_details_to_treatment_plans_table.php
-- .install
+- Installer
 - SmartBot: resources
 - Sms: Sms/composerjson
-- 2026_06_28_000000_create_treatment_plan_workflow_bindings_table.php
+- UpdateChequeRequest
 - Sales: resources
 - Clients: resources
 - caveman-discover/SKILL.md
@@ -473,31 +466,30 @@
 - Market: resources
 - Market: resources
 - 2026_08_31_144000_add_product_and_mode_to_service_package_items_table.php
-- 2019_12_14_000001_create_personal_access_tokens_table.php
+- BookingService
 - Sales: resources
-- 2026_05_20_100000_create_user_relationships_table.php
-- Campaign
+- UnifiedAuth
 - Client
-- DomainController.php
-- 2026_09_12_000002_create_tenant_modules_table.php
-- BrowserSessionsTest.php
-- 2024_07_20_100000_create_accounting_cheques_table.php
 - 2025_02_20_120001_create_accounting_invoices_table.php
+- RouteServiceProvider
+- BookingDashboardController.php
+- RouteServiceProvider
+- PropertyCategory
 - CsvImporter
-- 2025_02_20_120002_create_accounting_invoice_items_table.php
 - 2025_03_01_000001_create_accounting_proformas_table.php
-- 2026_07_06_120002_create_content_categories_table.php
+- 2025_12_14_000008_create_appointments_table.php
+- 2025_10_31_152607_create_themes_table.php
 - ContentForge: resources
+- 2026_11_04_000060_add_category_group_and_scope_to_custom_user_fields_table.php
+- 2026_07_06_120002_create_content_categories_table.php
+- 2025_03_01_000008_add_cheque_id_to_accounting_documents_table.php
 - 2026_07_16_000001_create_da_servers_table.php
+- DateCastingTest
 - 2026_07_16_000002_create_domain_records_table.php
-- 2026_04_25_135918_create_market_brands_table.php
-- 2026_04_25_135924_create_market_products_table.php
-- MasterProductController
-- 2026_05_23_140000_create_checkout_forms_table.php
 - skills/caveman-learn — the Caveman Learn editing skill (Apache-2.0, public)
 - caveman-learn skill
-- Projects/routes/web.php
-- Illuminate\Http\Request
+- RouteServiceProvider
+- Livewire\Component
 - ponytail-audit/SKILL.md
 - Ponytail Gain
 - ponytail-review/SKILL.md
@@ -505,26 +497,27 @@
 - Market: resources
 - 2026_09_28_000028_add_period_prices_to_reseller_packages_table.php
 - Installer
-- Properties: Database
+- 2026_04_25_135918_create_market_brands_table.php
 - 0001_01_01_000001_create_cache_table.php
-- Illuminate\Database\Migrations\Migration
+- 2025_11_08_073212_add_display_name_to_roles_table.php
 - Properties: Properties/resources/vi
-- 2025_12_14_000016_add_entry_exit_setting_to_booking_settings.php
-- 2026_09_16_000001_create_notification_preferences_table.php
-- 2026_11_17_123037_add_tenant_id_to_roles_table.php
-- Illuminate\Support\Facades\Route
+- AddChildHostRequest
+- 2026_02_26_000000_add_key_value_to_booking_settings_table.php
+- DeleteChildHostRequest
+- Illuminate\Foundation\Support\Providers\RouteServiceProvider
 - ResellerHub: Schema & Migrations
-- 2026_06_23_101400_rename_custom_field_values_to_meta_on_service_invoice_items.php
-- Services/App/Providers/AuthServiceProvider.php
+- 2026_06_08_125230_add_client_id_to_treatment_plans_table.php
+- CockpitMain.php
 - ResellerHub: Schema & Migrations
 - ResellerHub
-- 2026_09_16_000003_create_notification_broadcasts_table.php
-- DomainReseller
 - 2026_08_17_145400_create_projects_task_comments_table.php
-- 2026_09_15_000018_create_reseller_invoices_table.php
-- 2025_03_01_000008_add_cheque_id_to_accounting_documents_table.php
-- 2026_09_19_140000_create_reseller_settings_table.php
-- 2026_06_09_102045_change_columns_to_json_in_market_shipping_slots_table.php
+- DomainReseller
+- 2026_08_01_000002_add_meta_to_booking_payments_table.php
+- 2025_12_06_000001_create_reminders_table.php
+- RouteServiceProvider
+- 2026_08_19_000001_add_appointment_statuses_to_booking_settings_table.php
+- 2026_08_24_000001_add_duration_and_form_response_to_booking_waitlists_table.php
+- FormSchemaContract
 - SmsReseller: resources
 - SmsReseller: resources
 - resources
@@ -543,145 +536,189 @@
 - 2026_08_22_150000_add_source_project_id_to_projects_templates_table.php
 - 2026_06_09_133938_add_cure_to_booking_settings_table.php
 - 2026_06_17_145518_add_installment_fields_to_treatment_plans_table.php
-- 2026_07_29_000001_add_notes_to_booking_payments_table.php
+- 2025_01_16_000100_add_auth_columns_to_clients_table.php
 - Background Jobs / Commands
+- 2026_08_17_150200_create_projects_phases_table.php
+- ModifyDomainContactsRequest
 - database
-- 2026_06_20_000002_create_sales_campaign_contacts_table.php
-- database
-- UpdateDnsSecRequest
-- database
+- .hasTenant
+- RenewDomainRequest
 - Sales: resources
 - Services: resources
 - Market: resources
-- 2026_08_17_150200_create_projects_phases_table.php
+- .start
 - Sales: resources
 - ContentForge: resources
 - Accounting: SanitizesNumbers
-- Accounting: database
-- 2026_06_09_143000_add_stepper_fields_to_market_order_statuses_table.php
-- 2025_02_20_001200_add_building_id_to_properties_table.php
 - 2026_06_22_100500_create_services_statuses_table.php
-- 2026_10_28_000044_add_checkout_expires_at_to_tenants_table.php
-- GatewayCatalog
+- 2026_06_09_143000_add_stepper_fields_to_market_order_statuses_table.php
+- 2024_07_30_100000_add_category_id_to_fund_accounts_table.php
+- 2024_08_02_100000_add_bank_branch_to_cheques_table.php
+- Entities/ClientForm.php
+- RouteServiceProvider
 - 2024_07_31_100000_add_image_path_to_cheques_table.php
-- 2024_08_03_100000_add_registered_by_user_id_to_cheques_table.php
-- 2026_07_18_000002_create_bot_answers_table.php
+- SaveDnsRecordRequest
+- SyncDomainRequest
 - Booking: Database
-- 2026_06_23_102300_edite_service_invoices.php
-- ProrationResult
+- 2025_12_14_000014_add_operator_flow_to_booking_settings.php
 - 2026_09_16_000025_add_custom_pricing_to_reseller_packages_table.php
-- 2025_02_20_001400_add_filter_settings_to_property_attributes.php
-- 2026_02_27_000000_add_time_range_to_booking_statements_table.php
-- 2026_06_23_101500_add_unit_pricing_to_services_table.php
-- 2026_06_23_102000_add_payment_fields_to_service_invoices_table.php
-- Booking: Database
-- 2026_02_24_170000_add_statement_roles_to_booking_settings.php
-- 2026_06_23_102800_add_attributes_to_services_statuses_table.php
-- 2026_08_25_190000_make_description_nullable_in_service_invoice_items_table.php
+- 2026_09_29_000004_create_property_rental_tables.php
+- RouteServiceProvider
+- ShortLinkManager
+- RouteServiceProvider
+- RouteServiceProvider
+- RouteServiceProvider
+- RouteServiceProvider
+- RouteServiceProvider
+- FollowUpController.php
+- Installer
+- 2025_02_20_001500_create_property_buildings_table.php
+- HasInvoiceSourceScopes
+- InstallationLifecycleTest
+- SalesAutomationService.php
+- 2026_10_11_122340_add_entity_type_to_custom_user_fields_table.php
 - 2026_02_29_000000_add_user_appointment_flow_to_booking_settings_table.php
-- 2026_06_15_190000_add_installments_to_booking_services_table.php
+- OtpController.php
 - Booking: Database
 - Booking: Database
+- 2024_07_29_100000_add_is_treasury_related_to_categories_table.php
 - 2026_06_14_110000_create_workflow_nodes_and_edges_tables.php
+- RouteServiceProvider
 - Booking: Database
 - 2026_08_03_160000_add_status_to_accounting_documents_table.php
 - Booking: Database
-- 2025_01_16_000100_add_auth_columns_to_clients_table.php
-- 2026_07_28_000001_add_client_id_to_da_accounts_table.php
+- 2026_09_02_163119_add_is_public_to_calendar_events_table.php
+- 2026_10_31_130000_complete_enterprise_multi_tenancy_isolation.php
 - 2026_09_01_000002_add_order_id_to_da_accounts_table.php
-- 2025_12_14_000015_add_custom_schedule_to_booking_services_table.php
-- 2026_08_17_152500_add_is_template_to_projects_table.php
+- 2026_11_17_123037_add_tenant_id_to_roles_table.php
+- TenantRoleManagementTest
 - Clients: Clients/resources/views/us
 - ContentForge: ContentForge/resource
 - ContentForge: resources
 - ContentForge: resources
+- 2026_08_02_152906_add_cheque_id_to_accounting_documents_table.php
+- 2026_06_21_203000_add_cure_allowed_categories_to_booking_settings_table.php
+- 2026_08_09_124801_add_allow_manual_time_override_to_booking_settings.php
+- RouteServiceProvider
+- 2025_12_14_000015_add_custom_schedule_to_booking_services_table.php
+- 2025_12_14_000016_add_entry_exit_setting_to_booking_settings.php
 - 2026_02_24_160000_add_form_type_to_booking_forms_table.php
-- 2026_08_18_120002_upgrade_projects_checklist_items_table.php
-- 2026_10_27_000043_add_idempotency_key_to_reseller_invoice_payments_table.php
-- 2025_02_20_000900_create_property_attributes_tables.php
+- 2026_02_28_000000_add_tax_settings_to_booking_settings_table.php
+- 2026_06_15_190000_add_installments_to_booking_services_table.php
+- 2026_09_02_000001_add_service_order_id_to_domain_records_table.php
+- 2026_06_08_144708_add_shipping_zone_id_to_market_shipping_slots_table.php
+- 2026_06_08_150000_add_state_and_city_to_market_shipping_slots_table.php
+- RouteServiceProvider
 - 2026_08_01_000001_add_credit_client_wallet_to_booking_services_table.php
 - Market: Database
+- 2026_06_10_140000_add_enable_questions_to_market_master_products_table.php
+- 2026_08_18_000001_add_ads_to_booking_settings_table.php
+- 2025_02_20_000100_create_properties_table.php
 - Market: Database
 - Market: Database
+- ClientForm
+- OnboardingCustomStepsRoutingTest
 - Market: Database
-- 2026_08_19_000001_add_appointment_statuses_to_booking_settings_table.php
-- 2026_06_21_000000_add_show_in_crm_to_property_statuses_table.php
-- Market: Database
-- Market: Database
-- FormSchemaContract
-- Market: Database
-- 2025_02_20_001000_create_property_owners_table.php
+- 2025_01_10_000000_create_clients_table.php
+- 2026_05_26_164000_add_payment_fields_to_market_orders_table.php
 - Market: resources
 - Market: resources
 - Market: resources
 - Market: resources
+- 2026_09_14_000016_add_package_id_to_tenants_table.php
 - Projects: Database
 - Projects: Database
 - AccountingServiceProvider
 - 2026_09_05_000001_add_live_monitoring_settings_to_booking_settings_table.php
 - Projects: Database
-- 2025_01_10_000000_create_clients_table.php
+- 2026_05_28_100000_add_label_to_market_order_meta_table.php
 - 2026_09_08_130000_make_password_nullable_and_add_manual_servers_to_da_servers_table.php
-- 2026_07_28_000001_add_client_id_to_domain_records_table.php
-- 2026_09_02_000001_add_service_order_id_to_domain_records_table.php
+- 2026_07_28_000001_add_client_id_to_da_accounts_table.php
+- 2026_06_03_134347_add_brand_id_to_market_categories_table.php
 - Projects: Projects/resources/views/
-- 2026_09_08_130000_make_api_key_nullable_and_add_manual_reseller_to_domain_resellers_table.php
+- 2026_09_16_000024_add_features_and_pricing_to_reseller_packages_table.php
+- 2026_07_16_180122_add_locked_balance_to_domain_resellers_table.php
 - Properties: Database
+- 2026_04_26_135923_create_market_orders_table.php
 - Properties: Database
-- Properties: Database
-- 2026_10_05_111149_add_discount_start_date_to_reseller_packages_table.php
+- 2026_07_25_000001_add_is_default_to_market_order_statuses_table.php
+- 2026_09_30_000030_add_print_and_stamp_settings_to_reseller_settings_table.php
 - 2026_07_25_000000_add_source_invoice_id_to_market_orders_table.php
 - 2026_08_17_153100_increase_subject_length_in_projects_activities_table.php
-- Properties: Database
+- 2026_10_10_000031_add_default_package_registration_to_reseller_settings_table.php
 - ponytail-debt/SKILL.md
 - Properties: Properties/resources/vi
-- Reminders: Database
-- 2026_08_18_150002_modify_role_in_projects_members_table.php
-- 2026_08_22_163500_add_category_to_projects_documents_table.php
-- 2025_03_01_000005_create_accounting_source_documents_table.php
+- SaveTenantBrandingRequest
+- 2026_09_24_000027_add_limits_to_reseller_packages_and_sub_accounts.php
+- 2026_06_09_102045_change_columns_to_json_in_market_shipping_slots_table.php
+- 2026_07_11_102530_add_unique_to_gtin_in_market_master_products_table.php
+- 2026_08_17_152500_add_is_template_to_projects_table.php
+- 2026_10_28_000045_add_unique_gateway_transaction_to_reseller_invoice_payments_table.php
+- 2026_08_18_120002_upgrade_projects_checklist_items_table.php
+- 2026_07_09_000002_add_assigned_role_to_sales_campaign_contacts_table.php
+- 2026_06_23_101900_add_converted_at_to_service_invoices_table.php
+- 2026_06_23_103100_add_custom_service_name_to_service_invoice_items_table.php
 - 2026_09_28_000029_add_discount_expires_at_to_reseller_packages_table.php
+- 2026_08_09_140000_add_custom_fields_to_service_package_items_table.php
 - DB Schema (DDL Summary)
 - 2026_10_19_000041_remove_proforma_columns_from_reseller_settings_table.php
-- 2026_10_20_000043_remove_reward_columns_from_reseller_settings_table.php
-- 2026_09_16_000010_add_deal_id_to_client_calls_table.php
-- 2026_10_25_000046_add_contract_value_to_reseller_orders_table.php
-- 2026_06_22_100900_create_services_activity_log_table.php
-- 2026_06_23_103000_add_proforma_invoice_number_to_service_invoices_table.php
+- 2025_02_20_000500_add_document_type_to_properties.php
+- 2025_02_20_000600_add_video_to_properties.php
+- 2026_08_24_140000_add_custom_fields_quantities_to_service_package_items_table.php
+- 2025_02_20_000900_create_property_attributes_tables.php
+- 2026_08_31_123000_change_description_column_to_text_in_service_invoice_items_table.php
+- 2025_02_20_001400_add_filter_settings_to_property_attributes.php
 - 2026_07_18_124347_add_base_price_type_to_service_orders_table.php
-- 2026_07_19_100100_update_customer_id_foreign_key_in_services_projects_table.php
-- 2026_08_10_140000_add_accounting_category_id_to_services_table.php
-- 2026_07_07_000003_add_deal_id_to_sales_calls_table.php
+- 2026_06_23_101400_rename_custom_field_values_to_meta_on_service_invoice_items.php
+- 2026_09_29_000001_add_user_id_to_property_owners_table.php
+- Modules\ResellerHub\App\Http\Requests\UpdateTenantRequest
+- 2026_07_22_125717_change_date_columns_to_string_in_service_invoices_and_orders.php
+- 2026_09_22_000001_add_pricing_and_color_to_reseller_settings_table.php
+- 2026_09_06_110000_change_amount_columns_to_bigint_in_service_orders_and_invoices.php
 - ResellerHub
-- Sales: Database
+- 2026_08_18_123000_create_sms_reseller_storage_tables.php
+- StoreInvoiceRequest
+- 2026_05_23_140002_create_order_sync_logs_table.php
+- 2026_10_05_111149_add_discount_start_date_to_reseller_packages_table.php
+- 2026_06_28_000000_create_treatment_plan_workflow_bindings_table.php
+- 2026_06_22_100300_create_services_table.php
+- 2026_10_20_000043_remove_reward_columns_from_reseller_settings_table.php
+- 2026_11_15_000052_add_portal_pricing_settings_to_reseller_settings_table.php
+- AddDnsSecRequest
+- UpdateDomainClientRequest
 - 2026_06_23_101700_make_renewal_reminder_days_nullable_in_services_table.php
-- Sales: Database
-- 2026_02_24_000000_version_logs_table.php
-- 2026_02_26_000000_create_payments_table.php
 - Services: Database
 - Services: Database
+- 2026_06_23_102300_edite_service_invoices.php
+- 2026_08_15_135205_create_projects_messages_table.php
+- 2026_08_17_141800_create_projects_activities_table.php
+- UpdateNameserversRequest
+- 2026_06_23_102600_add_allowed_roles_to_services_statuses_table.php
+- 2026_09_29_000002_create_property_hosts_table.php
+- 2026_06_23_102800_add_attributes_to_services_statuses_table.php
+- 2026_06_23_103200_add_status_to_service_invoice_payments_table.php
+- RouteRegistrationTest
+- 2025_02_20_001200_add_building_id_to_properties_table.php
+- 2026_06_23_101200_add_renewal_price_type_to_services_table.php
+- 2026_06_23_101500_add_unit_pricing_to_services_table.php
 - Services: Database
-- Services: Database
-- Services: Database
-- 2026_06_23_102400_change_paid_at_to_datetime_in_payments_table.php
-- 2025_03_01_000002_create_accounting_proforma_items_table.php
-- 2025_03_01_000003_add_accounting_invoice_payments_table.php
-- Services: Database
-- 2025_03_01_000004_create_cheque_attachments_table.php
-- 2025_12_14_000002_create_booking_categories_table.php
-- Services: Database
+- 2026_08_09_120000_create_service_packages_table.php
 - 2026_02_25_000000_add_version_modules_table.php
 - Services: Database
-- 2026_06_06_095650_create_treatment_plans_table.php
-- 2026_06_20_113007_create_booking_category_service_table.php
-- 2026_08_22_000001_create_booking_waitlists_table.php
-- 2026_04_30_164241_change_field_type_in_custom_user_fields_table.php
-- 2026_10_31_130000_complete_enterprise_multi_tenancy_isolation.php
+- RecordPayment
+- 2026_02_27_000000_create_registration_requests_table.php
+- 2026_05_20_100000_create_user_relationships_table.php
+- 2026_06_16_193000_create_activity_logs_table.php
+- 2026_08_11_155500_create_google_calendar_tokens_table.php
+- 2026_08_11_184500_create_google_calendar_imported_events_table.php
+- 2026_09_12_000002_create_tenant_modules_table.php
 - Services: Database
 - 2026_07_20_170023_update_status_in_services_table.php
-- 2026_09_25_000002_create_booking_laboratory_orders_table.php
+- 2025_03_01_000003_add_accounting_invoice_payments_table.php
 - Settings: resources
 - SmartBot: resources
-- 2026_09_25_000003_create_booking_laboratory_stages_table.php
+- 2025_03_01_000004_create_cheque_attachments_table.php
+- 2026_06_20_130552_add_node_tracking_to_workflow_logs_table.php
 - 2026_08_18_134500_add_default_categories_to_sms_reseller_settings_table.php
 - SmsReseller: resources
 - SmsReseller: SmsReseller/resources/
@@ -689,114 +726,171 @@
 - SmsReseller: resources
 - SmsReseller: resources
 - SmsReseller: resources
-- 2024_08_02_100000_add_bank_branch_to_cheques_table.php
-- Workflows: Database
+- 2025_03_01_000005_create_accounting_source_documents_table.php
+- AccountingServiceProvider
 - resources
 - Accounting: resources
 - Market: resources
 - Market: resources
 - resources
 - Core App: TrustHosts
-- 2025_01_01_000000_create_client_settings_table.php
+- 2025_12_14_000001_create_booking_settings_table.php
 - Clients: resources
-- 2026_08_18_152902_add_operator_selling_prices_to_sms_reseller_settings_table.php
+- 2025_12_14_000002_create_booking_categories_table.php
+- 2025_11_15_000000_create_user_dashboard_settings_table.php
+- 2026_02_24_000000_version_logs_table.php
 - 2026_07_06_120009_create_content_comments_table.php
-- 2026_07_16_000002_create_da_accounts_table.php
-- database
-- ClientOrderController.php
+- 2026_07_28_000001_add_client_id_to_domain_records_table.php
+- 2026_06_21_000000_add_show_in_crm_to_property_statuses_table.php
+- ReminderSettingsController
+- 2025_12_14_000006_create_booking_availability_rules_table.php
 - 2026_04_28_120003_create_market_settings_table.php
-- 2026_04_29_100000_create_market_warehouses_table.php
+- 2026_02_26_000000_create_payments_table.php
 - Sales: resources
 - Market: resources
 - Accounting: NumberToWords
+- 2025_12_14_000010_create_booking_payments_table.php
 - directories
-- 2025_10_31_152107_create_modules_table.php
+- 2025_12_10_160415_000002_create_sms_gateway_settings_table.php
 - investigate-first/SKILL.md
 - lean-build/SKILL.md
 - 2026_09_16_000002_create_notification_user_settings_table.php
+- 2026_06_06_095650_create_treatment_plans_table.php
 - 2026_06_10_121444_add_installment_settings_to_booking_services_table.php
 - 2026_08_15_124335_create_projects_categories_table.php
 - 2026_08_15_130843_create_projects_statuses_table.php
+- RouteServiceProvider
 - megacave/README.md
-- Booking: Database
+- 2026_06_20_113007_create_booking_category_service_table.php
+- 2026_10_17_000038_remove_max_tenants_from_resellers_table.php
+- 2026_09_25_000002_create_booking_laboratory_orders_table.php
+- 2026_10_25_000046_add_contract_value_to_reseller_orders_table.php
 - migration/SKILL.md
-- 2025_11_15_000000_create_user_dashboard_settings_table.php
+- 2024_05_20_090002_create_accounting_documents_table.php
+- 2026_07_07_000003_add_deal_id_to_sales_calls_table.php
+- 2026_07_09_000001_add_assigned_to_to_sales_campaign_contacts_table.php
 - safe-refactor/SKILL.md
 - surgical-patch/SKILL.md
-- 2026_06_20_000004_create_sales_calls_table.php
+- 2026_06_22_100400_create_services_custom_fields_table.php
 - ultracave/README.md
-- 2026_06_21_000011_create_cockpit_goals_table.php
+- RemindersServiceProvider
+- 2026_06_23_101800_make_invoice_number_nullable_in_service_invoices_table.php
+- 2026_06_23_102000_add_payment_fields_to_service_invoices_table.php
 - verify-and-stop/SKILL.md
 - Booking: resources
-- 2026_09_25_000001_add_laboratory_settings_to_booking_settings_table.php
-- 2026_07_16_180122_add_locked_balance_to_domain_resellers_table.php
-- Clients: Database
+- 2026_10_12_000033_add_max_advance_renewal_cycles_to_reseller_settings_table.php
+- 2026_06_23_102100_add_installment_plan_fields_to_service_invoices_table.php
+- 2026_06_23_102500_add_triggers_conversion_to_services_statuses_table.php
+- 2025_01_01_000000_create_client_settings_table.php
+- 2025_01_15_000100_create_client_forms_table.php
 - 2024_05_20_090000_create_accounting_categories_table.php
+- 2026_06_23_103000_add_proforma_invoice_number_to_service_invoices_table.php
 - policy.md
-- 2026_05_26_164000_add_payment_fields_to_market_orders_table.php
+- 2026_08_10_140000_add_accounting_category_id_to_services_table.php
+- 2026_08_05_000000_create_client_terms_acceptances_table.php
 - terms.md
-- ContentForge: Database
+- 2026_07_06_120003_create_content_posts_table.php
 - ContentForge: resources
 - ContractForge: ConditionEvaluator
-- 2026_06_23_102600_add_allowed_roles_to_services_statuses_table.php
-- DirectAdmin: resources
-- DirectAdmin: resources
-- 2026_06_13_125020_add_cart_limit_fields_to_market_vendor_products_table.php
-- 2025_01_02_000000_create_workflow_triggers_table.php
-- 2025_02_21_000000_add_agent_id_to_properties_table.php
-- 2024_08_05_100000_create_accounting_settings_table_final.php
-- 2026_09_23_141623_add_enable_module_itemized_pricing_to_reseller_settings_table.php
-- 2026_06_21_000010_add_fields_to_client_calls_table.php
-- 2026_06_23_101200_add_renewal_price_type_to_services_table.php
-- Market: resources
-- Market: resources
-- Market: resources
-- 2026_06_23_103200_add_status_to_service_invoice_payments_table.php
-- 2025_01_09_000100_create_client_statuses_table.php
-- 2026_07_06_120003_create_content_posts_table.php
 - 2026_07_06_120006_create_content_short_links_table.php
+- DirectAdmin: resources
+- DirectAdmin: resources
+- 2025_10_31_152107_create_modules_table.php
+- 2026_09_01_000001_create_da_settings_table.php
+- 2026_06_13_125020_add_cart_limit_fields_to_market_vendor_products_table.php
 - 2026_04_25_135920_create_market_categories_table.php
+- 2026_09_25_000003_create_booking_laboratory_stages_table.php
+- 2026_08_11_000001_create_holiday_events_table.php
+- 2026_04_29_100001_create_market_warehouse_stocks_table.php
+- 2025_02_21_000000_add_agent_id_to_properties_table.php
+- 2026_04_29_100002_create_market_warehouse_transactions_table.php
+- 2026_05_23_140000_create_checkout_forms_table.php
 - 2026_06_03_151500_create_market_display_categories_table.php
-- 2026_08_09_120000_create_service_packages_table.php
-- 2026_08_25_180000_add_custom_fields_use_default_price_to_service_package_items_table.php
-- 2026_06_08_130000_create_market_warehouse_transfers_table.php
-- Properties: resources
-- 2026_06_10_150000_create_market_product_questions_table.php
-- 2026_08_15_131009_create_projects_table.php
+- 2026_07_06_120005_create_content_post_tag_table.php
+- 2026_09_23_141623_add_enable_module_itemized_pricing_to_reseller_settings_table.php
+- 2026_06_03_153500_create_market_master_product_display_category_table.php
+- 2026_06_08_140000_create_market_shipping_zones_table.php
+- 2026_06_08_140003_create_market_shipping_slots_table.php
+- 2026_10_13_000034_add_is_active_to_reseller_packages_table.php
+- 2025_12_14_000007_create_booking_availability_exceptions_table.php
+- 2026_06_21_000010_add_fields_to_client_calls_table.php
+- 2026_07_06_120008_create_content_post_revisions_table.php
+- 2025_12_14_000009_create_booking_slot_holds_table.php
 - 2026_08_15_131901_create_projects_members_table.php
+- Market: resources
+- Market: resources
+- Market: resources
 - 2026_08_15_132931_create_projects_checklist_items_table.php
-- ResellerHub: Schema & Migrations
+- 2026_08_15_135027_create_projects_documents_table.php
+- 2026_05_23_132011_create_doctor_media_table.php
+- 2026_08_18_150001_create_projects_roles_table.php
+- 2026_07_16_000001_create_domain_resellers_table.php
+- 2026_09_25_000004_create_booking_laboratory_daily_logs_table.php
+- 2026_08_22_170500_create_projects_settings_table.php
+- 2025_02_20_000000_create_property_statuses_table.php
+- 2026_10_27_000043_add_idempotency_key_to_reseller_invoice_payments_table.php
+- SyncResellerDatabaseCommand
+- 2026_09_12_000010_create_resellers_table.php
+- 2026_09_15_000017_create_reseller_module_pricings_table.php
+- 2026_10_28_000044_add_checkout_expires_at_to_tenants_table.php
+- 2026_07_06_120001_create_content_entities_table.php
+- 2026_06_20_000004_create_sales_calls_table.php
+- 2026_04_25_135926_create_market_product_variants_table.php
+- 2026_06_08_130000_create_market_warehouse_transfers_table.php
+- 2026_06_20_000006_create_sales_pipelines_table.php
+- Properties: resources
+- 2026_07_07_000002_create_sales_deals_table.php
+- 2026_07_16_000002_create_da_accounts_table.php
+- 2026_06_23_102900_add_allowed_users_to_services_statuses_table.php
+- 2026_06_22_100700_create_service_invoice_payments_table.php
+- 2026_08_25_180000_add_custom_fields_use_default_price_to_service_package_items_table.php
+- 2026_08_25_190000_make_description_nullable_in_service_invoice_items_table.php
+- 2026_04_25_135928_create_market_vendor_products_table.php
+- 2025_12_10_160415_000001_create_sms_templates_table.php
+- 2026_06_08_140005_create_market_shipping_rules_table.php
 - 2026_08_17_141900_create_projects_time_logs_table.php
+- 2026_08_15_183513_create_sms_reseller_settings_table.php
+- 2026_08_23_000001_create_menu_customizations_table.php
 - ResellerHub
 - ResellerHub
 - ResellerHub: ResellerHub/resources/views/user/orders/indexbladephp
 - ResellerHub
 - ResellerHub
 - ResellerHub
-- 2025_12_14_000012_create_booking_audit_logs_table.php
-- 2025_02_20_000000_create_property_statuses_table.php
-- 2026_06_16_195100_create_reminder_snooze_logs_table.php
-- 2026_09_14_000015_create_reseller_packages_table.php
-- 2026_09_15_000017_create_reseller_module_pricings_table.php
-- 2026_09_16_000023_create_reseller_invoice_payments_table.php
-- 2026_07_06_120005_create_content_post_tag_table.php
+- SettingsServiceProvider
+- SmsServiceProvider
+- 2026_08_18_152902_add_operator_selling_prices_to_sms_reseller_settings_table.php
+- TasksServiceProvider
+- 2026_06_10_110000_create_market_product_reviews_table.php
+- content-settings.blade.php
+- 2026_06_16_194000_create_notifications_table.php
+- 2026_09_16_000001_create_notification_preferences_table.php
+- RouteServiceProvider
+- 2025_02_20_001000_create_property_owners_table.php
+- 2026_09_19_140000_create_reseller_settings_table.php
+- 2025_02_20_000400_create_property_images_table.php
+- 2026_06_20_000003_create_sales_campaign_results_table.php
 - Services: Services/resources/views/
-- 2026_07_18_000001_create_bot_questions_table.php
-- 2026_07_16_180143_create_domain_logs_table.php
+- 2026_07_07_000001_create_sales_loss_reasons_table.php
+- 2026_06_22_100100_create_services_catalog_table.php
+- 2026_06_21_100000_create_api_keys_table.php
+- 2026_09_12_000011_create_reseller_allowed_modules_table.php
+- 2026_09_15_000020_create_reseller_orders_table.php
+- 2025_12_10_160415_000000_create_sms_messages_table.php
 - 2025_12_10_160415_000003_create_sms_otps_table.php
-- 2026_04_25_135926_create_market_product_variants_table.php
+- ContentForge/Providers/ContentForgeServiceProvider.php
+- 2026_10_06_120000_create_tenant_onboarding_states_table.php
+- Market/Providers/MarketServiceProvider.php
 - 2026_05_23_140001_create_market_order_meta_table.php
 - SmsReseller: SmsReseller/resources/
-- 2025_12_06_000000_create_tasks_table.php
-- 2026_08_01_000001_create_wallets_table.php
-- SmartBotServiceProvider
+- 2026_06_20_000002_create_sales_campaign_contacts_table.php
 - CreatesApplication.php
 - Workflows: resources
 - Core App: Kernel
 - Core App: EncryptCookies
 - Core App: PreventRequestsDuringMain
 - Core App: TrimStrings
-- .register
+- 2026_06_21_000011_create_cockpit_goals_table.php
 - Core App: ValidateSignature
 - Core App: VerifyCsrfToken
 - Booking: resources
@@ -828,6 +922,7 @@
 - DomainManager: resources
 - DomainManager: resources
 - DomainManager: DomainManager/resour
+- 2026_06_22_100000_create_service_categories_table.php
 - Market: resources
 - Market: resources
 - Market: resources
@@ -853,13 +948,12 @@
 - Services: resources
 - Services: resources
 - Services: resources
-- 2026_06_08_140005_create_market_shipping_rules_table.php
 - Sms: resources
 - Tasks: resources
 - Tasks: resources
 - Workflows: resources
 - package.json
-- 2026_06_10_110000_create_market_product_reviews_table.php
+- 2026_06_23_103300_create_service_orders_table.php
 - resources
 - resources
 - ClientCalls: ClientCalls/resources/
@@ -955,7 +1049,6 @@
 - Clients: resources
 - Clients: resources
 - Clients: resources
-- ContentForge: resources
 - ContentForge: resources
 - ContentForge: ContentForge/resource
 - ContentForge: resources
@@ -1167,26 +1260,18 @@
 - resources
 - resources
 - resources
-- AddToCartButton
+- 2026_07_18_000003_create_bot_sessions_table.php
+- 2026_07_18_000004_create_bot_messages_table.php
 - DomainManagerServiceProvider
+- 2025_12_06_000000_create_tasks_table.php
+- 2025_01_02_000000_create_workflow_triggers_table.php
+- layouts.user
 - AssetInliner
-- UpdateTenantDomainRequest
-- SalesAutomationService.php
-- .endorse
-- NotificationsServiceProvider
-- 2026_10_11_000032_add_subdomain_pattern_to_reseller_settings_table.php
-- 2026_10_12_000033_add_max_advance_renewal_cycles_to_reseller_settings_table.php
-- 2026_06_22_100300_create_services_table.php
-- 2026_09_15_191550_add_custom_fields_discounts_to_service_package_items_table.php
-- WalletServiceProvider
-- ClientObserver
-- 2025_11_16_000000_create_settings_table.php
-- 2025_12_10_160415_000000_create_sms_messages_table.php
 
 ## God Nodes (most connected - your core abstractions)
 1. `User` - 436 edges
 2. `ResellerInvoice` - 261 edges
-3. `Controller` - 212 edges
+3. `Controller` - 210 edges
 4. `Tenant` - 199 edges
 5. `ResellerOrder` - 173 edges
 6. `Project` - 157 edges
@@ -1196,121 +1281,101 @@
 10. `ResellerHelper` - 101 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `۴. ماژول اختصاصی نمایندگی (`Modules/ResellerHub`)` --references--> `TenantProvisioningService`  [INFERRED]
+  docs/TENANCY_AND_RESELLER.md → Modules/ResellerHub/App/Services/TenantProvisioningService.php
 - `۳. فیلترینگ سایدبار (`ModuleMenuService`)` --references--> `ModuleMenuService`  [INFERRED]
   docs/TENANCY_AND_RESELLER.md → app/Services/Modules/ModuleMenuService.php
 - `۴. ماژول اختصاصی نمایندگی (`Modules/ResellerHub`)` --references--> `Tenant`  [INFERRED]
   docs/TENANCY_AND_RESELLER.md → app/Models/Tenant.php
+- `۲. میدلور `App\Http\Middleware\EnsureTenantHasModule`` --references--> `EnsureTenantHasModule`  [INFERRED]
+  docs/TENANCY_AND_RESELLER.md → app/Http/Middleware/EnsureTenantHasModule.php
 - `۱. میدلور `App\Http\Middleware\IdentifyTenant`` --references--> `IdentifyTenant`  [INFERRED]
   docs/TENANCY_AND_RESELLER.md → app/Http/Middleware/IdentifyTenant.php
-- `۲. لایه تفکیک کوئری‌ها (Eloquent Global Scope)` --references--> `TenantScope`  [INFERRED]
-  docs/TENANCY_AND_RESELLER.md → app/Tenancy/Scopes/TenantScope.php
-- `۲. لایه تفکیک کوئری‌ها (Eloquent Global Scope)` --references--> `BelongsToTenant`  [INFERRED]
-  docs/TENANCY_AND_RESELLER.md → app/Tenancy/Traits/BelongsToTenant.php
 
 ## Import Cycles
 - None detected.
 
-## Communities (1582 total, 1207 thin omitted)
+## Communities (1676 total, 1287 thin omitted)
 
 ### Community 0 - "Illuminate\Database\Schema\Blueprint"
 Cohesion: 0.01
-Nodes (217): {closure#1}(), {closure#1}(), {closure#2}(), {closure#3}(), {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}() (+209 more)
+Nodes (168): {closure#1}(), {closure#2}(), {closure#3}(), {closure#1}(), {closure#2}(), {closure#3}(), {closure#1}(), {closure#2}() (+160 more)
 
 ### Community 1 - "Illuminate\Database\Eloquent\Model"
 Cohesion: 0.02
-Nodes (37): CronTaskLog, GoogleCalendarImportedEvent, HolidayEvent, Payment, TenantModule, UserDashboardSetting, WidgetSetting, Customer (+29 more)
+Nodes (43): CronTaskLog, GoogleCalendarImportedEvent, HolidayEvent, Payment, Theme, UserDashboardSetting, WidgetSetting, Customer (+35 more)
 
-### Community 2 - "Illuminate\Http\JsonResponse"
-Cohesion: 0.08
-Nodes (4): ResellerHubController, StoreResellerInvoiceRequest, DomainVerificationService, MenuManagerController
+### Community 2 - "ResellerInvoicePayment"
+Cohesion: 0.04
+Nodes (19): CancelInvoiceAction, {closure#1}(), ExpirePendingCheckoutsCommand, ResellerHubException, reseller_payment_method_label(), {closure#8}(), TenantSubscriptionController, {closure#1}() (+11 more)
 
-### Community 3 - "Illuminate\Support\Facades\Schema"
+### Community 3 - "Illuminate\Database\Migrations\Migration"
 Cohesion: 0.01
-Nodes (49): {closure#1}(), {closure#1}(), {closure#1}(), {closure#1}(), {closure#1}(), {closure#2}(), {closure#1}(), {closure#1}() (+41 more)
-
-### Community 4 - "Modules\ResellerHub\App\Http\Controllers\TenantSubscriptionController"
-Cohesion: 0.07
-Nodes (10): PublicPricingController, {closure#8}(), {closure#1}(), {closure#4}(), {closure#5}(), {closure#8}(), ResellerModulePricing, {closure#2}() (+2 more)
+Nodes (46): {closure#1}(), {closure#2}(), {closure#1}(), {closure#1}(), CreateWidgetSettingsTable, {closure#1}(), {closure#2}(), {closure#1}() (+38 more)
 
 ### Community 5 - "Illuminate\Database\Eloquent\Relations\BelongsTo"
-Cohesion: 0.01
-Nodes (36): CalendarEvent, DoctorMedia, BookingAuditLog, OrderDisplayHelper, ClientTermsAcceptance, ContentComment, ContentPostRevision, NotificationBroadcast (+28 more)
+Cohesion: 0.02
+Nodes (28): CalendarEvent, DoctorMedia, BookingCleanupHolds, BookingAuditLog, BookingSlotHold, ClientTermsAcceptance, ContentComment, ContentPostRevision (+20 more)
 
-### Community 6 - "Category"
-Cohesion: 0.07
-Nodes (5): CategoryController, DashboardController, Category, CategoryService, AccountingDatabaseSeeder
+### Community 6 - "Document"
+Cohesion: 0.03
+Nodes (29): FileSizeHelper, ActivityLogger, {closure#3}(), {closure#4}(), {closure#5}(), {closure#6}(), {closure#7}(), DocumentController (+21 more)
 
 ### Community 7 - "Illuminate\Support\Facades\DB"
 Cohesion: 0.03
-Nodes (23): BaseModuleInstaller, ModuleUpdaterService, {closure#1}(), {closure#2}(), {closure#1}(), up(), {closure#1}(), {closure#2}() (+15 more)
+Nodes (6): UpdateModulePermissions, {closure#1}(), Handler, BaseModuleInstaller, ThemeResolver, Setting
 
-### Community 8 - ".current"
-Cohesion: 0.08
-Nodes (9): BookingPaymentObserver, BookingPayment, AppointmentController, ProviderAvailabilityController, SettingsController, {closure#1}(), {closure#3}(), PaymentService (+1 more)
+### Community 8 - ".config"
+Cohesion: 0.07
+Nodes (16): PackageColor, AMBER, BLUE, CYAN, EMERALD, GRAY, INDIGO, ORANGE (+8 more)
 
-### Community 9 - "ResellerHub: OrderProvisionStatus"
+### Community 9 - "ResellerInvoice"
 Cohesion: 0.02
-Nodes (25): {closure#3}(), ScanExpiringOrdersCommand, OrderProvisionStatus, FAILED, NOT_PROVISIONED, PROVISIONED, OrderStatus, ACTIVE (+17 more)
+Nodes (30): ApplyTaxModeAction, {closure#1}(), MarkInvoicePaidAction, {closure#3}(), RenewOrderAction, RequestOrderUpgradeAction, AuditDuplicateInvoicesCommand, {closure#1}() (+22 more)
 
-### Community 10 - "Illuminate\Support\ServiceProvider"
-Cohesion: 0.04
-Nodes (10): Theme, AppServiceProvider, ThemeServiceProvider, WidgetServiceProvider, WidgetRegistry, ClientsServiceProvider, PropertiesServiceProvider, OrderObserver (+2 more)
+### Community 11 - "Illuminate\Database\Eloquent\Relations\MorphTo"
+Cohesion: 0.06
+Nodes (5): ActivityLog, SourceDocument, ActivityLog, CustomField, CustomFieldValue
 
-### Community 11 - "Illuminate\Database\Eloquent\Relations\HasMany"
-Cohesion: 0.03
-Nodes (5): Module, DoctorProfile, {closure#1}(), SalesLossReason, BotQuestion
+### Community 12 - "ConcurrencyAndIdempotencyTest"
+Cohesion: 0.20
+Nodes (4): {closure#2}(), InvoiceNumberGenerator, OrderNumberGenerator, ConcurrencyAndIdempotencyTest
 
 ### Community 13 - "Illuminate\Database\Seeder"
 Cohesion: 0.03
-Nodes (30): DatabaseSeeder, ModuleSeeder, RegistrationRequestsPermissionsSeeder, RolePermissionSeeder, ThemeSeeder, AccountingPermissionsSeeder, PermissionsSeeder, ClientCallsDatabaseSeeder (+22 more)
+Nodes (28): Module, DatabaseSeeder, ModuleSeeder, RegistrationRequestsPermissionsSeeder, RolePermissionSeeder, ThemeSeeder, AccountingPermissionsSeeder, PermissionsSeeder (+20 more)
 
-### Community 14 - "Morilog\Jalali\Jalalian"
-Cohesion: 0.04
-Nodes (11): BookingLaboratoryDailyLog, BookingLaboratoryOrder, BookingLaboratoryStage, LaboratoryIntegrationService, {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}() (+3 more)
+### Community 14 - "Illuminate\Support\Facades\Schema"
+Cohesion: 0.01
+Nodes (43): {closure#1}(), {closure#1}(), {closure#1}(), {closure#1}(), {closure#1}(), {closure#2}(), {closure#1}(), {closure#1}() (+35 more)
 
-### Community 15 - "Accounting: MoneyCast"
+### Community 15 - "CurrencyService"
 Cohesion: 0.04
 Nodes (17): MoneyCast, BankController, {closure#1}(), {closure#1}(), {closure#2}(), {closure#3}(), ProformaController, StoreProformaRequest (+9 more)
 
-### Community 16 - ".log"
-Cohesion: 0.07
-Nodes (7): ProjectsMessageController, ProjectsPhaseController, {closure#4}(), ProjectActivity, ProjectPhase, ProjectObserver, ProjectTaskObserver
-
-### Community 17 - "User"
-Cohesion: 0.04
-Nodes (11): DeleteUser, User, ProjectsDocumentController, {closure#1}(), {closure#2}(), Project, ProjectPolicy, ResellerOrderPolicy (+3 more)
+### Community 16 - "ProjectActivity"
+Cohesion: 0.10
+Nodes (3): ProjectsPhaseController, ProjectActivity, ProjectPhase
 
 ### Community 18 - "Property"
-Cohesion: 0.03
-Nodes (14): {closure#1}(), GapGPTServiceProvider, GapGPTService, ContentAIService, PropertyController, AIController, HostController, PropertyController (+6 more)
+Cohesion: 0.07
+Nodes (5): PropertyController, RentalCalendarController, RentalController, Property, {closure#2}()
 
-### Community 20 - "Modules\ResellerHub\App\Http\Controllers\ResellerDashboardController"
-Cohesion: 0.08
-Nodes (4): CustomFieldController, CustomUserField, {closure#6}(), RenewTenantRequest
-
-### Community 21 - "Booking: ScheduleManager"
-Cohesion: 0.04
-Nodes (9): ScheduleManager, BookingAvailabilityRule, AvailabilityController, {closure#2}(), {closure#3}(), {closure#6}(), {closure#7}(), OnlineBookingController (+1 more)
-
-### Community 22 - "FollowUpController"
-Cohesion: 0.12
-Nodes (3): FollowUpPulseOverview, FollowUp, FollowUpController
-
-### Community 23 - "ClientCall"
-Cohesion: 0.10
-Nodes (3): ClientCallController, ClientCallObserver, ClientCall
-
-### Community 25 - "routes/admin.php"
+### Community 22 - "OrderStatus"
 Cohesion: 0.05
-Nodes (4): DashboardController, RegistrationRequestController, RegistrationRequest, ImageOptimizerService
+Nodes (12): OrderProvisionStatus, FAILED, NOT_PROVISIONED, PROVISIONED, OrderStatus, ACTIVE, CANCELLED, COMPLETED (+4 more)
 
-### Community 26 - "Booking: IsolateTenancyTablesComman"
-Cohesion: 0.03
-Nodes (26): IsolateTenancyTablesCommand, MergeVendors, BookingCleanupHolds, BookingDispatchReminders, BookingInstall, BookingUpdatePermissions, DirectAdminInstall, DirectAdminUpdatePermissions (+18 more)
+### Community 25 - "CustomUserField"
+Cohesion: 0.05
+Nodes (5): CustomFieldController, RegistrationRequestController, CustomUserField, RegistrationRequest, {closure#6}()
 
-### Community 27 - "Illuminate\Foundation\Http\FormRequest"
+### Community 26 - "Illuminate\Support\ServiceProvider"
 Cohesion: 0.02
-Nodes (21): StoreUserRequest, UpdateRoleRequest, UpdateUserRequest, StoreInvoiceRequest, StoreReceiptRequest, UpdateFundAccountRequest, StoreClientRequest, UpdateClientRequest (+13 more)
+Nodes (37): IsolateTenancyTablesCommand, MergeVendors, AppServiceProvider, JetstreamServiceProvider, ThemeServiceProvider, WidgetRegistry, ThemeComposer, BookingDispatchReminders (+29 more)
+
+### Community 27 - "SearchController.php"
+Cohesion: 0.05
+Nodes (7): DomainLog, SearchController, CheckDomainRequest, CheckIrDomainRequest, RegisterDomainRequest, ShowRegisterFormRequest, TransferDomainRequest
 
 ### Community 28 - "public"
 Cohesion: 0.05
@@ -1322,203 +1387,199 @@ Nodes (77): ResellerSettingKey, AllowCustomDomains, AutoSuspendExpired, BankAcco
 
 ### Community 30 - "ExpenseController.php"
 Cohesion: 0.03
-Nodes (18): FileSizeHelper, AccountingWalletHelper, {closure#13}(), {closure#25}(), ExpenseController, FundAccountController, {closure#1}(), StoreExpenseRequest (+10 more)
+Nodes (11): AccountingWalletHelper, CategoryController, DashboardController, {closure#13}(), StoreExpenseRequest, UpdateExpenseRequest, Category, FundAccount (+3 more)
 
-### Community 31 - "ResellerInvoice"
+### Community 31 - "Carbon\Carbon"
 Cohesion: 0.02
-Nodes (28): CancelInvoiceAction, {closure#1}(), {closure#1}(), MarkInvoicePaidAction, AuditDuplicateInvoicesCommand, {closure#1}(), PaymentRecordDTO, InvoicePaid (+20 more)
+Nodes (62): {closure#1}(), CreateInvoiceAction, {closure#1}(), UpdateInvoiceAction, {closure#1}(), {closure#1}(), CreateInvoiceDTO, InvoiceItemDTO (+54 more)
 
-### Community 32 - "ResellerHub: QuotaKey"
-Cohesion: 0.04
-Nodes (44): {closure#1}(), QuotaKey, Appointments, BookingProviders, ClientImportExport, ClientPortal, Clients, ClientWallet (+36 more)
-
-### Community 33 - "FortifyServiceProvider.php"
-Cohesion: 0.04
-Nodes (13): CreateNewUser, PasswordValidationRules, ResetUserPassword, UpdateUserPassword, RegisteredUserController, {closure#2}(), {closure#3}(), {closure#4}() (+5 more)
-
-### Community 34 - "ContentPost"
-Cohesion: 0.05
-Nodes (14): ContentFrontController, CommentForm, ContentEntity, ContentPost, ContentShortLink, ContentPostObserver, SchemaMarkupService, ShortLinkService (+6 more)
-
-### Community 35 - "Deal360View"
+### Community 33 - "Illuminate\Http\Resources\Json\AnonymousResourceCollection"
 Cohesion: 0.12
-Nodes (7): Deal360View, 1. Overview & Objectives, 2. Core Entities & Database Schema, 3. UI Components & Livewire Architecture, 5. Styling & Visual Guidelines, Design Specification: Sales Module, Key Interface Views:
+Nodes (6): CategoryApiController, EntityApiController, PostApiController, CategoryResource, EntityResource, PostResource
+
+### Community 35 - "App/Providers/MarketServiceProvider.php"
+Cohesion: 0.06
+Nodes (5): AttributeManager, BrandManager, ProductVariantSelector, ReviewManager, VendorProductReview
 
 ### Community 36 - "ResellerHub: PaymentRecorded"
-Cohesion: 0.08
-Nodes (16): PaymentRecorded, ProjectMessageEvent, ProjectTaskEvent, InvoiceCancelled, InvoiceCreated, InvoiceStatusChanged, OrderCreated, OrderProvisioned (+8 more)
+Cohesion: 0.11
+Nodes (14): PaymentRecorded, InvoiceCancelled, InvoiceCreated, InvoicePaid, InvoiceStatusChanged, OrderCreated, OrderProvisioned, OrderRenewed (+6 more)
 
-### Community 37 - "BookingAvailabilityException"
-Cohesion: 0.07
-Nodes (4): BookingAvailabilityException, BookingDashboardController, GlobalExceptionController, ProviderExceptionController
+### Community 37 - "Illuminate\Http\Request"
+Cohesion: 0.03
+Nodes (15): ModuleController, CheckInstallationStatus, TrustProxies, ReportController, ReportController, ClientInvoiceController, ContentFrontController, CheckVendorStatus (+7 more)
 
 ### Community 38 - "resources"
 Cohesion: 0.05
 Nodes (53): a(), Ae(), be(), bi(), c(), Ci(), De(), e() (+45 more)
 
-### Community 39 - "Illuminate\Support\Str"
-Cohesion: 0.02
-Nodes (13): AccountingSettings, {closure#1}(), {closure#2}(), ContractSetting, ProductService, Brand, Category, DisplayCategory (+5 more)
+### Community 39 - "ShippingManager.php"
+Cohesion: 0.04
+Nodes (4): ProductService, Brand, Category, DisplayCategory
 
 ### Community 40 - "Exception"
 Cohesion: 0.04
-Nodes (26): AppointmentObserver, BookingPaymentWalletService, TransactionStatus, CANCELLED, COMPLETED, FAILED, PENDING, TransactionType (+18 more)
-
-### Community 41 - "ClientSetting"
-Cohesion: 0.08
-Nodes (6): ClientSettingsController, ClientTermsController, ClientAuthSettings, ClientDashboardSettings, ClientUsernameSettings, ClientSetting
+Nodes (29): AppointmentObserver, BookingPaymentObserver, BookingPaymentWalletService, TransactionStatus, CANCELLED, COMPLETED, FAILED, PENDING (+21 more)
 
 ### Community 43 - "ResellerHub: ResellerAuditService"
+Cohesion: 0.09
+Nodes (21): {closure#1}(), {closure#1}(), {closure#10}(), {closure#11}(), {closure#12}(), {closure#13}(), {closure#14}(), {closure#15}() (+13 more)
+
+### Community 44 - "Modules\ResellerHub\App\Http\Requests\StoreTenantRequest"
+Cohesion: 0.06
+Nodes (11): {closure#17}(), {closure#1}(), {closure#2}(), {closure#3}(), StorePackageRequest, {closure#1}(), {closure#1}(), {closure#2}() (+3 more)
+
+### Community 45 - "StoreTenantRequest"
+Cohesion: 0.06
+Nodes (7): reseller_normalize_mobile(), QuickStoreResellerSubAccountRequest, StoreResellerSubAccountRequest, StoreTenantRequest, {closure#1}(), UpdateResellerSettingsRequest, UpdateResellerSubAccountRequest
+
+### Community 46 - "ContentPost"
 Cohesion: 0.07
-Nodes (24): {closure#1}(), ScanOverdueInvoicesCommand, {closure#1}(), {closure#10}(), {closure#11}(), {closure#12}(), {closure#13}(), {closure#14}() (+16 more)
+Nodes (9): CommentForm, ContentPost, ContentShortLink, ContentCategoryObserver, ContentPostObserver, SchemaMarkupService, ShortLinkService, {closure#1}() (+1 more)
 
-### Community 44 - "InvoiceStatus"
-Cohesion: 0.02
-Nodes (29): EventServiceProvider, {closure#1}(), CreateInvoiceDTO, InvoiceItemDTO, UpdateInvoiceDTO, {closure#1}(), InvoiceStatus, CANCELLED (+21 more)
-
-### Community 45 - "Illuminate\Validation\Rule"
-Cohesion: 0.04
-Nodes (9): BookingCategory, BookingForm, CategoryController, FormController, CategoryController, FormController, AuditLogger, CategoryService (+1 more)
-
-### Community 46 - "ContentPanelController"
-Cohesion: 0.04
-Nodes (16): PostStatus, Archived, Draft, Published, Scheduled, PostType, Page, Post (+8 more)
-
-### Community 47 - "BookingSetting"
-Cohesion: 0.03
-Nodes (4): LaboratoryManager, BookingSeeder, BookingSetting, ServiceAvailabilityController
+### Community 47 - "WorkflowEngine"
+Cohesion: 0.13
+Nodes (4): WorkflowCompleted, HandleSubWorkflowCompletion, {closure#6}(), WorkflowEngine
 
 ### Community 48 - "ProjectTask"
 Cohesion: 0.06
-Nodes (15): {closure#1}(), {closure#1}(), ProjectsChecklistCommentController, ProjectsChecklistController, ProjectsTaskCommentController, {closure#1}(), {closure#2}(), ProjectsTimeLogController (+7 more)
+Nodes (13): ProjectsChecklistCommentController, ProjectsChecklistController, ProjectsTaskCommentController, {closure#1}(), {closure#2}(), ProjectsTaskController, {closure#4}(), ProjectChecklistItem (+5 more)
 
-### Community 49 - "ProjectStatus"
-Cohesion: 0.04
-Nodes (8): InvalidStatusTransitionException, ProjectsController, ProjectsTaskController, StoreProjectRequest, StoreProjectTaskRequest, ProjectsService, StatusTransitionService, HandlesJalaliDate
+### Community 49 - "Projects/routes/web.php"
+Cohesion: 0.03
+Nodes (10): ProjectsRoleController, ProjectsSettingsController, ProjectDocument, ProjectRole, ProjectSetting, {closure#1}(), StoreProjectDocumentRequest, {closure#1}() (+2 more)
 
-### Community 50 - "ProvisionTenantJob.php"
-Cohesion: 0.12
-Nodes (7): GeneralNotification, SnoozeEscalationNotification, ExportTenantDataJob, ProvisionTenantJob, CreateFollowupTaskJob, SystemNotification, TestSampleTenantJob
+### Community 51 - "SalesDeal"
+Cohesion: 0.03
+Nodes (16): Deal360View, CampaignContact, {closure#1}(), {closure#2}(), SalesDeal, SalesPipeline, 1. Overview & Objectives, 2. Core Entities & Database Schema (+8 more)
 
-### Community 52 - "UserFactory.php"
-Cohesion: 0.16
-Nodes (4): CustomUserFieldFactory, TenantFactory, {closure#2}(), UserFactory
+### Community 52 - "BookingCategory"
+Cohesion: 0.08
+Nodes (6): BookingCategory, {closure#1}(), {closure#2}(), CategoryController, CategoryController, CategoryService
 
 ### Community 53 - "Reminders: Reminder"
 Cohesion: 0.06
-Nodes (10): ProcessRemindersCommand, {closure#1}(), {closure#2}(), Reminder, {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}() (+2 more)
+Nodes (10): {closure#1}(), {closure#2}(), Reminder, {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), ReminderController (+2 more)
 
-### Community 54 - "Tenant"
+### Community 54 - "QuotaKey"
 Cohesion: 0.04
-Nodes (15): Tenant, TenantModuleActivator, reseller_add_jalali_months(), reseller_can_tenant_renew(), reseller_currency_label(), reseller_format_jalali(), reseller_price(), reseller_tenant_renewal_periods() (+7 more)
+Nodes (45): {closure#1}(), QuotaKey, Appointments, BookingProviders, ClientImportExport, ClientPortal, Clients, ClientWallet (+37 more)
 
-### Community 55 - "Appointment"
-Cohesion: 0.06
-Nodes (12): Appointment, AppointmentController, AppointmentService, {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#5}() (+4 more)
-
-### Community 56 - "ResellerHub: PortalCheckoutRequest"
-Cohesion: 0.09
-Nodes (4): PortalCheckoutRequest, Checkout, {closure#1}(), {closure#2}()
+### Community 55 - ".current"
+Cohesion: 0.03
+Nodes (24): Appointment, BookingPayment, AppointmentController, AvailabilityController, ServiceController, AppointmentController, ProviderAvailabilityController, {closure#2}() (+16 more)
 
 ### Community 59 - "Services: InvoiceController"
-Cohesion: 0.07
-Nodes (14): {closure#1}(), {closure#2}(), {closure#20}(), {closure#1}(), {closure#36}(), {closure#37}(), {closure#38}(), {closure#40}() (+6 more)
-
-### Community 61 - "BookingService"
 Cohesion: 0.06
-Nodes (8): BookingServiceObserver, BookingService, BookingServiceProvider, ServiceController, ServiceController, ServiceExceptionController, BookingApiController, {closure#2}()
+Nodes (10): {closure#36}(), {closure#37}(), {closure#41}(), {closure#42}(), {closure#43}(), {closure#44}(), InvoiceController, Invoice (+2 more)
 
-### Community 62 - "BillingCycle"
+### Community 60 - "Vendor"
 Cohesion: 0.04
-Nodes (24): BillingCycle, ANNUAL, BIENNIAL, CUSTOM, LIFETIME, MONTHLY, QUARTERLY, SEMI_ANNUAL (+16 more)
+Nodes (9): VendorController, VendorForm, KycWizard, VendorObserver, {closure#1}(), Vendor, VendorDocument, CommissionService (+1 more)
 
-### Community 65 - "Workflow"
-Cohesion: 0.07
-Nodes (5): WorkflowsSeeder, WorkflowAction, WorkflowStage, {closure#11}(), WorkflowController
-
-### Community 66 - "Cheque"
+### Community 61 - "BookingSetting"
 Cohesion: 0.03
-Nodes (21): ChequeController, InvoiceController, ReceiptController, StoreChequeRequest, RecordPayment, AccountingSetting, ChequeService, {closure#1}() (+13 more)
+Nodes (8): LaboratoryManager, BookingHandlePaymentTimeouts, BookingSeeder, BookingSetting, BookingSettingsController, {closure#1}(), {closure#3}(), ServiceSyncService
 
-### Community 67 - "DaServer"
-Cohesion: 0.07
-Nodes (6): DaServer, DaSetting, ServerController, SettingController, StoreServerRequest, UpdateServerRequest
+### Community 62 - "Web/CheckoutModal.php"
+Cohesion: 0.06
+Nodes (5): OrderItem, OrderMeta, ShippingService, ProductVariant, ShippingMethod
 
-### Community 69 - "SmsResellerApiService"
-Cohesion: 0.17
-Nodes (3): SyncSmsResellerDataCommand, SmsResellerApiService, SmsResellerSyncService
+### Community 63 - "PopupCart"
+Cohesion: 0.08
+Nodes (3): AddToCartButton, CartCounter, PopupCart
 
-### Community 70 - "ResellerHub: Automated Tests"
+### Community 66 - "Illuminate\Validation\Rule"
+Cohesion: 0.04
+Nodes (8): StoreRoleRequest, StoreUserRequest, UpdateRoleRequest, UpdateUserRequest, StoreChequeRequest, StoreFundAccountRequest, StoreReceiptRequest, UpdateInvoiceRequest
+
+### Community 67 - "BillingCycle"
 Cohesion: 0.09
-Nodes (8): {closure#1}(), {closure#1}(), PortalCheckoutController, PaymentGatewayFactory, InvoicePaymentService, GatewayAmountResolver, GatewayAmountResolverTest, PaymentSecurityHardeningTest
+Nodes (10): BillingCycle, ANNUAL, BIENNIAL, CUSTOM, LIFETIME, MONTHLY, QUARTERLY, SEMI_ANNUAL (+2 more)
+
+### Community 68 - "Market: PendingSyncs"
+Cohesion: 0.07
+Nodes (4): PendingSyncs, CheckoutPage, {closure#2}(), ClientSyncService
+
+### Community 69 - "ResellerAuditService"
+Cohesion: 0.13
+Nodes (5): {closure#1}(), {closure#2}(), {closure#9}(), ResellerAuditService, TenantDataExporterService
+
+### Community 70 - "PaymentSecurityHardeningTest.php"
+Cohesion: 0.20
+Nodes (3): PortalCheckoutController, PaymentGatewayFactory, PaymentSecurityHardeningTest
 
 ### Community 72 - "SmsMessage"
-Cohesion: 0.10
+Cohesion: 0.09
 Nodes (5): SmsMessage, SmsSender, BaseDriver, DriverInterface, ExampleHttpDriver
 
 ### Community 73 - "caveman-compress/README.md"
 Cohesion: 0.08
 Nodes (22): Before / After, Benchmarks, How It Work, <img src="../../docs/assets/dancing-rock.svg" width="20" height="20" alt="rock"/> Caveman (421 tokens), Install, Original (827 tokens), Part of Caveman, Provider / model (+14 more)
 
-### Community 74 - "WorkflowEngine.php"
-Cohesion: 0.06
-Nodes (13): WorkflowInstance, WorkflowNode, NodeReached, PatientStageAdvanced, WorkflowCompleted, HandleNodeReached, HandleSubWorkflowCompletion, ConditionEvaluator (+5 more)
+### Community 74 - "WorkflowNode"
+Cohesion: 0.18
+Nodes (4): WorkflowNode, NodeReached, HandleNodeReached, {closure#7}()
 
-### Community 75 - "Document"
-Cohesion: 0.02
-Nodes (25): {closure#3}(), {closure#4}(), {closure#5}(), {closure#6}(), {closure#7}(), DocumentController, CrossModuleTransactionListener, RecordPaymentInAccounting (+17 more)
+### Community 75 - ".now"
+Cohesion: 0.05
+Nodes (11): {closure#1}(), ProjectsTimeLogController, ProjectTimeLog, {closure#2}(), {closure#1}(), {closure#4}(), ManualPaymentGuardTest, RenewalIdempotencyTest (+3 more)
 
 ### Community 76 - "Market: AdminOrderForm"
-Cohesion: 0.05
-Nodes (5): AdminOrderForm, CheckoutFormManager, {closure#7}(), CheckoutForm, CheckoutFormSeeder
+Cohesion: 0.06
+Nodes (4): AdminOrderForm, CheckoutFormManager, CheckoutForm, CheckoutFormSeeder
 
-### Community 77 - "Transaction"
-Cohesion: 0.13
-Nodes (3): {closure#4}(), Transaction, TransactionService
+### Community 77 - ".redirect"
+Cohesion: 0.02
+Nodes (19): RoleController, PageController, ChequeController, BookingAvailabilityException, GlobalExceptionController, ProviderExceptionController, ServiceExceptionController, SettingsController (+11 more)
+
+### Community 78 - "ChatWidget"
+Cohesion: 0.05
+Nodes (8): ChatWidget, AiAdapterInterface, LocalQnAAdapter, BotEngineService, {closure#5}(), {closure#7}(), EntityResolverService, IntentMatcherService
 
 ### Community 79 - ".getValue"
 Cohesion: 0.06
-Nodes (12): GeolocationHelper, MarketController, MarketSettings, CartManager, LocationModal, MarketSetting, {closure#1}(), {closure#2}() (+4 more)
+Nodes (12): GeolocationHelper, MasterProductController, MarketController, CheckMultiVendorMode, MarketSettings, CartManager, MarketSetting, {closure#1}() (+4 more)
 
-### Community 81 - "Illuminate\Foundation\Testing\RefreshDatabase"
-Cohesion: 0.16
-Nodes (4): ApiTokenPermissionsTest, CreateApiTokenTest, DeleteAccountTest, DeleteApiTokenTest
+### Community 81 - "TestCase"
+Cohesion: 0.04
+Nodes (18): RouteServiceProvider, PortalPricingSettingsTest, UserRoleManagementTest, ApiTokenPermissionsTest, AuthenticationTest, BookingSoloModeTest, BrowserSessionsTest, CreateApiTokenTest (+10 more)
 
 ### Community 82 - "Illuminate\Database\Eloquent\Builder"
 Cohesion: 0.07
 Nodes (26): {closure#1}(), {closure#10}(), {closure#5}(), {closure#6}(), {closure#7}(), {closure#8}(), {closure#9}(), {closure#2}() (+18 more)
 
-### Community 85 - ".config"
-Cohesion: 0.05
-Nodes (20): PackageColor, AMBER, BLUE, CYAN, EMERALD, GRAY, INDIGO, ORANGE (+12 more)
+### Community 83 - "OrderForm"
+Cohesion: 0.07
+Nodes (3): ProvinceCity, OrderForm, LocationModal
 
-### Community 86 - "ResellerHub: OnboardingWidget"
+### Community 88 - ".isEnabled"
 Cohesion: 0.08
-Nodes (3): PostEditor, reseller_fa_num(), OnboardingWidget
+Nodes (11): {closure#1}(), {closure#2}(), {closure#1}(), {closure#1}(), {closure#38}(), {closure#40}(), {closure#1}(), ApiKey (+3 more)
 
-### Community 88 - "ApiKey"
+### Community 89 - "MapIrMapService"
 Cohesion: 0.13
-Nodes (4): ApiKey, {closure#2}(), PropertyApiController, ApiKeyController
-
-### Community 89 - "TestCase"
-Cohesion: 0.12
-Nodes (5): UserRoleManagementTest, BookingSoloModeTest, ExampleTest, PasswordConfirmationTest, TestCase
+Nodes (4): {closure#1}(), MapIrMapService, MapServiceInterface, NeshanMapService
 
 ### Community 91 - "resources"
 Cohesion: 0.11
 Nodes (28): at(), d(), et(), ht(), a(), D(), e(), f() (+20 more)
 
-### Community 92 - "Payment"
-Cohesion: 0.14
-Nodes (3): {closure#1}(), {closure#2}(), Payment
-
-### Community 93 - ".redirect"
-Cohesion: 0.04
-Nodes (14): VersionControlController, InstallController, PageController, VersionLog, EnvWriter, GitHubService, ClientPortalAutoLoginController, TenantSsoController (+6 more)
-
-### Community 94 - "Booking: CureController"
+### Community 92 - "ProjectsController.php"
 Cohesion: 0.05
-Nodes (5): {closure#14}(), {closure#18}(), CureController, {closure#1}(), TreatmentPlan
+Nodes (4): ProjectsController, StoreProjectRequest, ProjectsService, HandlesJalaliDate
+
+### Community 93 - ".get"
+Cohesion: 0.16
+Nodes (4): reseller_jalali_year(), ResellerPackageController, {closure#1}(), {closure#1}()
+
+### Community 94 - "Project"
+Cohesion: 0.06
+Nodes (7): CheckOverdueTasksCommand, ProjectsDocumentController, ProjectsMessageController, Project, ProjectObserver, ProjectPolicy, {closure#2}()
+
+### Community 95 - "ProjectsTemplateController.php"
+Cohesion: 0.10
+Nodes (4): {closure#5}(), ProjectsTemplateController, ProjectTemplate, StoreProjectTemplateRequest
 
 ### Community 96 - "ResellerHub: PackageIcon"
 Cohesion: 0.05
@@ -1528,9 +1589,13 @@ Nodes (33): PackageIcon, ACADEMIC, BOOK, BRIEFCASE, BUILDING, CALCULATOR, CAMERA
 Cohesion: 0.05
 Nodes (39): deleteMethod, deleteRate, deleteRule, deleteSlot, deleteZone, deselectAllCities, deselectAllFilteredBrands, deselectAllFilteredCategories (+31 more)
 
-### Community 100 - "Vendor"
-Cohesion: 0.17
-Nodes (4): VendorObserver, {closure#1}(), Vendor, CommissionService
+### Community 99 - "Reseller"
+Cohesion: 0.02
+Nodes (20): AppLayout, GuestLayout, UserLayout, UpdateResellerSettingsAction, reseller_base_domain(), {closure#9}(), ResellerInvoiceController, ResellerPricingController (+12 more)
+
+### Community 100 - "FortifyServiceProvider.php"
+Cohesion: 0.10
+Nodes (7): RegisteredUserController, {closure#2}(), {closure#3}(), {closure#4}(), FortifyServiceProvider, toResponse(), {closure#1}()
 
 ### Community 101 - ".agents: AnthropicSdkUnavailable"
 Cohesion: 0.08
@@ -1538,103 +1603,119 @@ Nodes (15): AnthropicSdkUnavailable, call_anthropic_sdk(), call_claude(), call_c
 
 ### Community 102 - "ResellerHub: Money"
 Cohesion: 0.06
-Nodes (7): {closure#1}(), CurrencyContext, {closure#1}(), Money, {closure#1}(), {closure#2}(), MoneyAndPricingTest
+Nodes (6): CurrencyConverter, MoneyFormatter, {closure#1}(), Money, {closure#1}(), {closure#2}()
+
+### Community 103 - "WarehouseStock"
+Cohesion: 0.09
+Nodes (5): {closure#10}(), {closure#3}(), WarehouseStockService, WarehouseStock, {closure#1}()
 
 ### Community 104 - "Rules"
 Cohesion: 0.09
 Nodes (20): caveman, Example output, How to invoke, See also, What it does, 1. Answer first, 2. Kill ceremony, 3. Short word (+12 more)
 
+### Community 105 - "VersionControlController"
+Cohesion: 0.15
+Nodes (3): VersionControlController, VersionLog, GitHubService
+
 ### Community 106 - "ProjectStatus"
-Cohesion: 0.12
-Nodes (12): ProjectsStatusBuilderController, {closure#1}(), {closure#10}(), {closure#3}(), {closure#4}(), {closure#5}(), {closure#6}(), {closure#7}() (+4 more)
+Cohesion: 0.08
+Nodes (15): InvalidStatusTransitionException, ProjectsStatusBuilderController, {closure#1}(), {closure#10}(), {closure#3}(), {closure#4}(), {closure#5}(), {closure#6}() (+7 more)
 
 ### Community 107 - "TenancyModelRegistry"
-Cohesion: 0.06
-Nodes (9): TenancyServiceProvider, PermissionCatalog, TenancyModelRegistry, ResellerSettingController, {closure#1}(), PermissionCatalogSyncTest, RouteRegistrationTest, DummyExternalModel (+1 more)
-
-### Community 108 - "Market: CheckoutModal"
-Cohesion: 0.08
-Nodes (3): PendingSyncs, CheckoutModal, ClientSyncService
+Cohesion: 0.12
+Nodes (5): TenancyServiceProvider, TenancyModelRegistry, ResellerSettingController, DummyExternalModel, ZeroTouchTenancyTest
 
 ### Community 109 - "Controller"
-Cohesion: 0.03
-Nodes (23): Controller, FileUploadTrait, DoctorController, BookingSettingsController, ClientCallsController, DashboardController, ImportController, ShortLinkController (+15 more)
+Cohesion: 0.02
+Nodes (28): DashboardController, Controller, ImageOptimizerService, FileUploadTrait, DoctorController, ClientCallsController, ClientSettingsController, ClientTermsController (+20 more)
 
-### Community 110 - "WorkflowEngine"
-Cohesion: 0.14
-Nodes (4): TreatmentPlanObserver, ProcessWorkflowsCommand, Workflow, WorkflowEngine
+### Community 110 - "WorkflowTrigger"
+Cohesion: 0.16
+Nodes (15): {closure#1}(), {closure#11}(), {closure#12}(), {closure#14}(), {closure#15}(), {closure#16}(), {closure#17}(), {closure#2}() (+7 more)
 
 ### Community 111 - "Services: ServicePackageController"
 Cohesion: 0.09
 Nodes (5): {closure#11}(), {closure#5}(), ServicePackageController, ServicePackage, StoreServicePackageRequest
 
-### Community 112 - "ProjectsService.php"
-Cohesion: 0.04
-Nodes (11): ProjectsRoleController, ProjectsSettingsController, ProjectDocument, ProjectRole, ProjectSetting, {closure#1}(), StoreProjectDocumentRequest, {closure#1}() (+3 more)
+### Community 112 - "DaServer"
+Cohesion: 0.07
+Nodes (6): DaServer, DaSetting, ServerController, SettingController, StoreServerRequest, UpdateServerRequest
 
-### Community 113 - "MasterProduct"
+### Community 114 - "RecordAccountingDocumentRequest"
 Cohesion: 0.06
-Nodes (3): ProductQuestions, ProductReviews, MasterProduct
+Nodes (4): RecordAccountingDocumentRequest, RecordCumulativeReconciliationRequest, RecordPanelExpenseDocumentRequest, RecordUserIncomeDocumentRequest
 
 ### Community 115 - "ResellerSubAccount"
+Cohesion: 0.08
+Nodes (3): ResellerSubAccountController, ResellerSubAccount, SubAccountResolver
+
+### Community 119 - "ContentSettings"
+Cohesion: 0.08
+Nodes (3): ContentSettings, ThemeStudio, CrmThemeOverrideTest
+
+### Community 120 - "BookingLaboratoryStage"
+Cohesion: 0.15
+Nodes (6): BookingLaboratoryStage, {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#5}()
+
+### Community 122 - "Closure"
 Cohesion: 0.05
-Nodes (7): ResellerSubAccountController, ResellerSubAccount, SubAccountResolver, {closure#1}(), {closure#2}(), TenantDeletionService, HardDeleteSafetyGuardTest
+Nodes (14): EnsureTenantHasModule, IdentifyTenant, RedirectIfAuthenticated, RedirectIfInstalled, RedirectIfNotInstalled, ResolveTenantPath, EnforceOnboardingDependency, SplashRedirectMiddleware (+6 more)
 
-### Community 117 - "Projects: ProjectsTemplateControlle"
-Cohesion: 0.10
-Nodes (4): {closure#5}(), ProjectsTemplateController, ProjectTemplate, StoreProjectTemplateRequest
-
-### Community 120 - "WarehouseStockController.php"
-Cohesion: 0.04
-Nodes (7): {closure#10}(), {closure#3}(), WarehouseStockService, ProductVariant, WarehouseStock, WarehouseTransaction, WarehouseTransfer
-
-### Community 121 - "OnboardingRegistry"
-Cohesion: 0.17
-Nodes (3): {closure#1}(), {closure#2}(), OnboardingRegistry
-
-### Community 122 - "OnboardingStateService"
-Cohesion: 0.10
-Nodes (6): EnforceOnboardingDependency, TenantOnboardingState, {closure#2}(), {closure#4}(), {closure#5}(), OnboardingStateService
-
-### Community 123 - "ResellerHub: Automated Tests"
-Cohesion: 0.14
+### Community 123 - "HasResellerTest.php"
+Cohesion: 0.15
 Nodes (17): {closure#1}(), {closure#10}(), {closure#11}(), {closure#12}(), {closure#13}(), {closure#14}(), {closure#2}(), {closure#3}() (+9 more)
 
-### Community 124 - "Service"
-Cohesion: 0.16
-Nodes (3): Service, {closure#1}(), ServiceManagementService
+### Community 124 - "GatewayAmountResolver"
+Cohesion: 0.22
+Nodes (3): InvoicePaymentService, GatewayAmountResolver, GatewayAmountResolverTest
 
-### Community 125 - "AccountController.php"
-Cohesion: 0.09
-Nodes (3): StoreAccountRequest, SyncAccountsRequest, UpdateAccountClientRequest
+### Community 125 - "Illuminate\Bus\Queueable"
+Cohesion: 0.15
+Nodes (5): GeneralNotification, ExportTenantDataJob, CreateFollowupTaskJob, SystemNotification, TestSampleTenantJob
 
-### Community 127 - "RoleController.php"
-Cohesion: 0.04
-Nodes (4): RoleController, TenantRoleController, StoreRoleRequest, Role
+### Community 127 - "Order"
+Cohesion: 0.06
+Nodes (4): OrderDisplayHelper, {closure#12}(), OrderController, Order
 
 ### Community 128 - "Market: OrderController"
 Cohesion: 0.06
 Nodes (4): CheckoutController, OrderController, Order, PaymentService
 
-### Community 130 - "Services: Invoice"
-Cohesion: 0.07
-Nodes (6): {closure#1}(), {closure#2}(), Invoice, InvoicePolicy, {closure#3}(), InvoiceMergeService
+### Community 130 - "User"
+Cohesion: 0.03
+Nodes (15): CreateNewUser, PasswordValidationRules, ResetUserPassword, UpdateUserPassword, UpdateUserProfileInformation, DeleteUser, User, AuthServiceProvider (+7 more)
 
-### Community 131 - "ClientForm"
+### Community 131 - "BookingForm"
+Cohesion: 0.12
+Nodes (4): BookingForm, FormController, FormController, FormService
+
+### Community 132 - "Transaction"
+Cohesion: 0.12
+Nodes (3): {closure#4}(), Transaction, TransactionService
+
+### Community 133 - "GapGPTService"
 Cohesion: 0.09
-Nodes (5): ClientProfileController, ClientFormService, ClientForm, {closure#2}(), {closure#3}()
+Nodes (5): {closure#1}(), GapGPTServiceProvider, GapGPTService, ContentAIService, AIController
 
 ### Community 134 - "ResellerHub: OnboardingStepIcon"
 Cohesion: 0.07
 Nodes (24): {closure#1}(), OnboardingStepIcon, ADJUSTMENTS_HORIZONTAL, BUILDING_OFFICE, CALENDAR_DAYS, CHART_BAR, CHAT_BUBBLE, CHECK_CIRCLE (+16 more)
 
-### Community 138 - "ResellerBillingService"
-Cohesion: 0.04
-Nodes (27): ApplyTaxModeAction, {closure#1}(), CreateInvoiceAction, {closure#1}(), UpdateInvoiceAction, {closure#1}(), {closure#3}(), RenewOrderAction (+19 more)
-
-### Community 139 - "DirectAdminClient"
+### Community 135 - "ClientCall"
 Cohesion: 0.10
-Nodes (6): SyncDirectAdminCommand, DaAccount, AccountController, AccountDetailController, DashboardController, DirectAdminClient
+Nodes (3): ClientCallController, ClientCallObserver, ClientCall
+
+### Community 137 - "Status"
+Cohesion: 0.06
+Nodes (5): StatusBuilderController, Status, StatusBuilderService, ServicesDatabaseSeeder, StatusSeeder
+
+### Community 138 - "InvoiceItemType"
+Cohesion: 0.12
+Nodes (8): InvoiceItemType, CUSTOM, CUSTOM_DOMAIN, MODULE, PACKAGE, PACKAGE_UPGRADE, SETUP_FEE, WHITE_LABEL
+
+### Community 140 - ".setTenant"
+Cohesion: 0.16
+Nodes (3): MultiTenancyDataIsolationTest, performUpload(), TenantArchitectureAdvancementsTest
 
 ### Community 141 - "ResellerHub: OnboardingStepPreset"
 Cohesion: 0.10
@@ -1650,75 +1731,87 @@ Nodes (28): applyWaitlistFilter, bookFromWaitlist, cancelAppointment, closeDetai
 
 ### Community 144 - "ResellerPackage"
 Cohesion: 0.06
-Nodes (6): {closure#2}(), {closure#3}(), ResellerPackage, PackagePresenter, CheckoutPricingService, PriceResolver
+Nodes (8): {closure#2}(), {closure#3}(), {closure#1}(), {closure#2}(), ResellerPackage, CheckoutPricingService, PriceResolver, MoneyAndPricingTest
 
-### Community 146 - "WorkflowTrigger"
+### Community 145 - "TenantManager"
+Cohesion: 0.03
+Nodes (4): TenantManager, {closure#11}(), {closure#3}(), TenantSubdomainUrl
+
+### Community 146 - "AccountController.php"
+Cohesion: 0.07
+Nodes (5): DaAccount, AccountController, StoreAccountRequest, SyncAccountsRequest, UpdateAccountClientRequest
+
+### Community 147 - "OnboardingStep"
 Cohesion: 0.16
-Nodes (15): {closure#1}(), {closure#11}(), {closure#12}(), {closure#14}(), {closure#15}(), {closure#16}(), {closure#17}(), {closure#2}() (+7 more)
-
-### Community 147 - "ResellerHub: OnboardingStep"
-Cohesion: 0.17
-Nodes (7): {closure#1}(), {closure#1}(), OnboardingStep, COMPLETE_KYC, CONFIGURE_BRANDING, CONFIGURE_DOMAIN, SELECT_PACKAGE
+Nodes (6): {closure#1}(), OnboardingStep, COMPLETE_KYC, CONFIGURE_BRANDING, CONFIGURE_DOMAIN, SELECT_PACKAGE
 
 ### Community 148 - "UiRegressionGuardTest"
-Cohesion: 0.07
-Nodes (7): OnboardingTourStatus, COMPLETED, IN_PROGRESS, PENDING, POSTPONED, StorePackageRequest, UiRegressionGuardTest
+Cohesion: 0.08
+Nodes (6): OnboardingTourStatus, COMPLETED, IN_PROGRESS, PENDING, POSTPONED, UiRegressionGuardTest
 
-### Community 151 - "TenantManager"
+### Community 152 - "Modules\ResellerHub\App\Http\Controllers\TenantProvisioningController"
 Cohesion: 0.04
-Nodes (8): TenantManager, EnforceTenantQuotaMiddleware, TenantSubdomainUrl, MultiTenancyDataIsolationTest, {closure#1}(), {closure#2}(), performUpload(), TenantArchitectureAdvancementsTest
+Nodes (9): {closure#14}(), {closure#16}(), {closure#8}(), TenantProvisioningController, ResellerModulePricing, {closure#1}(), ModuleTitleResolver, TenantProvisioningService (+1 more)
 
-### Community 152 - "EmailVerificationTest.php"
-Cohesion: 0.14
-Nodes (3): RouteServiceProvider, AuthenticationTest, EmailVerificationTest
+### Community 155 - "TenantProvisioningProgress"
+Cohesion: 0.12
+Nodes (4): ProjectMessageEvent, ProjectTaskEvent, TenantProvisioningProgress, {closure#1}()
 
-### Community 159 - "Illuminate\Database\Eloquent\Relations\MorphTo"
-Cohesion: 0.09
-Nodes (4): ActivityLog, SourceDocument, ActivityLog, CustomField
-
-### Community 161 - "DomainManager: SearchController"
+### Community 158 - "Morilog\Jalali\Jalalian"
 Cohesion: 0.05
-Nodes (8): DomainLog, DomainRecord, SearchController, CheckDomainRequest, CheckIrDomainRequest, RegisterDomainRequest, ShowRegisterFormRequest, TransferDomainRequest
+Nodes (3): PropertyOwner, PropertySetting, PeriodBucketBuilder
+
+### Community 159 - "Illuminate\Database\Eloquent\Relations\HasMany"
+Cohesion: 0.03
+Nodes (9): DoctorProfile, {closure#1}(), ContentCategory, CampaignController, CampaignReportController, Campaign, SalesLossReason, BotQuestion (+1 more)
+
+### Community 160 - "Service"
+Cohesion: 0.06
+Nodes (6): ServicesController, Service, StoreServiceRequest, UpdateServiceRequest, {closure#1}(), ServiceManagementService
+
+### Community 161 - "Illuminate\Routing\Controller"
+Cohesion: 0.06
+Nodes (9): AccountingController, ClientPortalAutoLoginController, DashboardController, SettingController, NotificationPreferenceController, GapGPTLog, GapGPTLogController, UserPaymentSettingsController (+1 more)
 
 ### Community 162 - "Task"
-Cohesion: 0.09
-Nodes (8): {closure#1}(), {closure#2}(), TaskObserver, {closure#1}(), {closure#2}(), {closure#3}(), Task, TaskController
+Cohesion: 0.11
+Nodes (7): {closure#1}(), {closure#2}(), TaskObserver, {closure#1}(), {closure#2}(), {closure#3}(), Task
 
-### Community 163 - "CheckoutPage.php"
-Cohesion: 0.04
-Nodes (7): VendorProductController, {closure#4}(), {closure#2}(), OrderItem, OrderMeta, StockService, VendorProduct
+### Community 163 - "WorkflowStage"
+Cohesion: 0.13
+Nodes (4): SeedResellerWorkflows, WorkflowsSeeder, WorkflowAction, WorkflowStage
 
-### Community 164 - "AccountStatus"
-Cohesion: 0.20
-Nodes (3): AccountStatus, ACTIVE, SUSPENDED
+### Community 167 - "MasterProduct"
+Cohesion: 0.06
+Nodes (3): MasterProductForm, ProductReviews, MasterProduct
 
-### Community 166 - "SmsManager"
-Cohesion: 0.16
-Nodes (3): ProcessScheduledSms, {closure#1}(), SmsManager
-
-### Community 167 - "2026_09_16_000022_add_period_prices_and_renewal_fields.php"
-Cohesion: 0.17
-Nodes (6): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#6}(), {closure#8}()
+### Community 168 - ".session"
+Cohesion: 0.05
+Nodes (5): CommentManager, PostEditor, RedirectManager, InteractionsManager, ProductQuestions
 
 ### Community 169 - "ResellerHub: PackagePriceType"
-Cohesion: 0.12
-Nodes (4): PackagePriceType, FREE, ONE_TIME, SUBSCRIPTION
+Cohesion: 0.07
+Nodes (7): PackageDiscountType, AMOUNT, PackagePriceType, FREE, ONE_TIME, SUBSCRIPTION, reseller_package_meta()
 
-### Community 171 - "CronTask"
-Cohesion: 0.08
-Nodes (4): Kernel, CronManagementController, CronTask, CronService
+### Community 170 - "NoInvoiceProvisioningTest"
+Cohesion: 0.06
+Nodes (17): DashboardController, MenuCustomizationService, ModuleMenuService, راهنمای جامع معماری، استقرار در پروداکشن و بازبینی فنی, مستند فنی معماری چندمستأجری (Multi-Tenancy) و ماژول نمایندگی فروش (ResellerHub), ۱. تنظیم دامنه‌های مرکزی در فایل `.env` سرور, ۱. خلاصه معماری (Architecture Overview), ۱. میدلور `App\Http\Middleware\IdentifyTenant` (+9 more)
+
+### Community 171 - "Illuminate\Http\JsonResponse"
+Cohesion: 0.07
+Nodes (8): CalendarController, {closure#2}(), ProjectsMessageSseController, {closure#1}(), ProjectsTaskSseController, ResellerHubController, TenantDataExportController, MenuManagerController
 
 ### Community 172 - "Illuminate\Support\Collection"
 Cohesion: 0.05
-Nodes (6): CalendarEventSource, HandlesCustomUserFields, CalendarController, UserCustomValue, CalendarEventService, {closure#1}()
+Nodes (7): CalendarEventSource, {closure#13}(), {closure#7}(), UserController, HandlesCustomUserFields, CalendarEventService, {closure#1}()
 
-### Community 173 - "TenantStorage"
-Cohesion: 0.12
-Nodes (4): tenant_cache(), tenant_storage(), TenantCache, TenantStorage
+### Community 173 - "Tenant"
+Cohesion: 0.04
+Nodes (12): Tenant, TenantModuleActivator, reseller_can_tenant_renew(), reseller_currency_label(), reseller_format_jalali(), reseller_price(), reseller_tenant_renewal_periods(), ResellerDashboardController (+4 more)
 
-### Community 175 - "StepData"
-Cohesion: 0.15
-Nodes (9): JourneyData, StepData, OnboardingJourney, CRM_SETUP, {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}() (+1 more)
+### Community 175 - "Properties/Routes/web.php"
+Cohesion: 0.09
+Nodes (3): HostController, {closure#1}(), SettingsController
 
 ### Community 176 - "API Contracts (نمونه Request/Response)"
 Cohesion: 0.13
@@ -1728,12 +1821,12 @@ Nodes (14): 1) Slots, 2) Online booking - Start Hold, 3) Online booking - Confir
 Cohesion: 0.10
 Nodes (21): devDependencies, autoprefixer@^10.4.7, axios@^1.6.4, laravel-vite-plugin@^1.0.0, postcss@^8.4.14, tailwindcss@^4.1.17, @tailwindcss/forms@^0.5.2, @tailwindcss/postcss@^4.1.17 (+13 more)
 
-### Community 180 - "App\Tenancy\TenancyModelRegistry"
-Cohesion: 0.13
+### Community 180 - "TenantScope"
+Cohesion: 0.15
 Nodes (8): {closure#1}(), {closure#2}(), {closure#3}(), TenantScope, {closure#2}(), {closure#3}(), BelongsToTenant, ۲. لایه تفکیک کوئری‌ها (Eloquent Global Scope)
 
 ### Community 181 - "Core App: GoogleCalendarToken"
-Cohesion: 0.11
+Cohesion: 0.12
 Nodes (3): GoogleCalendarToken, GoogleCalendarService, GoogleCalendarController
 
 ### Community 183 - "package.json: AlignClass"
@@ -1741,28 +1834,32 @@ Cohesion: 0.11
 Nodes (19): dependencies, alpinejs@^3.15.1, chart.js@^4.5.1, leaflet@^1.9.4, leaflet-geosearch@^4.0.0, @majidh1/jalalidatepicker@^0.9.12, puppeteer@^22.15.0, quill@^2.0.3 (+11 more)
 
 ### Community 184 - "get_setting"
-Cohesion: 0.13
-Nodes (7): OtpLoginController, {closure#1}(), ContractRuleController, ContractRule, get_setting(), is_panel_indexing_blocked(), is_public_indexing_blocked()
+Cohesion: 0.10
+Nodes (9): OtpLoginController, {closure#1}(), AccountingSettingController, ContractRuleController, ContractRule, get_setting(), is_panel_indexing_blocked(), is_public_indexing_blocked() (+1 more)
 
-### Community 188 - "CockpitGoalManager"
-Cohesion: 0.11
-Nodes (3): {closure#1}(), CockpitGoalManager, CockpitGoal
+### Community 186 - "2026_09_16_000022_add_period_prices_and_renewal_fields.php"
+Cohesion: 0.17
+Nodes (6): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#6}(), {closure#8}()
 
-### Community 191 - "Livewire\Component"
-Cohesion: 0.03
-Nodes (10): AgentCallPerformance, DailyCallOverview, AgentCallPerformance, ProductVariantSelector, CartCounter, PropertyCreateWizard, TenantProvisioningLoader, CustomerTab (+2 more)
+### Community 190 - "WorkflowEngine.php"
+Cohesion: 0.16
+Nodes (4): ConditionEvaluator, {closure#1}(), {closure#8}(), {closure#9}()
 
 ### Community 192 - "Core App: ThemeManager"
-Cohesion: 0.18
+Cohesion: 0.16
 Nodes (4): {closure#1}(), ThemeManager, ViewOverrideResolver, ThemeOverrideViewFinder
 
 ### Community 196 - "ResellerHub: ResellerHub/composerjson"
 Cohesion: 0.10
 Nodes (19): authors, autoload, autoload-dev, psr-4, psr-4, description, extra, laravel (+11 more)
 
-### Community 201 - "BookingServiceProvider"
+### Community 198 - "OnboardingRegistry"
 Cohesion: 0.20
-Nodes (3): BookingHandlePaymentTimeouts, BookingServiceProvider, ServiceSyncService
+Nodes (3): JourneyData, {closure#1}(), OnboardingRegistry
+
+### Community 200 - "Payment"
+Cohesion: 0.14
+Nodes (3): {closure#1}(), {closure#2}(), Payment
 
 ### Community 202 - "cavecrew/SKILL.md"
 Cohesion: 0.14
@@ -1772,9 +1869,13 @@ Nodes (12): cavecrew, Example chaining, How to invoke, Model overrides, See also
 Cohesion: 0.14
 Nodes (12): caveman-help, Example output, How to invoke, See also, What it does, Caveman Help, Configure Default Mode, Deactivate (+4 more)
 
-### Community 205 - "ResellerHelper"
-Cohesion: 0.02
-Nodes (29): CurrencyConverter, reseller_calculate_tax(), reseller_clean_domain(), reseller_compute_totals(), reseller_currency_conversion_factor(), reseller_days_remaining(), reseller_en_num(), reseller_format_text_dates() (+21 more)
+### Community 204 - "WarehouseStockController.php"
+Cohesion: 0.05
+Nodes (5): VendorProductController, {closure#4}(), {closure#7}(), StockService, VendorProduct
+
+### Community 205 - "TenantStorage"
+Cohesion: 0.19
+Nodes (3): tenant_cache(), tenant_storage(), TenantStorage
 
 ### Community 206 - ".agents: Path"
 Cohesion: 0.20
@@ -1788,6 +1889,10 @@ Nodes (17): completeCustomStep, dismiss, handleQuotaLockedStep, closeCustomField
 Cohesion: 0.11
 Nodes (18): require, blade-ui-kit/blade-heroicons, google/apiclient, guzzlehttp/guzzle, intervention/image, laravel/fortify, laravel/framework, laravel/jetstream (+10 more)
 
+### Community 210 - "HardDeleteSafetyGuardTest"
+Cohesion: 0.22
+Nodes (3): {closure#1}(), TenantDeletionService, HardDeleteSafetyGuardTest
+
 ### Community 213 - "package.json"
 Cohesion: 0.11
 Nodes (17): author, bugs, url, description, homepage, keywords, license, main (+9 more)
@@ -1796,13 +1901,9 @@ Nodes (17): author, bugs, url, description, homepage, keywords, license, main (+
 Cohesion: 0.18
 Nodes (6): detect_file_type(), _is_code_line(), is_generated(), _is_json_content(), _is_yaml_content(), should_compress()
 
-### Community 215 - "Throwable"
-Cohesion: 0.03
-Nodes (7): {closure#1}(), Handler, {closure#5}(), ActivityLogger, Setting, SmsOtp, GET /_e2e/login()
-
-### Community 216 - "Illuminate\Http\Resources\Json\JsonResource"
-Cohesion: 0.12
-Nodes (6): CategoryApiController, EntityApiController, PostApiController, CategoryResource, EntityResource, PostResource
+### Community 215 - "CronTask"
+Cohesion: 0.07
+Nodes (4): Kernel, CronManagementController, CronTask, CronService
 
 ### Community 217 - "ClientCalls: ClientCalls/packagejso"
 Cohesion: 0.15
@@ -1812,6 +1913,10 @@ Nodes (16): devDependencies, axios@^1.1.2, laravel-vite-plugin@^0.7.5, postcss@^
 Cohesion: 0.15
 Nodes (16): devDependencies, axios@^1.1.2, laravel-vite-plugin@^0.7.5, postcss@^8.3.7, sass@^1.69.5, vite@^4.0.0, axios, laravel-vite-plugin (+8 more)
 
+### Community 222 - "TenantArchitectureAdvancementsTest.php"
+Cohesion: 0.15
+Nodes (5): {closure#1}(), {closure#4}(), {closure#5}(), {closure#6}(), {closure#2}()
+
 ### Community 224 - "Projects: Projects/packagejson"
 Cohesion: 0.15
 Nodes (16): devDependencies, axios@^1.1.2, laravel-vite-plugin@^0.7.5, postcss@^8.3.7, sass@^1.69.5, vite@^4.0.0, axios, laravel-vite-plugin (+8 more)
@@ -1820,9 +1925,9 @@ Nodes (16): devDependencies, axios@^1.1.2, laravel-vite-plugin@^0.7.5, postcss@^
 Cohesion: 0.12
 Nodes (10): BrandColor, CLASSIC_INDIGO, CORPORATE_NAVY, DARK_SLATE, HEALTH_CRIMSON, HEALTH_EMERALD, MEDICAL_CYAN, MODERN_AMBER (+2 more)
 
-### Community 226 - "ResellerHub: InvoiceItemType"
-Cohesion: 0.12
-Nodes (8): InvoiceItemType, CUSTOM, CUSTOM_DOMAIN, MODULE, PACKAGE, PACKAGE_UPGRADE, SETUP_FEE, WHITE_LABEL
+### Community 227 - "ResellerHub: ResellerQuotaServiceProvider"
+Cohesion: 0.16
+Nodes (3): {closure#4}(), {closure#5}(), ResellerQuotaServiceProvider
 
 ### Community 228 - "ResellerHub: ResellerHub/packagejson"
 Cohesion: 0.15
@@ -1848,10 +1953,6 @@ Nodes (16): devDependencies, axios@^1.1.2, laravel-vite-plugin@^0.7.5, postcss@^
 Cohesion: 0.12
 Nodes (9): build_compress_prompt(), build_fix_prompt(), _compress_file_locked(), find_credential(), _is_smaller_than_body(), mask_code_blocks(), read_source(), restore_code_blocks() (+1 more)
 
-### Community 235 - "CommentManager"
-Cohesion: 0.11
-Nodes (6): CommentStatus, Approved, Pending, Spam, CommentManager, CommentList
-
 ### Community 236 - "ClientCalls: ClientCalls/composerjs"
 Cohesion: 0.12
 Nodes (15): authors, autoload, autoload-dev, psr-4, psr-4, description, extra, laravel (+7 more)
@@ -1868,21 +1969,25 @@ Nodes (15): authors, autoload, autoload-dev, psr-4, psr-4, description, extra, l
 Cohesion: 0.12
 Nodes (15): authors, autoload, autoload-dev, psr-4, psr-4, description, extra, laravel (+7 more)
 
-### Community 241 - "Notifications: PruneNotificationsCo"
-Cohesion: 0.19
-Nodes (3): BroadcastNotificationController, {closure#1}(), NotificationService
+### Community 241 - "NotificationService"
+Cohesion: 0.10
+Nodes (6): PruneNotificationsCommand, NotificationUserSetting, BroadcastNotificationController, {closure#1}(), NotificationsServiceProvider, NotificationService
 
 ### Community 242 - "Projects: Projects/composerjson"
 Cohesion: 0.12
 Nodes (15): authors, autoload, autoload-dev, psr-4, psr-4, description, extra, laravel (+7 more)
 
 ### Community 243 - "ResellerHub: OnboardingInternalRoute"
-Cohesion: 0.09
-Nodes (14): {closure#1}(), OnboardingInternalRoute, BOOKING_CALENDAR, BOOKING_PROVIDERS, CLIENTS_CREATE, CUSTOM, INVOICES_CREATE, SETTINGS (+6 more)
+Cohesion: 0.13
+Nodes (13): {closure#1}(), OnboardingInternalRoute, BOOKING_CALENDAR, BOOKING_PROVIDERS, CLIENTS_CREATE, CUSTOM, INVOICES_CREATE, SETTINGS (+5 more)
 
 ### Community 244 - "Sales: Sales/composerjson"
 Cohesion: 0.12
 Nodes (15): authors, autoload, autoload-dev, psr-4, psr-4, description, extra, laravel (+7 more)
+
+### Community 245 - "TreatmentPlan"
+Cohesion: 0.04
+Nodes (6): {closure#14}(), {closure#18}(), CureController, TreatmentPlanWorkflowController, TreatmentPlan, TreatmentPlanWorkflowBinding
 
 ### Community 246 - "Services: Services/composerjson"
 Cohesion: 0.12
@@ -1896,17 +2001,13 @@ Nodes (15): authors, autoload, autoload-dev, psr-4, psr-4, description, extra, l
 Cohesion: 0.12
 Nodes (15): authors, autoload, autoload-dev, psr-4, psr-4, description, extra, laravel (+7 more)
 
-### Community 250 - "App\Models\Tenant"
-Cohesion: 0.06
-Nodes (7): {closure#1}(), {closure#4}(), {closure#5}(), {closure#6}(), PropagateTenantContext, TenantAwareJob, TenantRoleManagementTest
+### Community 249 - "SmsResellerController.php"
+Cohesion: 0.05
+Nodes (7): SaveMarginPricesRequest, SaveSettingsRequest, SmsResellerSetting, SmsResellerUserCredit, SmsResellerUserPayment, SmsResellerApiService, SmsResellerSyncService
 
 ### Community 251 - "Market: resources"
 Cohesion: 0.13
 Nodes (14): approveTransferRequest, clearWarehouseFilter, closeRejectTransferForm, closeTransactionForm, closeTransferForm, cancelEdit, setTab, openRejectTransferForm (+6 more)
-
-### Community 252 - "MapIrMapService"
-Cohesion: 0.13
-Nodes (4): {closure#1}(), MapIrMapService, MapServiceInterface, NeshanMapService
 
 ### Community 255 - "ResellerHub: ResellerHub/resources/views/user/settings/indexbladephp"
 Cohesion: 0.13
@@ -1920,16 +2021,16 @@ Nodes (14): layouts.user, partials.jalali-date-picker, resellerhub::partials.pre
 Cohesion: 0.15
 Nodes (12): 1. Classical register, 2. Particles carry structure, 3. Each fact once, 4. Payload in original script, 5. Tool runs, 6. Never perform, Floor, megacave (+4 more)
 
-### Community 259 - "Modules\ResellerHub\App\Http\Controllers\TenantProvisioningController"
-Cohesion: 0.03
-Nodes (20): راهنمای جامع معماری، استقرار در پروداکشن و بازبینی فنی, مستند فنی معماری چندمستأجری (Multi-Tenancy) و ماژول نمایندگی فروش (ResellerHub), ۱. تنظیم دامنه‌های مرکزی در فایل `.env` سرور, ۱. خلاصه معماری (Architecture Overview), ۲. تنظیم وب‌سرور Nginx (وایلدکارت سابدامین), ۳. اجرای مایگریشن‌های پایگاه‌داده, ۴. دستورات برگشت‌پذیری (Rollback Safety), ۴. ماژول اختصاصی نمایندگی (`Modules/ResellerHub`) (+12 more)
+### Community 259 - ".store"
+Cohesion: 0.16
+Nodes (3): SmsLogController, SmsSendController, SmsSettingsController
 
 ### Community 260 - "Rules"
 Cohesion: 0.15
 Nodes (12): 1. Fragments, 2. One word when one word is enough, 3. Each fact once, 4. Cut conjunctions only when order survives, 5. Tool runs, 6. Never perform, Floor, Persistence (+4 more)
 
 ### Community 261 - "JalaliHolidayService"
-Cohesion: 0.17
+Cohesion: 0.15
 Nodes (8): JalaliHolidayService, مستندات فنی: بانک اطلاعاتی محلی مناسبت‌ها و تعطیلات (persian_holidays.json), ۱. منبع اصلی داده‌ها (Data Origin), ۲. ساختار پایگاه داده مرجع (SQLite Schema), ۳. مراحل پاک‌سازی و تبدیل داده‌ها (Data Extraction Pipeline), ۴. نمونه فرمت خروجی فایل JSON, ۵. نحوه عملکرد در پروژه لاراول, ۶. اسکریپت به‌روزرسانی برای سال‌های جدید (برای آینده)
 
 ### Community 262 - "Booking: resources"
@@ -1937,20 +2038,16 @@ Cohesion: 0.14
 Nodes (13): clearSelectedClient, deleteOrder, closeDetailModal, confirmReceiveOrder, confirmStageCompletion, openCreateModal, openDetailModal, openEditModal (+5 more)
 
 ### Community 263 - "OnboardingStepStatus"
-Cohesion: 0.18
+Cohesion: 0.20
 Nodes (4): OnboardingStepStatus, COMPLETED, PENDING, SKIPPED
 
 ### Community 266 - "Booking: resources"
 Cohesion: 0.14
 Nodes (13): closeDetailModal, confirmReceiveOrder, confirmStageCompletion, openDetailModal, openReceiveModal, openStageModal, setDetailTab, openLogModal (+5 more)
 
-### Community 269 - "0001_01_01_000002_create_jobs_table.php"
-Cohesion: 0.33
-Nodes (3): {closure#1}(), {closure#2}(), {closure#3}()
-
-### Community 276 - "ModuleMenuService"
-Cohesion: 0.09
-Nodes (5): DashboardController, MenuCustomizationService, ModuleMenuService, {closure#11}(), {closure#3}()
+### Community 267 - "UserFactory.php"
+Cohesion: 0.16
+Nodes (4): CustomUserFieldFactory, TenantFactory, {closure#2}(), UserFactory
 
 ### Community 277 - "Sales: resources"
 Cohesion: 0.15
@@ -1984,17 +2081,21 @@ Nodes (3): md, skillFile, skill
 Cohesion: 0.12
 Nodes (13): BookingPermissionsSeeder, 1) category_management_scope, 2) form_management_scope, 3) service_category_selection_scope و service_form_selection_scope, 4) allow_role_service_creation + allowed_roles, Permissionهای استفاده‌شده در UI/User routes, RBAC (نقش‌ها و مجوزها), Scope Rules (طبق Spec) (+5 more)
 
-### Community 293 - "Modules\ResellerHub\App\Http\Controllers\ResellerSubAccountController"
-Cohesion: 0.03
-Nodes (26): AppLayout, GuestLayout, UserLayout, ThemeComposer, reseller_base_domain(), reseller_jalali_year(), ResellerInvoiceController, {closure#1}() (+18 more)
+### Community 291 - "Projects: Installer"
+Cohesion: 0.15
+Nodes (3): ProjectsInstall, ProjectsUpdatePermissions, Installer
+
+### Community 293 - "Modules\ResellerHub\App\Http\Controllers\ResellerPackageController"
+Cohesion: 0.14
+Nodes (5): {closure#1}(), {closure#10}(), {closure#5}(), {closure#1}(), {closure#13}()
 
 ### Community 294 - "QueryBudgetTest.php"
 Cohesion: 0.13
 Nodes (6): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#5}(), {closure#6}()
 
-### Community 296 - "Reseller"
-Cohesion: 0.05
-Nodes (8): UpdateResellerSettingsAction, UpdateResellerSettingsRequest, {closure#1}(), Reseller, {closure#7}(), HasReseller, PortalPricingSettingsTest, QueryBudgetTest
+### Community 295 - "Cheque"
+Cohesion: 0.04
+Nodes (17): InvoiceController, ReceiptController, AccountingSetting, ChequeService, {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}() (+9 more)
 
 ### Community 297 - "caveman-commit"
 Cohesion: 0.18
@@ -2020,17 +2121,13 @@ Nodes (10): addAttribute, addVariantField, closeDeleteModal, confirmDelete, clos
 Cohesion: 0.18
 Nodes (10): autoload-dev, psr-4, description, keywords, license, minimum-stability, name, prefer-stable (+2 more)
 
-### Community 308 - "database"
-Cohesion: 0.25
-Nodes (10): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#5}(), {closure#6}(), down(), dropIndexIfExists() (+2 more)
-
 ### Community 309 - "database"
 Cohesion: 0.24
 Nodes (9): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#5}(), {closure#6}(), dropIndexIfExists(), hasIndex() (+1 more)
 
-### Community 311 - "SettingsController"
-Cohesion: 0.10
-Nodes (4): GapGPTLog, GapGPTLogController, SettingsController, UserPaymentSettingsController
+### Community 310 - "Contract"
+Cohesion: 0.05
+Nodes (9): ContractController, ContractSettingController, ContractTemplateController, Contract, ContractSetting, ContractTemplate, ContractableEntity, ContractEngine (+1 more)
 
 ### Community 313 - "Market: resources"
 Cohesion: 0.18
@@ -2048,9 +2145,9 @@ Nodes (10): layouts.user, partials.jalali-date-picker, resellerhub::user.package
 Cohesion: 0.18
 Nodes (10): layouts.user, partials.jalali-date-picker, resellerhub::user.packages.partials.icons-script, resellerhub::user.packages.partials.stepper, resellerhub::user.packages.partials.edit.actions, resellerhub::user.packages.partials.edit.card-basic, resellerhub::user.packages.partials.edit.card-modules, resellerhub::user.packages.partials.edit.card-pricing (+2 more)
 
-### Community 317 - "Livewire\WithPagination"
-Cohesion: 0.05
-Nodes (6): BrandManager, ReviewManager, VendorProductReview, InteractionsManager, VendorWarehouseManager, ProductReview
+### Community 319 - ".getValue"
+Cohesion: 0.06
+Nodes (7): ClientAuthController, ClientOrderController, ClientAuthSettings, ClientDashboardSettings, ClientUsernameSettings, UsernameGenerator, ServicesSettingsController
 
 ### Community 323 - ".agents"
 Cohesion: 0.20
@@ -2072,9 +2169,13 @@ Nodes (9): clearActiveClient, clearGlobalSearch, closeDrawer, initiateCall, sele
 Cohesion: 0.20
 Nodes (9): clearAllVariants, generateAllCombinations, nextStep, save, setStep, prevStep, removeExistingGalleryImage, removeNewGalleryImage (+1 more)
 
-### Community 332 - "Illuminate\Foundation\Auth\Access\AuthorizesRequests"
-Cohesion: 0.07
-Nodes (4): CategoryManager, ContentSettings, ShortLinkManager, PropertyStatusesManager
+### Community 332 - "Modules\ContentForge\App\Models\ContentPost"
+Cohesion: 0.05
+Nodes (15): PostStatus, Archived, Draft, Published, Scheduled, PostType, Page, Post (+7 more)
+
+### Community 334 - "theme-studio.blade.php"
+Cohesion: 0.18
+Nodes (10): addOverrideFile, closeEditThemeModal, closeOverridesModal, deleteOverrideFile, closeCreateThemeModal, createTheme, openCreateThemeModal, openEditThemeModal (+2 more)
 
 ### Community 336 - "DomainManager: DomainManager/compos"
 Cohesion: 0.20
@@ -2091,6 +2192,10 @@ Nodes (9): layouts.user, projects::projects.partials.tab-documents, projects::pr
 ### Community 343 - "Ponytail Help"
 Cohesion: 0.22
 Nodes (8): Band (Claude Code), Configure Default Mode, Deactivate, Levels, More, Ponytail Help, Skills, Update
+
+### Community 345 - "AccountStatus"
+Cohesion: 0.20
+Nodes (3): AccountStatus, ACTIVE, SUSPENDED
 
 ### Community 346 - "Booking Module (Appointments / Online Booking)"
 Cohesion: 0.22
@@ -2116,6 +2221,10 @@ Nodes (4): benchmark_pair(), count_tokens(), main(), print_table()
 Cohesion: 0.25
 Nodes (7): Hard rules, Review Caveman evidence, Step 1 — Load context, Step 2 — Establish baseline, Step 3 — Test the leading explanation with traces, Step 4 — Inspect representative traces, Step 5 — Report
 
+### Community 354 - "Appointment.php"
+Cohesion: 0.36
+Nodes (8): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#5}(), {closure#6}(), {closure#7}(), {closure#8}()
+
 ### Community 356 - "Sales: resources"
 Cohesion: 0.22
 Nodes (8): assignToMe, cancelTask, clearModalClient, completeTask, editTask, openCreateModal, selectClientForModal, sales::livewire.partials.task-card
@@ -2136,9 +2245,13 @@ Nodes (7): Manage eval-gated experiments, Non-negotiable gates, Step 1 — Load 
 Cohesion: 0.25
 Nodes (7): Failure templates (use verbatim, filled in — never soften), Rules (non-negotiable), Step 1 — Find every live LLM callsite, Step 2 — Pick the app slug, Step 3 — Wire each callsite, Step 4 — Verify with one real request, Step 5 — Report
 
-### Community 372 - "Illuminate\Support\Facades\Route"
-Cohesion: 0.05
-Nodes (15): EnsureTenantHasModule, IdentifyTenant, RedirectIfAuthenticated, RedirectIfInstalled, RedirectIfNotInstalled, ResolveTenantPath, ۱. میدلور `App\Http\Middleware\IdentifyTenant`, ۲. میدلور `App\Http\Middleware\EnsureTenantHasModule` (+7 more)
+### Community 364 - "Installer"
+Cohesion: 0.15
+Nodes (3): BookingInstall, BookingUpdatePermissions, Installer
+
+### Community 366 - "2026_09_29_130000_add_tenant_id_to_all_module_tables.php"
+Cohesion: 0.25
+Nodes (10): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#5}(), {closure#6}(), down(), dropIndexIfExists() (+2 more)
 
 ### Community 373 - "ResellerHub"
 Cohesion: 0.22
@@ -2147,10 +2260,6 @@ Nodes (8): layouts.user, partials.jalali-date-picker, resellerhub::partials.toas
 ### Community 375 - "ResellerHub"
 Cohesion: 0.22
 Nodes (8): layouts.user, resellerhub::partials.renew-modal, resellerhub::partials.subaccount-delete-modal, resellerhub::partials.suspend-modal, resellerhub::partials.tenant-delete-modal, resellerhub::partials.toast, resellerhub::user.dashboard.partials.scripts, resellerhub::user.dashboard.partials.tenants-table
-
-### Community 376 - "EntityResolverService.php"
-Cohesion: 0.08
-Nodes (8): BotSession, BotSetting, AiAdapterInterface, BotEngineService, {closure#5}(), {closure#7}(), EntityResolverService, SmartBotDatabaseSeeder
 
 ### Community 382 - "Market: resources"
 Cohesion: 0.25
@@ -2184,21 +2293,29 @@ Nodes (8): require-dev, fakerphp/faker, laravel/pint, laravel/sail, mockery/mock
 Cohesion: 0.39
 Nodes (7): addCompoundIndex(), {closure#1}(), {closure#2}(), down(), dropIndexIfExists(), hasIndex(), up()
 
+### Community 394 - "StepData"
+Cohesion: 0.27
+Nodes (6): StepData, {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#5}()
+
 ### Community 396 - "Clients: Database"
 Cohesion: 0.32
 Nodes (7): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), down(), hasIndex(), up()
 
-### Community 402 - "2026_09_22_150824_update_pricing_fields_on_reseller_packages_table.php"
-Cohesion: 0.29
-Nodes (3): {closure#1}(), {closure#3}(), {closure#4}()
+### Community 397 - "OnboardingJourney"
+Cohesion: 0.27
+Nodes (3): {closure#1}(), OnboardingJourney, CRM_SETUP
+
+### Community 398 - "TestCase"
+Cohesion: 0.03
+Nodes (16): TenantModule, {closure#1}(), {closure#1}(), CurrencyContext, TestCase, BladeCompilationTest, UsesIsolatedDatabase, DuplicateInvoiceGuardTest (+8 more)
 
 ### Community 404 - "Services: Database"
 Cohesion: 0.29
 Nodes (6): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), convertToGregorian(), up()
 
-### Community 405 - "Settings: Settings/resources/views/"
+### Community 405 - "Settings/resources/views/index.blade.php"
 Cohesion: 0.25
-Nodes (7): layouts.admin, partials.jalali-date-picker, settings::partials.payment_scripts, settings::partials.payment_settings, settings::api-keys.index, settings::partials.menu-manager, settings::partials.widget_settings
+Nodes (7): layouts.admin, partials.jalali-date-picker, settings::api-keys.index, settings::partials.menu-manager, settings::partials.payment_scripts, settings::partials.payment_settings, settings::partials.widget_settings
 
 ### Community 407 - "Evaluate an optimization observation"
 Cohesion: 0.29
@@ -2207,6 +2324,10 @@ Nodes (6): 1. Read the exact observations, 2. Ask the operator to choose, 3. Des
 ### Community 408 - "caveman-stats"
 Cohesion: 0.29
 Nodes (5): caveman-stats, Example output, How to invoke, See also, What it does
+
+### Community 409 - "2026_10_17_000040_add_explicit_columns_to_orders_and_invoices.php"
+Cohesion: 0.25
+Nodes (4): {closure#1}(), {closure#2}(), {closure#4}(), {closure#5}()
 
 ### Community 410 - "package.json: resources"
 Cohesion: 0.29
@@ -2240,10 +2361,6 @@ Nodes (6): deleteQuestion, deleteReview, cancelEdit, setTab, startEditQuestion, 
 Cohesion: 0.29
 Nodes (6): Booking Engine (Slot generation + merge policy), Inputs, Merge policy priority, Null = INHERIT, Overbooking prevention, Slot generation
 
-### Community 422 - "UserController.php"
-Cohesion: 0.10
-Nodes (3): {closure#13}(), {closure#7}(), UserController
-
 ### Community 425 - "UX Flow & Screens (پیشنهادی + وضعیت پیاده‌سازی)"
 Cohesion: 0.29
 Nodes (6): 1) Admin Dashboard (Booking KPI), 2) Service Editor, 3) Provider Customization UI, 4) Operator Booking Flow, 5) Online Booking Flow, UX Flow & Screens (پیشنهادی + وضعیت پیاده‌سازی)
@@ -2260,6 +2377,10 @@ Nodes (6): closeForm, deleteAddress, editAddress, makeDefault, openAddForm, sele
 Cohesion: 0.29
 Nodes (6): autoload, psr-4, description, name, Modules\\DirectAdmin\\, type
 
+### Community 435 - "2026_09_22_150824_update_pricing_fields_on_reseller_packages_table.php"
+Cohesion: 0.29
+Nodes (3): {closure#1}(), {closure#3}(), {closure#4}()
+
 ### Community 437 - "Market: resources"
 Cohesion: 0.29
 Nodes (6): approve, cancelReject, confirmReject, delete, promptReject, setFilter
@@ -2267,6 +2388,10 @@ Nodes (6): approve, cancelReject, confirmReject, delete, promptReject, setFilter
 ### Community 438 - "Market: resources"
 Cohesion: 0.29
 Nodes (6): approve, cancelReject, confirmReject, delete, promptReject, setFilter
+
+### Community 441 - "Illuminate\Foundation\Http\FormRequest"
+Cohesion: 0.03
+Nodes (16): EndorseChequeRequest, StoreCategoryRequest, UpdateClientRequest, DeleteDnsRecordRequest, SaveChildHostRequest, UpdateDnsSecRequest, AddOrderItemsRequest, MarkAsPaidRequest (+8 more)
 
 ### Community 446 - "ResellerHub: Schema & Migrations"
 Cohesion: 0.38
@@ -2300,10 +2425,6 @@ Nodes (6): resetAuthStep, resetSession, selectAttribute, sendMessage, sendOtpCod
 Cohesion: 0.29
 Nodes (6): autoload, psr-4, description, name, Modules\\Sms\\, type
 
-### Community 457 - "2026_06_28_000000_create_treatment_plan_workflow_bindings_table.php"
-Cohesion: 0.33
-Nodes (3): {closure#1}(), {closure#2}(), {closure#3}()
-
 ### Community 458 - "Sales: resources"
 Cohesion: 0.33
 Nodes (5): activateContactInCockpit, claimContact, convertToDeal, initiateVoipCall, openLeadDrawer
@@ -2328,21 +2449,21 @@ Nodes (5): cancel, create, delete, edit, selectColor
 Cohesion: 0.33
 Nodes (5): clearClient, decrementItem, incrementItem, addItem, removeItem
 
+### Community 465 - "BookingService"
+Cohesion: 0.05
+Nodes (7): BookingServiceObserver, BookingService, BookingServiceProvider, ServiceAvailabilityController, ServiceController, BookingApiController, {closure#2}()
+
 ### Community 466 - "Sales: resources"
 Cohesion: 0.33
 Nodes (5): deleteGoal, editGoal, openCreateModal, setPreset, toggleGoalActive
 
-### Community 468 - "Campaign"
-Cohesion: 0.08
-Nodes (4): CampaignController, CampaignReportController, CampaignContactManager, Campaign
-
 ### Community 469 - "Client"
-Cohesion: 0.04
-Nodes (18): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}(), {closure#5}(), {closure#6}(), {closure#7}(), {closure#8}() (+10 more)
+Cohesion: 0.05
+Nodes (11): ClientController, ClientObserver, Client, {closure#1}(), {closure#2}(), {closure#3}(), DomainRecord, OrderSyncLog (+3 more)
 
-### Community 470 - "DomainController.php"
-Cohesion: 0.04
-Nodes (8): AddChildHostRequest, AddDnsSecRequest, DeleteChildHostRequest, ModifyDomainContactsRequest, RenewDomainRequest, SyncDomainRequest, UpdateDomainClientRequest, UpdateNameserversRequest
+### Community 478 - "2025_10_31_152607_create_themes_table.php"
+Cohesion: 0.33
+Nodes (3): {closure#1}(), {closure#2}(), {closure#3}()
 
 ### Community 479 - "ContentForge: resources"
 Cohesion: 0.33
@@ -2356,13 +2477,9 @@ Nodes (4): Boundary (binding), Install path, Layout, skills/caveman-learn — th
 Cohesion: 0.40
 Nodes (4): caveman-learn skill, Honesty, Install, What it does
 
-### Community 488 - "Projects/routes/web.php"
-Cohesion: 0.05
-Nodes (8): CheckOverdueTasksCommand, {closure#2}(), ProjectsMessageSseController, ProjectsTaskSseController, {closure#1}(), {closure#2}(), TenantDataExportController, TenantDataExporterService
-
-### Community 489 - "Illuminate\Http\Request"
+### Community 489 - "Livewire\Component"
 Cohesion: 0.02
-Nodes (25): ModuleController, CheckInstallationStatus, TrustProxies, AccountingController, AccountingSettingController, ReportController, ReportController, ClientController (+17 more)
+Nodes (24): UserCustomValue, ModuleUpdaterService, AccountingSettings, AgentCallPerformance, DailyCallOverview, {closure#2}(), ClientSetting, ClientStatus (+16 more)
 
 ### Community 490 - "ponytail-audit/SKILL.md"
 Cohesion: 0.40
@@ -2384,29 +2501,13 @@ Nodes (4): Before you write, Levels, Ponytail, The smallest complete change
 Cohesion: 0.33
 Nodes (5): approve, cancelReject, confirmReject, promptReject, setFilter
 
-### Community 497 - "Properties: Database"
-Cohesion: 0.33
-Nodes (3): {closure#1}(), {closure#2}(), {closure#3}()
-
-### Community 499 - "Illuminate\Database\Migrations\Migration"
-Cohesion: 0.01
-Nodes (56): {closure#1}(), {closure#2}(), {closure#1}(), {closure#1}(), {closure#2}(), {closure#1}(), CreateWidgetSettingsTable, {closure#1}() (+48 more)
-
 ### Community 500 - "Properties: Properties/resources/vi"
 Cohesion: 0.33
 Nodes (5): layouts.user, properties::user.partials.ai-search-modal, properties::user.partials.empty-row, properties::user.partials.filter-inputs, properties::user.partials.property-row
 
-### Community 504 - "Illuminate\Support\Facades\Route"
-Cohesion: 0.02
-Nodes (18): RouteServiceProvider, RouteServiceProvider, RouteServiceProvider, RouteServiceProvider, RouteServiceProvider, RouteServiceProvider, RouteServiceProvider, RouteServiceProvider (+10 more)
-
-### Community 506 - "2026_06_23_101400_rename_custom_field_values_to_meta_on_service_invoice_items.php"
-Cohesion: 0.29
-Nodes (4): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}()
-
-### Community 507 - "Services/App/Providers/AuthServiceProvider.php"
-Cohesion: 0.27
-Nodes (3): AuthServiceProvider, AuthServiceProvider, AuthServiceProvider
+### Community 504 - "Illuminate\Foundation\Support\Providers\RouteServiceProvider"
+Cohesion: 0.19
+Nodes (3): RouteServiceProvider, RouteServiceProvider, RouteServiceProvider
 
 ### Community 508 - "ResellerHub: Schema & Migrations"
 Cohesion: 0.40
@@ -2417,8 +2518,8 @@ Cohesion: 0.33
 Nodes (5): nextStep, removeBrandFavicon, removeBrandLogo, setPrimaryColor, setWhiteLabelType
 
 ### Community 511 - "DomainReseller"
-Cohesion: 0.10
-Nodes (4): DomainReseller, ConnectionController, StoreConnectionRequest, UpdateConnectionRequest
+Cohesion: 0.08
+Nodes (5): DomainReseller, ConnectionController, DashboardController, StoreConnectionRequest, UpdateConnectionRequest
 
 ### Community 518 - "SmsReseller: resources"
 Cohesion: 0.33
@@ -2484,6 +2585,10 @@ Nodes (4): confirmApiTokenDeletion, deleteApiToken, manageApiTokenPermissions, u
 Cohesion: 0.40
 Nodes (4): 1) booking:cleanup-holds, 2) booking:handle-payment-timeouts, 3) booking:dispatch-reminders, Background Jobs / Commands
 
+### Community 539 - "2026_08_17_150200_create_projects_phases_table.php"
+Cohesion: 0.33
+Nodes (3): {closure#1}(), {closure#2}(), {closure#3}()
+
 ### Community 544 - "Sales: resources"
 Cohesion: 0.40
 Nodes (4): deleteDeal, editDeal, openCreateModal, selectDeal
@@ -2496,10 +2601,6 @@ Nodes (4): directadmin::partials.order-hosting-card, domainmanager::partials.ord
 Cohesion: 0.40
 Nodes (4): dislikeQuestion, likeQuestion, toggleForm, toggleReplyForm
 
-### Community 547 - "2026_08_17_150200_create_projects_phases_table.php"
-Cohesion: 0.33
-Nodes (3): {closure#1}(), {closure#2}(), {closure#3}()
-
 ### Community 548 - "Sales: resources"
 Cohesion: 0.40
 Nodes (4): initiateVoip, openCreateModal, saveDeal, submitLossReason
@@ -2507,6 +2608,14 @@ Nodes (4): initiateVoip, openCreateModal, saveDeal, submitLossReason
 ### Community 549 - "ContentForge: resources"
 Cohesion: 0.40
 Nodes (4): markSpam, approve, delete, reject
+
+### Community 564 - "2026_09_29_000004_create_property_rental_tables.php"
+Cohesion: 0.33
+Nodes (3): {closure#1}(), {closure#2}(), {closure#3}()
+
+### Community 574 - "2025_02_20_001500_create_property_buildings_table.php"
+Cohesion: 0.33
+Nodes (3): {closure#1}(), {closure#2}(), {closure#3}()
 
 ### Community 594 - "Clients: Clients/resources/views/us"
 Cohesion: 0.40
@@ -2523,6 +2632,10 @@ Nodes (4): delete, edit, resetForm, save
 ### Community 597 - "ContentForge: resources"
 Cohesion: 0.40
 Nodes (4): delete, edit, resetForm, save
+
+### Community 615 - "2025_02_20_000100_create_properties_table.php"
+Cohesion: 0.40
+Nodes (3): {closure#1}(), {closure#2}(), up()
 
 ### Community 623 - "Market: resources"
 Cohesion: 0.40
@@ -2544,6 +2657,10 @@ Nodes (4): cancelEdit, delete, edit, saveEdit
 Cohesion: 0.40
 Nodes (4): layouts.user, projects::status-builder.partials.attributes-form, projects::status-builder.partials.status-badges, projects::status-builder.partials.transitions-form
 
+### Community 643 - "2026_07_25_000001_add_is_default_to_market_order_statuses_table.php"
+Cohesion: 0.40
+Nodes (3): {closure#1}(), {closure#2}(), up()
+
 ### Community 648 - "ponytail-debt/SKILL.md"
 Cohesion: 0.50
 Nodes (3): Boundaries, Output, Scan
@@ -2552,13 +2669,37 @@ Nodes (3): Boundaries, Output, Scan
 Cohesion: 0.40
 Nodes (4): createNew, delete, edit, save
 
+### Community 651 - "2026_09_24_000027_add_limits_to_reseller_packages_and_sub_accounts.php"
+Cohesion: 0.29
+Nodes (4): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}()
+
 ### Community 662 - "DB Schema (DDL Summary)"
 Cohesion: 0.50
 Nodes (3): DB Schema (DDL Summary), ERD (متنی), Tables
 
+### Community 671 - "2026_06_23_101400_rename_custom_field_values_to_meta_on_service_invoice_items.php"
+Cohesion: 0.29
+Nodes (4): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}()
+
+### Community 674 - "2026_07_22_125717_change_date_columns_to_string_in_service_invoices_and_orders.php"
+Cohesion: 0.29
+Nodes (4): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}()
+
+### Community 676 - "2026_09_06_110000_change_amount_columns_to_bigint_in_service_orders_and_invoices.php"
+Cohesion: 0.29
+Nodes (4): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}()
+
 ### Community 677 - "ResellerHub"
 Cohesion: 0.40
 Nodes (4): resellerhub::partials.notice-modal, resellerhub::tenant.partials.subscription.modals, resellerhub::tenant.partials.subscription.scripts, resellerhub::tenant.partials.subscription.invoices-section
+
+### Community 678 - "2026_08_18_123000_create_sms_reseller_storage_tables.php"
+Cohesion: 0.29
+Nodes (4): {closure#1}(), {closure#2}(), {closure#3}(), {closure#4}()
+
+### Community 682 - "2026_06_28_000000_create_treatment_plan_workflow_bindings_table.php"
+Cohesion: 0.33
+Nodes (3): {closure#1}(), {closure#2}(), {closure#3}()
 
 ### Community 717 - "Settings: resources"
 Cohesion: 0.40
@@ -2684,6 +2825,10 @@ Nodes (3): layouts.user, resellerhub::partials.prevent-double-submit, resellerhu
 Cohesion: 0.50
 Nodes (3): resellerhub::user.tenants.partials.create-wizard.step-3.invoice-calculation, resellerhub::user.tenants.partials.create-wizard.step-3.modules-grid, resellerhub::user.tenants.partials.create-wizard.step-3.packages-showcase
 
+### Community 866 - "content-settings.blade.php"
+Cohesion: 0.50
+Nodes (3): closeCreateThemeModal, createTheme, save
+
 ### Community 875 - "Services: Services/resources/views/"
 Cohesion: 0.50
 Nodes (3): layouts.user, services::status-builder.partials.attributes-form, services::status-builder.partials.status-badges
@@ -2695,10 +2840,6 @@ Nodes (3): layouts.user, smsreseller::partials.confirm-modal, smsreseller::parti
 ### Community 894 - "Workflows: resources"
 Cohesion: 0.50
 Nodes (3): layouts.user, workflows::user.workflows._form, workflows::user.workflows._action-form
-
-### Community 900 - ".register"
-Cohesion: 0.19
-Nodes (3): FollowUpsServiceProvider, RemindersServiceProvider, WorkflowsServiceProvider
 
 ### Community 907 - "composer.json"
 Cohesion: 0.67
@@ -2713,24 +2854,24 @@ Cohesion: 0.22
 Nodes (8): layouts.user, partials.jalali-date-picker, resellerhub::partials.toast, resellerhub::user.packages.partials.delete-modal, resellerhub::user.packages.partials.icon, resellerhub::user.packages.partials.icons-script, resellerhub::user.packages.partials.quick-provision-modal, resellerhub::user.packages.partials.status-modal
 
 ## Knowledge Gaps
-- **1415 isolated node(s):** `layouts.user`, `layouts.user`, `layouts.user`, `layouts.user`, `layouts.user` (+1410 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6915 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **1207 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **1428 isolated node(s):** `save`, `closeCreateThemeModal`, `createTheme`, `openCreateThemeModal`, `openEditThemeModal` (+1423 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6945 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **1287 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `User` connect `User` to `Illuminate\Database\Schema\Blueprint`, `Illuminate\Database\Eloquent\Model`, `Illuminate\Support\Facades\Schema`, `Illuminate\Database\Eloquent\Relations\BelongsTo`, `Illuminate\Support\Facades\DB`, `.current`, `Illuminate\Support\ServiceProvider`, `Illuminate\Database\Eloquent\Relations\HasMany`, `Illuminate\Database\Seeder`, `Morilog\Jalali\Jalalian`, `.log`, `Modules\ResellerHub\App\Http\Controllers\ResellerDashboardController`, `FollowUpController`, `ClientCall`, `BookingWaitlist`, `routes/admin.php`, `ExpenseController.php`, `ResellerInvoice`, `FortifyServiceProvider.php`, `BookingAvailabilityException`, `Illuminate\Support\Str`, `Exception`, `InvoiceStatus`, `Illuminate\Validation\Rule`, `BookingSetting`, `ProjectTask`, `ProjectStatus`, `ProvisionTenantJob.php`, `UserFactory.php`, `Reminders: Reminder`, `Tenant`, `Appointment`, `Services: InvoiceController`, `BookingService`, `Cheque`, `ResellerHub: Automated Tests`, `UpdateUserProfileInformation.php`, `WorkflowEngine.php`, `.getValue`, `Booking: ClinicLiveMonitoring`, `Illuminate\Foundation\Testing\RefreshDatabase`, `Illuminate\Database\Eloquent\Builder`, `ResellerHub: OnboardingWidget`, `ResellerHub: Automated Tests`, `ApiKey`, `TestCase`, `Workflows: ClientWorkflowService`, `Payment`, `Booking: CureController`, `MenuCustomizationService.php`, `Booking: ScheduleManagerphp`, `Vendor`, `ProjectStatus`, `ResellerSubAccount`, `Booking: User/AppointmentController`, `Projects: ProjectsTemplateControlle`, `WarehouseStockController.php`, `OnboardingStateService`, `ResellerHub: Automated Tests`, `Booking: BookingWaitlistManager`, `Services: Invoice`, `PendingPaymentLifecycleTest`, `Status`, `ResellerBillingService`, `TenantManager`, `EmailVerificationTest.php`, `Clients: ClientForm`, `Illuminate\Database\Eloquent\Relations\MorphTo`, `DomainManager: SearchController`, `Task`, `Illuminate\Support\Collection`, `Booking: BookingWaitlistModal`, `StepData`, `TaskController.php`, `get_setting`, `PasswordResetTest.php`, `CockpitGoalManager`, `TenantUserController`, `Livewire\Component`, `TaskTab.php`, `StatementController.php`, `Throwable`, `Notifications: PruneNotificationsCo`, `ResellerHub: OnboardingInternalRoute`, `VendorController.php`, `PipelineKanban`, `Modules\ResellerHub\App\Http\Controllers\TenantProvisioningController`, `TwoFactorAuthenticationSettingsTest.php`, `UpdatePasswordTest.php`, `ModuleMenuService`, `WarehouseManager`, `Modules\ResellerHub\App\Http\Controllers\ResellerSubAccountController`, `QueryBudgetTest.php`, `Reseller`, `ContractTemplate`, `SettingsController`, `tests`, `PriceRoundingService`, `ProfileInformationTest.php`, `CampaignLeadsTab.php`, `SmsSendController.php`, `UserController.php`, `UsernameGenerator.php`, `HasMarketVendor`, `Campaign`, `Client`, `BrowserSessionsTest.php`, `Illuminate\Http\Request`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
-- **What connects `layouts.user`, `layouts.user`, `layouts.user` to the rest of the system?**
-  _1415 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `User` connect `User` to `Illuminate\Database\Schema\Blueprint`, `Illuminate\Database\Eloquent\Model`, `ResellerInvoicePayment`, `Illuminate\Database\Eloquent\Relations\BelongsTo`, `Document`, `Illuminate\Support\Facades\DB`, `ResellerInvoice`, `Illuminate\Database\Eloquent\Relations\MorphTo`, `Illuminate\Database\Seeder`, `ProjectActivity`, `Project.php`, `BookingWaitlist`, `CustomUserField`, `SearchController.php`, `ExpenseController.php`, `Carbon\Carbon`, `App/Providers/MarketServiceProvider.php`, `Illuminate\Http\Request`, `Exception`, `TaskController.php`, `Modules\ResellerHub\App\Http\Requests\StoreTenantRequest`, `ProjectTask`, `ProvisionTenantJob.php`, `SalesDeal`, `BookingCategory`, `Reminders: Reminder`, `.current`, `Vendor`, `BookingSetting`, `FollowUpController.php`, `PaymentSecurityHardeningTest.php`, `.now`, `.redirect`, `.getValue`, `Booking: ClinicLiveMonitoring`, `TestCase`, `Illuminate\Database\Eloquent\Builder`, `ResellerHub: OnboardingWidget`, `ResellerHub: Automated Tests`, `.isEnabled`, `Workflows: ClientWorkflowService`, `ProjectsController.php`, `Project`, `ProjectsTemplateController.php`, `Booking: ScheduleManagerphp`, `Reseller`, `FortifyServiceProvider.php`, `ClientForm`, `ProjectStatus`, `OnboardingCustomStepsRoutingTest`, `ResellerSubAccount`, `Booking: User/AppointmentController`, `Closure`, `HasResellerTest.php`, `GatewayAmountResolver`, `Booking: BookingWaitlistManager`, `BookingForm`, `ClientCall`, `Status`, `.setTenant`, `ResellerHub: OnboardingStepPreset`, `TenantManager`, `Modules\ResellerHub\App\Http\Controllers\TenantProvisioningController`, `Morilog\Jalali\Jalalian`, `Illuminate\Database\Eloquent\Relations\HasMany`, `Illuminate\Routing\Controller`, `Task`, `NoInvoiceProvisioningTest`, `Illuminate\Support\Collection`, `Booking: BookingWaitlistModal`, `get_setting`, `TenantUserController`, `WorkflowEngine.php`, `TaskTab.php`, `Payment`, `StatementController`, `Models/Invoice.php`, `NotificationService`, `TreatmentPlan`, `TenantUserController.php`, `.store`, `UserFactory.php`, `LaboratoryDailyBoard.php`, `TaskController`, `WarehouseManager`, `QueryBudgetTest.php`, `Contract`, `QuestionManager`, `Modules\ContentForge\App\Models\ContentPost`, `Appointment.php`, `CockpitGoal`, `LaboratoryManager.php`, `.getActiveGoalForUser`, `StepData`, `TestCase`, `.initiateGatewayPayment`, `SmsSendController.php`, `TenantUserManagementTest`, `BookingService`, `Client`, `Livewire\Component`?**
+  _High betweenness centrality (0.050) - this node is a cross-community bridge._
+- **What connects `save`, `closeCreateThemeModal`, `createTheme` to the rest of the system?**
+  _1428 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Illuminate\Database\Schema\Blueprint` be split into smaller, more focused modules?**
-  _Cohesion score 0.008276628246076934 - nodes in this community are weakly interconnected._
-- **Why does `Controller` connect `Controller` to `Illuminate\Http\JsonResponse`, `Modules\ResellerHub\App\Http\Controllers\TenantSubscriptionController`, `Illuminate\Database\Eloquent\Relations\BelongsTo`, `Illuminate\Support\Facades\DB`, `.current`, `ResellerHub: OrderProvisionStatus`, `.log`, `User`, `Modules\ResellerHub\App\Http\Controllers\ResellerDashboardController`, `ClientCall`, `routes/admin.php`, `ResellerInvoice`, `ResellerHub: QuotaKey`, `FortifyServiceProvider.php`, `ContentPost`, `Illuminate\Support\Str`, `Exception`, `ClientSetting`, `Controllers/ReportController.php`, `ContentPanelController`, `ProjectTask`, `ProjectStatus`, `Services/routes/web.php`, `Tenant`, `Appointment`, `Market: MarketControllerphp`, `Services: InvoiceController`, `Workflow`, `Cheque`, `ResellerHub: Automated Tests`, `Document`, `Contract`, `.getValue`, `Services: Services/App/Http/Control`, `.config`, `Workflows: ClientWorkflowService`, `.redirect`, `Booking: CureController`, `ProjectStatus`, `TenancyModelRegistry`, `Services: ServicePackageController`, `ProjectsService.php`, `ResellerSubAccount`, `Projects: ProjectsTemplateControlle`, `RoleController.php`, `Market: OrderController`, `ClientForm`, `Status`, `Clients: Illuminate\Pagination\Pagi`, `.getValue`, `ServicesController`, `CheckoutPage.php`, `CronTask`, `Illuminate\Support\Collection`, `get_setting`, `ContractForge/Routes/web.php`, `ClientController`, `ServicesController.php`, `Throwable`, `Illuminate\Http\Resources\Json\JsonResource`, `Clients: ClientDashboardController`, `ClientInvoiceController.php`, `ServiceCategory`, `ClientOrderController.php`, `VendorController.php`, `ModuleMenuService`, `Modules\ResellerHub\App\Http\Controllers\ResellerSubAccountController`, `Reseller`, `ContractController.php`, `ContractTemplate`, `Illuminate\Foundation\Auth\Access\AuthorizesRequests`, `TreatmentPlanWorkflowController`, `UserController.php`, `Campaign`, `Client`, `MasterProductController`, `Projects/routes/web.php`, `Illuminate\Http\Request`?**
-  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+  _Cohesion score 0.011884089429129585 - nodes in this community are weakly interconnected._
+- **Why does `ResellerInvoice` connect `ResellerInvoice` to `Illuminate\Database\Schema\Blueprint`, `Illuminate\Database\Eloquent\Model`, `ResellerInvoicePayment`, `Illuminate\Database\Eloquent\Relations\BelongsTo`, `Illuminate\Support\Facades\DB`, `TestCase`, `TenantManager`, `Modules\ResellerHub\App\Http\Controllers\TenantProvisioningController`, `Illuminate\Support\ServiceProvider`, `.initiateGatewayPayment`, `Illuminate\Database\Eloquent\Relations\HasMany`, `Carbon\Carbon`, `ResellerHub: PaymentRecorded`, `QueryBudgetTest.php`, `ResellerHub: ResellerAuditService`, `Tenant`, `PriceRoundingService`, `Illuminate\Foundation\Http\FormRequest`, `QueryBudgetTest`, `WorkflowEngine.php`, `HasInvoiceSourceScopes`, `ResellerAuditService`, `PaymentSecurityHardeningTest.php`, `.now`, `ResellerHub: Automated Tests`, `Workflows: ClientWorkflowService`, `Reseller`, `DateCastingTest`, `ResellerHub: Money`, `Livewire\Component`, `WorkflowTrigger`, `ResellerSubAccount`, `GatewayAmountResolver`?**
+  _High betweenness centrality (0.022) - this node is a cross-community bridge._
 - **Should `Illuminate\Database\Eloquent\Model` be split into smaller, more focused modules?**
-  _Cohesion score 0.018979645783769494 - nodes in this community are weakly interconnected._
-- **Why does `ResellerHelper` connect `ResellerHelper` to `Modules\ResellerHub\App\Http\Controllers\TenantProvisioningController`, `Modules\ResellerHub\App\Http\Controllers\TenantSubscriptionController`, `Illuminate\Support\Facades\DB`, `ResellerHub: OrderProvisionStatus`, `ResellerBillingService`, `Illuminate\Support\ServiceProvider`, `ResellerPackage`, `Modules\ResellerHub\App\Http\Controllers\ResellerDashboardController`, `ResellerInvoice`, `ResellerHub: QuotaKey`, `Modules\ResellerHub\App\Http\Controllers\ResellerSubAccountController`, `Reseller`, `ResellerHub: PackagePriceType`, `Illuminate\Support\Collection`, `InvoiceStatus`, `Tenant`, `ResellerHub: PortalCheckoutRequest`, `BillingCycle`, `ResellerHub: Automated Tests`, `Illuminate\Database\Eloquent\Builder`, `.config`, `Throwable`, `ResellerHub: BrandColor`, `ResellerHub: Money`, `Controller`, `ResellerSubAccount`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
-- **Should `Illuminate\Http\JsonResponse` be split into smaller, more focused modules?**
-  _Cohesion score 0.0841813135985199 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.017739403453689167 - nodes in this community are weakly interconnected._
+- **Why does `Controller` connect `Controller` to `Market: OrderController`, `ResellerInvoicePayment`, `Illuminate\Database\Eloquent\Relations\BelongsTo`, `Document`, `ClientCall`, `Illuminate\Support\Facades\DB`, `Status`, `ResellerInvoice`, `.config`, `Services/routes/web.php`, `ProjectActivity`, `TenantManager`, `CustomUserField`, `Clients: Illuminate\Pagination\Pagi`, `Carbon\Carbon`, `Illuminate\Database\Eloquent\Relations\HasMany`, `Illuminate\Routing\Controller`, `Illuminate\Http\Resources\Json\AnonymousResourceCollection`, `Service`, `Illuminate\Http\Request`, `Cheque`, `Exception`, `ShippingManager.php`, `InstallController`, `Illuminate\Http\JsonResponse`, `Illuminate\Support\Collection`, `NoInvoiceProvisioningTest`, `Controllers/ReportController.php`, `Tenant`, `ProjectTask`, `Projects/routes/web.php`, `Contract`, `.current`, `get_setting`, `Market: MarketControllerphp`, `QuotaKey`, `Services: InvoiceController`, `Vendor`, `BookingSetting`, `.getValue`, `Workflow`, `ResellerAuditService`, `PaymentSecurityHardeningTest.php`, `Illuminate\Database\Eloquent\Collection`, `.now`, `Modules\ContentForge\App\Models\ContentPost`, `.redirect`, `WarehouseStockController.php`, `.getValue`, `Services: Services/App/Http/Control`, `ClientInvoiceController.php`, `CronTask`, `Clients: ClientDashboardController`, `Workflows: ClientWorkflowService`, `ProjectsController.php`, `Project`, `ProjectsTemplateController.php`, `Reseller`, `FortifyServiceProvider.php`, `Livewire\Component`, `VersionControlController`, `ProjectStatus`, `TenancyModelRegistry`, `ClientAdminController`, `Services: ServicePackageController`, `ClientFormService`, `ResellerSubAccount`, `TreatmentPlan`, `SmsResellerController.php`, `TenantUserController.php`, `Order`?**
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+- **Should `ResellerInvoicePayment` be split into smaller, more focused modules?**
+  _Cohesion score 0.0358337314859054 - nodes in this community are weakly interconnected._

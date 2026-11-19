@@ -2,6 +2,7 @@
 
 namespace Modules\ContentForge\Entities;
 
+use App\Services\ThemeManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
@@ -12,25 +13,29 @@ class ContentSetting extends Model
 
     public const DEFAULTS = [
         'general' => [
-            'posts_per_page'    => 12,
+            'posts_per_page' => 12,
             'default_theme_key' => 'content',
-            'enable_comments'   => 'true',
-            'enable_tags'       => 'true',
-            'reading_time_wpm'  => 200,
+            'enable_comments' => 'true',
+            'enable_tags' => 'true',
+            'reading_time_wpm' => 200,
+        ],
+        'crm' => [
+            'theme_key' => 'default',
+            'enable_overrides' => 'true',
         ],
         'seo' => [
             'auto_generate_description' => 'true',
-            'description_length'        => 160,
-            'auto_schema_markup'        => 'true',
+            'description_length' => 160,
+            'auto_schema_markup' => 'true',
         ],
         'short_link' => [
-            'enabled'     => 'true',
-            'prefix'      => 's',
+            'enabled' => 'true',
+            'prefix' => 's',
             'code_length' => 6,
         ],
         'editor' => [
             'default_editor' => 'tiptap',
-            'enable_ai'      => 'false',
+            'enable_ai' => 'false',
         ]
     ];
 
@@ -70,6 +75,15 @@ class ContentSetting extends Model
     {
         $setting = self::updateOrCreate(['key' => $key], ['value' => $value]);
         Cache::forget("content_setting_{$key}");
+
+        if (str_starts_with($key, 'crm.') || str_contains($key, 'theme')) {
+            Cache::forget('active_crm_theme_key');
+            Cache::forget('active_theme_entity_default');
+            if (app()->bound(ThemeManager::class)) {
+                app(ThemeManager::class)->clearCache();
+            }
+        }
+
         return $setting;
     }
 }
