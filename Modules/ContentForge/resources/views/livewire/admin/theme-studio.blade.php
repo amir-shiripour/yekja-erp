@@ -245,19 +245,41 @@
                                class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none">
                     </div>
 
-                    <div class="space-y-1">
-                        <label class="font-bold text-gray-700 dark:text-gray-300">کپی خودکار صفحه اولیه</label>
-                        <select wire:model.defer="initialOverrideView"
-                                class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="font-bold text-gray-700 dark:text-gray-300">
+                                انتخاب چندتایی صفحات جهت کپی خودکار در پوسته ({{ count($initialOverrideViews) }} مورد)
+                            </label>
+                            <div class="flex items-center gap-2 text-[11px]">
+                                <button type="button" wire:click="selectAllInitialViews" class="text-indigo-600 dark:text-indigo-400 hover:underline font-bold">انتخاب همه</button>
+                                <span class="text-gray-300">|</span>
+                                <button type="button" wire:click="clearInitialViews" class="text-gray-500 hover:text-rose-600 hover:underline">پاک کردن</button>
+                            </div>
+                        </div>
+
+                        <div class="max-h-48 overflow-y-auto p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl space-y-3">
                             @foreach($commonTargets as $group => $items)
-                                <optgroup label="{{ $group }}">
-                                    @foreach($items as $vKey => $vLabel)
-                                        <option value="{{ $vKey }}">{{ $vLabel }}</option>
-                                    @endforeach
-                                </optgroup>
+                                <div class="space-y-1.5">
+                                    <div class="text-[11px] font-black text-indigo-600 dark:text-indigo-400 px-1">{{ $group }}</div>
+                                    <div class="grid grid-cols-1 gap-1.5">
+                                        @foreach($items as $vKey => $vLabel)
+                                            <label class="flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/80 hover:border-indigo-300 cursor-pointer transition-colors">
+                                                <input type="checkbox" value="{{ $vKey }}" wire:model.live="initialOverrideViews"
+                                                       class="w-4 h-4 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                                <span class="text-[11px] font-medium text-gray-700 dark:text-gray-200">{{ $vLabel }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
                             @endforeach
-                            <option value="none">پوسته خام (بدون فایل اولیه)</option>
-                        </select>
+                        </div>
+
+                        <div class="space-y-1 pt-1">
+                            <label class="text-[11px] text-gray-500 dark:text-gray-400">نام ویوهای اضافی (اختیاری - با کاما جدا کنید):</label>
+                            <input type="text" wire:model.defer="initialCustomViews" dir="ltr"
+                                   placeholder="e.g. tasks::index, clients::edit"
+                                   class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-mono text-[11px] text-left focus:outline-none">
+                        </div>
                     </div>
                 </div>
 
@@ -268,7 +290,7 @@
                     </button>
                     <button type="button" wire:click="createTheme"
                             class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20">
-                        ایجاد و فعال‌سازی
+                        ایجاد پوسته
                     </button>
                 </div>
             </div>

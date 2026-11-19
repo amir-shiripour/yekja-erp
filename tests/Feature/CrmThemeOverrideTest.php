@@ -217,17 +217,18 @@ class CrmThemeOverrideTest extends TestCase
         }
 
         try {
-            // 2. Create CRM-only theme via ThemeStudio
+            // 2. Create CRM-only theme via ThemeStudio with multi-select views
             $component = \Livewire\Livewire::test(\Modules\ContentForge\App\Livewire\Admin\ThemeStudio::class)
                 ->call('openCreateThemeModal')
                 ->set('newThemeKey', $testKey)
                 ->set('newThemeName', 'پوسته استودیو')
-                ->set('initialOverrideView', 'none')
+                ->set('initialOverrideViews', ['admin.users.index', 'admin.roles.index'])
                 ->call('createTheme')
                 ->assertHasNoErrors();
 
             $this->assertDirectoryExists($testDir);
-            $this->assertEquals($testKey, ContentSetting::getValue('crm.theme_key'));
+            $this->assertFileExists("{$testDir}/overrides/admin/users/index.blade.php");
+            $this->assertFileExists("{$testDir}/overrides/admin/roles/index.blade.php");
 
             // 3. Guardrail: CRM-only theme cannot be set as public website theme
             $component->call('activateWebTheme', $testKey);

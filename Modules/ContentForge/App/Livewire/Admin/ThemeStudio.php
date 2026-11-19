@@ -24,7 +24,8 @@ class ThemeStudio extends Component
     public string $newThemeKey = '';
     public string $newThemeName = '';
     public string $newThemeDescription = '';
-    public string $initialOverrideView = 'admin.users.edit';
+    public array $initialOverrideViews = ['admin.users.edit'];
+    public string $initialCustomViews = '';
     public bool $showOverridesModal = false;
     public string $inspectingThemeKey = '';
     public string $selectedOverrideTarget = 'admin.users.edit';
@@ -154,15 +155,32 @@ class ThemeStudio extends Component
 
     public function openCreateThemeModal(): void
     {
-        $this->reset(['newThemeKey', 'newThemeName', 'newThemeDescription']);
-        $this->initialOverrideView = 'admin.users.edit';
+        $this->reset(['newThemeKey', 'newThemeName', 'newThemeDescription', 'initialCustomViews']);
+        $this->initialOverrideViews = ['admin.users.edit'];
         $this->showCreateThemeModal = true;
     }
 
     public function closeCreateThemeModal(): void
     {
         $this->showCreateThemeModal = false;
-        $this->reset(['newThemeKey', 'newThemeName', 'newThemeDescription']);
+        $this->reset(['newThemeKey', 'newThemeName', 'newThemeDescription', 'initialCustomViews']);
+        $this->initialOverrideViews = ['admin.users.edit'];
+    }
+
+    public function selectAllInitialViews(): void
+    {
+        $all = [];
+        foreach (app(ThemeResolver::class)->getCommonOverrideTargets() as $items) {
+            foreach (array_keys($items) as $viewKey) {
+                $all[] = $viewKey;
+            }
+        }
+        $this->initialOverrideViews = $all;
+    }
+
+    public function clearInitialViews(): void
+    {
+        $this->initialOverrideViews = [];
     }
 
     public function createTheme(): void
@@ -200,17 +218,31 @@ class ThemeStudio extends Component
             json_encode($meta, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
         );
 
-        if (!empty($this->initialOverrideView) && $this->initialOverrideView !== 'none') {
-            $this->copyViewToThemeOverrides($themeKey, $this->initialOverrideView);
+        $viewsToCopy = array_filter(array_map('trim', $this->initialOverrideViews));
+        if (!empty(trim($this->initialCustomViews))) {
+            $customs = array_filter(array_map('trim', explode(',', $this->initialCustomViews)));
+            $viewsToCopy = array_values(array_unique(array_merge($viewsToCopy, $customs)));
         }
 
-        ContentSetting::setValue('crm.theme_key', $themeKey);
-        ContentSetting::setValue('crm.enable_overrides', 'true');
-        app(ThemeManager::class)->clearCache();
+        $copiedCount = 0;
+        foreach ($viewsToCopy as $viewName) {
+            if ($viewName !== 'none') {
+                $res = $this->copyViewToThemeOverrides($themeKey, $viewName);
+                if (!empty($res['ok'])) {
+                    $copiedCount++;
+                }
+            }
+        }
 
         $this->syncActiveStates();
         $this->showCreateThemeModal = false;
-        session()->flash('success', "پوسته «{$this->newThemeName}» ساخته شد و بلافاصله برای پنل CRM فعال گردید.");
+        $msg = "پوسته «{$this->newThemeName}» با موفقیت ساخته شد";
+        if ($copiedCount > 0) {
+            $msg .= " و {$copiedCount} فایل در پوشه overrides کپی گردید.";
+        } else {
+            $msg .= '.';
+        }
+        session()->flash('success', $msg);
     }
 
     public function openOverridesModal(string $themeKey): void
@@ -297,7 +329,9 @@ class ThemeStudio extends Component
             return ['ok' => false, 'message' => "فایل [{$relPath}] از قبل در این پوسته وجود دارد."];
         }
 
-        File::makeDirectory(dirname($destPath), 0755, true);
+        if (!File::isDirectory(dirname($destPath))) {
+            File::makeDirectory(dirname($destPath), 0755, true, true);
+        }
         File::copy($sourcePath, $destPath);
 
         return ['ok' => true, 'relative' => "themes/{$themeKey}/overrides/{$relPath}"];
