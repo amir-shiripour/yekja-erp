@@ -82,4 +82,9 @@ final class ContentPanelController extends Controller
     {
         return view('contentforge::user.settings');
     }
+
+    public function themes()
+    {
+        return view('contentforge::user.themes');
+    }
 }

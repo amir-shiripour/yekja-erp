@@ -13,7 +13,7 @@ use Modules\ContentForge\Entities\ContentSetting;
 */
 
 // --- Short Link Redirect Route ---
-Route::middleware(['web'])->group(function() {
+Route::middleware(['web'])->group(function () {
     $shortLinkPrefix = 's';
     try {
         if (class_exists(ContentSetting::class)) {
@@ -24,7 +24,7 @@ Route::middleware(['web'])->group(function() {
     }
 
     Route::get("/{$shortLinkPrefix}/{code}", [ShortLinkController::class, 'redirect'])
-         ->name('content.short-link');
+        ->name('content.short-link');
 
     if ($shortLinkPrefix !== 's') {
         Route::get("/s/{code}", [ShortLinkController::class, 'redirect']);
@@ -32,8 +32,8 @@ Route::middleware(['web'])->group(function() {
 });
 
 // --- Public Frontend Routes (Flat & Clean SEO Structure) ---
-Route::middleware(['web'])->group(function() {
-    
+Route::middleware(['web'])->group(function () {
+
     // 1. Core Blog and Feed Routes
     Route::get('/blog', [ContentFrontController::class, 'archiveDefault'])->name('content.archive.default');
     Route::get('/blog/category/{categorySlug}', [ContentFrontController::class, 'categoryDefault'])->name('content.category.default');
@@ -44,74 +44,79 @@ Route::middleware(['web'])->group(function() {
     // 2. Fallback direct root route for posts, pages, and entity archives
     // Constrained to strictly avoid shadowing any system keywords, auth paths, or module prefixes
     Route::get('/{slug}', [ContentFrontController::class, 'showDefault'])
-         ->where('slug', '^(?!(user|admin|api|_e2e|_ignition|assets|blog|booking|broadcasting|build|cart|chat|checkout|clients|css|debug-attributes|email|external|external-api|feed\.xml|fieldservice|fonts|forgot-password|get-started|images|install|js|livewire|login|logout|market|password|payment|ping|properties|register|reseller|resellerhub|reset-password|s|sanctum|settings|shop|sitemap\.xml|storage|two-factor-challenge)).+')
-         ->name('content.show.default');
+        ->where('slug', '^(?!(user|admin|api|_e2e|_ignition|assets|blog|booking|broadcasting|build|cart|chat|checkout|clients|css|debug-attributes|email|external|external-api|feed\.xml|fieldservice|fonts|forgot-password|get-started|images|install|js|livewire|login|logout|market|password|payment|ping|properties|register|reseller|resellerhub|reset-password|s|sanctum|settings|shop|sitemap\.xml|storage|two-factor-challenge)).+')
+        ->name('content.show.default');
 });
 
 // --- Authenticated User Panel Routes (/user/content) ---
 Route::group(['prefix' => 'user', 'as' => 'user.', 'middleware' => ['web', 'auth']], function () {
     Route::prefix('content')->name('content.')->group(function () {
-        
+
         // Dashboard
         Route::get('/dashboard', [ContentPanelController::class, 'dashboard'])
-             ->middleware('can:content.dashboard.view')
-             ->name('dashboard');
+            ->middleware('can:content.dashboard.view')
+            ->name('dashboard');
 
         // Pages
         Route::get('/pages', [ContentPanelController::class, 'pages'])
-             ->middleware('can:content.posts.view')
-             ->name('pages.index');
+            ->middleware('can:content.posts.view')
+            ->name('pages.index');
         Route::get('/pages/create', [ContentPanelController::class, 'createPage'])
-             ->middleware('can:content.posts.create')
-             ->name('pages.create');
+            ->middleware('can:content.posts.create')
+            ->name('pages.create');
         Route::get('/pages/{post}/edit', [ContentPanelController::class, 'editPage'])
-             ->middleware('can:content.posts.edit')
-             ->name('pages.edit');
+            ->middleware('can:content.posts.edit')
+            ->name('pages.edit');
 
         // Blog Posts
         Route::get('/posts', [ContentPanelController::class, 'posts'])
-             ->middleware('can:content.posts.view')
-             ->name('posts.index');
+            ->middleware('can:content.posts.view')
+            ->name('posts.index');
         Route::get('/posts/create', [ContentPanelController::class, 'createPost'])
-             ->middleware('can:content.posts.create')
-             ->name('posts.create');
+            ->middleware('can:content.posts.create')
+            ->name('posts.create');
         Route::get('/posts/{post}/edit', [ContentPanelController::class, 'editPost'])
-             ->middleware('can:content.posts.edit')
-             ->name('posts.edit');
+            ->middleware('can:content.posts.edit')
+            ->name('posts.edit');
 
         // Categories
         Route::get('/categories', [ContentPanelController::class, 'categories'])
-             ->middleware('can:content.categories.manage')
-             ->name('categories.index');
+            ->middleware('can:content.categories.manage')
+            ->name('categories.index');
 
         // Tags
         Route::get('/tags', [ContentPanelController::class, 'tags'])
-             ->middleware('can:content.tags.manage')
-             ->name('tags.index');
+            ->middleware('can:content.tags.manage')
+            ->name('tags.index');
 
         // Comments
         Route::get('/comments', [ContentPanelController::class, 'comments'])
-             ->middleware('can:content.comments.manage')
-             ->name('comments.index');
+            ->middleware('can:content.comments.manage')
+            ->name('comments.index');
 
         // Short Links
         Route::get('/short-links', [ContentPanelController::class, 'shortLinks'])
-             ->middleware('can:content.shortlinks.manage')
-             ->name('short-links.index');
+            ->middleware('can:content.shortlinks.manage')
+            ->name('short-links.index');
 
         // Redirects
         Route::get('/redirects', [ContentPanelController::class, 'redirects'])
-             ->middleware('can:content.redirects.manage')
-             ->name('redirects.index');
+            ->middleware('can:content.redirects.manage')
+            ->name('redirects.index');
 
         // Content Entities
         Route::get('/entities', [ContentPanelController::class, 'entities'])
-             ->middleware('can:content.entities.manage')
-             ->name('entities.index');
+            ->middleware('can:content.entities.manage')
+            ->name('entities.index');
 
         // Module Settings
         Route::get('/settings', [ContentPanelController::class, 'settings'])
-             ->middleware('can:content.settings.manage')
-             ->name('settings');
+            ->middleware('can:content.settings.manage')
+            ->name('settings');
+
+        // Unified Theme Studio
+        Route::get('/themes', [ContentPanelController::class, 'themes'])
+            ->middleware('can:content.themes.manage')
+            ->name('themes');
     });
 });

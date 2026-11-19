@@ -338,6 +338,12 @@ class PermissionCatalog
                 'matchers' => ['resellerhub.', 'menu.see.resellerhub'],
             ],
 
+            // ContentForge module
+            'contentforge' => [
+                'title' => 'مدیریت محتوا و پوسته‌ها (ContentForge)',
+                'matchers' => ['content.'],
+            ],
+
             'other' => [
                 'title' => 'سایر',
                 'matchers' => [''], // fallback
@@ -822,6 +828,27 @@ class PermissionCatalog
             // ResellerHub: Admin Platform
             'resellerhub.admin.view' => 'مشاهده فهرست نمایندگان در پنل مدیریت',
             'resellerhub.admin.manage' => 'مدیریت سهمیه، ماژول‌ها و وضعیت نمایندگان',
+
+            // ContentForge
+            'content.manage' => 'مدیریت کلان محتوا (Super Admin)',
+            'content.dashboard.view' => 'مشاهده داشبورد محتوا',
+            'content.posts.view' => 'مشاهده برگه‌ها و نوشته‌ها',
+            'content.posts.create' => 'ایجاد برگه و نوشته',
+            'content.posts.edit' => 'ویرایش برگه و نوشته',
+            'content.posts.edit.own' => 'ویرایش نوشته‌های خود',
+            'content.posts.delete' => 'حذف برگه و نوشته',
+            'content.posts.publish' => 'انتشار برگه و نوشته',
+            'content.categories.manage' => 'مدیریت دسته‌بندی‌های محتوا',
+            'content.tags.manage' => 'مدیریت برچسب‌های محتوا',
+            'content.comments.manage' => 'مدیریت نظرات محتوا',
+            'content.comments.approve' => 'تایید نظرات محتوا',
+            'content.media.upload' => 'آپلود رسانه در محتوا',
+            'content.entities.manage' => 'مدیریت موجودیت‌های محتوا',
+            'content.settings.manage' => 'مدیریت تنظیمات محتوا',
+            'content.themes.manage' => 'مدیریت استودیو پوسته‌ها و بازنویسی فرانت CRM',
+            'content.redirects.manage' => 'مدیریت ریدایرکت‌ها',
+            'content.shortlinks.manage' => 'مدیریت لینک‌های کوتاه',
+            'content.seo.manage' => 'مدیریت سئو (SEO) صفحات',
         ];
 
         if (!isset($map[$name])) {

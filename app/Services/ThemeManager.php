@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Tenancy\TenantManager;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
+use Modules\ContentForge\App\Models\ContentEntity;
+use Modules\ContentForge\Entities\ContentSetting;
 use Modules\Settings\Entities\Setting;
+use Nwidart\Modules\Facades\Module;
+use Throwable;
 
 final class ThemeManager
 {
@@ -26,14 +32,14 @@ final class ThemeManager
      */
     private function isContentForgeActive(): bool
     {
-        if (!class_exists(\Nwidart\Modules\Facades\Module::class)) {
+        if (!class_exists(Module::class)) {
             return false;
         }
 
         try {
-            return \Nwidart\Modules\Facades\Module::has('ContentForge')
-                && \Nwidart\Modules\Facades\Module::isEnabled('ContentForge');
-        } catch (\Throwable $e) {
+            return Module::has('ContentForge')
+                && Module::isEnabled('ContentForge');
+        } catch (Throwable $e) {
             return false;
         }
     }
@@ -49,28 +55,123 @@ final class ThemeManager
 
         $this->entityChecked = true;
 
-        // اگر سیستم هنوز نصب نشده باشد یا ماژول ContentForge فعال نباشد، دسترسی به دیتابیس انجام نمی‌شود
         if (!$this->isInstalled() || !$this->isContentForgeActive()) {
             return null;
         }
 
         try {
-            if (class_exists(\Modules\ContentForge\App\Models\ContentEntity::class) && \Illuminate\Support\Facades\Schema::hasTable('content_entities')) {
+            if (class_exists(ContentEntity::class) && Schema::hasTable('content_entities')) {
                 $entityId = Setting::where('key', 'content_entity_id')->value('value');
                 if ($entityId) {
                     // کش کردن اطلاعات به مدت ۶۰ ثانیه برای بهینه‌سازی
                     $this->activeEntity = Cache::remember("active_theme_entity_{$entityId}", 60, function () use ($entityId) {
-                        return \Modules\ContentForge\App\Models\ContentEntity::where('id', $entityId)
+                        return ContentEntity::where('id', $entityId)
+                            ->where('is_active', true)
+                            ->first();
+                    });
+                }
+
+                // فال‌بک به موجودیت پیش‌فرض در صورت عدم تنظیم شناسه در جدول settings
+                if (!$this->activeEntity) {
+                    $this->activeEntity = Cache::remember("active_theme_entity_default", 60, function () {
+                        return ContentEntity::where('is_default', true)
                             ->where('is_active', true)
                             ->first();
                     });
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->activeEntity = null;
         }
 
         return $this->activeEntity;
+    }
+
+    /**
+     * دریافت کلید قالب فعال برای پنل CRM
+     */
+    public function getActiveCrmTheme(): string
+    {
+        if (class_exists(TenantManager::class)) {
+            try {
+                $tenant = app(TenantManager::class)->getTenant();
+                if (!$tenant && auth()->check() && !empty(auth()->user()->tenant_id)) {
+                    $tenant = auth()->user()->tenant;
+                }
+
+                if ($tenant) {
+                    $tenantTheme = $tenant->branding['crm_theme_key']
+                        ?? $tenant->branding['theme_key']
+                        ?? $tenant->settings['crm_theme_key']
+                        ?? null;
+
+                    if (!empty($tenantTheme)) {
+                        return strtolower((string)$tenantTheme);
+                    }
+                }
+            } catch (Throwable) {
+            }
+        }
+
+        if ($this->isContentForgeActive() && class_exists(ContentSetting::class)) {
+            try {
+                $crmTheme = ContentSetting::getValue('crm.theme_key');
+                if (!empty($crmTheme) && $crmTheme !== 'default') {
+                    return strtolower((string)$crmTheme);
+                }
+            } catch (Throwable) {
+            }
+        }
+
+        $entity = $this->getActiveEntity();
+        if ($entity && !empty($entity->theme_key) && !in_array(strtolower($entity->theme_key), ['content', 'default'], true)) {
+            return strtolower((string)$entity->theme_key);
+        }
+
+        if ($this->isInstalled()) {
+            try {
+                $appTheme = Setting::where('key', 'crm_theme')->value('value')
+                    ?? Setting::where('key', 'app_theme')->value('value');
+                if (!empty($appTheme) && $appTheme !== 'default') {
+                    return strtolower((string)$appTheme);
+                }
+            } catch (Throwable) {
+            }
+        }
+
+        return 'default';
+    }
+
+    /**
+     * آیا بازنویسی (Override) ویوهای CRM فعال است؟
+     */
+    public function isCrmOverrideEnabled(): bool
+    {
+        if (!$this->isContentForgeActive()) {
+            return false;
+        }
+
+        if (class_exists(ContentSetting::class)) {
+            try {
+                $enabled = ContentSetting::getValue('crm.enable_overrides', 'true');
+                return $enabled === 'true' || $enabled === true || $enabled === '1' || $enabled === 1;
+            } catch (Throwable) {
+                return true;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * پاکسازی کش تم‌ها
+     */
+    public function clearCache(): void
+    {
+        $this->entityChecked = false;
+        $this->activeEntity = null;
+        Cache::forget('active_theme_entity_default');
+        Cache::forget('active_crm_theme_key');
     }
 
     /**
@@ -96,7 +197,7 @@ final class ThemeManager
         if ($this->isInstalled()) {
             try {
                 $appTheme = Setting::where('key', 'app_theme')->value('value') ?? 'default';
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $appTheme = 'default';
             }
         }
@@ -163,7 +264,7 @@ final class ThemeManager
             try {
                 $config = json_decode(File::get($themePath), true);
                 return isset($config['type']) && strtolower($config['type']) === 'spa';
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 return false;
             }
         }
