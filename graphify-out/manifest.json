@@ -14922,9 +14922,9 @@
     "semantic_hash": "c20405402391037668c55af02b62178c"
   },
   "resources/views/layouts/user.blade.php": {
-    "mtime": 1795070046.722319,
-    "seen": 1795070165.3238947,
-    "ast_hash": "0220198062c712b29a239c732495be11",
+    "mtime": 1795077641.1821842,
+    "seen": 1795077787.552315,
+    "ast_hash": "7e08c70932e937551b3248984e2abcfd",
     "semantic_hash": ""
   },
   "resources/views/layouts/web.blade.php": {
@@ -15954,21 +15954,21 @@
     "semantic_hash": ""
   },
   "resources/views/components/ui/card-to-card.blade.php": {
-    "mtime": 1795069894.1175516,
-    "seen": 1795070165.32384,
-    "ast_hash": "ef57d6023e76e4df04cd6452a0d30f7d",
+    "mtime": 1795075126.155952,
+    "seen": 1795075820.27031,
+    "ast_hash": "1ef0547c2a1038bf06782bc448ecf89d",
     "semantic_hash": ""
   },
   "resources/views/components/ui/color-picker.blade.php": {
-    "mtime": 1795069761.5934556,
-    "seen": 1795070165.3238447,
-    "ast_hash": "f04fb282851be882937fa746bafa6f47",
+    "mtime": 1795075142.0405042,
+    "seen": 1795075820.2703116,
+    "ast_hash": "d0b49ca23251a3e0f719e01f3fbb8f29",
     "semantic_hash": ""
   },
   "resources/views/components/ui/command-palette.blade.php": {
-    "mtime": 1795069971.7700024,
-    "seen": 1795070165.3238475,
-    "ast_hash": "78256e5f280b6b7af5a070dc5c7d79d1",
+    "mtime": 1795075162.4104204,
+    "seen": 1795075820.2703133,
+    "ast_hash": "8d311087ced079e1c023cfc8c18c8bf5",
     "semantic_hash": ""
   },
   "resources/views/components/ui/context-menu.blade.php": {
@@ -15978,9 +15978,9 @@
     "semantic_hash": ""
   },
   "resources/views/components/ui/copy-button.blade.php": {
-    "mtime": 1795069732.1422863,
-    "seen": 1795070165.3238509,
-    "ast_hash": "2c373e402030f29caa26a0a9aea13575",
+    "mtime": 1795075183.4972892,
+    "seen": 1795075820.2703168,
+    "ast_hash": "b82bd922dfe55e39f490bf551a46e3c1",
     "semantic_hash": ""
   },
   "resources/views/components/ui/delete-button.blade.php": {
@@ -15990,39 +15990,39 @@
     "semantic_hash": ""
   },
   "resources/views/components/ui/dock.blade.php": {
-    "mtime": 1795070026.3990648,
-    "seen": 1795070165.3238535,
-    "ast_hash": "64703351ddefcddee9c062531d9349c4",
+    "mtime": 1795075244.9044702,
+    "seen": 1795075820.2703207,
+    "ast_hash": "2909d19c5b551989a759bcca797b8469",
     "semantic_hash": ""
   },
   "resources/views/components/ui/empty-state.blade.php": {
-    "mtime": 1795069811.8169744,
-    "seen": 1795070165.3238552,
-    "ast_hash": "cf2aa124d5171f663b0df0c4b4c1e108",
+    "mtime": 1795075307.632051,
+    "seen": 1795075820.270322,
+    "ast_hash": "a5feb5e70aa4607afb39cca32b6c8e4c",
     "semantic_hash": ""
   },
   "resources/views/components/ui/file-upload.blade.php": {
-    "mtime": 1795069778.1673713,
-    "seen": 1795070165.3238568,
-    "ast_hash": "5e6c2f5e503e0f4172293ce5e0f9fed9",
+    "mtime": 1795075328.4204543,
+    "seen": 1795075820.2703245,
+    "ast_hash": "2a388b9c84228cce0c2b8616c47cad3e",
     "semantic_hash": ""
   },
   "resources/views/components/ui/iban-input.blade.php": {
-    "mtime": 1795069869.0460124,
-    "seen": 1795070165.3238587,
-    "ast_hash": "7e6ad3ebbf97e909b5290bc1681cea91",
+    "mtime": 1795075404.6586144,
+    "seen": 1795075820.270326,
+    "ast_hash": "295299ef5ab5d631e6359990c412b0a0",
     "semantic_hash": ""
   },
   "resources/views/components/ui/menu-notch.blade.php": {
-    "mtime": 1795069935.4609623,
-    "seen": 1795070165.3238597,
-    "ast_hash": "56c235943f7c606aed4895b44a858d52",
+    "mtime": 1795075441.0981662,
+    "seen": 1795075820.2703278,
+    "ast_hash": "061999ea371e506c9cb37fd69b68bb40",
     "semantic_hash": ""
   },
   "resources/views/components/ui/national-id-input.blade.php": {
-    "mtime": 1795069849.2564733,
-    "seen": 1795070165.3238616,
-    "ast_hash": "698b730a483b8c004468be204fc4bf99",
+    "mtime": 1795075453.626345,
+    "seen": 1795075820.2703292,
+    "ast_hash": "792014be7dd38545067489478d9a1935",
     "semantic_hash": ""
   },
   "resources/views/components/ui/otp-input.blade.php": {
@@ -16032,45 +16032,45 @@
     "semantic_hash": ""
   },
   "resources/views/components/ui/payment-methods.blade.php": {
-    "mtime": 1795069909.777803,
-    "seen": 1795070165.3238645,
-    "ast_hash": "49929e29ceb772b2ba0d7a2cb16477a3",
+    "mtime": 1795075543.9277823,
+    "seen": 1795075820.270335,
+    "ast_hash": "93baedec201acbb55bc6fbde92495e09",
     "semantic_hash": ""
   },
   "resources/views/components/ui/price-input.blade.php": {
-    "mtime": 1795069835.561206,
-    "seen": 1795070165.323866,
-    "ast_hash": "156509d66feffd536d4768ccaa57e5a7",
+    "mtime": 1795075578.865805,
+    "seen": 1795075820.2703366,
+    "ast_hash": "f8038a3290993047ece9d768856ee719",
     "semantic_hash": ""
   },
   "tests/Feature/UiComponentsTest.php": {
-    "mtime": 1795071445.8892763,
-    "seen": 1795071525.9936016,
-    "ast_hash": "b6a171ed6a0176fe5b1d5cbdb60ef903",
+    "mtime": 1795077685.9902804,
+    "seen": 1795077787.5527074,
+    "ast_hash": "8454b8391bfc78af0843c9d99263851b",
     "semantic_hash": ""
   },
   "resources/views/components/ui/alert.blade.php": {
-    "mtime": 1795071187.9219792,
-    "seen": 1795071525.9933233,
-    "ast_hash": "4ac3b526b9661ab0e682463a1df411fa",
+    "mtime": 1795075081.9086778,
+    "seen": 1795075820.2703025,
+    "ast_hash": "e7e52a7434c35e9a2e89b4a9dfe843fa",
     "semantic_hash": ""
   },
   "resources/views/components/ui/badge.blade.php": {
-    "mtime": 1795071361.8827052,
-    "seen": 1795071525.9933295,
-    "ast_hash": "f99468a0f0aa4e8f9139fb361db360c4",
+    "mtime": 1795075100.384192,
+    "seen": 1795075820.270306,
+    "ast_hash": "afa782c88e591409e2222753982f7b43",
     "semantic_hash": ""
   },
   "resources/views/components/ui/card-number-input.blade.php": {
-    "mtime": 1795071415.7233646,
-    "seen": 1795071525.9933324,
-    "ast_hash": "808d4b21b1e72c1ab96983730fa392e8",
+    "mtime": 1795075114.10081,
+    "seen": 1795075820.270308,
+    "ast_hash": "3918eac33554fe5085f6bdfef5fbe8b4",
     "semantic_hash": ""
   },
   "resources/views/components/ui/password-input.blade.php": {
-    "mtime": 1795071396.9490643,
-    "seen": 1795071525.9933684,
-    "ast_hash": "30225f168cc7f395392aef4a38e1ab31",
+    "mtime": 1795075510.5077055,
+    "seen": 1795075820.2703335,
+    "ast_hash": "73beb090052b0939f6988a01a9bc76b6",
     "semantic_hash": ""
   },
   "resources/views/components/ui/price.blade.php": {
@@ -16086,9 +16086,15 @@
     "semantic_hash": ""
   },
   "resources/views/components/ui/toast.blade.php": {
-    "mtime": 1795071292.5623806,
-    "seen": 1795071525.9933789,
-    "ast_hash": "34f0054fafbf07feeb08506ebe96cd6e",
+    "mtime": 1795075650.8787038,
+    "seen": 1795075820.2703414,
+    "ast_hash": "bb02c8775af47e58b18c975673461277",
+    "semantic_hash": ""
+  },
+  "Modules/ContentForge/Database/Migrations/2026_11_19_000001_add_content_themes_manage_permission.php": {
+    "mtime": 1795077669.812011,
+    "seen": 1795077787.5440786,
+    "ast_hash": "7321ba4c9bafaf77498473d3cacb257e",
     "semantic_hash": ""
   },
   "package-lock.json": {

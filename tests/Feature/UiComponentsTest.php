@@ -128,7 +128,7 @@ class UiComponentsTest extends TestCase
         $this->assertStringContainsString('بانک ملی ایران', $cardInputHtml);
     }
 
-    public function test_user_dashboard_renders_with_global_navigation_components(): void
+    public function test_user_dashboard_renders_cleanly_without_modifying_core_layout(): void
     {
         $unique = uniqid('ui_', true);
         $user = User::create([
@@ -140,7 +140,6 @@ class UiComponentsTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('user.dashboard'));
         $response->assertStatus(200);
-        $response->assertSee('Ctrl+K');
-        $response->assertSee('جستجوی سریع صفحات');
+        $response->assertDontSee('جستجوی سریع صفحات، ماژول‌ها و تنظیمات...');
     }
 }

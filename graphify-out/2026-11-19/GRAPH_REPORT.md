@@ -1,12 +1,12 @@
 # Graph Report - crm-laravel  (2026-11-19)
 
 ## Corpus Check
-- 2661 files · ~2,099,462 words
+- 2668 files · ~2,101,683 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 108 file(s) not represented in the graph (top: .stub 48, (none) 40, .scss 7)
 
 ## Summary
-- 16859 nodes · 34727 edges · 1725 communities (391 shown, 1334 thin omitted)
+- 16866 nodes · 34727 edges · 1732 communities (391 shown, 1341 thin omitted)
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 2110 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
@@ -1334,7 +1334,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (1725 total, 1334 thin omitted)
+## Communities (1732 total, 1341 thin omitted)
 
 ### Community 0 - "Illuminate\Database\Schema\Blueprint"
 Cohesion: 0.01
@@ -2901,24 +2901,24 @@ Cohesion: 0.22
 Nodes (8): layouts.user, partials.jalali-date-picker, resellerhub::partials.toast, resellerhub::user.packages.partials.delete-modal, resellerhub::user.packages.partials.icon, resellerhub::user.packages.partials.icons-script, resellerhub::user.packages.partials.quick-provision-modal, resellerhub::user.packages.partials.status-modal
 
 ## Knowledge Gaps
-- **1428 isolated node(s):** `user.partials.sidebar`, `user.partials.topbar`, `layouts.user`, `layouts.user`, `layouts.user` (+1423 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6962 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **1334 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **1428 isolated node(s):** `layouts.user`, `layouts.user`, `layouts.user`, `layouts.user`, `layouts.user` (+1423 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 6969 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **1341 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `User` connect `User` to `Illuminate\Database\Schema\Blueprint`, `Illuminate\Database\Eloquent\Model`, `ResellerInvoicePayment`, `BookingLaboratoryOrder`, `Illuminate\Database\Eloquent\Relations\BelongsTo`, `Illuminate\Support\Facades\DB`, `Illuminate\Support\Str`, `Illuminate\Database\Eloquent\Relations\MorphTo`, `.log`, `Throwable`, `FundAccount`, `InvoiceStatus`, `TransactionType`, `BookingWaitlist`, `SearchController.php`, `ExpenseController.php`, `ResellerBillingService`, `CampaignLeadsTab.php`, `OnboardingCustomStepsRoutingTest`, `Illuminate\Database\Eloquent\SoftDeletes`, `ResellerHub: PaymentRecorded`, `Illuminate\Http\Request`, `Wallet`, `MarketSetting`, `Modules\ResellerHub\App\Http\Requests\StoreTenantRequest`, `ProjectTask`, `Projects/routes/web.php`, `ProvisionTenantJob.php`, `SalesDeal`, `BookingCategory`, `Reminders: Reminder`, `.current`, `FollowUpController.php`, `BookingSetting`, `WarehouseStockController.php`, `Controller`, `GatewayAmountResolver`, `OrderProvisioningService.php`, `.redirect`, `Booking: ClinicLiveMonitoring`, `TestCase`, `Illuminate\Database\Eloquent\Builder`, `ResellerHub: OnboardingWidget`, `ResellerHub: Automated Tests`, `Livewire/ClientForm.php`, `Workflows: ClientWorkflowService`, `ProjectsController.php`, `Illuminate\View\View`, `.current`, `ProjectsTemplateController.php`, `Booking: ScheduleManagerphp`, `ResellerHub/routes/web.php`, `ClinicMonitoringService.php`, `ClientForm`, `ProjectStatus`, `ResellerSubAccount`, `Booking: User/AppointmentController`, `Campaign`, `CockpitGoalManager`, `StepData`, `OnboardingStateService`, `HasResellerTest.php`, `.getValue`, `Order`, `BookingForm`, `Morilog\Jalali\Jalalian`, `Status`, `User/ClientController.php`, `.setTenant`, `ResellerHub: OnboardingStepPreset`, `Illuminate\Support\Facades\Route`, `UiRegressionGuardTest`, `Carbon\Carbon`, `Illuminate\Database\Eloquent\Relations\BelongsToMany`, `Illuminate\Database\Eloquent\Relations\HasMany`, `BookingAvailabilityException`, `HasMarketVendor`, `FortifyServiceProvider.php`, `Task`, `MenuCustomizationService.php`, `Illuminate\Http\JsonResponse`, `UserController.php`, `Tenant`, `WalletAdapter`, `get_setting`, `CockpitMain`, `TenantUserController`, `WorkflowEngine.php`, `Vendor`, `Payment`, `CreateNewUser.php`, `StatementController`, `.now`, `DeleteUser`, `NotificationService`, `TreatmentPlan`, `Modules\Booking\Entities\BookingCategory`, `Illuminate\Support\Collection`, `RoleController.php`, `UserFactory.php`, `.snooze`, `ContractTemplate`, `TaskController.php`, `QueryBudgetTest.php`, `ResellerInvoice`, `Modules\ContentForge\App\Models\ContentPost`, `Appointment.php`, `CalendarEventService.php`, `VendorController.php`, `PROJECT_GUIDE.md`, `TestCase`, `ProductQuestion`, `TenantUserManagementTest`, `PropertyCategory`, `Illuminate\Support\ServiceProvider`, `UpdateUserProfileInformation.php`, `BookingService`, `Client`, `PropertyOwner`, `Livewire\Component`?**
-  _High betweenness centrality (0.041) - this node is a cross-community bridge._
-- **What connects `user.partials.sidebar`, `user.partials.topbar`, `layouts.user` to the rest of the system?**
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+- **What connects `layouts.user`, `layouts.user`, `layouts.user` to the rest of the system?**
   _1428 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Illuminate\Database\Schema\Blueprint` be split into smaller, more focused modules?**
   _Cohesion score 0.012260536398467433 - nodes in this community are weakly interconnected._
 - **Why does `Controller` connect `Controller` to `Illuminate\Database\Eloquent\Relations\BelongsTo`, `Document`, `Illuminate\Support\Facades\DB`, `.config`, `Illuminate\Support\Str`, `.log`, `Throwable`, `TransactionType`, `CustomUserField`, `Illuminate\Http\Resources\Json\AnonymousResourceCollection`, `Illuminate\Http\Request`, `MarketSetting`, `Controllers/ReportController.php`, `ProjectTask`, `Projects/routes/web.php`, `QuotaKey`, `Market: MarketControllerphp`, `Services: InvoiceController`, `BookingSetting`, `Workflow`, `Reseller`, `GatewayAmountResolver`, `ResellerSetting`, `.redirect`, `Services: Services/App/Http/Control`, `ClientInvoiceController.php`, `Livewire/ClientForm.php`, `Workflows: ClientWorkflowService`, `ProjectsController.php`, `Illuminate\View\View`, `.current`, `ProjectsTemplateController.php`, `ResellerHub/routes/web.php`, `VersionControlController`, `ProjectStatus`, `TenancyModelRegistry`, `Illuminate\Http\RedirectResponse`, `Services: ServicePackageController`, `ResellerSubAccount`, `Campaign`, `Order`, `Market: OrderController`, `Status`, `User/ClientController.php`, `Illuminate\Support\Facades\Route`, `Clients: Illuminate\Pagination\Pagi`, `Service`, `FortifyServiceProvider.php`, `Illuminate\Http\JsonResponse`, `UserController.php`, `Tenant`, `get_setting`, `routes/web.php`, `ContentFrontController`, `.syncStatusFromTasks`, `Market/Routes/web.php`, `.now`, `Clients: ClientDashboardController`, `Services/routes/web.php`, `TreatmentPlan`, `SmsResellerController.php`, `Illuminate\Support\Collection`, `RoleController.php`, `ServicesController.php`, `Projects/routes/web.php`, `ContractTemplate`, `Invoice`, `Contract`, `.getValue`, `ServicePackageController.php`, `ContractController.php`, `VendorController.php`, `ClientFormService`, `ServiceCategory`, `InstallController`, `TenantManager`, `ContractRuleController`, `ContractEngine.php`, `MasterProductController`, `Clients/Routes/web.php`, `Client`, `ClientInvoiceController`, `Livewire\Component`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
+  _High betweenness centrality (0.031) - this node is a cross-community bridge._
 - **Should `Illuminate\Database\Eloquent\Model` be split into smaller, more focused modules?**
   _Cohesion score 0.018246753246753247 - nodes in this community are weakly interconnected._
-- **Why does `Tenant` connect `Tenant` to `Illuminate\Database\Eloquent\Model`, `ScanExpiringOrdersCommand.php`, `ResellerInvoicePayment`, `Illuminate\Database\Eloquent\Relations\BelongsTo`, `OnboardingStepStatus`, `.config`, `Illuminate\Support\Facades\DB`, `Illuminate\Support\Str`, `UserFactory.php`, `.setTenant`, `TestCase`, `ResellerPackage`, `Illuminate\Support\Facades\Route`, `Throwable`, `UiRegressionGuardTest`, `InvoiceStatus`, `Modules\ResellerHub\App\Http\Controllers\TenantProvisioningController`, `Carbon\Carbon`, `Illuminate\Database\Eloquent\Relations\HasMany`, `ResellerBillingService`, `OnboardingCustomStepsRoutingTest`, `ResellerHelper`, `Illuminate\Database\Eloquent\SoftDeletes`, `FortifyServiceProvider.php`, `ResellerHub: PaymentRecorded`, `TenantUserManagementTest`, `مستند فنی معماری چندمستأجری (Multi-Tenancy) و ماژول نمایندگی فروش (ResellerHub)`, `Illuminate\Http\JsonResponse`, `ResellerHub: ResellerAuditService`, `Modules\ResellerHub\App\Http\Requests\StoreTenantRequest`, `channels.php`, `ProvisionTenantJob.php`, `TenantScope`, `QuotaKey`, `OnboardingTourStatus`, `Reseller`, `GatewayAmountResolver`, `ResellerSetting`, `OrderProvisioningService.php`, `TestCase`, `Illuminate\Database\Eloquent\Builder`, `ResellerHub: OnboardingWidget`, `Illuminate\View\View`, `ResellerHub/routes/web.php`, `Livewire\Component`, `TenancyModelRegistry`, `Illuminate\Http\RedirectResponse`, `ResellerSubAccount`, `StepData`, `OnboardingStateService`, `TenantManager`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+- **Why does `ResellerInvoice` connect `ResellerInvoice` to `Illuminate\Database\Schema\Blueprint`, `Illuminate\Database\Eloquent\Model`, `ResellerInvoicePayment`, `User`, `Illuminate\Support\Facades\DB`, `ResellerOrder`, `ConcurrencyAndIdempotencyTest`, `TestCase`, `Throwable`, `Illuminate\Support\Facades\Route`, `InvoiceStatus`, `Illuminate\Console\Command`, `ResellerBillingService`, `Illuminate\Database\Eloquent\Relations\HasMany`, `ResellerHelper`, `Illuminate\Database\Eloquent\SoftDeletes`, `ResellerHub: PaymentRecorded`, `.computeTotals`, `QueryBudgetTest.php`, `Illuminate\Http\JsonResponse`, `ResellerHub: ResellerAuditService`, `Tenant`, `Illuminate\Support\ServiceProvider`, `QueryBudgetTest`, `WorkflowEngine.php`, `Reseller`, `GatewayAmountResolver`, `OrderProvisioningService.php`, `ResellerHub: Automated Tests`, `Workflows: ClientWorkflowService`, `Illuminate\View\View`, `ResellerHub/routes/web.php`, `ResellerHub: Money`, `HasInvoiceSourceScopes`, `Illuminate\Http\RedirectResponse`, `WorkflowTrigger`, `ResellerSubAccount`, `TenantManager`?**
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
 - **Should `ResellerInvoicePayment` be split into smaller, more focused modules?**
   _Cohesion score 0.04066985645933014 - nodes in this community are weakly interconnected._
