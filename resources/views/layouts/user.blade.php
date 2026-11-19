@@ -382,13 +382,6 @@
             </footer>
         @endif
     </div>
-
-    @auth
-        {{-- Devigner UI Global Navigation: Dynamic Island Notch, Mobile Dock & Ctrl+K Command Palette --}}
-        <x-ui.menu-notch />
-        <x-ui.dock />
-        <x-ui.command-palette />
-    @endauth
 </div>
 
 
