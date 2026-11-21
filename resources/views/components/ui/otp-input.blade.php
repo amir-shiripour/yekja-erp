@@ -95,7 +95,7 @@
                 @keydown.backspace="handleBackspace({{ $i }}, $event)"
                 @paste.prevent="handlePaste({{ $i }}, $event)"
                 @focus="$event.target.select()"
-                class="w-11 h-12 sm:w-12 sm:h-14 text-center text-lg font-mono font-black bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 transition-all"
+                class="w-11 h-12 sm:w-12 sm:h-14 text-center text-lg font-black bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 transition-all"
             >
         @endfor
     </div>

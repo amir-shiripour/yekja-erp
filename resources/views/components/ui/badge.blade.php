@@ -15,7 +15,7 @@
             'pill' => 'bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60',
             'dot'  => 'bg-amber-500',
         ],
-        'rose', 'danger', 'error' => [
+        'rose', 'danger', 'error', 'destructive' => [
             'pill' => 'bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60',
             'dot'  => 'bg-rose-500',
         ],
@@ -27,7 +27,11 @@
             'pill' => 'bg-purple-50 text-purple-700 border-purple-200/80 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/60',
             'dot'  => 'bg-purple-500',
         ],
-        'slate', 'gray', 'neutral' => [
+        'outline' => [
+            'pill' => 'bg-transparent text-gray-700 border-gray-300 dark:text-gray-300 dark:border-gray-600',
+            'dot'  => 'bg-gray-400',
+        ],
+        'secondary', 'subtle', 'slate', 'gray', 'neutral' => [
             'pill' => 'bg-gray-100 text-gray-700 border-gray-200/80 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700',
             'dot'  => 'bg-gray-500',
         ],
@@ -43,16 +47,17 @@
     };
 @endphp
 
+{{-- VibeFarsi Badge Component (RTL, Persian text, optional pulse dot) --}}
 <span {{ $attributes->merge([
-    'class' => "inline-flex items-center font-bold rounded-xl border {$colors['pill']} {$sizes}"
+    'class' => "inline-flex items-center font-bold rounded-xl border {$colors['pill']} {$sizes} whitespace-nowrap"
 ]) }}>
     @if($dot)
-        <span class="relative flex h-2 w-2 shrink-0">
+        <span class="relative flex size-2 shrink-0">
             @if($pulse)
                 <span
                     class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 {{ $colors['dot'] }}"></span>
             @endif
-            <span class="relative inline-flex rounded-full h-2 w-2 {{ $colors['dot'] }}"></span>
+            <span class="relative inline-flex rounded-full size-2 {{ $colors['dot'] }}"></span>
         </span>
     @endif
     <span>{{ $slot }}</span>

@@ -62,7 +62,7 @@
         {{-- Card Number + Instant Copy --}}
         <div
             class="relative py-3.5 px-4 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-sm flex items-center justify-between gap-3">
-            <span dir="ltr" class="text-lg sm:text-xl font-mono font-black tracking-[0.18em] text-white select-all">
+            <span dir="ltr" class="text-lg sm:text-xl font-black tracking-[0.18em] text-white select-all">
                 {{ $formattedCard ?: '---- ---- ---- ----' }}
             </span>
             @if($rawCard)
@@ -80,7 +80,7 @@
             </div>
             @if($iban)
                 <div class="flex items-center gap-2">
-                    <span dir="ltr" class="font-mono text-[11px] text-slate-200">{{ $iban }}</span>
+                    <span dir="ltr" class="text-[11px] text-slate-200">{{ $iban }}</span>
                     <x-ui.copy-button :text="$iban" size="sm"
                                       class="!bg-white/10 !border-white/15 !text-white hover:!bg-white/20"/>
                 </div>
