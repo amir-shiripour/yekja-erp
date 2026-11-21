@@ -109,7 +109,7 @@
             :value="display"
             @input="onInput($event)"
             placeholder="{{ $placeholder }}"
-            class="w-full px-4 py-2.5 pl-16 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-mono font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-left"
+            class="w-full px-4 py-2.5 pl-16 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-left"
         >
         <span
             class="absolute left-3 px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-[11px] font-bold text-gray-500 dark:text-gray-400 pointer-events-none select-none">

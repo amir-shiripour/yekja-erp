@@ -1,27 +1,46 @@
 @props([
-    'position' => 'bottom-left', // bottom-left | bottom-right | top-left | top-right
+    'position' => 'top-center', // top-center | top-left | top-right | bottom-left | bottom-right
 ])
 
 @php
     $posClasses = match($position) {
-        'bottom-right' => 'bottom-5 right-5',
-        'top-left'     => 'top-5 left-5',
-        'top-right'    => 'top-5 right-5',
-        default        => 'bottom-5 left-5',
+        'top-center'   => 'top-4 left-1/2 -translate-x-1/2 items-center',
+        'top-left'     => 'top-4 left-4 items-start',
+        'top-right'    => 'top-4 right-4 items-end',
+        'bottom-right' => 'bottom-4 right-4 items-end',
+        'bottom-center'=> 'bottom-4 left-1/2 -translate-x-1/2 items-center',
+        default        => 'top-4 left-1/2 -translate-x-1/2 items-center',
     };
 @endphp
 
+{{-- VibeFarsi Official Toast System (Exact 1:1 circular icon pill, popover surface, and typography) --}}
 <div
     x-data="{
         toasts: [],
+        init() {
+            window.toast = {
+                success: (message, title = 'موفقیت‌آمیز', duration = 3500) => {
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', message, title, duration } }));
+                },
+                error: (message, title = 'خطا', duration = 4500) => {
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message, title, duration } }));
+                },
+                warning: (message, title = 'هشدار', duration = 4000) => {
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'warning', message, title, duration } }));
+                },
+                info: (message, title = 'اطلاع', duration = 3500) => {
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'info', message, title, duration } }));
+                }
+            };
+        },
         add(detail) {
             const d = (typeof detail === 'string') ? { message: detail } : (detail || {});
             const id = Date.now() + Math.random();
-            const duration = d.duration || 4500;
+            const duration = d.duration || 3800;
             const rawType = String(d.type || 'info').toLowerCase();
-            const type = rawType === 'danger' ? 'error' : rawType;
+            const type = (rawType === 'danger' || rawType === 'destructive') ? 'error' : rawType;
 
-            this.toasts.push({
+            this.toasts.unshift({
                 id,
                 type,
                 title: d.title || '',
@@ -33,67 +52,87 @@
         },
         remove(id) {
             this.toasts = this.toasts.filter(t => t.id !== id);
+        },
+        dismissAll() {
+            this.toasts = [];
         }
     }"
     @toast.window="add($event.detail)"
     @notify.window="add($event.detail)"
-    class="fixed {{ $posClasses }} z-[9998] flex flex-col gap-2.5 w-80 sm:w-96 max-w-[calc(100vw-2.5rem)] pointer-events-none"
+    class="fixed {{ $posClasses }} z-[9999] flex flex-col gap-2 w-[min(360px,calc(100vw-2rem))] pointer-events-none select-none"
+    role="region"
+    aria-label="اعلان‌ها"
 >
-    <template x-for="toast in toasts" :key="toast.id">
+    <template x-for="t in toasts" :key="t.id">
         <div
-            x-transition:enter="transition ease-out duration-250"
-            x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+            x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-250"
+            x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave="transition cubic-bezier(0.16, 1, 0.3, 1) duration-150"
             x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            class="pointer-events-auto relative overflow-hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200 dark:border-gray-700/80 rounded-2xl shadow-2xl p-3.5 flex items-start gap-3 text-xs"
+            x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
+            class="pointer-events-auto relative flex items-start gap-3 rounded-2xl border border-gray-200/90 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl px-3.5 py-3 text-gray-900 dark:text-gray-100 shadow-xl w-full"
+            style="box-shadow: 0 12px 32px -4px rgba(0,0,0,0.16);"
+            role="status"
         >
-            {{-- Status Icon --}}
-            <div
+            {{-- VibeFarsi Icon Badge (size-5 rounded-full with size-3 icon) --}}
+            <span
+                class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full"
                 :class="{
-                    'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400': toast.type === 'success',
-                    'bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400': toast.type === 'error',
-                    'bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400': toast.type === 'warning',
-                    'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400': !['success','error','warning'].includes(toast.type)
+                    'bg-emerald-600 text-white': t.type === 'success',
+                    'bg-rose-600 text-white': t.type === 'error',
+                    'bg-amber-500 text-white': t.type === 'warning',
+                    'bg-gray-900 text-white dark:bg-white dark:text-gray-900': !['success','error','warning'].includes(t.type)
                 }"
-                class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
             >
-                <svg x-show="toast.type === 'success'" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                </svg>
-                <svg x-show="toast.type === 'error'" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-                <svg x-show="toast.type === 'warning'" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor" stroke-width="2.2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                <svg x-show="!['success','error','warning'].includes(toast.type)" class="w-4 h-4" fill="none"
-                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+                <template x-if="t.type === 'success'">
+                    <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </template>
+                <template x-if="t.type === 'error'">
+                    <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="18" x2="18" y2="6"/>
+                    </svg>
+                </template>
+                <template x-if="t.type === 'warning'">
+                    <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </template>
+                <template x-if="!['success','error','warning'].includes(t.type)">
+                    <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                </template>
+            </span>
+
+            {{-- Text Body --}}
+            <div class="min-w-0 flex-1 text-xs">
+                <template x-if="t.title">
+                    <p class="font-bold leading-5 text-gray-900 dark:text-white" x-text="t.title"></p>
+                </template>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed" x-text="t.message"></p>
             </div>
 
-            {{-- Message --}}
-            <div class="flex-1 min-w-0 pt-0.5">
-                <p x-show="toast.title" class="font-black text-gray-900 dark:text-white mb-0.5"
-                   x-text="toast.title"></p>
-                <p class="font-medium text-gray-600 dark:text-gray-300 leading-relaxed" x-text="toast.message"></p>
-            </div>
-
-            {{-- Close --}}
+            {{-- Close Button --}}
             <button
                 type="button"
-                @click="remove(toast.id)"
-                class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg transition-colors shrink-0 cursor-pointer"
+                @click="remove(t.id)"
+                class="-me-1 -mt-0.5 p-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-lg transition-colors shrink-0 cursor-pointer"
+                title="بستن"
             >
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
             </button>
         </div>

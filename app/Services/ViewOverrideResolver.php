@@ -17,7 +17,7 @@ final class ViewOverrideResolver
 
     public function isCrmView(string $viewName): bool
     {
-        if (str_starts_with($viewName, 'user.') || str_starts_with($viewName, 'layouts.user') || str_starts_with($viewName, 'layouts.auth')) {
+        if (str_starts_with($viewName, 'user.') || str_starts_with($viewName, 'admin.') || str_starts_with($viewName, 'layouts.user') || str_starts_with($viewName, 'layouts.auth')) {
             return true;
         }
 

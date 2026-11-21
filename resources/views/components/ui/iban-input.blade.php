@@ -89,7 +89,7 @@
 
     <div class="relative flex items-center" dir="ltr">
         <span
-            class="inline-flex items-center justify-center px-3.5 py-2.5 bg-gray-100 dark:bg-gray-800 border border-r-0 border-gray-200 dark:border-gray-700 rounded-l-xl text-sm font-mono font-black text-gray-700 dark:text-gray-200 select-none">
+            class="inline-flex items-center justify-center px-3.5 py-2.5 bg-gray-100 dark:bg-gray-800 border border-r-0 border-gray-200 dark:border-gray-700 rounded-l-xl text-sm font-black text-gray-700 dark:text-gray-200 select-none">
             IR
         </span>
         <input
@@ -104,7 +104,7 @@
                 'border-rose-400 dark:border-rose-600 focus:border-rose-500 focus:ring-rose-500/20': status === 'invalid',
                 'border-gray-200 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-500/20': status === 'idle'
             }"
-            class="w-full px-3.5 py-2.5 pr-10 bg-white dark:bg-gray-900 border rounded-r-xl text-sm font-mono font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all text-left"
+            class="w-full px-3.5 py-2.5 pr-10 bg-white dark:bg-gray-900 border rounded-r-xl text-sm font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all text-left"
         >
         <span class="absolute right-3 flex items-center pointer-events-none">
             <svg x-cloak x-show="status === 'valid'" class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24"
@@ -120,6 +120,6 @@
     </div>
 
     <p x-cloak x-show="status === 'invalid'" class="text-[11px] font-bold text-rose-600 dark:text-rose-400">
-        شماره شبای وارد شده با استاندارد ISO 13616 (رقم کنترل) مطابقت ندارد.
+        شماره شبای وارد شده صحیح نیست.
     </p>
 </div>

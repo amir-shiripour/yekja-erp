@@ -119,7 +119,7 @@
                         </template>
                         <div class="min-w-0">
                             <p class="font-bold text-gray-800 dark:text-gray-200 truncate" x-text="file.name"></p>
-                            <p class="text-[11px] text-gray-400 font-mono" dir="ltr" x-text="file.size"></p>
+                            <p class="text-[11px] text-gray-400" dir="ltr" x-text="file.size"></p>
                         </div>
                     </div>
                     <button type="button" @click.stop="clearFiles()"

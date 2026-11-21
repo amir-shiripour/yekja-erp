@@ -14922,9 +14922,9 @@
     "semantic_hash": "c20405402391037668c55af02b62178c"
   },
   "resources/views/layouts/user.blade.php": {
-    "mtime": 1795070046.722319,
-    "seen": 1795070165.3238947,
-    "ast_hash": "0220198062c712b29a239c732495be11",
+    "mtime": 1795077641.1821842,
+    "seen": 1795077787.552315,
+    "ast_hash": "7e08c70932e937551b3248984e2abcfd",
     "semantic_hash": ""
   },
   "resources/views/layouts/web.blade.php": {
@@ -15930,21 +15930,21 @@
     "semantic_hash": ""
   },
   "tests/Feature/CrmThemeOverrideTest.php": {
-    "mtime": 1795004678.463636,
-    "seen": 1795004734.80638,
-    "ast_hash": "abfa288677e2fec8c7dfdcb019597f9f",
+    "mtime": 1795078706.2564852,
+    "seen": 1795080756.1508927,
+    "ast_hash": "899009017bed6333b7035029639716fe",
     "semantic_hash": ""
   },
   "Modules/ContentForge/App/Livewire/Admin/ThemeStudio.php": {
-    "mtime": 1795068010.8198783,
-    "seen": 1795068361.9271433,
-    "ast_hash": "5bfbb6d77d2df406eb65a15bd30c3cbf",
+    "mtime": 1795078800.313636,
+    "seen": 1795080756.1446629,
+    "ast_hash": "ceb4281d7865db9e8a6091d0d65b552e",
     "semantic_hash": ""
   },
   "Modules/ContentForge/resources/views/livewire/admin/theme-studio.blade.php": {
-    "mtime": 1795004466.75026,
-    "seen": 1795004734.8020017,
-    "ast_hash": "8469ee929921219ec0cfca55b07bb560",
+    "mtime": 1795078683.974931,
+    "seen": 1795080756.1448188,
+    "ast_hash": "1b30538f1a9e93fe4445ae3c1e4a70d9",
     "semantic_hash": ""
   },
   "Modules/ContentForge/resources/views/user/themes.blade.php": {
@@ -16044,9 +16044,9 @@
     "semantic_hash": ""
   },
   "tests/Feature/UiComponentsTest.php": {
-    "mtime": 1795071445.8892763,
-    "seen": 1795071525.9936016,
-    "ast_hash": "b6a171ed6a0176fe5b1d5cbdb60ef903",
+    "mtime": 1795077685.9902804,
+    "seen": 1795077787.5527074,
+    "ast_hash": "8454b8391bfc78af0843c9d99263851b",
     "semantic_hash": ""
   },
   "resources/views/components/ui/alert.blade.php": {
@@ -16089,6 +16089,12 @@
     "mtime": 1795075650.8787038,
     "seen": 1795075820.2703414,
     "ast_hash": "bb02c8775af47e58b18c975673461277",
+    "semantic_hash": ""
+  },
+  "Modules/ContentForge/Database/Migrations/2026_11_19_000001_add_content_themes_manage_permission.php": {
+    "mtime": 1795077669.812011,
+    "seen": 1795077787.5440786,
+    "ast_hash": "7321ba4c9bafaf77498473d3cacb257e",
     "semantic_hash": ""
   },
   "package-lock.json": {

@@ -40,7 +40,7 @@
         <button
             type="button"
             @click="open = !open"
-            class="flex items-center gap-2.5 w-full px-3.5 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-mono text-gray-700 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
+            class="flex items-center gap-2.5 w-full px-3.5 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-700 dark:text-gray-200 hover:border-indigo-300 dark:hover:border-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
         >
             <span
                 class="w-6 h-6 rounded-lg border border-black/10 dark:border-white/10 shadow-xs shrink-0 transition-colors"
@@ -68,7 +68,7 @@
     >
         <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-gray-700 dark:text-gray-200">پالت رنگ پیشنهادی</span>
-            <span class="text-[11px] font-mono text-gray-400 uppercase" dir="ltr" x-text="color"></span>
+            <span class="text-[11px] text-gray-400 uppercase font-bold" dir="ltr" x-text="color"></span>
         </div>
 
         {{-- Swatches Grid --}}
@@ -103,7 +103,7 @@
                 x-model.lazy="color"
                 maxlength="7"
                 placeholder="#4F46E5"
-                class="w-full px-3 py-2 text-xs font-mono uppercase bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-800 dark:text-gray-200 focus:outline-none focus:border-indigo-500"
+                class="w-full px-3 py-2 text-xs uppercase bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-800 dark:text-gray-200 focus:outline-none focus:border-indigo-500 font-bold"
             >
         </div>
     </div>

@@ -5,6 +5,7 @@
     'showPercent' => true,
     'color' => 'indigo',
     'size' => 'md',
+    'bind' => null,
 ])
 
 @php
@@ -27,15 +28,17 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => 'w-full space-y-1.5']) }}>
-    @if($label || $showPercent)
+    @if($label || $showPercent || $bind)
         <div class="flex items-center justify-between text-xs">
             @if($label)
                 <span class="font-bold text-gray-700 dark:text-gray-300">{{ $label }}</span>
             @else
                 <span></span>
             @endif
-            @if($showPercent)
-                <span class="font-mono font-bold text-gray-600 dark:text-gray-400" dir="ltr">{{ $percent }}%</span>
+            @if($bind)
+                <span class="font-bold text-gray-600 dark:text-gray-400" dir="ltr" x-text="{{ $bind }} + '%'"></span>
+            @elseif($showPercent)
+                <span class="font-bold text-gray-600 dark:text-gray-400" dir="ltr">{{ $percent }}%</span>
             @endif
         </div>
     @endif
@@ -48,8 +51,12 @@
         class="w-full {{ $heightClass }} bg-gray-200/80 dark:bg-gray-700/80 rounded-full overflow-hidden"
     >
         <div
-            class="h-full {{ $barColor }} rounded-full transition-all duration-500 ease-out"
-            style="width: {{ $percent }}%"
+            class="h-full {{ $barColor }} rounded-full transition-all duration-300 ease-out"
+            @if($bind)
+                :style="{ width: Math.min(100, Math.max(0, {{ $bind }})) + '%' }"
+            @else
+                style="width: {{ $percent }}%"
+            @endif
         ></div>
     </div>
 </div>

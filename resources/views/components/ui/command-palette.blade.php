@@ -147,7 +147,7 @@
                         class="w-full bg-transparent text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
                     >
                     <kbd
-                        class="hidden sm:inline-block px-2 py-0.5 text-[10px] font-mono text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">ESC</kbd>
+                        class="hidden sm:inline-block px-2 py-0.5 text-[10px] text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 font-bold">ESC</kbd>
                 </div>
 
                 {{-- Results List --}}
@@ -183,7 +183,6 @@
                 <div
                     class="px-4 py-2.5 bg-gray-50 dark:bg-gray-950/60 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-[11px] text-gray-400">
                     <span>انتخاب با کلیدهای ↑ ↓ و Enter</span>
-                    <span class="font-mono">Ctrl + K</span>
                 </div>
             </div>
         </div>

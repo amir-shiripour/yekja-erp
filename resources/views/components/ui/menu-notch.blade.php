@@ -52,7 +52,7 @@
                     <button
                         type="button"
                         @click.stop="$dispatch('open-command-palette')"
-                        class="px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 text-[10px] font-mono text-gray-200 transition-colors"
+                        class="px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 text-[10px] text-gray-200 transition-colors"
                         title="جستجوی سریع (Ctrl+K)"
                     >
                         Ctrl+K
@@ -85,7 +85,7 @@
                     @click="expanded = false; $dispatch('open-command-palette')"
                     class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-[11px] transition-colors text-center"
                 >
-                    پالت دستورات (Ctrl+K)
+                     دستورات
                 </button>
                 <a
                     href="{{ route('user.dashboard') }}"
