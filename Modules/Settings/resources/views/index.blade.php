@@ -539,15 +539,25 @@
                                         <h2 class="text-base font-bold text-gray-900 dark:text-white">اعمال پوسته پنل
                                             مدیریت CRM</h2>
                                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">انتخاب و فعال‌سازی
-                                            پوسته‌های ساخته‌شده در ماژول ContentForge برای پنل کاربری</p>
+                                            پوسته‌های ساخته‌شده برای پنل کاربری</p>
                                     </div>
                                 </div>
-                                @if(\Illuminate\Support\Facades\Route::has('user.content.themes'))
-                                    <a href="{{ route('user.content.themes') }}"
-                                       class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all shrink-0">
-                                        ساخت و ویرایش پوسته‌ها در ContentForge ←
-                                    </a>
-                                @endif
+                                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                    <button type="submit" formaction="{{ route('settings.theme.rebuild') }}"
+                                            class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                                            title="پاکسازی خودکار کش لاراول و اجرای دستور npm run build جهت کامپایل استایل‌های جدید">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        <span>بازسازی استایل‌ها و پاکسازی کش</span>
+                                    </button>
+                                    @if(\Illuminate\Support\Facades\Route::has('user.content.themes'))
+                                        <a href="{{ route('user.content.themes') }}"
+                                           class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all shrink-0">
+                                            ساخت و ویرایش پوسته‌ها ←
+                                        </a>
+                                    @endif
+                                </div>
                             </div>
 
                             <div class="p-6 space-y-6">

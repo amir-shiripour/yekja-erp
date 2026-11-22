@@ -276,6 +276,7 @@ class SettingsController extends Controller
             }
         }
 
+        $themeSyncNeeded = false;
         if (array_key_exists('crm_theme_key', $data) || array_key_exists('crm_enable_overrides', $data)) {
             if (class_exists(ContentSetting::class)) {
                 if (isset($data['crm_theme_key'])) {
@@ -285,10 +286,18 @@ class SettingsController extends Controller
                     ContentSetting::setValue('crm.enable_overrides', (string) $data['crm_enable_overrides']);
                 }
             }
-            if (app()->bound(ThemeManager::class)) {
-                app(ThemeManager::class)->clearCache();
-            }
+            $themeSyncNeeded = true;
             unset($data['crm_theme_key'], $data['crm_enable_overrides']);
+        }
+
+        if (array_key_exists('app_theme', $data) || $activeTab === 'themes' || $request->input('action') === 'rebuild_theme') {
+            $themeSyncNeeded = true;
+        }
+
+        $buildInfo = null;
+        if ($themeSyncNeeded && app()->bound(ThemeManager::class)) {
+            $shouldRunBuild = $request->input('action') === 'rebuild_theme';
+            $buildInfo = app(ThemeManager::class)->syncAndBuildAssets($shouldRunBuild);
         }
 
         foreach ($data as $key => $value) {
@@ -377,12 +386,45 @@ class SettingsController extends Controller
             );
         }
 
-        $redirect = redirect()->route('settings.index')->with('success', 'تنظیمات با موفقیت ذخیره شد.');
+        $successMsg = 'تنظیمات با موفقیت ذخیره شد.';
+        if ($buildInfo) {
+            if (!empty($buildInfo['build_success'])) {
+                $successMsg = 'تنظیمات پوسته اعمال شد، کش ویوها پاک گردید و استایل‌های جدید فرانت‌اند (npm run build) با موفقیت کامپایل شدند.';
+            } elseif (!empty($buildInfo['view_cleared'])) {
+                $successMsg = 'تنظیمات پوسته با موفقیت اعمال شد و کش ویوها پاکسازی گردید.';
+            }
+        }
+
+        $redirect = redirect()->route('settings.index')->with('success', $successMsg);
         if ($activeTab) {
             $redirect->withFragment($activeTab);
         }
 
         return $redirect;
+    }
+
+    /**
+     * اجرای مستقیم پاکسازی کش ویوها و کامپایل استایل‌های پوسته (npm run build)
+     */
+    public function rebuildThemeAssets(Request $request)
+    {
+        $themeManager = app(ThemeManager::class);
+        $result = $themeManager->syncAndBuildAssets(true);
+
+        if (!empty($result['build_success'])) {
+            $msg = 'کش ویوها پاکسازی شد و استایل‌های پوسته با دستور npm run build با موفقیت بیلد شدند.';
+            return redirect()->route('settings.index')->withFragment('themes')->with('success', $msg);
+        }
+
+        if (!empty($result['view_cleared'])) {
+            $msg = 'کش ویوها با موفقیت پاکسازی شد.';
+            if (!empty($result['error'])) {
+                $msg .= ' (نکته: دسترسی به اجرای دستور npm در وب‌سرور مقدور نبود یا بیلد با خطا پایان یافت؛ می‌توانید در صورت نیاز فایل‌های پوشه public/build را مستقیماً آپلود فرمایید).';
+            }
+            return redirect()->route('settings.index')->withFragment('themes')->with('warning', $msg);
+        }
+
+        return redirect()->route('settings.index')->withFragment('themes')->with('error', 'خطا در اجرای عملیات پاکسازی و بیلد استایل‌ها.');
     }
 
     private function handleIdentitySealUpload(Request $request): void

@@ -6,12 +6,14 @@ namespace Modules\ContentForge\App\Livewire\Admin;
 
 use App\Services\ThemeManager;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Livewire\Component;
 use Modules\ContentForge\App\Services\ThemeResolver;
 use Modules\ContentForge\Entities\ContentSetting;
 use Modules\Settings\Entities\Setting;
+use Throwable;
 
 class ThemeStudio extends Component
 {
@@ -70,7 +72,11 @@ class ThemeStudio extends Component
 
         $meta = [];
         if (File::exists($jsonPath)) {
-            $meta = json_decode(File::get($jsonPath), true) ?: [];
+            try {
+                $meta = json_decode(File::get($jsonPath), true, 512, JSON_THROW_ON_ERROR) ?: [];
+            } catch (Throwable) {
+                $meta = [];
+            }
         }
 
         $meta['name'] = trim($this->editThemeName);
@@ -78,7 +84,12 @@ class ThemeStudio extends Component
         $meta['version'] = trim($this->editThemeVersion ?: '1.0.0');
         $meta['updated_at'] = now()->toIso8601String();
 
-        File::put($jsonPath, json_encode($meta, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        try {
+            $jsonContent = json_encode($meta, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        } catch (Throwable) {
+            $jsonContent = json_encode($meta);
+        }
+        File::put($jsonPath, $jsonContent);
 
         $this->showEditThemeModal = false;
         session()->flash('success', "مشخصات پوسته «{$meta['name']}» با موفقیت ویرایش شد.");
@@ -109,25 +120,51 @@ class ThemeStudio extends Component
 
         ContentSetting::setValue('crm.theme_key', $themeKey);
         ContentSetting::setValue('crm.enable_overrides', 'true');
-        app(ThemeManager::class)->clearCache();
+
+        $result = app(ThemeManager::class)->syncAndBuildAssets(true);
 
         $this->syncActiveStates();
-        session()->flash('success', "پوسته «{$themes[$themeKey]['name']}» با موفقیت برای کل پنل مدیریت CRM فعال شد.");
+        $msg = "پوسته «{$themes[$themeKey]['name']}» با موفقیت برای کل پنل مدیریت CRM فعال شد و کش ویوها پاک گردید.";
+        if (!empty($result['build_success'])) {
+            $msg .= ' همچنین استایل‌ها و کامپوننت‌های جدید با موفقیت بیلد شدند.';
+        }
+        session()->flash('success', $msg);
     }
 
     public function toggleCrmOverrides(): void
     {
         $newState = $this->crmOverridesEnabled ? 'false' : 'true';
         ContentSetting::setValue('crm.enable_overrides', $newState);
-        app(ThemeManager::class)->clearCache();
+
+        app(ThemeManager::class)->syncAndBuildAssets(false);
 
         $this->syncActiveStates();
         session()->flash(
             'success',
             $newState === 'true'
-                ? 'موتور بازنویسی (Override) ویوهای پنل CRM فعال شد.'
+                ? 'موتور بازنویسی (Override) ویوهای پنل CRM فعال شد و کش ویوها پاکسازی گردید.'
                 : 'موتور بازنویسی غیرفعال شد؛ پنل موقتاً به ظاهر استاندارد هسته بازگشت.'
         );
+    }
+
+    public function rebuildAndClearCache(): void
+    {
+        try {
+            Artisan::call('config:clear');
+        } catch (\Throwable) {
+        }
+
+        $result = app(ThemeManager::class)->syncAndBuildAssets(true);
+
+        $this->syncActiveStates();
+
+        if (!empty($result['build_success'])) {
+            session()->flash('success', 'کش سیستم پاک شد و استایل‌های Tailwind با دستور npm run build با موفقیت کامپایل گردیدند.');
+        } elseif (!empty($result['view_cleared'])) {
+            session()->flash('success', 'کش ویوهای لاراول پاکسازی شد. (در صورت تمایل می‌توانید پوشه public/build را مستقیماً آپلود فرمایید).');
+        } else {
+            session()->flash('success', 'کش ویوها و پیکربندی سیستم با موفقیت پاکسازی شد.');
+        }
     }
 
     public function activateWebTheme(string $themeKey): void
@@ -149,8 +186,14 @@ class ThemeStudio extends Component
         ContentSetting::setValue('general.default_theme_key', $themeKey);
         Cache::forget('app_theme');
 
+        $result = app(ThemeManager::class)->syncAndBuildAssets(true);
+
         $this->syncActiveStates();
-        session()->flash('success', "پوسته «{$themes[$themeKey]['name']}» برای وب‌سایت عمومی (صفحه اول) فعال شد.");
+        $msg = "پوسته «{$themes[$themeKey]['name']}» برای وب‌سایت عمومی (صفحه اول) فعال شد و کش ویوها پاکسازی گردید.";
+        if (!empty($result['build_success'])) {
+            $msg .= ' همچنین استایل‌ها بیلد شدند.';
+        }
+        session()->flash('success', $msg);
     }
 
     public function openCreateThemeModal(): void
@@ -213,9 +256,14 @@ class ThemeStudio extends Component
             'author' => auth()->user()?->name ?? 'مدیر سیستم',
             'created_at' => now()->toIso8601String(),
         ];
+        try {
+            $jsonContent = json_encode($meta, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        } catch (Throwable) {
+            $jsonContent = json_encode($meta);
+        }
         File::put(
             $themeDir . DIRECTORY_SEPARATOR . 'theme.json',
-            json_encode($meta, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+            $jsonContent
         );
 
         $viewsToCopy = array_filter(array_map('trim', $this->initialOverrideViews));
@@ -308,7 +356,7 @@ class ThemeStudio extends Component
         try {
             $finder = app('view')->getFinder();
             $sourcePath = $finder->find($viewName);
-        } catch (\Throwable $e) {
+        } catch (Throwable) {
             return ['ok' => false, 'message' => "ویوی [{$viewName}] در سیستم یافت نشد."];
         }
 
@@ -337,7 +385,7 @@ class ThemeStudio extends Component
         return ['ok' => true, 'relative' => "themes/{$themeKey}/overrides/{$relPath}"];
     }
 
-    public function render()
+    public function render(): \Illuminate\Contracts\View\View
     {
         $resolver = app(ThemeResolver::class);
         $availableThemes = $resolver->getAvailableThemes();

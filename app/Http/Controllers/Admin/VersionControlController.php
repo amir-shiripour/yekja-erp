@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\VersionLog;
 use App\Services\GitHubService;
+use App\Services\ThemeManager;
 use Illuminate\Http\Request;
 
 class VersionControlController extends Controller
@@ -37,9 +38,6 @@ class VersionControlController extends Controller
         ));
     }
 
-    /**
-     * چک کردن وضعیت مخزن گیت‌هاب
-     */
     public function checkRemote()
     {
         $info = $this->gitService->getLatestRemoteInfo();
@@ -50,9 +48,7 @@ class VersionControlController extends Controller
         return redirect()->back()->with('error', 'امکان برقراری ارتباط با مخزن گیت‌هاب (' . $this->gitService->getRepo() . ') وجود ندارد.');
     }
 
-    /**
-     * مقداردهی اولیه مخزن گیت روی سرور (برای سرورهایی که با Zip یا FTP آپلود شده‌اند)
-     */
+
     public function initRepo()
     {
         $result = $this->gitService->initializeGitRepository();
@@ -62,17 +58,41 @@ class VersionControlController extends Controller
         return redirect()->back()->with('error', $result['message']);
     }
 
-    /**
-     * اجرای عملیات بروزرسانی مستقیم
-     */
+
     public function deployUpdate()
     {
+        @set_time_limit(300);
+        @ini_set('memory_limit', '512M');
+
         $result = $this->gitService->performUpdate();
 
         if ($result['success']) {
             return redirect()->route('admin.version-control.index')->with('success', $result['message']);
         }
         return redirect()->back()->with('error', $result['message']);
+    }
+
+
+    public function rebuildAssets()
+    {
+        @set_time_limit(300);
+        @ini_set('memory_limit', '512M');
+
+        $result = app(ThemeManager::class)->syncAndBuildAssets(true);
+
+        if (!empty($result['build_success'])) {
+            return redirect()->route('admin.version-control.index')->with('success', 'استایل‌ها و کامپوننت‌های فرانت‌اند با موفقیت بیلد شدند (npm run build) و کش ویوها پاک گردید.');
+        }
+
+        if (!empty($result['view_cleared'])) {
+            $msg = 'کش ویوها با موفقیت پاکسازی شد.';
+            if (!empty($result['error'])) {
+                $msg .= ' (نکته: دسترسی به npm مقدور نبود: ' . $result['error'] . ')';
+            }
+            return redirect()->route('admin.version-control.index')->with('warning', $msg);
+        }
+
+        return redirect()->route('admin.version-control.index')->with('error', 'خطا در کامپایل استایل‌ها.');
     }
 
     public function create()

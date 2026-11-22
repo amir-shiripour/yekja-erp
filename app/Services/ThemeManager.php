@@ -5,31 +5,32 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Tenancy\TenantManager;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Schema;
 use Modules\ContentForge\App\Models\ContentEntity;
 use Modules\ContentForge\Entities\ContentSetting;
 use Modules\Settings\Entities\Setting;
 use Nwidart\Modules\Facades\Module;
+use Symfony\Component\Process\ExecutableFinder;
 use Throwable;
 
 final class ThemeManager
 {
     private ?object $activeEntity = null;
     private bool $entityChecked = false;
+    private ?string $resolvedNpmBinary = null;
 
-    /**
-     * بررسی می‌کند آیا سیستم نصب شده است یا خیر.
-     */
+
     private function isInstalled(): bool
     {
         return File::exists(storage_path('app/installed.flag'));
     }
 
-    /**
-     * بررسی فعال بودن ماژول ContentForge
-     */
+
     private function isContentForgeActive(): bool
     {
         if (!class_exists(Module::class)) {
@@ -44,9 +45,7 @@ final class ThemeManager
         }
     }
 
-    /**
-     * موجودیت فعال انتخاب شده در تنظیمات را برمی‌گرداند.
-     */
+
     public function getActiveEntity(): ?object
     {
         if ($this->entityChecked) {
@@ -63,7 +62,6 @@ final class ThemeManager
             if (class_exists(ContentEntity::class) && Schema::hasTable('content_entities')) {
                 $entityId = Setting::where('key', 'content_entity_id')->value('value');
                 if ($entityId) {
-                    // کش کردن اطلاعات به مدت ۶۰ ثانیه برای بهینه‌سازی
                     $this->activeEntity = Cache::remember("active_theme_entity_{$entityId}", 60, function () use ($entityId) {
                         return ContentEntity::where('id', $entityId)
                             ->where('is_active', true)
@@ -71,7 +69,6 @@ final class ThemeManager
                     });
                 }
 
-                // فال‌بک به موجودیت پیش‌فرض در صورت عدم تنظیم شناسه در جدول settings
                 if (!$this->activeEntity) {
                     $this->activeEntity = Cache::remember("active_theme_entity_default", 60, function () {
                         return ContentEntity::where('is_default', true)
@@ -87,9 +84,7 @@ final class ThemeManager
         return $this->activeEntity;
     }
 
-    /**
-     * دریافت کلید قالب فعال برای پنل CRM
-     */
+
     public function getActiveCrmTheme(): string
     {
         if (class_exists(TenantManager::class)) {
@@ -142,9 +137,7 @@ final class ThemeManager
         return 'default';
     }
 
-    /**
-     * آیا بازنویسی (Override) ویوهای CRM فعال است؟
-     */
+
     public function isCrmOverrideEnabled(): bool
     {
         if (!$this->isContentForgeActive()) {
@@ -163,15 +156,138 @@ final class ThemeManager
         return true;
     }
 
-    /**
-     * پاکسازی کش تم‌ها
-     */
+
     public function clearCache(): void
     {
         $this->entityChecked = false;
         $this->activeEntity = null;
+        $this->resolvedNpmBinary = null;
         Cache::forget('active_theme_entity_default');
         Cache::forget('active_crm_theme_key');
+        Cache::forget('app_theme');
+    }
+
+    /**
+     * (npm run build)
+     *
+     * @param bool $runBuild
+     * @return array{view_cleared: bool, cache_cleared: bool, build_attempted: bool, build_success: bool, output: string, error: ?string}
+     */
+    public function syncAndBuildAssets(bool $runBuild = true): array
+    {
+        $this->clearCache();
+
+        $viewCleared = false;
+        $cacheCleared = false;
+
+        try {
+            Artisan::call('view:clear');
+            $viewCleared = true;
+        } catch (Throwable $e) {
+            Log::warning('ThemeManager: view:clear failed: ' . $e->getMessage());
+        }
+
+        try {
+            Artisan::call('cache:clear');
+            $cacheCleared = true;
+        } catch (Throwable $e) {
+            Log::warning('ThemeManager: cache:clear failed: ' . $e->getMessage());
+        }
+
+        $buildAttempted = false;
+        $buildSuccess = false;
+        $output = '';
+        $error = null;
+
+        if ($runBuild && class_exists(Process::class)) {
+            $buildAttempted = true;
+            $npmBinary = $this->resolveNpmBinary();
+            $env = $this->getProcessEnvironment();
+
+            try {
+                $cmd = [$npmBinary, 'run', 'build'];
+
+                $process = Process::path(base_path())
+                    ->env($env)
+                    ->timeout(180)
+                    ->run($cmd);
+
+                $output = (string) $process->output();
+                if ($process->successful()) {
+                    $buildSuccess = true;
+                    Log::info('ThemeManager: Assets built successfully via npm run build.');
+                } else {
+                    $error = (string) ($process->errorOutput() ?: $output);
+                    Log::warning('ThemeManager: npm run build failed with exit code: ' . $process->exitCode(), [
+                        'error' => $error,
+                    ]);
+                }
+            } catch (Throwable $e) {
+                $error = $e->getMessage();
+                Log::error('ThemeManager: npm run build exception: ' . $e->getMessage());
+            }
+        }
+
+        return [
+            'view_cleared' => $viewCleared,
+            'cache_cleared' => $cacheCleared,
+            'build_attempted' => $buildAttempted,
+            'build_success' => $buildSuccess,
+            'output' => $output,
+            'error' => $error,
+        ];
+    }
+
+    public function resolveNpmBinary(): string
+    {
+        if ($this->resolvedNpmBinary !== null) {
+            return $this->resolvedNpmBinary;
+        }
+
+        $configured = config('services.npm.binary');
+        if (!empty($configured)) {
+            return $this->resolvedNpmBinary = (string) $configured;
+        }
+
+        $finder = new ExecutableFinder();
+        $fallbackDirs = PHP_OS_FAMILY === 'Windows' ? [] : ['/usr/local/bin', '/usr/bin'];
+        $binary = $finder->find('npm', null, $fallbackDirs);
+
+        return $this->resolvedNpmBinary = $binary ?: (PHP_OS_FAMILY === 'Windows' ? 'npm.cmd' : 'npm');
+    }
+
+    /**
+     * آماده‌سازی متغیرهای محیطی برای اجرای مطمئن npm و node در وب سرور
+     */
+    public function getProcessEnvironment(): array
+    {
+        $currentPath = (string) (getenv('PATH') ?: getenv('Path') ?: '');
+        $separator = PATH_SEPARATOR;
+        $npmBinary = $this->resolveNpmBinary();
+
+        // از آنجا که باینری node همواره در همان پوشه باینری npm قرار دارد،
+        // قرار دادن dirname($npmBinary) در ابتدای PATH تضمین می‌کند npm به node متصل شود.
+        $npmDir = is_file($npmBinary) ? dirname($npmBinary) : null;
+        $configuredExtra = config('services.npm.extra_paths', []);
+
+        $paths = array_filter(array_unique(array_merge(
+            $npmDir ? [$npmDir] : [],
+            is_array($configuredExtra) ? $configuredExtra : [],
+            explode($separator, $currentPath),
+            PHP_OS_FAMILY === 'Windows' ? [] : ['/usr/local/bin', '/usr/bin']
+        )));
+
+        $storageCache = storage_path('framework/cache/npm');
+        if (!File::isDirectory($storageCache)) {
+            @File::makeDirectory($storageCache, 0755, true);
+        }
+
+        return [
+            'PATH' => implode($separator, $paths),
+            'HOME' => getenv('HOME') ?: storage_path('framework/cache'),
+            'npm_config_cache' => $storageCache,
+            'NODE_OPTIONS' => '--max-old-space-size=1024',
+        ];
     }
 
     /**
