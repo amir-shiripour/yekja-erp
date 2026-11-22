@@ -37,4 +37,9 @@ return [
         'token' => env('GITHUB_TOKEN'),
     ],
 
+    'npm' => [
+        'binary' => env('NPM_BINARY', env('NPM_PATH')),
+        'extra_paths' => array_filter(array_map('trim', explode(',', (string) env('NODE_EXTRA_PATHS', '')))),
+    ],
+
 ];

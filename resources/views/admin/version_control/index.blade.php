@@ -12,7 +12,18 @@
                     </h1>
                     <p class="mt-2 text-slate-600 dark:text-slate-300 font-medium text-sm">وضعیت پایداری هسته ERP و همگام‌سازی با مخزن گیت‌هاب</p>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center gap-3">
+                    <form action="{{ route('admin.version-control.rebuild-assets') }}" method="POST" class="inline m-0">
+                        @csrf
+                        <button type="submit" onclick="return confirm('آیا از پاکسازی کش و اجرای بیلد استایل‌ها (npm run build) اطمینان دارید؟')"
+                                class="px-5 py-3 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400 text-sm font-bold rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+                                title="کامپایل مجدد استایل‌های Tailwind و پاکسازی کش ویوها">
+                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            بیلد استایل‌ها (npm run build)
+                        </button>
+                    </form>
                     <a href="{{ route('admin.version-control.check-remote') }}" class="px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-all flex items-center gap-2">
                         <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                         بررسی مخزن آنلاین

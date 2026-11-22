@@ -40,7 +40,10 @@
         {{-- تب‌های تفکیک موجودیت: کاربران داخلی در برابر زیرمجموعه‌های نمایندگی --}}
         @php
             $isResellerHubEnabled = \Nwidart\Modules\Facades\Module::has('ResellerHub') && \Nwidart\Modules\Facades\Module::isEnabled('ResellerHub');
-            $canSeeSubAccountTab = $isResellerHubEnabled && (auth()->user()->can('custom-fields.sub-accounts.view') || auth()->user()->hasRole('super-admin'));
+            $canSeeSubAccountTab = $isResellerHubEnabled && auth()->check() && (
+                (method_exists(auth()->user(), 'can') && auth()->user()->can('custom-fields.sub-accounts.view'))
+                || (method_exists(auth()->user(), 'hasRole') && auth()->user()->hasRole('super-admin'))
+            );
         @endphp
 
         <div class="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-2">

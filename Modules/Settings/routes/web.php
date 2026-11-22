@@ -11,6 +11,7 @@ use Modules\Settings\Http\Controllers\GoogleCalendarController;
 Route::prefix('settings')->middleware(['auth'])->group(function () {
     Route::get('/', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/', [SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/rebuild-theme-assets', [SettingsController::class, 'rebuildThemeAssets'])->name('settings.theme.rebuild');
     Route::post('/test-gapgpt', [SettingsController::class, 'testGapGPT'])->name('settings.test-gapgpt');
     Route::post('/sync-holidays', [SettingsController::class, 'syncHolidays'])->name('settings.sync-holidays');
 

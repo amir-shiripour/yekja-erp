@@ -5,6 +5,7 @@ namespace Modules\ContentForge\App\Providers;
 use Livewire\Livewire;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\ContentForge\App\Console\Commands\ThemeBuildCommand;
 use Modules\ContentForge\App\Console\Commands\ThemeOverrideCommand;
 use Modules\ContentForge\App\Models\ContentPost;
 use Modules\ContentForge\App\Models\ContentCategory;
@@ -63,6 +64,7 @@ class ContentForgeServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 ThemeOverrideCommand::class,
+                ThemeBuildCommand::class,
             ]);
         }
     }

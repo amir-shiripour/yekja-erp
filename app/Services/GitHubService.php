@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Log;
@@ -29,25 +30,19 @@ class GitHubService
         return $this->branch;
     }
 
-    /**
-     * دستور Git را همراه با فلگ دور زدن خطای dubious ownership اجرا می‌کند
-     */
+
     protected function gitCmd(string $command): string
     {
         return "git -c safe.directory=* {$command}";
     }
 
-    /**
-     * بررسی اینکه آیا مسیر پروژه یک مخزن گیت معتبر است یا خیر
-     */
+
     public function isGitRepository(): bool
     {
         return is_dir(base_path('.git'));
     }
 
-    /**
-     * دریافت وضعیت گیت محلی سرور
-     */
+
     public function getLocalGitStatus(): array
     {
         $base = base_path();
@@ -70,7 +65,7 @@ class GitHubService
                 'commit' => $commitRes->successful() ? trim($commitRes->output()) : 'نامشخص',
                 'message' => 'مخزن گیت فعال است.',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'initialized' => true,
                 'branch' => 'نامشخص',
@@ -80,9 +75,7 @@ class GitHubService
         }
     }
 
-    /**
-     * دریافت اطلاعات آخرین کامیت از برنچ مشخص شده مخزن گیت‌هاب از طریق API
-     */
+
     public function getLatestRemoteInfo(): ?array
     {
         try {
@@ -107,7 +100,7 @@ class GitHubService
             }
 
             Log::warning("GitHub API returned status {$response->status()}: " . $response->body());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("GitHub API Error: " . $e->getMessage());
             return null;
         }
@@ -115,16 +108,12 @@ class GitHubService
         return null;
     }
 
-    /**
-     * راه‌اندازی و اتصال اولیه پوشه پروژه به مخزن گیت‌هاب (برای سرورهایی که با Zip یا FTP آپلود شده‌اند)
-     */
     public function initializeGitRepository(): array
     {
         $base = base_path();
         try {
             Log::info("Auto-initializing Git repository at {$base} for {$this->repo} on branch {$this->branch}...");
 
-            // ۱. مقداردهی اولیه Git
             if (!$this->isGitRepository()) {
                 $init = Process::path($base)->run($this->gitCmd('init'));
                 if (!$init->successful()) {
@@ -135,10 +124,8 @@ class GitHubService
                 }
             }
 
-            // ۲. تنظیم نام شاخه اصلی
             Process::path($base)->run($this->gitCmd("branch -M {$this->branch}"));
 
-            // ۳. افزودن آدرس ریموت
             $remoteUrl = "https://github.com/{$this->repo}.git";
             Process::path($base)->run($this->gitCmd('remote remove origin'));
             $remote = Process::path($base)->run($this->gitCmd("remote add origin {$remoteUrl}"));
@@ -149,7 +136,6 @@ class GitHubService
                 ];
             }
 
-            // ۴. دریافت اطلاعات شاخه از گیت‌هاب
             $fetch = Process::path($base)->timeout(120)->run($this->gitCmd("fetch origin {$this->branch}"));
             if (!$fetch->successful()) {
                 return [
@@ -158,7 +144,6 @@ class GitHubService
                 ];
             }
 
-            // ۵. اتصال شاخه محلی به شاخه ریموت و ریست ملایم جهت حفظ فایل‌ها
             Process::path($base)->run($this->gitCmd("branch --set-upstream-to=origin/{$this->branch} {$this->branch}"));
             Process::path($base)->run($this->gitCmd("reset --mixed origin/{$this->branch}"));
 
@@ -168,7 +153,7 @@ class GitHubService
                 'success' => true,
                 'message' => 'مخزن گیت با موفقیت روی سرور مقداردهی شد و به شاخه ' . $this->branch . ' متصل گردید.',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Git initialization exception: " . $e->getMessage());
             return [
                 'success' => false,
@@ -177,16 +162,16 @@ class GitHubService
         }
     }
 
-    /**
-     * اجرای عملیات به‌روزرسانی خودکار با ثبت لاگ دقیق
-     */
+
     public function performUpdate(): array
     {
+        @set_time_limit(300);
+        @ini_set('memory_limit', '512M');
+
         $base = base_path();
         try {
             Log::info("Starting Smart Deployment from GitHub ({$this->repo} / {$this->branch})...");
 
-            // اگر پوشه .git روی سرور وجود نداشت، ابتدا به صورت خودکار آن را مقداردهی و متصل کن
             if (!$this->isGitRepository()) {
                 Log::info("No .git folder detected on server. Attempting auto-initialization...");
                 $initResult = $this->initializeGitRepository();
@@ -195,10 +180,8 @@ class GitHubService
                 }
             }
 
-            // ۱. بردن سایت به حالت تعمیرات
             Process::path($base)->run('php artisan down');
 
-            // ۲. واکشی آخرین کدها از گیت‌هاب با دور زدن محدودیت مالکیت لینوکس
             $fetch = Process::path($base)->timeout(90)->run($this->gitCmd("fetch origin {$this->branch}"));
             if (!$fetch->successful()) {
                 Log::error("Git Fetch Failed: " . $fetch->errorOutput());
@@ -209,11 +192,9 @@ class GitHubService
                 ];
             }
 
-            // تلاش برای ادغام آخرین تغییرات شاخه
             $pull = Process::path($base)->timeout(90)->run($this->gitCmd("pull origin {$this->branch}"));
             if (!$pull->successful()) {
                 Log::warning("Git Pull standard failed, attempting safe merge/checkout: " . $pull->errorOutput());
-                // در صورت وجود تغییرات لوکال Unstaged، ریست هارد با شاخه اصلی انجام می‌دهیم
                 $reset = Process::path($base)->run($this->gitCmd("reset --hard origin/{$this->branch}"));
                 if (!$reset->successful()) {
                     Log::error("Git Reset Failed: " . $reset->errorOutput());
@@ -227,20 +208,31 @@ class GitHubService
 
             Log::info("Git update applied successfully.");
 
-            // ۳. آپدیت دیتابیس، کش‌ها و برگرداندن سایت به حالت آنلاین
             Process::path($base)->timeout(180)->run('php artisan migrate --force');
             Process::path($base)->timeout(120)->run('php artisan reseller:sync-database');
+
+            $buildResult = null;
+            if (app()->bound(ThemeManager::class)) {
+                Log::info("Smart Deployment: Compiling frontend theme assets via npm run build...");
+                $buildResult = app(ThemeManager::class)->syncAndBuildAssets(true);
+            }
+
             Process::path($base)->run('php artisan optimize:clear');
             Process::path($base)->run('php artisan up');
 
             Log::info("Deployment completed successfully.");
 
+            $successMsg = 'سیستم با موفقیت به آخرین نسخه گیت‌هاب به‌روزرسانی و همگام شد.';
+            if (!empty($buildResult['build_success'])) {
+                $successMsg .= ' استایل‌ها و کامپوننت‌های فرانت‌اند (npm run build) نیز با موفقیت کامپایل شدند.';
+            }
+
             return [
                 'success' => true,
-                'message' => 'سیستم با موفقیت به آخرین نسخه گیت‌هاب به‌روزرسانی و همگام شد.',
+                'message' => $successMsg,
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Critical Deployment Error: " . $e->getMessage());
             Process::path($base)->run('php artisan up');
             return [

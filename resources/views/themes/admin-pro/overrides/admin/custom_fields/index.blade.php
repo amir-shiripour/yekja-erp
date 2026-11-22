@@ -3,7 +3,10 @@
 @php
     $title = 'مدیریت فیلدهای سفارشی';
     $isResellerHubEnabled = \Nwidart\Modules\Facades\Module::has('ResellerHub') && \Nwidart\Modules\Facades\Module::isEnabled('ResellerHub');
-    $canSeeSubAccountTab = $isResellerHubEnabled && (auth()->user()->can('custom-fields.sub-accounts.view') || auth()->user()->hasRole('super-admin'));
+    $canSeeSubAccountTab = $isResellerHubEnabled && auth()->check() && (
+        (method_exists(auth()->user(), 'can') && auth()->user()->can('custom-fields.sub-accounts.view'))
+        || (method_exists(auth()->user(), 'hasRole') && auth()->user()->hasRole('super-admin'))
+    );
 @endphp
 
 @section('content')
@@ -65,7 +68,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
-                <span>فیلدهای کاربران</span>
+                <span>فیلدهای کاربران و پرسنل</span>
                 <span
                     class="px-2 py-0.5 rounded-lg text-[10px] font-black {{ $tab === 'user' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }}">
                     {{ number_format($userFieldsCount) }}
