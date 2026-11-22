@@ -17,10 +17,16 @@ use Tests\TestCase;
 
 class AdminProThemeTest extends TestCase
 {
+    private ?string $originalThemeKey = null;
+    private ?string $originalEnableOverrides = null;
+
     protected function setUp(): void
     {
         parent::setUp();
         View::share('errors', new \Illuminate\Support\ViewErrorBag());
+        $this->originalThemeKey = (string)ContentSetting::getValue('crm.theme_key', 'admin-pro');
+        $this->originalEnableOverrides = (string)ContentSetting::getValue('crm.enable_overrides', 'true');
+
         ContentSetting::setValue('crm.theme_key', 'admin-pro');
         ContentSetting::setValue('crm.enable_overrides', 'true');
         app(ThemeManager::class)->clearCache();
@@ -28,8 +34,8 @@ class AdminProThemeTest extends TestCase
 
     protected function tearDown(): void
     {
-        ContentSetting::setValue('crm.theme_key', 'default');
-        ContentSetting::setValue('crm.enable_overrides', 'true');
+        ContentSetting::setValue('crm.theme_key', $this->originalThemeKey ?: 'admin-pro');
+        ContentSetting::setValue('crm.enable_overrides', $this->originalEnableOverrides ?: 'true');
         app(ThemeManager::class)->clearCache();
         parent::tearDown();
     }
@@ -44,7 +50,7 @@ class AdminProThemeTest extends TestCase
         $this->assertEquals('مدیریت پیشرفته (Admin Pro)', $theme['name']);
         $this->assertTrue($theme['has_overrides']);
         $this->assertFalse($theme['has_web_index']);
-        $this->assertEquals(12, $theme['crm_overrides_count']);
+        $this->assertEquals(16, $theme['crm_overrides_count']);
 
         $expectedFiles = [
             'layouts/user.blade.php',
@@ -59,6 +65,10 @@ class AdminProThemeTest extends TestCase
             'admin/custom_fields/sub_account_create.blade.php',
             'admin/custom_fields/edit.blade.php',
             'admin/custom_fields/sub_account_edit.blade.php',
+            'followups/user/followups/index.blade.php',
+            'followups/user/followups/show.blade.php',
+            'followups/user/followups/create.blade.php',
+            'followups/user/followups/edit.blade.php',
         ];
 
         foreach ($expectedFiles as $file) {
@@ -74,6 +84,11 @@ class AdminProThemeTest extends TestCase
         $this->assertNotNull($indexOverride);
         $this->assertStringContainsString('admin-pro', str_replace('\\', '/', $indexOverride));
         $this->assertFileExists($indexOverride);
+
+        $followupOverride = $resolver->findOverridePath('followups::user.followups.index');
+        $this->assertNotNull($followupOverride);
+        $this->assertStringContainsString('admin-pro', str_replace('\\', '/', $followupOverride));
+        $this->assertFileExists($followupOverride);
 
         $createOverride = $resolver->findOverridePath('admin.users.create');
         $this->assertNotNull($createOverride);
@@ -273,5 +288,69 @@ class AdminProThemeTest extends TestCase
 
         $this->assertStringContainsString('فیلدهای سفارشی و احراز هویت', $rendered);
         $this->assertStringContainsString('فیلدهای کاربران و پرسنل', $rendered);
+    }
+
+    public function test_followups_index_and_create_overrides_render_with_ui_components(): void
+    {
+        $user = new User(['name' => 'کاربر پیگیری']);
+        $user->id = 1;
+        $this->actingAs($user);
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            collect(),
+            0,
+            15,
+            1,
+            ['path' => '/user/followups']
+        );
+
+        $renderedIndex = View::make('followups::user.followups.index', [
+            'followups' => $paginator,
+            'statuses' => ['TODO' => 'در انتظار', 'DONE' => 'انجام شده'],
+            'priorities' => ['LOW' => 'پایین', 'MEDIUM' => 'متوسط'],
+            'types' => ['FOLLOW_UP' => 'پیگیری عادی'],
+            'users' => collect(),
+        ])->render();
+
+        $this->assertStringContainsString('لیست پیگیری‌ها', $renderedIndex);
+        $this->assertStringContainsString('هیچ پیگیری‌ای یافت نشد', $renderedIndex);
+
+        $renderedCreate = View::make('followups::user.followups.create', [
+            'statuses' => ['TODO' => 'در انتظار'],
+            'priorities' => ['MEDIUM' => 'متوسط'],
+            'users' => collect(),
+            'clients' => collect(),
+            'canAssign' => true,
+        ])->render();
+
+        $this->assertStringContainsString('ثبت پیگیری جدید', $renderedCreate);
+        $this->assertStringContainsString('اطلاعات پایه پیگیری', $renderedCreate);
+        $this->assertStringContainsString('کاربر مسئول انجام', $renderedCreate);
+        $this->assertStringContainsString('مشتری مرتبط', $renderedCreate);
+        $this->assertStringNotContainsString('نکات و الزامات ثبت', $renderedCreate);
+
+        $fakeTask = new \Modules\Tasks\Entities\Task([
+            'title' => 'پیگیری تست',
+            'status' => 'TODO',
+            'priority' => 'MEDIUM',
+            'task_type' => \Modules\Tasks\Entities\Task::TYPE_FOLLOW_UP,
+        ]);
+        $fakeTask->id = 999;
+        $fakeTask->created_at = now();
+
+        $renderedEdit = View::make('followups::user.followups.edit', [
+            'followUp' => $fakeTask,
+            'statuses' => ['TODO' => 'در انتظار', 'DONE' => 'انجام شده'],
+            'priorities' => ['LOW' => 'پایین', 'MEDIUM' => 'متوسط'],
+            'users' => collect(),
+            'clients' => collect(),
+            'canAssign' => true,
+        ])->render();
+
+        $this->assertStringContainsString('ویرایش پیگیری شماره', $renderedEdit);
+        $this->assertStringContainsString('اطلاعات پایه پیگیری', $renderedEdit);
+        $this->assertStringContainsString('کاربر مسئول انجام', $renderedEdit);
+        $this->assertStringContainsString('مشتری مرتبط', $renderedEdit);
+        $this->assertStringNotContainsString('نکات و الزامات ثبت', $renderedEdit);
     }
 }
