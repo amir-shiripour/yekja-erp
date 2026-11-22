@@ -18,20 +18,20 @@ class FollowUpController extends Controller
 {
     protected function validateRequest(Request $request): array
     {
-        $statusKeys   = array_keys(Task::statusOptions());
+        $statusKeys = array_keys(Task::statusOptions());
         $priorityKeys = array_keys(Task::priorityOptions());
 
         return $request->validate([
-            'title'        => ['required', 'string', 'max:255'],
-            'description'  => ['nullable', 'string'],
-            'assignee_id'  => ['nullable', 'integer', 'exists:users,id'],
-            'status'       => ['nullable', 'string', Rule::in($statusKeys)],
-            'priority'     => ['nullable', 'string', Rule::in($priorityKeys)],
-            'due_at'       => ['nullable', 'date'],
-            'due_at_view'  => ['nullable', 'string'],
-            'due_time'    => ['nullable', 'string'],
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'assignee_id' => ['nullable', 'integer', 'exists:users,id'],
+            'status' => ['nullable', 'string', Rule::in($statusKeys)],
+            'priority' => ['nullable', 'string', Rule::in($priorityKeys)],
+            'due_at' => ['nullable', 'date'],
+            'due_at_view' => ['nullable', 'string'],
+            'due_time' => ['nullable', 'string'],
             'related_type' => ['nullable', 'string', 'max:100'],
-            'related_id'   => ['nullable', 'integer'],
+            'related_id' => ['nullable', 'integer'],
         ]);
     }
 
@@ -41,11 +41,12 @@ class FollowUpController extends Controller
             return null;
         }
 
-        $persian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹','٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
-        $latin   = ['0','1','2','3','4','5','6','7','8','9','0','1','2','3','4','5','6','7','8','9'];
+        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹', '٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        $latin = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
         return str_replace($persian, $latin, $value);
     }
+
     /**
      * تبدیل تاریخ شمسی (مثلاً 1403/09/15) + ساعت اختیاری (HH:MM) به Carbon میلادی.
      */
@@ -74,7 +75,7 @@ class FollowUpController extends Controller
             if (function_exists('logger')) {
                 logger()->warning('Failed to convert FollowUp Jalali due_at_view', [
                     'value' => $jalali,
-                    'time'  => $time,
+                    'time' => $time,
                     'error' => $e->getMessage(),
                 ]);
             }
@@ -92,8 +93,8 @@ class FollowUpController extends Controller
             if ($time !== '') {
                 $parts = preg_split('/[^\d]+/', $time);
                 if (count($parts) >= 2) {
-                    $h = (int) $parts[0];
-                    $m = (int) $parts[1];
+                    $h = (int)$parts[0];
+                    $m = (int)$parts[1];
 
                     if ($h >= 0 && $h <= 23) {
                         $hour = $h;
@@ -131,7 +132,7 @@ class FollowUpController extends Controller
     {
         $user = Auth::user();
 
-        if (! $user->can('followups.edit') && ! $user->can('followups.manage')) {
+        if (!$user->can('followups.edit') && !$user->can('followups.manage')) {
             abort(403);
         }
     }
@@ -188,16 +189,16 @@ class FollowUpController extends Controller
             });
         }
 
-        $perPage   = config('tasks.default_items_per_page', 15);
+        $perPage = config('tasks.default_items_per_page', 15);
         $followups = $query->paginate($perPage)->withQueryString();
 
-        $statuses   = Task::statusOptions();
+        $statuses = Task::statusOptions();
         $priorities = Task::priorityOptions();
-        $types      = Task::typeOptions();
+        $types = Task::typeOptions();
 
         $users = [];
         if ($user->can('followups.view.all')) {
-            $usersQuery = \App\Models\User::select('id', 'name', 'email');
+            $usersQuery = User::select('id', 'name', 'email');
             if (!$user->hasRole('super-admin')) {
                 $usersQuery->whereDoesntHave('roles', function ($q) {
                     $q->where('name', 'super-admin');
@@ -219,15 +220,15 @@ class FollowUpController extends Controller
     {
         $user = Auth::user();
 
-        if (! $user->can('followups.create')) {
+        if (!$user->can('followups.create')) {
             abort(403);
         }
 
-        $statuses   = Task::statusOptions();
+        $statuses = Task::statusOptions();
         $priorities = Task::priorityOptions();
 
         // لیست کاربران برای انتخاب مسئول
-        $usersQuery = \App\Models\User::select('id', 'name', 'email');
+        $usersQuery = User::select('id', 'name', 'email', 'mobile');
         if (!$user->hasRole('super-admin')) {
             $usersQuery->whereDoesntHave('roles', function ($q) {
                 $q->where('name', 'super-admin');
@@ -235,19 +236,19 @@ class FollowUpController extends Controller
         }
         $users = $usersQuery->get();
 
-        // لیست مشتری‌ها برای انتخاب موجودیت مرتبط
-        $clients = \Modules\Clients\Entities\Client::select('id', 'full_name', 'phone')->get();
+        // لیست مشتری‌ها برای انتخاب موجودیت مرتبط با کلیه مشخصات و وضعیت
+        $clients = Client::with('status')->get();
 
         // مجوز انتخاب مسئول
         $canAssign = $user->can('followups.manage') || $user->hasRole('super-admin');
 
         // اگر از صفحه مشتری آمده باشیم
         $relatedType = $request->get('related_type');
-        $relatedId   = $request->get('related_id');
+        $relatedId = $request->get('related_id');
 
         $relatedClient = null;
         if ($relatedType === Task::RELATED_TYPE_CLIENT && $relatedId) {
-            $relatedClient = \Modules\Clients\Entities\Client::find($relatedId);
+            $relatedClient = Client::find($relatedId);
         }
 
         return view('followups::user.followups.create', compact(
@@ -266,30 +267,30 @@ class FollowUpController extends Controller
     {
         $user = Auth::user();
 
-        if (! $user->can('followups.create')) {
+        if (!$user->can('followups.create')) {
             abort(403);
         }
 
-        $statusKeys   = array_keys(Task::statusOptions());
+        $statusKeys = array_keys(Task::statusOptions());
         $priorityKeys = array_keys(Task::priorityOptions());
 
         $data = $request->validate([
-            'title'        => ['required', 'string', 'max:255'],
-            'description'  => ['nullable', 'string'],
-            'assignee_id'  => ['nullable', 'integer', 'exists:users,id'],
-            'status'       => ['nullable', 'string', Rule::in($statusKeys)],
-            'priority'     => ['nullable', 'string', Rule::in($priorityKeys)],
-            'due_at'       => ['nullable', 'date'],
-            'due_at_view'  => ['nullable', 'string'],
-            'due_time'     => ['nullable', 'string'],
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'assignee_id' => ['nullable', 'integer', 'exists:users,id'],
+            'status' => ['nullable', 'string', Rule::in($statusKeys)],
+            'priority' => ['nullable', 'string', Rule::in($priorityKeys)],
+            'due_at' => ['nullable', 'date'],
+            'due_at_view' => ['nullable', 'string'],
+            'due_time' => ['nullable', 'string'],
             'related_type' => ['nullable', 'string', 'max:100'],
-            'related_id'   => ['nullable', 'integer'],
+            'related_id' => ['nullable', 'integer'],
         ]);
 
         if (!$user->hasRole('super-admin')) {
             $assigneeId = $data['assignee_id'] ?? null;
             if ($assigneeId) {
-                $u = \App\Models\User::find($assigneeId);
+                $u = User::find($assigneeId);
                 if ($u && $u->hasRole('super-admin')) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
                         'assignee_id' => ['شما مجاز به انتخاب کاربر سوپر ادمین نیستید.']
@@ -300,7 +301,7 @@ class FollowUpController extends Controller
 
         // تبدیل تاریخ شمسی به میلادی
         $dueAt = $this->convertJalaliDate($data['due_at_view'] ?? null, $request->input('due_time'))
-            ?? (! empty($data['due_at']) ? Carbon::parse($data['due_at']) : null);
+            ?? (!empty($data['due_at']) ? Carbon::parse($data['due_at']) : null);
 
 
         // منطق تعیین مسئول
@@ -311,21 +312,21 @@ class FollowUpController extends Controller
 
         $assigneeId = $data['assignee_id'] ?? null;
 
-        if (! $canAssign || empty($assigneeId)) {
+        if (!$canAssign || empty($assigneeId)) {
             $assigneeId = $user->id;
         }
 
         $followUp = FollowUp::create([
-            'title'        => $data['title'],
-            'description'  => $data['description'] ?? null,
-            'task_type'    => Task::TYPE_FOLLOW_UP,
-            'assignee_id'  => $assigneeId,
-            'creator_id'   => $user->id,
-            'status'       => $data['status'] ?? Task::STATUS_TODO,
-            'priority'     => $data['priority'] ?? Task::PRIORITY_MEDIUM,
-            'due_at'       => $dueAt,
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'task_type' => Task::TYPE_FOLLOW_UP,
+            'assignee_id' => $assigneeId,
+            'creator_id' => $user->id,
+            'status' => $data['status'] ?? Task::STATUS_TODO,
+            'priority' => $data['priority'] ?? Task::PRIORITY_MEDIUM,
+            'due_at' => $dueAt,
             'related_type' => $data['related_type'] ?? null,
-            'related_id'   => $data['related_id'] ?? null,
+            'related_id' => $data['related_id'] ?? null,
         ]);
 
         // هوک created در مدل Task (پدر FollowUp) خودش Reminder می‌سازد
@@ -338,11 +339,11 @@ class FollowUpController extends Controller
     {
         $this->authorizeView($followUp);
 
-        $followUp->load(['assignee', 'creator', 'client']);
+        $followUp->load(['assignee', 'creator', 'client.status']);
 
-        $statuses   = Task::statusOptions();
+        $statuses = Task::statusOptions();
         $priorities = Task::priorityOptions();
-        $types      = Task::typeOptions();
+        $types = Task::typeOptions();
 
         return view('followups::user.followups.show', compact(
             'followUp',
@@ -356,28 +357,28 @@ class FollowUpController extends Controller
     {
         $user = Auth::user();
 
-        if (! $user->can('followups.create')) {
+        if (!$user->can('followups.create')) {
             abort(403);
         }
 
-        $statusKeys   = array_keys(Task::statusOptions());
+        $statusKeys = array_keys(Task::statusOptions());
         $priorityKeys = array_keys(Task::priorityOptions());
 
         $data = $request->validate([
-            'title'        => ['required', 'string', 'max:255'],
-            'description'  => ['nullable', 'string'],
-            'assignee_id'  => ['nullable', 'integer', 'exists:users,id'],
-            'status'       => ['nullable', 'string', Rule::in($statusKeys)],
-            'priority'     => ['nullable', 'string', Rule::in($priorityKeys)],
-            'due_at_view'  => ['nullable', 'string'],
-            'due_time'     => ['nullable', 'string'],
-            'client_id'    => ['required', 'integer', 'exists:clients,id'],
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'assignee_id' => ['nullable', 'integer', 'exists:users,id'],
+            'status' => ['nullable', 'string', Rule::in($statusKeys)],
+            'priority' => ['nullable', 'string', Rule::in($priorityKeys)],
+            'due_at_view' => ['nullable', 'string'],
+            'due_time' => ['nullable', 'string'],
+            'client_id' => ['required', 'integer', 'exists:clients,id'],
         ]);
 
         if (!$user->hasRole('super-admin')) {
             $assigneeId = $data['assignee_id'] ?? null;
             if ($assigneeId) {
-                $u = \App\Models\User::find($assigneeId);
+                $u = User::find($assigneeId);
                 if ($u && $u->hasRole('super-admin')) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
                         'assignee_id' => ['شما مجاز به انتخاب کاربر سوپر ادمین نیستید.']
@@ -397,28 +398,28 @@ class FollowUpController extends Controller
 
         $assigneeId = $data['assignee_id'] ?? null;
 
-        if (! $canAssign || empty($assigneeId)) {
+        if (!$canAssign || empty($assigneeId)) {
             $assigneeId = $user->id;
         }
 
         $followUp = FollowUp::create([
-            'title'        => $data['title'],
-            'description'  => $data['description'] ?? null,
-            'task_type'    => Task::TYPE_FOLLOW_UP,
-            'assignee_id'  => $assigneeId,
-            'creator_id'   => $user->id,
-            'status'       => $data['status'] ?? Task::STATUS_TODO,
-            'priority'     => $data['priority'] ?? Task::PRIORITY_MEDIUM,
-            'due_at'       => $dueAt,
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'task_type' => Task::TYPE_FOLLOW_UP,
+            'assignee_id' => $assigneeId,
+            'creator_id' => $user->id,
+            'status' => $data['status'] ?? Task::STATUS_TODO,
+            'priority' => $data['priority'] ?? Task::PRIORITY_MEDIUM,
+            'due_at' => $dueAt,
             'related_type' => Task::RELATED_TYPE_CLIENT,
-            'related_id'   => $data['client_id'],
+            'related_id' => $data['client_id'],
         ]);
 
         // مدل Task خودش Reminder می‌سازد (autoCreateReminderIfPossible)
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message'   => 'پیگیری با موفقیت ثبت شد.',
+                'message' => 'پیگیری با موفقیت ثبت شد.',
                 'followup_id' => $followUp->id,
             ], 201);
         }
@@ -433,11 +434,11 @@ class FollowUpController extends Controller
         $user = Auth::user();
 
         // همان optionها مثل Task
-        $statuses   = Task::statusOptions();
+        $statuses = Task::statusOptions();
         $priorities = Task::priorityOptions();
 
         // لیست کاربران برای انتخاب مسئول
-        $usersQuery = \App\Models\User::select('id', 'name', 'email');
+        $usersQuery = User::select('id', 'name', 'email', 'mobile');
         if (!$user->hasRole('super-admin')) {
             $usersQuery->whereDoesntHave('roles', function ($q) {
                 $q->where('name', 'super-admin');
@@ -445,8 +446,8 @@ class FollowUpController extends Controller
         }
         $users = $usersQuery->get();
 
-        // لیست مشتری‌ها برای موجودیت مرتبط
-        $clients = \Modules\Clients\Entities\Client::select('id', 'full_name', 'phone')->get();
+        // لیست مشتری‌ها برای موجودیت مرتبط با کلیه مشخصات و وضعیت
+        $clients = Client::with('status')->get();
 
         // مجوز انتخاب/تغییر مسئول
         $canAssign = $user->can('followups.manage') || $user->hasRole('super-admin');
@@ -454,7 +455,7 @@ class FollowUpController extends Controller
         // اگر این پیگیری به یک Client وصل باشد
         $relatedClient = null;
         if ($followUp->related_type === Task::RELATED_TYPE_CLIENT && $followUp->related_id) {
-            $relatedClient = \Modules\Clients\Entities\Client::find($followUp->related_id);
+            $relatedClient = Client::with('status')->find($followUp->related_id);
         }
 
         return view('followups::user.followups.edit', compact(
@@ -479,7 +480,7 @@ class FollowUpController extends Controller
         if (!$user->hasRole('super-admin')) {
             $assigneeIdInput = $data['assignee_id'] ?? null;
             if ($assigneeIdInput) {
-                $u = \App\Models\User::find($assigneeIdInput);
+                $u = User::find($assigneeIdInput);
                 if ($u && $u->hasRole('super-admin')) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
                         'assignee_id' => ['شما مجاز به انتخاب کاربر سوپر ادمین نیستید.']
@@ -494,7 +495,7 @@ class FollowUpController extends Controller
         // اگر مجوز مدیریت دارد و چیزی انتخاب شده، از همان استفاده کن
         // اگر نه، همان مسئول قبلی یا خود کاربر فعلی
         $assigneeId = $canAssign && !empty($data['assignee_id'])
-            ? (int) $data['assignee_id']
+            ? (int)$data['assignee_id']
             : ($followUp->assignee_id ?: $user->id);
 
         // تبدیل تاریخ شمسی (due_at_view) به میلادی
@@ -506,20 +507,20 @@ class FollowUpController extends Controller
 
 
         $followUp->fill([
-            'title'       => $data['title'],
+            'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'assignee_id' => $assigneeId,
-            'status'      => $data['status'] ?? $followUp->status,
-            'priority'    => $data['priority'] ?? $followUp->priority,
-            'due_at'      => $dueAt,
+            'status' => $data['status'] ?? $followUp->status,
+            'priority' => $data['priority'] ?? $followUp->priority,
+            'due_at' => $dueAt,
         ]);
 
         // موجودیت مرتبط: همیشه CLIENT (طبق خواسته‌ات)
         $followUp->related_type = Task::RELATED_TYPE_CLIENT;
-        $followUp->related_id   = $data['related_id'] ?? $followUp->related_id;
+        $followUp->related_id = $data['related_id'] ?? $followUp->related_id;
 
         // اگر پیگیری به وضعیت Done/Cancelled رفت و completed_at نداشت، ست کن
-        if (in_array($followUp->status, [Task::STATUS_DONE, Task::STATUS_CANCELED], true) && ! $followUp->completed_at) {
+        if (in_array($followUp->status, [Task::STATUS_DONE, Task::STATUS_CANCELED], true) && !$followUp->completed_at) {
             $followUp->completed_at = now();
         }
 

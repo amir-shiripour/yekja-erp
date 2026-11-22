@@ -4668,10 +4668,10 @@
     "semantic_hash": "a018448c142980ed090010d60df85e37"
   },
   "Modules/FollowUps/Http/Controllers/User/FollowUpController.php": {
-    "mtime": 1782979312.399639,
-    "seen": 1794898849.8309267,
-    "ast_hash": "ca9e48f81e0ebf43f12d973002cbe35c",
-    "semantic_hash": "ca9e48f81e0ebf43f12d973002cbe35c"
+    "mtime": 1795342443.9550183,
+    "seen": 1795342865.963424,
+    "ast_hash": "98fce346ae95a3fbae3e8b45b9a5db18",
+    "semantic_hash": ""
   },
   "Modules/FollowUps/Installer.php": {
     "mtime": 1789194888.1263223,
@@ -11868,9 +11868,9 @@
     "semantic_hash": "7f6d797655d5eaa7377a07f2b424938b"
   },
   "Modules/Settings/resources/views/index.blade.php": {
-    "mtime": 1795328046.1093388,
-    "seen": 1795328500.0060823,
-    "ast_hash": "5d2063db5fd1a99ae6aa336da339220d",
+    "mtime": 1795332327.05533,
+    "seen": 1795332923.4367225,
+    "ast_hash": "816596f697b1f432b30ab05ae4f63031",
     "semantic_hash": ""
   },
   "Modules/Settings/resources/views/layouts/master.blade.php": {
@@ -13776,9 +13776,9 @@
     "semantic_hash": "0f5ed131a586464467cb431bebdf8356"
   },
   "app/Services/GitHubService.php": {
-    "mtime": 1795330036.4306426,
-    "seen": 1795330125.9842834,
-    "ast_hash": "6325b637ca3c618efed80f1349944b57",
+    "mtime": 1795332327.0142348,
+    "seen": 1795332923.4388304,
+    "ast_hash": "bc8981285271e9673578404431b7ea82",
     "semantic_hash": ""
   },
   "app/Services/GoogleCalendarImportService.php": {
@@ -13842,9 +13842,9 @@
     "semantic_hash": "59604e70a32d43a901201fc97a8524bf"
   },
   "app/Services/ThemeManager.php": {
-    "mtime": 1795331437.7755835,
-    "seen": 1795331499.3152215,
-    "ast_hash": "89d28ee17acd63fceeacfb7d53013170",
+    "mtime": 1795331851.7016342,
+    "seen": 1795331916.9710517,
+    "ast_hash": "3b14f20263289d6c52723155652ee06a",
     "semantic_hash": ""
   },
   "app/Services/ViewOverrideResolver.php": {
@@ -15936,9 +15936,9 @@
     "semantic_hash": ""
   },
   "Modules/ContentForge/App/Livewire/Admin/ThemeStudio.php": {
-    "mtime": 1795330684.606356,
-    "seen": 1795330753.493598,
-    "ast_hash": "09f400390ce742cc4af7d9c38334201e",
+    "mtime": 1795332701.860741,
+    "seen": 1795332923.4333282,
+    "ast_hash": "15a685ed4f4ce47bdd2cb0aebe6c8467",
     "semantic_hash": ""
   },
   "Modules/ContentForge/resources/views/livewire/admin/theme-studio.blade.php": {
@@ -16134,9 +16134,9 @@
     "semantic_hash": ""
   },
   "tests/Feature/AdminProThemeTest.php": {
-    "mtime": 1795259772.1669405,
-    "seen": 1795260535.2734337,
-    "ast_hash": "0d1a470314d0c57bc4805b0d8f83148d",
+    "mtime": 1795340315.6395829,
+    "seen": 1795340370.0327458,
+    "ast_hash": "0e4ba80766515035ba935868347e63eb",
     "semantic_hash": ""
   },
   "resources/views/components/ui/phone-input.blade.php": {
@@ -16191,6 +16191,30 @@
     "mtime": 1795330499.6511176,
     "seen": 1795330753.4935598,
     "ast_hash": "40079212cc53dfcde661f32e20dcc3bd",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/followups/user/followups/create.blade.php": {
+    "mtime": 1795342244.0013628,
+    "seen": 1795342865.9695964,
+    "ast_hash": "0acc06ce4023e8072d1d46c2c379f859",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/followups/user/followups/edit.blade.php": {
+    "mtime": 1795342332.683768,
+    "seen": 1795342865.9696004,
+    "ast_hash": "b13666cc5c8710afff1b5ca8c928a759",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/followups/user/followups/index.blade.php": {
+    "mtime": 1795341257.4789565,
+    "seen": 1795341308.094053,
+    "ast_hash": "99a008bc7a613224ad8d184b4bf046a6",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/followups/user/followups/show.blade.php": {
+    "mtime": 1795342791.3343153,
+    "seen": 1795342865.9696069,
+    "ast_hash": "69c392298aafe31fd07ce6e523a9bd5c",
     "semantic_hash": ""
   },
   "package-lock.json": {
