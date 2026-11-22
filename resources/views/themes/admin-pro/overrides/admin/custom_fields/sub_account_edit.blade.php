@@ -16,12 +16,15 @@
          }"
     >
 
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs">
+        <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs">
             <div class="space-y-1">
                 <div class="flex items-center gap-3">
-                    <span class="flex items-center justify-center w-10 h-10 rounded-2xl bg-amber-500 text-white shadow-md shadow-amber-500/30">
+                    <span
+                        class="flex items-center justify-center w-10 h-10 rounded-2xl bg-amber-500 text-white shadow-md shadow-amber-500/30">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                         </svg>
                     </span>
                     <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">
@@ -29,9 +32,6 @@
                     </h1>
                     <x-ui.badge variant="amber" size="sm" dot>احراز هویت زیرمجموعه</x-ui.badge>
                 </div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mr-13 leading-relaxed">
-                    به‌روزرسانی عنوان، نوع ورودی، الزامی بودن و متن راهنمای مدرک یا اطلاعات هویتی زیرمجموعه.
-                </p>
             </div>
 
             <a href="{{ route('admin.custom-fields.index', ['tab' => 'sub_account']) }}"
@@ -53,27 +53,29 @@
             </x-ui.alert>
         @endif
 
-        <form method="POST" action="{{ route('admin.custom-fields.update', $field) }}" @submit="isSubmitting = true" class="space-y-6">
+        <form method="POST" action="{{ route('admin.custom-fields.update', $field) }}" @submit="isSubmitting = true"
+              class="space-y-6">
             @csrf
             @method('PUT')
             <input type="hidden" name="entity_type" value="sub_account">
             <input type="hidden" name="role_name" value="sub_account">
 
             <div class="{{ $cardClass }}">
-                <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700/80 bg-gray-50/60 dark:bg-gray-900/30 flex items-center justify-between">
+                <div
+                    class="px-6 py-4 border-b border-gray-100 dark:border-gray-700/80 bg-gray-50/60 dark:bg-gray-900/30 flex items-center justify-between">
                     <h2 class="text-xs font-black text-gray-900 dark:text-white flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
                         مشخصات فیلد زیرمجموعه
                     </h2>
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-gray-400 font-bold dir-ltr">#{{ $field->field_name }}</span>
-                        <x-ui.copy-button :text="$field->field_name" size="sm" title="کپی شناسه" />
+                        <x-ui.copy-button :text="$field->field_name" size="sm" title="کپی شناسه"/>
                     </div>
                 </div>
 
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="{{ $labelClass }}">عنوان فیلد (Label) <span class="text-rose-500">*</span></label>
+                        <label class="{{ $labelClass }}">عنوان فیلد<span class="text-rose-500">*</span></label>
                         <input
                             type="text"
                             name="label"
@@ -81,12 +83,11 @@
                             class="{{ $inputClass }}"
                             required
                         />
-                        <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5">این عنوان در فرم احراز هویت زیرمجموعه به مدیر نمایش داده می‌شود.</p>
                     </div>
 
-                    {{-- نوع فیلد --}}
                     <div>
-                        <label class="{{ $labelClass }}">نوع ورودی (HTML Type) <span class="text-rose-500">*</span></label>
+                        <label class="{{ $labelClass }}">نوع ورودی (HTML Type) <span
+                                class="text-rose-500">*</span></label>
                         <select name="field_type" x-model="fieldType" class="{{ $selectClass }}" required>
                             @foreach([
                                 'text' => 'متن کوتاه (Text)',
@@ -101,7 +102,8 @@
                                 'tel' => 'تلفن ثابت یا همراه (Tel)',
                                 'url' => 'آدرس وب‌سایت (URL)'
                             ] as $t => $label)
-                                <option value="{{ $t }}" @selected(old('field_type', $field->field_type) === $t)>{{ $label }}</option>
+                                <option
+                                    value="{{ $t }}" @selected(old('field_type', $field->field_type) === $t)>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -115,14 +117,16 @@
                                 @checked(old('is_required', $field->is_required))
                                 class="w-4 h-4 rounded-lg border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-600"
                             />
-                            <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-indigo-600 transition-colors">
+                            <span
+                                class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-indigo-600 transition-colors">
                                 این فیلد در احراز هویت اجباری است
                             </span>
                         </label>
                     </div>
 
                     <div class="md:col-span-2" x-show="['select', 'radio', 'checkbox'].includes(fieldType)" x-collapse>
-                        <label class="{{ $labelClass }}">گزینه‌های انتخاب (هر گزینه در یک سطر یا با ویرگول انگلیسی)</label>
+                        <label class="{{ $labelClass }}">گزینه‌های انتخاب (هر گزینه در یک سطر یا با ویرگول
+                            انگلیسی)</label>
                         <textarea
                             name="options"
                             rows="3"
@@ -143,8 +147,8 @@
                 </div>
             </div>
 
-            {{-- نوار ثبت فرم بهینه‌شده برای موبایل --}}
-            <div class="flex items-center justify-between relative md:sticky md:bottom-6 z-30 mb-6 md:mb-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md p-4 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xl">
+            <div
+                class="flex items-center justify-between relative md:sticky md:bottom-6 z-30 mb-6 md:mb-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md p-4 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xl">
                 <a href="{{ route('admin.custom-fields.index', ['tab' => 'sub_account']) }}"
                    class="px-5 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
                     انصراف
@@ -155,18 +159,22 @@
                     :disabled="isSubmitting"
                     class="inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                 >
-                    <span x-show="isSubmitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span x-show="isSubmitting"
+                          class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     <span x-show="!isSubmitting">ذخیره تغییرات فیلد</span>
                     <span x-show="isSubmitting">در حال ذخیره...</span>
-                    <svg x-show="!isSubmitting" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <svg x-show="!isSubmitting" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                         stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
                 </button>
             </div>
         </form>
 
         <div class="h-32 md:hidden" style="height: 8rem;" aria-hidden="true"></div>
 
-        <x-ui.dock />
+        <x-ui.dock/>
 
-        <x-ui.toast position="bottom-left" />
+        <x-ui.toast position="bottom-left"/>
     </div>
 @endsection

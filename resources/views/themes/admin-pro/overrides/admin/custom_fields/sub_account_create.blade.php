@@ -30,16 +30,19 @@
          }"
     >
 
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs">
+        <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xs">
             <div class="space-y-1">
                 <div class="flex items-center gap-3">
-                    <span class="flex items-center justify-center w-10 h-10 rounded-2xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
+                    <span
+                        class="flex items-center justify-center w-10 h-10 rounded-2xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                         </svg>
                     </span>
                     <h1 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">
-                        تعریف فیلد احراز هویت زیرمجموعه‌ها (KYC)
+                        تعریف فیلد احراز هویت زیرمجموعه‌ها
                     </h1>
                 </div>
             </div>
@@ -63,13 +66,15 @@
             </x-ui.alert>
         @endif
 
-        <form method="POST" action="{{ route('admin.custom-fields.store') }}" @submit="isSubmitting = true" class="space-y-6">
+        <form method="POST" action="{{ route('admin.custom-fields.store') }}" @submit="isSubmitting = true"
+              class="space-y-6">
             @csrf
             <input type="hidden" name="entity_type" value="sub_account">
             <input type="hidden" name="role_name" value="sub_account">
 
             <div class="{{ $cardClass }}">
-                <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700/80 bg-gray-50/60 dark:bg-gray-900/30 flex items-center justify-between">
+                <div
+                    class="px-6 py-4 border-b border-gray-100 dark:border-gray-700/80 bg-gray-50/60 dark:bg-gray-900/30 flex items-center justify-between">
                     <h2 class="text-xs font-black text-gray-900 dark:text-white flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
                         مشخصات فیلد زیرمجموعه‌ها
@@ -78,9 +83,8 @@
                 </div>
 
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {{-- برچسب فیلد --}}
                     <div>
-                        <label class="{{ $labelClass }}">عنوان فیلد (Label) <span class="text-rose-500">*</span></label>
+                        <label class="{{ $labelClass }}">عنوان فیلد<span class="text-rose-500">*</span></label>
                         <input
                             type="text"
                             name="label"
@@ -92,13 +96,12 @@
                             required
                             autofocus
                         />
-                        <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5">این عنوان در فرم احراز هویت زیرمجموعه به مدیر نمایش داده می‌شود.</p>
                     </div>
 
-                    {{-- نام فیلد (شناسه سیستمی) با آیکون داخل فیلد و دکمه کپی در هدر --}}
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <label class="{{ $labelClass }} !mb-0">شناسه سیستمی (Field Name) <span class="text-rose-500">*</span></label>
+                            <label class="{{ $labelClass }} !mb-0">شناسه سیستمی <span
+                                    class="text-rose-500">*</span></label>
                             <div class="flex items-center gap-2">
                                 <button
                                     type="button"
@@ -114,7 +117,11 @@
                                     class="text-[11px] font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
                                     title="کپی شناسه فیلد"
                                 >
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                         stroke-width="2">
+                                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                                    </svg>
                                     کپی
                                 </button>
                             </div>
@@ -130,19 +137,20 @@
                                 placeholder="business_license_number"
                                 required
                             />
-                            {{-- آیکون شیک کد/شناسه سیستمی داخل اینپوت --}}
-                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            <div
+                                class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                                 </svg>
                             </div>
                         </div>
-                        <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5">شناسه انگلیسی منحصر‌به‌فرد برای ذخیره در پایگاه داده.</p>
                     </div>
 
-                    {{-- نوع فیلد --}}
                     <div>
-                        <label class="{{ $labelClass }}">نوع ورودی (HTML Type) <span class="text-rose-500">*</span></label>
+                        <label class="{{ $labelClass }}">نوع ورودی (HTML Type) <span
+                                class="text-rose-500">*</span></label>
                         <select name="field_type" x-model="fieldType" class="{{ $selectClass }}" required>
                             @foreach([
                                 'text' => 'متن کوتاه (Text)',
@@ -157,12 +165,12 @@
                                 'tel' => 'تلفن ثابت یا همراه (Tel)',
                                 'url' => 'آدرس وب‌سایت (URL)'
                             ] as $t => $label)
-                                <option value="{{ $t }}" @selected(old('field_type', 'text') === $t)>{{ $label }}</option>
+                                <option
+                                    value="{{ $t }}" @selected(old('field_type', 'text') === $t)>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
 
-                    {{-- الزامی بودن --}}
                     <div class="flex items-center pt-6">
                         <label class="flex items-center gap-3 cursor-pointer group">
                             <input
@@ -172,15 +180,16 @@
                                 @checked(old('is_required'))
                                 class="w-4 h-4 rounded-lg border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-600"
                             />
-                            <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-indigo-600 transition-colors">
+                            <span
+                                class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-indigo-600 transition-colors">
                                 این فیلد در احراز هویت اجباری است
                             </span>
                         </label>
                     </div>
 
-                    {{-- گزینه‌ها برای Select / Radio / Checkbox --}}
                     <div class="md:col-span-2" x-show="['select', 'radio', 'checkbox'].includes(fieldType)" x-collapse>
-                        <label class="{{ $labelClass }}">گزینه‌های انتخاب (هر گزینه در یک سطر یا با ویرگول انگلیسی)</label>
+                        <label class="{{ $labelClass }}">گزینه‌های انتخاب (هر گزینه در یک سطر یا با ویرگول
+                            انگلیسی)</label>
                         <textarea
                             name="options"
                             rows="3"
@@ -189,7 +198,6 @@
                         >{{ old('options') }}</textarea>
                     </div>
 
-                    {{-- راهنما --}}
                     <div class="md:col-span-2">
                         <label class="{{ $labelClass }}">راهنما یا دستورالعمل آپلود/ورود داده (اختیاری)</label>
                         <input
@@ -203,8 +211,8 @@
                 </div>
             </div>
 
-            {{-- نوار ثبت فرم بهینه‌شده برای موبایل --}}
-            <div class="flex items-center justify-between relative md:sticky md:bottom-6 z-30 mb-6 md:mb-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md p-4 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xl">
+            <div
+                class="flex items-center justify-between relative md:sticky md:bottom-6 z-30 mb-6 md:mb-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md p-4 rounded-3xl border border-gray-200/80 dark:border-gray-700/80 shadow-xl">
                 <a href="{{ route('admin.custom-fields.index', ['tab' => 'sub_account']) }}"
                    class="px-5 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
                     انصراف
@@ -215,21 +223,22 @@
                     :disabled="isSubmitting"
                     class="inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                 >
-                    <span x-show="isSubmitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span x-show="isSubmitting"
+                          class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     <span x-show="!isSubmitting">ذخیره فیلد احراز هویت</span>
                     <span x-show="isSubmitting">در حال ذخیره...</span>
-                    <svg x-show="!isSubmitting" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <svg x-show="!isSubmitting" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                         stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
                 </button>
             </div>
         </form>
 
-        {{-- فاصله تضمین‌شده انتهای فرم در موبایل برای جلوگیری از هرگونه تداخل با داک شناور --}}
         <div class="h-32 md:hidden" style="height: 8rem;" aria-hidden="true"></div>
 
-        {{-- نوار ابزار متحرک موبایل (Mobile Dock) --}}
-        <x-ui.dock />
+        <x-ui.dock/>
 
-        {{-- سیستم نمایش اعلان‌ها و توست‌ها --}}
-        <x-ui.toast position="bottom-left" />
+        <x-ui.toast position="bottom-left"/>
     </div>
 @endsection
