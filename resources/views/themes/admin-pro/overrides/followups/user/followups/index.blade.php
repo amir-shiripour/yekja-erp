@@ -19,6 +19,12 @@
     $doneCount = $followups->where('status', Task::STATUS_DONE)->count();
     $inProgressCount = $followups->where('status', Task::STATUS_IN_PROGRESS)->count();
     $criticalCount = $followups->whereIn('priority', [Task::PRIORITY_HIGH, Task::PRIORITY_CRITICAL])->count();
+
+    $userFilterOptions = collect($users ?? [])->map(fn($u) => [
+        'value'   => (string) $u->id,
+        'label'   => $u->name,
+        'initial' => mb_substr($u->name, 0, 1),
+    ])->all();
 @endphp
 
 @section('title', 'مدیریت پیگیری‌ها')
@@ -166,45 +172,48 @@
 
                 @if(auth()->user()->can('followups.view.all'))
                     <div class="lg:col-span-2">
-                        <select name="assignee_id"
-                                class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 px-3 py-2.5 text-xs text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-hidden cursor-pointer">
-                            <option value="">همه مسئولین</option>
-                            @foreach($users ?? [] as $u)
-                                <option
-                                    value="{{ $u->id }}" @selected(request('assignee_id') == $u->id)>{{ $u->name }}</option>
-                            @endforeach
-                        </select>
+                        <x-ui.select
+                            name="assignee_id"
+                            :options="$userFilterOptions"
+                            :value="request('assignee_id')"
+                            placeholder="همه مسئولین"
+                            searchPlaceholder="جستجوی مسئول..."
+                            :clearable="true"
+                        />
                     </div>
                 @endif
 
                 <div class="lg:col-span-2">
-                    <select name="status"
-                            class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 px-3 py-2.5 text-xs text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-hidden cursor-pointer">
-                        <option value="">همه وضعیت‌ها</option>
-                        @foreach($statuses as $value => $label)
-                            <option value="{{ $value }}" @selected(request('status') == $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
+                    <x-ui.select
+                        name="status"
+                        :options="$statuses"
+                        :value="request('status')"
+                        placeholder="همه وضعیت‌ها"
+                        :searchable="false"
+                        :clearable="true"
+                    />
                 </div>
 
                 <div class="lg:col-span-2">
-                    <select name="task_type"
-                            class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 px-3 py-2.5 text-xs text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-hidden cursor-pointer">
-                        <option value="">همه انواع پیگیری</option>
-                        @foreach($types as $value => $label)
-                            <option value="{{ $value }}" @selected(request('task_type') == $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
+                    <x-ui.select
+                        name="task_type"
+                        :options="$types"
+                        :value="request('task_type')"
+                        placeholder="همه انواع پیگیری"
+                        :searchable="false"
+                        :clearable="true"
+                    />
                 </div>
 
                 <div class="lg:col-span-1">
-                    <select name="priority"
-                            class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 px-2 py-2.5 text-xs text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all outline-hidden cursor-pointer">
-                        <option value="">اولویت</option>
-                        @foreach($priorities as $value => $label)
-                            <option value="{{ $value }}" @selected(request('priority') == $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
+                    <x-ui.select
+                        name="priority"
+                        :options="$priorities"
+                        :value="request('priority')"
+                        placeholder="اولویت"
+                        :searchable="false"
+                        :clearable="true"
+                    />
                 </div>
 
                 <div class="flex items-center gap-1.5 lg:col-span-2 justify-end">
@@ -416,13 +425,14 @@
                     </table>
                 </div>
 
-                <div class="md:hidden divide-y divide-gray-100 dark:divide-gray-700/40">
+                {{-- نسخه موبایل: کارت‌های منظم و شکیل مستقل --}}
+                <div class="md:hidden p-3.5 sm:p-4 space-y-3.5 bg-gray-50/50 dark:bg-gray-900/30">
                     @foreach($followups as $fu)
                         @php
                             $statusVariant = match($fu->status) {
                                 Task::STATUS_DONE => 'emerald',
-                                Task::STATUS_CANCELED => 'rose',
                                 Task::STATUS_IN_PROGRESS => 'blue',
+                                Task::STATUS_CANCELED => 'rose',
                                 default => 'slate',
                             };
 
@@ -433,83 +443,126 @@
                                 default => 'slate',
                             };
                         @endphp
-                        <div class="p-4 space-y-3">
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/60 shadow-xs space-y-3.5 transition-all hover:border-indigo-100 dark:hover:border-indigo-900/40">
+                            {{-- ردیف عنوان پیگیری و شناسه --}}
                             <div class="flex items-start justify-between gap-3">
                                 <div class="min-w-0">
-                                    <div class="flex items-center gap-1.5 text-xs text-gray-400 mb-1">
-                                        <span class="font-bold">#{{ $faNum($fu->id) }}</span>
-                                        <span>{{ $types[$fu->task_type] ?? $fu->task_type }}</span>
-                                    </div>
                                     <a href="{{ route('user.followups.show', $fu) }}"
-                                       class="font-black text-sm text-gray-900 dark:text-white hover:text-indigo-600 line-clamp-1">
+                                       class="font-black text-sm text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 line-clamp-2 transition-colors">
                                         {{ $fu->title }}
                                     </a>
                                 </div>
-                                <div class="flex items-center gap-1.5 shrink-0">
-                                    <x-ui.badge :variant="$statusVariant" size="sm">
-                                        {{ $statuses[$fu->status] ?? $fu->status }}
-                                    </x-ui.badge>
-                                    <x-ui.badge :variant="$priorityVariant" size="sm">
-                                        {{ $priorities[$fu->priority] ?? $fu->priority }}
-                                    </x-ui.badge>
-                                </div>
+                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/40 shrink-0">
+                                    #{{ $faNum($fu->id) }}
+                                </span>
                             </div>
 
+                            {{-- بج‌های وضعیت، اولویت و نوع پیگیری --}}
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <x-ui.badge :variant="$statusVariant" size="sm" dot>
+                                    {{ $statuses[$fu->status] ?? $fu->status }}
+                                </x-ui.badge>
+                                <x-ui.badge :variant="$priorityVariant" size="sm">
+                                    {{ $priorities[$fu->priority] ?? $fu->priority }}
+                                </x-ui.badge>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-700 dark:bg-gray-700/70 dark:text-gray-300">
+                                    {{ $types[$fu->task_type] ?? $fu->task_type }}
+                                </span>
+                            </div>
+
+                            {{-- توضیحات خلاصه --}}
                             @if($fu->description)
-                                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                                <div class="p-2.5 rounded-xl bg-gray-50/80 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
                                     {{ $fu->description }}
-                                </p>
+                                </div>
                             @endif
 
-                            <div
-                                class="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-gray-100 dark:border-gray-700/40">
-                                <div>
-                                    <span class="text-gray-400 text-[11px] block">مشتری:</span>
-                                    @if($fu->client)
-                                        <span class="font-bold text-gray-800 dark:text-gray-200 truncate block">
-                                            {{ $fu->client->full_name }}
-                                        </span>
-                                        @if($fu->client->phone)
-                                            <span
-                                                class="text-[11px] text-gray-500 dark:text-gray-400 dir-ltr block mt-0.5">
-                                                {{ $faNum($fu->client->phone) }}
+                            {{-- شبکه اطلاعات: مسئول، سررسید و مخاطب مرتبط --}}
+                            <div class="grid grid-cols-2 gap-2 text-xs pt-2.5 border-t border-gray-100 dark:border-gray-700/40">
+                                <div class="p-2 rounded-xl bg-gray-50/60 dark:bg-gray-900/40">
+                                    <span class="text-gray-400 text-[10.5px] block font-bold mb-0.5">مسئول انجام:</span>
+                                    <span class="font-bold text-gray-800 dark:text-gray-200 truncate block">{{ $fu->assignee->name ?? '—' }}</span>
+                                </div>
+                                <div class="p-2 rounded-xl bg-gray-50/60 dark:bg-gray-900/40">
+                                    <span class="text-gray-400 text-[10.5px] block font-bold mb-0.5">موعد سررسید:</span>
+                                    <span class="font-bold text-gray-800 dark:text-gray-200 block dir-ltr text-right">
+                                        {{ $fu->due_at ? $faNum(Jalalian::fromCarbon($fu->due_at)->format('Y/m/d H:i')) : '—' }}
+                                    </span>
+                                </div>
+                                {{-- مخاطب مرتبط --}}
+                                @if($fu->client)
+                                    <div class="col-span-2 p-2.5 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100/70 dark:border-emerald-900/40 flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <div class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-black text-[10px] shrink-0">
+                                                {{ mb_substr($fu->client->full_name, 0, 1) }}
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="text-gray-400 text-[10px] font-bold">مخاطب:</span>
+                                                    <a href="{{ route('user.clients.show', $fu->client) }}"
+                                                       class="font-black text-xs text-gray-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 truncate">
+                                                        {{ $fu->client->full_name }}
+                                                    </a>
+                                                    @if(optional($fu->client->status)->name)
+                                                        <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200">
+                                                            {{ $fu->client->status->name }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                @if($fu->client->phone)
+                                                    <div class="text-[10px] text-gray-500 dark:text-gray-400 dir-ltr text-right font-medium">
+                                                        {{ $faNum($fu->client->phone) }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        @if($fu->client->case_number)
+                                            <span class="text-[10px] font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/40 px-2 py-0.5 rounded-md shrink-0">
+                                                پرونده: {{ $faNum($fu->client->case_number) }}
                                             </span>
                                         @endif
-                                    @else
-                                        <span class="text-gray-400">—</span>
-                                    @endif
-                                </div>
-                                <div>
-                                    <span class="text-gray-400 text-[11px] block">مسئول / سررسید:</span>
-                                    <span class="font-bold text-gray-800 dark:text-gray-200 block truncate">
-                                        {{ $fu->assignee->name ?? '—' }}
-                                    </span>
-                                    @if($fu->due_at)
-                                        <span class="text-[11px] text-gray-500 dark:text-gray-400 dir-ltr block mt-0.5">
-                                            {{ $faNum(Jalalian::fromCarbon($fu->due_at)->format('Y/m/d H:i')) }}
-                                        </span>
-                                    @endif
-                                </div>
+                                    </div>
+                                @elseif($fu->related_type === Task::RELATED_TYPE_USER && $fu->relatedUser)
+                                    <div class="col-span-2 p-2.5 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100/70 dark:border-blue-900/40 flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <div class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-[10px] shrink-0">
+                                                {{ mb_substr($fu->relatedUser->name, 0, 1) }}
+                                            </div>
+                                            <div class="min-w-0 flex items-center gap-1.5">
+                                                <span class="text-gray-400 text-[10px] font-bold">همکار مرتبط:</span>
+                                                <span class="font-black text-xs text-gray-900 dark:text-white truncate">
+                                                    {{ $fu->relatedUser->name }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
 
-                            <div
-                                class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-gray-700/40">
+                            {{-- دکمه‌های عملیاتی --}}
+                            <div class="flex items-center justify-end gap-2 pt-2.5 border-t border-gray-100 dark:border-gray-700/40">
                                 <a href="{{ route('user.followups.show', $fu) }}"
-                                   class="px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700/60 hover:bg-gray-200">
-                                    مشاهده
+                                   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700/60 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                                    <svg class="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    <span>مشاهده</span>
                                 </a>
                                 @canany(['followups.edit', 'followups.manage'])
                                     <a href="{{ route('user.followups.edit', $fu) }}"
-                                       class="px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100">
-                                        ویرایش
+                                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                        <span>ویرایش</span>
                                     </a>
                                 @endcanany
                                 @can('followups.delete')
-                                    <form method="POST" action="{{ route('user.followups.destroy', $fu) }}"
-                                          class="inline-block">
+                                    <form method="POST" action="{{ route('user.followups.destroy', $fu) }}" class="inline-block">
                                         @csrf
                                         @method('DELETE')
-                                        <x-ui.delete-button type="submit" label="" confirm-label="حذف؟" size="sm"/>
+                                        <x-ui.delete-button type="submit" label="" confirm-label="حذف؟" size="sm" title="حذف پیگیری" />
                                     </form>
                                 @endcan
                             </div>
@@ -583,8 +636,6 @@
                 @endif
             @endif
         </div>
-
-        <x-ui.dock/>
 
         <x-ui.toast position="bottom-left"/>
     </div>

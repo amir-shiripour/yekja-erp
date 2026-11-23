@@ -297,7 +297,5 @@
                 </div>
             @endif
         </div>
-
-        <x-ui.dock/>
     </div>
 @endsection

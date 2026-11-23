@@ -142,7 +142,7 @@ class FollowUpController extends Controller
         $user = Auth::user();
 
         $query = FollowUp::query()
-            ->with(['assignee', 'creator', 'client'])
+            ->with(['assignee', 'creator', 'client.status'])
             ->orderByDesc('due_at')
             ->orderByDesc('created_at');
 

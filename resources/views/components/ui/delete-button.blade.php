@@ -12,24 +12,28 @@
     $shellSizes = match($size) {
         'lg' => 'h-11 rounded-[22px] p-1 gap-1.5',
         'md' => 'h-10 rounded-[20px] p-1 gap-1',
+        'base' => 'h-9 rounded-full p-1 gap-1.5',
         default => 'h-8 rounded-full p-0.5 gap-1',
     };
 
     $tileSizes = match($size) {
         'lg' => 'size-9',
         'md' => 'size-8',
+        'base' => 'size-7',
         default => 'size-7',
     };
 
     $actionSizes = match($size) {
         'lg' => 'size-8',
         'md' => 'size-7',
+        'base' => 'size-6',
         default => 'size-6',
     };
 
     $iconSizes = match($size) {
         'lg' => 'size-5',
         'md' => 'size-4.5',
+        'base' => 'size-4',
         default => 'size-3.5',
     };
 @endphp

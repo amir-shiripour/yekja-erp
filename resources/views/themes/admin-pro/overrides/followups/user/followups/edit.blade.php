@@ -246,7 +246,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-xs p-5 sm:p-7 space-y-6">
                 <div class="flex items-center gap-2.5 pb-3 border-b border-gray-100 dark:border-gray-700/40">
                     <span
-                        class="w-2.5 h-2.5 rounded-full bg-indigo-600 ring-4 ring-indigo-100 dark:ring-indigo-950"></span>
+                        class="w-2.5 h-2.5 rounded-full bg-indigo-600 shrink-0"></span>
                     <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">اطلاعات پایه پیگیری</h3>
                 </div>
 
@@ -614,29 +614,20 @@
                             <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">
                                 اولویت اهمیت <span class="text-rose-500 font-bold">*</span>
                             </label>
-                            <select name="priority"
-                                    class="w-full rounded-xl border border-gray-200/80 bg-gray-50/70 dark:bg-gray-900/50 dark:border-gray-700/60 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all cursor-pointer outline-hidden">
-                                @foreach($priorities as $value => $label)
-                                    <option
-                                        value="{{ $value }}" @selected(old('priority', $followUp->priority) === $value)>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-ui.select name="priority"
+                                         :options="$priorities"
+                                         :value="old('priority', $followUp->priority)"
+                                         :searchable="false" />
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold mb-1.5 text-gray-700 dark:text-gray-300">
                                 وضعیت پیگیری <span class="text-rose-500 font-bold">*</span>
                             </label>
-                            <select name="status"
-                                    class="w-full rounded-xl border border-gray-200/80 bg-gray-50/70 dark:bg-gray-900/50 dark:border-gray-700/60 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all cursor-pointer outline-hidden">
-                                @foreach($statuses as $value => $label)
-                                    <option value="{{ $value }}" @selected(old('status', $followUp->status) === $value)>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-ui.select name="status"
+                                         :options="$statuses"
+                                         :value="old('status', $followUp->status)"
+                                         :searchable="false" />
                         </div>
                     </div>
 
@@ -659,7 +650,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-xs p-5 sm:p-7 space-y-6">
                 <div class="flex items-center gap-2.5 pb-3 border-b border-gray-100 dark:border-gray-700/40">
                     <span
-                        class="w-2.5 h-2.5 rounded-full bg-indigo-600 ring-4 ring-indigo-100 dark:ring-indigo-950"></span>
+                        class="w-2.5 h-2.5 rounded-full bg-indigo-600 shrink-0"></span>
                     <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">موعد انجام و سررسید
                         پیگیری</h3>
                 </div>
@@ -723,7 +714,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 p-5 sm:p-6 shadow-xs space-y-4">
                 <div class="flex items-center gap-2.5 pb-3 border-b border-gray-100 dark:border-gray-700/40">
                     <span
-                        class="w-2.5 h-2.5 rounded-full bg-indigo-600 ring-4 ring-indigo-100 dark:ring-indigo-950"></span>
+                        class="w-2.5 h-2.5 rounded-full bg-indigo-600 shrink-0"></span>
                     <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">اطلاعات سیستمی و متادیتای
                         رکورد</h3>
                 </div>
@@ -757,31 +748,35 @@
                 </div>
             </div>
 
-            <div
-                class="flex items-center justify-between relative md:sticky md:bottom-6 z-30 mb-6 md:mb-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700/50 shadow-xl">
-                <a href="{{ route('user.followups.index') }}"
-                   class="px-5 py-2.5 text-xs sm:text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                    انصراف
-                </a>
+            {{-- نوار شناور و چسبان عملیات فرم (ثبت / انصراف) --}}
+            <div class="relative md:sticky md:bottom-6 z-30 mb-6 md:mb-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700/60 shadow-xl shadow-gray-200/50 dark:shadow-black/30 flex items-center justify-between gap-4 transition-all">
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('user.followups.index') }}"
+                       class="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 hover:bg-gray-100 dark:bg-gray-700/50 dark:hover:bg-gray-700 text-xs sm:text-sm font-bold text-gray-600 dark:text-gray-300 transition-all shadow-2xs active:scale-95">
+                        <svg class="w-4 h-4 rtl:rotate-180 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        <span>انصراف و بازگشت</span>
+                    </a>
+                </div>
 
-                <button type="submit"
-                        :disabled="submitting"
-                        class="inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-black text-xs sm:text-sm shadow-lg shadow-indigo-600/30 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer">
-                    <span x-show="submitting"
-                          class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    <span x-show="!submitting">ذخیره تغییرات پیگیری</span>
-                    <span x-show="submitting">در حال ذخیره‌سازی...</span>
-                    <svg x-show="!submitting" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                         stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                    </svg>
-                </button>
+                <div class="flex items-center gap-3">
+                    <button type="submit"
+                            :disabled="submitting"
+                            class="inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-black text-xs sm:text-sm shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+                        <span x-show="submitting"
+                              class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0"></span>
+                        <svg x-show="!submitting" class="w-4.5 h-4.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span x-show="!submitting">ذخیره تغییرات پیگیری</span>
+                        <span x-show="submitting">در حال ذخیره‌سازی...</span>
+                    </button>
+                </div>
             </div>
         </form>
 
         <div class="h-32 md:hidden" style="height: 8rem;" aria-hidden="true"></div>
-
-        <x-ui.dock/>
 
         <x-ui.toast position="bottom-left"/>
 

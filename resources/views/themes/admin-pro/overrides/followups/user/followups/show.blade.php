@@ -134,7 +134,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-xs p-5 sm:p-7 space-y-6">
                     <div class="flex items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-700/40 pb-4">
                         <div class="flex items-center gap-2.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 ring-4 ring-indigo-100 dark:ring-indigo-950"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 shrink-0"></span>
                             <span class="text-xs font-bold text-gray-400 dark:text-gray-500">نوع اقدام:</span>
                             <x-ui.badge variant="indigo" size="sm">
                                 {{ $typeLabel }}
@@ -329,7 +329,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-xs p-5 sm:p-7 space-y-6">
                     <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700/40 pb-3">
                         <div class="flex items-center gap-2.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 ring-4 ring-indigo-100 dark:ring-indigo-950"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 shrink-0"></span>
                             <h3 class="text-xs sm:text-sm font-black text-gray-900 dark:text-white">
                                 هشدارهای یادآور پیگیری
                             </h3>
@@ -513,8 +513,6 @@
             </div>
 
         </div>
-
-        <x-ui.dock />
 
         <x-ui.toast position="bottom-left" />
 
