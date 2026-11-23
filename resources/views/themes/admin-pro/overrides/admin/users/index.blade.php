@@ -265,9 +265,6 @@
             @endif
         </div>
 
-        {{-- نوار ابزار متحرک موبایل (Mobile Dock) --}}
-        <x-ui.dock />
-
         {{-- کانتینر اعلان‌ها و توست‌های سیستمی --}}
         <x-ui.toast position="bottom-left" />
     </div>

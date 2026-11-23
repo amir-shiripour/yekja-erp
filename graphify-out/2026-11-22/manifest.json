@@ -4668,9 +4668,9 @@
     "semantic_hash": "a018448c142980ed090010d60df85e37"
   },
   "Modules/FollowUps/Http/Controllers/User/FollowUpController.php": {
-    "mtime": 1795342443.9550183,
-    "seen": 1795342865.963424,
-    "ast_hash": "98fce346ae95a3fbae3e8b45b9a5db18",
+    "mtime": 1795346645.778984,
+    "seen": 1795346726.2334375,
+    "ast_hash": "1e57080f5d57b074eb60e86d2f24843c",
     "semantic_hash": ""
   },
   "Modules/FollowUps/Installer.php": {
@@ -12762,10 +12762,10 @@
     "semantic_hash": "294236b1972f9a82385b13bf09c904da"
   },
   "Modules/Tasks/Http/Controllers/User/TaskController.php": {
-    "mtime": 1782910888.1084876,
-    "seen": 1794898849.832469,
-    "ast_hash": "7cb61aec9266e85521177146ba9ff535",
-    "semantic_hash": "7cb61aec9266e85521177146ba9ff535"
+    "mtime": 1795348418.5590725,
+    "seen": 1795348963.142632,
+    "ast_hash": "508a5d6278ccc6a31a93bfd85a69d1bd",
+    "semantic_hash": ""
   },
   "Modules/Tasks/Installer.php": {
     "mtime": 1793436067.443165,
@@ -16134,9 +16134,9 @@
     "semantic_hash": ""
   },
   "tests/Feature/AdminProThemeTest.php": {
-    "mtime": 1795340315.6395829,
-    "seen": 1795340370.0327458,
-    "ast_hash": "0e4ba80766515035ba935868347e63eb",
+    "mtime": 1795348805.2401161,
+    "seen": 1795348963.1434739,
+    "ast_hash": "eb95c40d75ac422db8606928f95b01a2",
     "semantic_hash": ""
   },
   "resources/views/components/ui/phone-input.blade.php": {
@@ -16194,27 +16194,57 @@
     "semantic_hash": ""
   },
   "resources/views/themes/admin-pro/overrides/followups/user/followups/create.blade.php": {
-    "mtime": 1795342244.0013628,
-    "seen": 1795342865.9695964,
-    "ast_hash": "0acc06ce4023e8072d1d46c2c379f859",
+    "mtime": 1795346240.6241124,
+    "seen": 1795346726.2419531,
+    "ast_hash": "af44f6770ad699caab76bd4f8752c905",
     "semantic_hash": ""
   },
   "resources/views/themes/admin-pro/overrides/followups/user/followups/edit.blade.php": {
-    "mtime": 1795342332.683768,
-    "seen": 1795342865.9696004,
-    "ast_hash": "b13666cc5c8710afff1b5ca8c928a759",
+    "mtime": 1795346295.4005468,
+    "seen": 1795346726.2419586,
+    "ast_hash": "324f7cf9652b8c9b01bac5c330c41809",
     "semantic_hash": ""
   },
   "resources/views/themes/admin-pro/overrides/followups/user/followups/index.blade.php": {
-    "mtime": 1795341257.4789565,
-    "seen": 1795341308.094053,
-    "ast_hash": "99a008bc7a613224ad8d184b4bf046a6",
+    "mtime": 1795346645.7545946,
+    "seen": 1795346726.241963,
+    "ast_hash": "0cea7bcf30c94066fc2edc2d13ccd424",
     "semantic_hash": ""
   },
   "resources/views/themes/admin-pro/overrides/followups/user/followups/show.blade.php": {
-    "mtime": 1795342791.3343153,
-    "seen": 1795342865.9696069,
-    "ast_hash": "69c392298aafe31fd07ce6e523a9bd5c",
+    "mtime": 1795345611.0626426,
+    "seen": 1795346726.2419674,
+    "ast_hash": "f7d7506580baf66647030157f1722bb1",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/partials/pagination.blade.php": {
+    "mtime": 1795346645.768027,
+    "seen": 1795346726.2419758,
+    "ast_hash": "7ee26cbb00411702f5663aa637897fb5",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/tasks/user/tasks/create.blade.php": {
+    "mtime": 1795348593.8685226,
+    "seen": 1795348963.1433818,
+    "ast_hash": "a867e0cfd831db8dd1b732174078e274",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/tasks/user/tasks/edit.blade.php": {
+    "mtime": 1795348864.5577848,
+    "seen": 1795348963.1433847,
+    "ast_hash": "1f076f35f7b7088c588a4282cc62916a",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/tasks/user/tasks/index.blade.php": {
+    "mtime": 1795348523.5452752,
+    "seen": 1795348963.143387,
+    "ast_hash": "1e63c20a14ee08b9890985aac797639d",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/tasks/user/tasks/show.blade.php": {
+    "mtime": 1795348740.5638335,
+    "seen": 1795348963.1433887,
+    "ast_hash": "a8c36483225419a5401c585963b2220a",
     "semantic_hash": ""
   },
   "package-lock.json": {

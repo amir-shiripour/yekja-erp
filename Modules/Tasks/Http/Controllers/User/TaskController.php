@@ -298,7 +298,7 @@ class TaskController extends Controller
         $user = Auth::user();
 
         $query = Task::query()
-            ->with(['assignee', 'creator']);
+            ->with(['assignee', 'creator', 'relatedClient.status', 'relatedUser']);
 
         // مرتب‌سازی
         $sort = $request->get('sort', 'newest');
@@ -347,6 +347,11 @@ class TaskController extends Controller
             $query->where('priority', $priority);
         }
 
+        // فیلتر نوع وظیفه
+        if ($taskType = $request->get('task_type')) {
+            $query->where('task_type', $taskType);
+        }
+
         // فیلتر نوع موجودیت مرتبط (مثلاً client)
         if ($relatedType = $request->get('related_type')) {
             $query->where('related_type', $relatedType);
@@ -362,7 +367,9 @@ class TaskController extends Controller
             $query->where('assignee_id', $assigneeId);
         }
 
-        $perPage = config('tasks.default_items_per_page', 15);
+        $defaultPerPage = (int) config('tasks.default_items_per_page', 15);
+        $perPage = (int) $request->get('per_page', $defaultPerPage);
+        $perPage = in_array($perPage, [10, 15, 25, 50, 100], true) ? $perPage : $defaultPerPage;
         $tasks   = $query->paginate($perPage)->withQueryString();
 
         // برای نمایش labelها در جدول
@@ -403,7 +410,7 @@ class TaskController extends Controller
         $priorities = Task::priorityOptions();
         $types      = Task::typeOptions();
 
-        $usersQuery = \App\Models\User::select('id', 'name', 'email');
+        $usersQuery = \App\Models\User::select('id', 'name', 'email', 'mobile');
         $rolesQuery = \Spatie\Permission\Models\Role::select('id', 'name');
 
         if (!$user->hasRole('super-admin')) {
@@ -417,7 +424,7 @@ class TaskController extends Controller
         $roles = $rolesQuery->get();
 
         // ماژول کلاینت
-        $clients        = \Modules\Clients\Entities\Client::select('id', 'full_name', 'phone', 'status_id')->get();
+        $clients        = \Modules\Clients\Entities\Client::with('status')->get();
         $clientStatuses = \Modules\Clients\Entities\ClientStatus::active()->get();
 
         return view('tasks::user.tasks.create', compact(
@@ -609,7 +616,7 @@ class TaskController extends Controller
         }
 
         if ($task->related_type === Task::RELATED_TYPE_CLIENT && $task->related_id) {
-            $relatedClient = Client::find($task->related_id);
+            $relatedClient = Client::with('status')->find($task->related_id);
         }
 
         // برای نمایش roleها در بخش meta
@@ -673,7 +680,7 @@ class TaskController extends Controller
 
         // کاربران همراه با نقش‌ها (برای فیلتر در multi-select)
         $usersQuery = User::query()
-            ->select('id', 'name', 'email')
+            ->select('id', 'name', 'email', 'mobile')
             ->with('roles:id,name'); // برای userOptions در view
 
         // نقش‌ها
@@ -691,9 +698,7 @@ class TaskController extends Controller
         $roles = $rolesQuery->get();
 
         // کلاینت‌ها + وضعیتشان
-        $clients = Client::query()
-            ->select('id', 'full_name', 'phone', 'status_id')
-            ->get();
+        $clients = Client::with('status')->get();
 
         // وضعیت‌های فعال مشتری
         $clientStatuses = ClientStatus::active()->get();

@@ -219,8 +219,6 @@
             @endif
         </div>
 
-        <x-ui.dock/>
-
         <x-ui.toast position="bottom-left"/>
     </div>
 @endsection

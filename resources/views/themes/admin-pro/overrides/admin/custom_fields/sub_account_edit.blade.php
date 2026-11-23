@@ -173,8 +173,6 @@
 
         <div class="h-32 md:hidden" style="height: 8rem;" aria-hidden="true"></div>
 
-        <x-ui.dock/>
-
         <x-ui.toast position="bottom-left"/>
     </div>
 @endsection

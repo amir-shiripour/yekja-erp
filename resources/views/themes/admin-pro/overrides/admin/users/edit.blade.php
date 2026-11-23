@@ -632,9 +632,6 @@
         {{-- فاصله تضمین‌شده انتهای فرم در موبایل برای جلوگیری از هرگونه تداخل با داک شناور --}}
         <div class="h-32 md:hidden" style="height: 8rem;" aria-hidden="true"></div>
 
-        {{-- نوار ابزار متحرک موبایل (Mobile Dock) --}}
-        <x-ui.dock />
-
         {{-- کانتینر اعلان‌ها و توست‌های سیستمی --}}
         <x-ui.toast position="bottom-left" />
     </div>

@@ -50,7 +50,7 @@ class AdminProThemeTest extends TestCase
         $this->assertEquals('مدیریت پیشرفته (Admin Pro)', $theme['name']);
         $this->assertTrue($theme['has_overrides']);
         $this->assertFalse($theme['has_web_index']);
-        $this->assertEquals(16, $theme['crm_overrides_count']);
+        $this->assertEquals(20, $theme['crm_overrides_count']);
 
         $expectedFiles = [
             'layouts/user.blade.php',
@@ -69,6 +69,10 @@ class AdminProThemeTest extends TestCase
             'followups/user/followups/show.blade.php',
             'followups/user/followups/create.blade.php',
             'followups/user/followups/edit.blade.php',
+            'tasks/user/tasks/index.blade.php',
+            'tasks/user/tasks/show.blade.php',
+            'tasks/user/tasks/create.blade.php',
+            'tasks/user/tasks/edit.blade.php',
         ];
 
         foreach ($expectedFiles as $file) {
@@ -89,6 +93,11 @@ class AdminProThemeTest extends TestCase
         $this->assertNotNull($followupOverride);
         $this->assertStringContainsString('admin-pro', str_replace('\\', '/', $followupOverride));
         $this->assertFileExists($followupOverride);
+
+        $taskOverride = $resolver->findOverridePath('tasks::user.tasks.index');
+        $this->assertNotNull($taskOverride);
+        $this->assertStringContainsString('admin-pro', str_replace('\\', '/', $taskOverride));
+        $this->assertFileExists($taskOverride);
 
         $createOverride = $resolver->findOverridePath('admin.users.create');
         $this->assertNotNull($createOverride);
@@ -352,5 +361,171 @@ class AdminProThemeTest extends TestCase
         $this->assertStringContainsString('کاربر مسئول انجام', $renderedEdit);
         $this->assertStringContainsString('مشتری مرتبط', $renderedEdit);
         $this->assertStringNotContainsString('نکات و الزامات ثبت', $renderedEdit);
+    }
+
+    public function test_tasks_index_and_create_overrides_render_with_ui_components(): void
+    {
+        $user = new User(['name' => 'کاربر وظایف']);
+        $user->id = 1;
+        $this->actingAs($user);
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            collect(),
+            0,
+            15,
+            1,
+            ['path' => '/user/tasks']
+        );
+
+        $renderedIndex = View::make('tasks::user.tasks.index', [
+            'tasks' => $paginator,
+            'statuses' => ['TODO' => 'در صف انجام', 'DONE' => 'انجام شده'],
+            'priorities' => ['LOW' => 'پایین', 'MEDIUM' => 'متوسط'],
+            'types' => ['GENERAL' => 'عمومی'],
+            'users' => collect(),
+        ])->render();
+
+        $this->assertStringContainsString('لیست وظایف', $renderedIndex);
+        $this->assertStringContainsString('اعمال فیلتر', $renderedIndex);
+        $this->assertStringContainsString('هیچ وظیفه‌ای یافت نشد', $renderedIndex);
+
+        // تست رندر تسک با دکمه حذف Devigner
+        \Illuminate\Support\Facades\Gate::define('tasks.delete', fn() => true);
+        $taskItem = new \Modules\Tasks\Entities\Task([
+            'title' => 'تسک تست دکمه حذف',
+            'status' => 'TODO',
+            'priority' => 'HIGH',
+            'task_type' => \Modules\Tasks\Entities\Task::TYPE_GENERAL,
+        ]);
+        $taskItem->id = 777;
+        $paginatorWithItem = new \Illuminate\Pagination\LengthAwarePaginator(
+            collect([$taskItem]),
+            1,
+            15,
+            1,
+            ['path' => '/user/tasks']
+        );
+        $renderedIndexWithItem = View::make('tasks::user.tasks.index', [
+            'tasks' => $paginatorWithItem,
+            'statuses' => ['TODO' => 'در صف انجام'],
+            'priorities' => ['HIGH' => 'بالا'],
+            'types' => ['GENERAL' => 'عمومی'],
+            'users' => collect(),
+        ])->render();
+        $this->assertStringContainsString('confirmDelete', $renderedIndexWithItem);
+        $this->assertStringContainsString('aria-label="حذف"', $renderedIndexWithItem);
+
+        $renderedCreate = View::make('tasks::user.tasks.create', [
+            'statuses' => ['TODO' => 'در صف انجام'],
+            'priorities' => ['MEDIUM' => 'متوسط'],
+            'types' => ['GENERAL' => 'عمومی'],
+            'users' => collect(),
+            'roles' => collect(),
+            'clients' => collect(),
+            'clientStatuses' => collect(),
+            'canAssign' => true,
+        ])->render();
+
+        $this->assertStringContainsString('ثبت وظیفه جدید', $renderedCreate);
+        $this->assertStringContainsString('اطلاعات پایه وظیفه', $renderedCreate);
+        $this->assertStringContainsString('کاربر مسئول انجام', $renderedCreate);
+        $this->assertStringContainsString('مشتری مرتبط', $renderedCreate);
+        $this->assertStringContainsString('Menu Dock', $renderedCreate);
+        $this->assertStringContainsString('role="radiogroup"', $renderedCreate);
+        $this->assertStringContainsString('name="assignee_mode"', $renderedCreate);
+        $this->assertStringContainsString('name="related_target"', $renderedCreate);
+        $this->assertStringContainsString('window.uiSearchableSelect', $renderedCreate);
+        $this->assertStringContainsString('name="assignee_user_ids[]"', $renderedCreate);
+
+        $fakeTask = new \Modules\Tasks\Entities\Task([
+            'title' => 'وظیفه تست',
+            'status' => 'TODO',
+            'priority' => 'MEDIUM',
+            'task_type' => \Modules\Tasks\Entities\Task::TYPE_GENERAL,
+        ]);
+        $fakeTask->id = 888;
+        $fakeTask->created_at = now();
+
+        $renderedEdit = View::make('tasks::user.tasks.edit', [
+            'task' => $fakeTask,
+            'statuses' => ['TODO' => 'در صف انجام', 'DONE' => 'انجام شده'],
+            'priorities' => ['LOW' => 'پایین', 'MEDIUM' => 'متوسط'],
+            'types' => ['GENERAL' => 'عمومی'],
+            'users' => collect(),
+            'roles' => collect(),
+            'clients' => collect(),
+            'clientStatuses' => collect(),
+            'canAssign' => true,
+        ])->render();
+
+        $this->assertStringContainsString('ویرایش وظیفه شماره', $renderedEdit);
+        $this->assertStringContainsString('اطلاعات پایه وظیفه', $renderedEdit);
+        $this->assertStringContainsString('کاربر مسئول انجام', $renderedEdit);
+        $this->assertStringContainsString('مشتری مرتبط', $renderedEdit);
+        $this->assertStringContainsString('Menu Dock', $renderedEdit);
+        $this->assertStringContainsString('role="radiogroup"', $renderedEdit);
+        $this->assertStringContainsString('name="assignee_mode"', $renderedEdit);
+        $this->assertStringContainsString('name="related_target"', $renderedEdit);
+        $this->assertStringContainsString('window.uiSearchableSelect', $renderedEdit);
+        $this->assertStringContainsString('name="assignee_user_ids[]"', $renderedEdit);
+
+        $renderedShow = View::make('tasks::user.tasks.show', [
+            'task' => $fakeTask,
+            'statuses' => ['TODO' => 'در صف انجام', 'DONE' => 'انجام شده'],
+            'priorities' => ['LOW' => 'پایین', 'MEDIUM' => 'متوسط'],
+            'types' => ['GENERAL' => 'عمومی'],
+            'relatedClient' => null,
+            'relatedUser' => null,
+        ])->render();
+
+        $this->assertStringContainsString('مشخصات و شرح وظیفه', $renderedShow);
+        $this->assertStringContainsString('هشدارهای یادآوری وظیفه', $renderedShow);
+    }
+
+    public function test_segmented_button_component_renders_with_options_and_models(): void
+    {
+        $rendered = \Illuminate\Support\Facades\Blade::render(
+            '<x-ui.segmented-button name="period" model="selectedPeriod" :options="[\'monthly\' => \'ماهانه\', \'yearly\' => \'سالانه\']" />'
+        );
+        $this->assertStringContainsString('role="radiogroup"', $rendered);
+        $this->assertStringContainsString('ماهانه', $rendered);
+        $this->assertStringContainsString('سالانه', $rendered);
+        $this->assertStringContainsString('name="period"', $rendered);
+        $this->assertStringContainsString('selectedPeriod = \'monthly\'', $rendered);
+    }
+
+    public function test_searchable_select_component_renders_with_options(): void
+    {
+        $options = [
+            ['value' => '1', 'label' => 'محمد رضایی', 'subtitle' => '09121234567'],
+            ['value' => '2', 'label' => 'سارا کریمی', 'subtitle' => 'sara@test.com'],
+        ];
+
+        $rendered = \Illuminate\Support\Facades\Blade::render(
+            '<x-ui.searchable-select name="assignee_id" :options="$options" placeholder="انتخاب مسئول..." />',
+            ['options' => $options]
+        );
+
+        $this->assertStringContainsString('window.uiSearchableSelect', $rendered);
+        $this->assertStringContainsString('name="assignee_id"', $rendered);
+        $this->assertStringContainsString('محمد رضایی', $rendered);
+        $this->assertStringContainsString('سارا کریمی', $rendered);
+    }
+
+    public function test_select_component_card_variant_and_multiple(): void
+    {
+        $options = [
+            ['value' => '10', 'label' => 'شرکت توسعه داده', 'badge' => 'پرونده: ۱۰۰۱'],
+        ];
+
+        $rendered = \Illuminate\Support\Facades\Blade::render(
+            '<x-ui.select name="client_ids" :options="$options" :multiple="true" variant="card" color="emerald" />',
+            ['options' => $options]
+        );
+
+        $this->assertStringContainsString('window.uiSearchableSelect', $rendered);
+        $this->assertStringContainsString('client_ids[]', $rendered);
+        $this->assertStringContainsString('bg-emerald-600', $rendered);
+        $this->assertStringContainsString('شرکت توسعه داده', $rendered);
     }
 }
