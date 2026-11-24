@@ -7656,10 +7656,10 @@
     "semantic_hash": "fd1f98328898f4d29d09930e8a8004ef"
   },
   "Modules/Reminders/Http/Controllers/User/ReminderController.php": {
-    "mtime": 1789194888.13037,
-    "seen": 1794898849.831447,
-    "ast_hash": "8b7213cedcfdc6461e0baa7927bee592",
-    "semantic_hash": "8b7213cedcfdc6461e0baa7927bee592"
+    "mtime": 1795430554.2910173,
+    "seen": 1795431339.5327163,
+    "ast_hash": "b15531725eda8e613cfc61ca358d7831",
+    "semantic_hash": ""
   },
   "Modules/Reminders/Http/Controllers/User/ReminderSettingsController.php": {
     "mtime": 1781688592.44246,
@@ -7692,10 +7692,10 @@
     "semantic_hash": "eb4bc7335406619391f5c7740ade7187"
   },
   "Modules/Reminders/Routes/web.php": {
-    "mtime": 1781775709.5260885,
-    "seen": 1794898849.8314528,
-    "ast_hash": "c9ca7a42e69a6e0b733f0b9c2149432a",
-    "semantic_hash": "c9ca7a42e69a6e0b733f0b9c2149432a"
+    "mtime": 1795430536.1955347,
+    "seen": 1795431339.5327313,
+    "ast_hash": "c86efc97955bf0cad2110f440c2c31c5",
+    "semantic_hash": ""
   },
   "Modules/Reminders/Services/SnoozeEscalationService.php": {
     "mtime": 1781688592.4466445,
@@ -15984,9 +15984,9 @@
     "semantic_hash": ""
   },
   "resources/views/components/ui/delete-button.blade.php": {
-    "mtime": 1795261250.2511694,
-    "seen": 1795262151.9795856,
-    "ast_hash": "31eba62ce13cb5922e4c1b3fb91e229b",
+    "mtime": 1795425179.7342174,
+    "seen": 1795425377.3045516,
+    "ast_hash": "70505203f57f0ef8ce68926f7bc3f22e",
     "semantic_hash": ""
   },
   "resources/views/components/ui/dock.blade.php": {
@@ -16134,9 +16134,9 @@
     "semantic_hash": ""
   },
   "tests/Feature/AdminProThemeTest.php": {
-    "mtime": 1795411799.0702636,
-    "seen": 1795411894.3907042,
-    "ast_hash": "1de3af6a478649c2b1e2c43d5c179400",
+    "mtime": 1795435043.01494,
+    "seen": 1795435157.174385,
+    "ast_hash": "e1d8e389527d2c21922568c7abb35c2e",
     "semantic_hash": ""
   },
   "resources/views/components/ui/phone-input.blade.php": {
@@ -16206,9 +16206,9 @@
     "semantic_hash": ""
   },
   "resources/views/themes/admin-pro/overrides/followups/user/followups/index.blade.php": {
-    "mtime": 1795419193.0301194,
-    "seen": 1795419359.7235353,
-    "ast_hash": "6da811860933072e4403c24978abc13d",
+    "mtime": 1795434824.6560383,
+    "seen": 1795435157.1742296,
+    "ast_hash": "ad5805b1ec2cc26269c2f0f274e94293",
     "semantic_hash": ""
   },
   "resources/views/themes/admin-pro/overrides/followups/user/followups/show.blade.php": {
@@ -16224,45 +16224,63 @@
     "semantic_hash": ""
   },
   "resources/views/themes/admin-pro/overrides/tasks/user/tasks/create.blade.php": {
-    "mtime": 1795419111.1385863,
-    "seen": 1795419359.723546,
-    "ast_hash": "789c7d02bd53777872f809639ae324e2",
+    "mtime": 1795426857.7651985,
+    "seen": 1795427477.9425,
+    "ast_hash": "749edd02fb2f66829dbe9b549fdcecc9",
     "semantic_hash": ""
   },
   "resources/views/themes/admin-pro/overrides/tasks/user/tasks/edit.blade.php": {
-    "mtime": 1795419850.3309243,
-    "seen": 1795420014.112136,
-    "ast_hash": "25fa1f98dc3c86dfdd6e800c52d71731",
+    "mtime": 1795427229.1914783,
+    "seen": 1795427477.9425051,
+    "ast_hash": "b26f2bae456d46eaf6f0cdae6fa63ad5",
     "semantic_hash": ""
   },
   "resources/views/themes/admin-pro/overrides/tasks/user/tasks/index.blade.php": {
-    "mtime": 1795419235.3589284,
-    "seen": 1795419359.7235565,
-    "ast_hash": "07f471fd34f6bf2bd5d3555cc85e6517",
+    "mtime": 1795434768.722446,
+    "seen": 1795435157.1742551,
+    "ast_hash": "6c8e63e1f67be0bac719e09cc8a6f812",
     "semantic_hash": ""
   },
   "resources/views/themes/admin-pro/overrides/tasks/user/tasks/show.blade.php": {
-    "mtime": 1795415681.6193655,
-    "seen": 1795415808.9465616,
-    "ast_hash": "e2d87c4e18ab03d0ba03b50fa97327b5",
+    "mtime": 1795427168.5537815,
+    "seen": 1795427477.942519,
+    "ast_hash": "25d615a69bf6e2563b8f6c932a35005d",
     "semantic_hash": ""
   },
   "resources/views/components/ui/searchable-select.blade.php": {
-    "mtime": 1795411440.5272334,
-    "seen": 1795411894.3903894,
-    "ast_hash": "eb8b8cdc5758aa499e73ffa0803f35f1",
+    "mtime": 1795427352.885092,
+    "seen": 1795427477.9421883,
+    "ast_hash": "697da8d73ff60de8dc2b571d131531f4",
     "semantic_hash": ""
   },
   "resources/views/components/ui/segmented-button.blade.php": {
-    "mtime": 1795350259.0360186,
-    "seen": 1795411894.3903964,
-    "ast_hash": "8c185452432f6c37e46576a845ff340c",
+    "mtime": 1795427352.896096,
+    "seen": 1795427477.9422073,
+    "ast_hash": "ec928af9150d82eecc5d04728bf73214",
     "semantic_hash": ""
   },
   "resources/views/components/ui/select.blade.php": {
     "mtime": 1795411330.7769566,
     "seen": 1795411894.3903992,
     "ast_hash": "97f05380ca4990132f9f21fdbbc7dbc5",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/reminders/user/reminders/index.blade.php": {
+    "mtime": 1795434800.480672,
+    "seen": 1795435157.1742368,
+    "ast_hash": "183913de8c3919d7056db0b0356319d1",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/complete-button.blade.php": {
+    "mtime": 1795433190.286857,
+    "seen": 1795435157.1740744,
+    "ast_hash": "b62e2476b7bd2fd0ec3f4455f8ee1bad",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/reminders/user/settings/index.blade.php": {
+    "mtime": 1795433902.6113691,
+    "seen": 1795435157.1742387,
+    "ast_hash": "de7ac2e46cfe3afd1cd0f185918b9663",
     "semantic_hash": ""
   },
   "package-lock.json": {

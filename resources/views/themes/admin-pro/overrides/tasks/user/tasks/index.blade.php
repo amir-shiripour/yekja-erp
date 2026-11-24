@@ -494,6 +494,25 @@
                                             </a>
                                         @endcanany
 
+                                        {{-- علامت‌گذاری به عنوان انجام شده --}}
+                                        @canany(['tasks.edit', 'tasks.manage'])
+                                            @if($task->status !== Task::STATUS_DONE)
+                                                <form method="POST" action="{{ route('user.tasks.bulk-update') }}" class="inline-block">
+                                                    @csrf
+                                                    <input type="hidden" name="action" value="status">
+                                                    <input type="hidden" name="status" value="{{ Task::STATUS_DONE }}">
+                                                    <input type="hidden" name="ids[]" value="{{ $task->id }}">
+                                                    <x-ui.complete-button
+                                                        type="submit"
+                                                        label=""
+                                                        confirm-label="انجام شد؟"
+                                                        size="sm"
+                                                        title="علامت‌گذاری وظیفه به عنوان انجام شده"
+                                                    />
+                                                </form>
+                                            @endif
+                                        @endcanany
+
                                         {{-- حذف --}}
                                         @can('tasks.delete')
                                             <form method="POST" action="{{ route('user.tasks.destroy', $task) }}"
@@ -652,7 +671,7 @@
 
                             {{-- دکمه‌های عملیاتی --}}
                             <div
-                                class="flex items-center justify-end gap-2 pt-2.5 border-t border-gray-100 dark:border-gray-700/40">
+                                class="flex flex-wrap items-center justify-end gap-2 pt-2.5 border-t border-gray-100 dark:border-gray-700/40">
                                 <a href="{{ route('user.tasks.show', $task) }}"
                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700/60 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                                     <svg class="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" fill="none"
@@ -673,6 +692,23 @@
                                         </svg>
                                         <span>ویرایش</span>
                                     </a>
+                                @endcanany
+                                @canany(['tasks.edit', 'tasks.manage'])
+                                    @if($task->status !== Task::STATUS_DONE)
+                                        <form method="POST" action="{{ route('user.tasks.bulk-update') }}" class="inline-block">
+                                            @csrf
+                                            <input type="hidden" name="action" value="status">
+                                            <input type="hidden" name="status" value="{{ Task::STATUS_DONE }}">
+                                            <input type="hidden" name="ids[]" value="{{ $task->id }}">
+                                            <x-ui.complete-button
+                                                type="submit"
+                                                label=""
+                                                confirm-label="انجام شد؟"
+                                                size="sm"
+                                                title="علامت‌گذاری وظیفه به عنوان انجام شده"
+                                            />
+                                        </form>
+                                    @endif
                                 @endcanany
                                 @can('tasks.delete')
                                     <form method="POST" action="{{ route('user.tasks.destroy', $task) }}"
@@ -765,12 +801,12 @@
              x-transition:leave="transition cubic-bezier(0.16, 1, 0.3, 1) duration-200 transform"
              x-transition:leave-start="opacity-100 translate-y-0 scale-100"
              x-transition:leave-end="opacity-0 translate-y-10 scale-95"
-             class="fixed bottom-24 md:bottom-6 z-40 inset-x-4 md:inset-x-0 pointer-events-none flex justify-center transition-all duration-300"
+             class="fixed bottom-24 md:bottom-6 z-40 inset-x-0 px-8 sm:px-12 md:px-0 pointer-events-none flex justify-center transition-all duration-300"
              :class="typeof sidebarCollapsed !== 'undefined' && sidebarCollapsed ? 'lg:pr-20' : 'lg:pr-72'">
             <div
-                class="pointer-events-auto w-full md:w-auto md:max-w-2xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-2xl border border-gray-200/90 dark:border-gray-700/80 rounded-full px-2 py-1.5 sm:px-4 sm:py-2 shadow-2xl shadow-indigo-950/20 dark:shadow-black/70 ring-1 ring-black/5 dark:ring-white/10">
+                class="pointer-events-auto w-full sm:w-auto bg-white/95 dark:bg-gray-800/95 backdrop-blur-2xl border border-gray-200/90 dark:border-gray-700/80 rounded-full px-2 py-1.5 sm:px-4 sm:py-2 shadow-2xl shadow-indigo-950/20 dark:shadow-black/70 ring-1 ring-black/5 dark:ring-white/10">
                 <form method="POST" action="{{ route('user.tasks.bulk-update') }}"
-                      class="flex items-center gap-1.5 sm:justify-between sm:gap-2.5 w-full">
+                      class="flex items-center gap-1.5 sm:gap-3 w-full sm:w-auto">
                     @csrf
                     <input type="hidden" name="action" x-model="bulkAction">
                     <template x-for="id in selectedIds" :key="id">
@@ -784,7 +820,7 @@
                             class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-indigo-600 text-white text-[11px] font-black leading-none shadow-xs"
                             x-text="toFa(selectedIds.length)"></span>
                         <span class="text-xs font-black whitespace-nowrap">
-                            <span class="hidden sm:inline">وظیفه </span>انتخاب<span class="hidden sm:inline"> شد</span>
+                            <span class="hidden sm:inline">وظیفه </span>انتخاب
                         </span>
                         <button type="button"
                                 @click="selectedIds = []; allChecked = false"
@@ -804,7 +840,7 @@
                     @canany(['tasks.edit', 'tasks.manage'])
                         <div class="flex items-center gap-1.5 flex-1 sm:flex-initial min-w-0"
                              @status-changed.window="bulkStatus = $event.detail">
-                            <div class="flex-1 sm:flex-initial sm:w-44 min-w-[90px]">
+                            <div class="flex-1 sm:flex-initial sm:w-44 min-w-0">
                                 <x-ui.select
                                     name="status"
                                     :options="$statuses"
@@ -822,7 +858,7 @@
                                     name="action"
                                     value="status"
                                     :disabled="!bulkStatus"
-                                    class="h-9 px-3 sm:px-4 rounded-full text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 transition-all cursor-pointer shadow-xs shadow-indigo-600/20 active:scale-95 inline-flex items-center justify-center gap-1 shrink-0">
+                                    class="h-9 px-2.5 sm:px-4 rounded-full text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 transition-all cursor-pointer shadow-xs shadow-indigo-600/20 active:scale-95 inline-flex items-center justify-center gap-1 shrink-0">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                      stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
@@ -840,21 +876,19 @@
                         <div @click="bulkAction = 'delete'" class="shrink-0 flex items-center">
                             <x-ui.delete-button
                                 type="submit"
-                                label="حذف"
+                                label=""
                                 confirm-label="حذف؟"
                                 cancel-label="انصراف"
-                                size="base"
+                                size="sm"
                                 title="حذف گروهی وظایف انتخاب شده"
                             />
                         </div>
                     @endcan
                 </form>
             </div>
-            </form>
         </div>
-    </div>
 
-    {{-- فاصله تضمین‌شده انتهای صفحه در موبایل برای جلوگیری از هرگونه تداخل با داک ناوبری --}}
-    <div class="h-28 md:hidden" style="height: 7rem;" aria-hidden="true"></div>
+        {{-- فاصله تضمین‌شده انتهای صفحه در موبایل برای جلوگیری از هرگونه تداخل با داک ناوبری --}}
+        <div class="h-28 md:hidden" style="height: 7rem;" aria-hidden="true"></div>
     </div>
 @endsection

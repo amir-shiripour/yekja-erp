@@ -45,7 +45,7 @@ Route::prefix('user')
         // تغییر وضعیت گروهی
         Route::match(['post', 'patch'], 'reminders/bulk-status', [ReminderController::class, 'bulkUpdateStatus'])
             ->name('reminders.bulk-status')
-            ->middleware('permission:reminders.edit|reminders.manage');
+            ->middleware('permission:reminders.edit|reminders.manage|reminders.delete');
 
         // تعویق
         Route::patch('reminders/{reminder}/snooze', [ReminderController::class, 'snooze'])

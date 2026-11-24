@@ -50,7 +50,7 @@ class AdminProThemeTest extends TestCase
         $this->assertEquals('مدیریت پیشرفته (Admin Pro)', $theme['name']);
         $this->assertTrue($theme['has_overrides']);
         $this->assertFalse($theme['has_web_index']);
-        $this->assertEquals(20, $theme['crm_overrides_count']);
+        $this->assertEquals(23, $theme['crm_overrides_count']);
 
         $expectedFiles = [
             'layouts/user.blade.php',
@@ -73,6 +73,9 @@ class AdminProThemeTest extends TestCase
             'tasks/user/tasks/show.blade.php',
             'tasks/user/tasks/create.blade.php',
             'tasks/user/tasks/edit.blade.php',
+            'reminders/user/reminders/index.blade.php',
+            'reminders/user/reminders/snooze-history.blade.php',
+            'reminders/user/settings/index.blade.php',
         ];
 
         foreach ($expectedFiles as $file) {
@@ -98,6 +101,21 @@ class AdminProThemeTest extends TestCase
         $this->assertNotNull($taskOverride);
         $this->assertStringContainsString('admin-pro', str_replace('\\', '/', $taskOverride));
         $this->assertFileExists($taskOverride);
+
+        $reminderOverride = $resolver->findOverridePath('reminders::user.reminders.index');
+        $this->assertNotNull($reminderOverride);
+        $this->assertStringContainsString('admin-pro', str_replace('\\', '/', $reminderOverride));
+        $this->assertFileExists($reminderOverride);
+
+        $reminderSettingsOverride = $resolver->findOverridePath('reminders::user.settings.index');
+        $this->assertNotNull($reminderSettingsOverride);
+        $this->assertStringContainsString('admin-pro', str_replace('\\', '/', $reminderSettingsOverride));
+        $this->assertFileExists($reminderSettingsOverride);
+
+        $reminderSnoozeOverride = $resolver->findOverridePath('reminders::user.reminders.snooze-history');
+        $this->assertNotNull($reminderSnoozeOverride);
+        $this->assertStringContainsString('admin-pro', str_replace('\\', '/', $reminderSnoozeOverride));
+        $this->assertFileExists($reminderSnoozeOverride);
 
         $createOverride = $resolver->findOverridePath('admin.users.create');
         $this->assertNotNull($createOverride);
@@ -324,6 +342,32 @@ class AdminProThemeTest extends TestCase
         $this->assertStringContainsString('لیست پیگیری‌ها', $renderedIndex);
         $this->assertStringContainsString('هیچ پیگیری‌ای یافت نشد', $renderedIndex);
 
+        \Illuminate\Support\Facades\Gate::define('followups.edit', fn() => true);
+        $fakeFollowupItem = new \Modules\Tasks\Entities\Task([
+            'title' => 'پیگیری تستی برای کامپوننت انجام شد',
+            'status' => 'TODO',
+            'priority' => 'MEDIUM',
+            'task_type' => \Modules\Tasks\Entities\Task::TYPE_FOLLOW_UP,
+        ]);
+        $fakeFollowupItem->id = 888;
+        $paginatorWithFu = new \Illuminate\Pagination\LengthAwarePaginator(
+            collect([$fakeFollowupItem]),
+            1,
+            15,
+            1,
+            ['path' => '/user/followups']
+        );
+        $renderedIndexWithFu = View::make('followups::user.followups.index', [
+            'followups' => $paginatorWithFu,
+            'statuses' => ['TODO' => 'در انتظار', 'DONE' => 'انجام شده'],
+            'priorities' => ['LOW' => 'پایین', 'MEDIUM' => 'متوسط'],
+            'types' => ['FOLLOW_UP' => 'پیگیری عادی'],
+            'users' => collect(),
+        ])->render();
+        $this->assertStringContainsString('confirmComplete', $renderedIndexWithFu);
+        $this->assertStringContainsString('user/tasks/bulk', $renderedIndexWithFu);
+        $this->assertStringContainsString('لغو انتخاب همه', $renderedIndexWithFu);
+
         $renderedCreate = View::make('followups::user.followups.create', [
             'statuses' => ['TODO' => 'در انتظار'],
             'priorities' => ['MEDIUM' => 'متوسط'],
@@ -389,8 +433,9 @@ class AdminProThemeTest extends TestCase
         $this->assertStringContainsString('اعمال فیلتر', $renderedIndex);
         $this->assertStringContainsString('هیچ وظیفه‌ای یافت نشد', $renderedIndex);
 
-        // تست رندر تسک با دکمه حذف Devigner
+        // تست رندر تسک با دکمه حذف و تکمیل Devigner
         \Illuminate\Support\Facades\Gate::define('tasks.delete', fn() => true);
+        \Illuminate\Support\Facades\Gate::define('tasks.edit', fn() => true);
         $taskItem = new \Modules\Tasks\Entities\Task([
             'title' => 'تسک تست دکمه حذف',
             'status' => 'TODO',
@@ -413,6 +458,7 @@ class AdminProThemeTest extends TestCase
             'users' => collect(),
         ])->render();
         $this->assertStringContainsString('confirmDelete', $renderedIndexWithItem);
+        $this->assertStringContainsString('confirmComplete', $renderedIndexWithItem);
         $this->assertStringContainsString('aria-label="حذف"', $renderedIndexWithItem);
 
         $renderedCreate = View::make('tasks::user.tasks.create', [
@@ -527,5 +573,183 @@ class AdminProThemeTest extends TestCase
         $this->assertStringContainsString('client_ids[]', $rendered);
         $this->assertStringContainsString('bg-emerald-600', $rendered);
         $this->assertStringContainsString('شرکت توسعه داده', $rendered);
+    }
+
+    public function test_reminders_index_override_renders_with_ui_components(): void
+    {
+        $user = new User([
+            'id' => 1,
+            'name' => 'کاربر آزمایشی',
+            'email' => 'test@crm.local',
+        ]);
+        $this->actingAs($user);
+
+        // ۱. بررسی رندر خالی
+        $renderedEmpty = View::make('reminders::user.reminders.index', [
+            'taskReminders' => collect(),
+            'followUpReminders' => collect(),
+            'status' => 'open',
+            'period' => 'today',
+            'statusFilterOptions' => ['open' => 'باز (در انتظار)', 'done' => 'انجام‌شده', 'all' => 'همه'],
+            'periodOptions' => ['today' => 'امروز', 'all' => 'بدون فیلتر زمانی'],
+            'users' => collect([$user]),
+            'selectedUserId' => 1,
+            'from' => null,
+            'to' => null,
+        ])->render();
+
+        $this->assertStringContainsString('مدیریت و پیگیری یادآوری‌ها', $renderedEmpty);
+        $this->assertStringContainsString('کل یادآوری‌ها', $renderedEmpty);
+        $this->assertStringContainsString('یادآوری‌های وظایف', $renderedEmpty);
+        $this->assertStringContainsString('یادآوری‌های پیگیری', $renderedEmpty);
+        $this->assertStringContainsString('در انتظار انجام', $renderedEmpty);
+        $this->assertStringContainsString('وضعیت یادآوری', $renderedEmpty);
+        $this->assertStringContainsString('هیچ یادآوری‌ای در این بازه یافت نشد', $renderedEmpty);
+
+        // ۲. بررسی رندر با داده فیک
+        $fakeTask = new \Modules\Tasks\Entities\Task([
+            'title' => 'تماس با مشتری VIP',
+            'priority' => \Modules\Tasks\Entities\Task::PRIORITY_HIGH,
+            'task_type' => \Modules\Tasks\Entities\Task::TYPE_GENERAL,
+        ]);
+        $fakeTask->id = 10;
+
+        $fakeFollowUp = new \Modules\Tasks\Entities\Task([
+            'title' => 'پیگیری فاکتور ارسالی',
+            'priority' => \Modules\Tasks\Entities\Task::PRIORITY_CRITICAL,
+            'task_type' => \Modules\Tasks\Entities\Task::TYPE_FOLLOW_UP,
+        ]);
+        $fakeFollowUp->id = 20;
+
+        $fakeReminder1 = new \Modules\Reminders\Entities\Reminder([
+            'message' => 'تماس تلفنی با مدیر خرید',
+            'remind_at' => now()->addHours(2),
+            'status' => \Modules\Reminders\Entities\Reminder::STATUS_OPEN,
+            'related_type' => 'TASK',
+            'related_id' => 10,
+            'user_id' => 1,
+            'snooze_count' => 0,
+        ]);
+        $fakeReminder1->id = 101;
+        $fakeReminder1->setRelation('task', $fakeTask);
+        $fakeReminder1->setRelation('user', $user);
+
+        $fakeReminder2 = new \Modules\Reminders\Entities\Reminder([
+            'message' => 'بررسی تایید پرداخت مشتری',
+            'remind_at' => now()->subHours(1),
+            'status' => \Modules\Reminders\Entities\Reminder::STATUS_OPEN,
+            'related_type' => 'TASK',
+            'related_id' => 20,
+            'user_id' => 1,
+            'snooze_count' => 1,
+        ]);
+        $fakeReminder2->id = 102;
+        $fakeReminder2->setRelation('task', $fakeFollowUp);
+        $fakeReminder2->setRelation('followUp', $fakeFollowUp);
+        $fakeReminder2->setRelation('user', $user);
+
+        $renderedWithData = View::make('reminders::user.reminders.index', [
+            'taskReminders' => collect([$fakeReminder1]),
+            'followUpReminders' => collect([$fakeReminder2]),
+            'status' => 'open',
+            'period' => 'today',
+            'statusFilterOptions' => ['open' => 'باز (در انتظار)', 'done' => 'انجام‌شده', 'all' => 'همه'],
+            'periodOptions' => ['today' => 'امروز', 'all' => 'بدون فیلتر زمانی'],
+            'users' => collect([$user]),
+            'selectedUserId' => 1,
+            'from' => null,
+            'to' => null,
+        ])->render();
+
+        $this->assertStringContainsString('تماس با مشتری VIP', $renderedWithData);
+        $this->assertStringContainsString('پیگیری فاکتور ارسالی', $renderedWithData);
+        $this->assertStringContainsString('تماس تلفنی با مدیر خرید', $renderedWithData);
+        $this->assertStringContainsString('بررسی تایید پرداخت مشتری', $renderedWithData);
+        $this->assertStringContainsString('تعویق', $renderedWithData);
+        $this->assertStringContainsString('data-scope="tasks"', $renderedWithData);
+        $this->assertStringContainsString('data-scope="followups"', $renderedWithData);
+        $this->assertStringContainsString('confirmComplete', $renderedWithData);
+        $this->assertStringContainsString('user/reminders/bulk-status', $renderedWithData);
+    }
+
+    public function test_reminders_settings_override_renders_with_ui_components(): void
+    {
+        $user = new User([
+            'id' => 1,
+            'name' => 'کاربر آزمایشی',
+            'email' => 'test@crm.local',
+        ]);
+        $this->actingAs($user);
+
+        $fakeRole = new \Spatie\Permission\Models\Role(['id' => 1, 'name' => 'super-admin']);
+
+        $rendered = View::make('reminders::user.settings.index', [
+            'settings' => [
+                'reminders_in_progress_enabled' => '1',
+                'reminders_snooze_enabled' => '1',
+                'reminders_snooze_limit' => 5,
+                'reminders_snooze_reason_required' => 'optional',
+                'reminders_escalation_roles' => json_encode(['super-admin']),
+                'reminders_escalation_users' => json_encode([1]),
+            ],
+            'escalationRoles' => ['super-admin'],
+            'escalationUsers' => [1],
+            'roles' => collect([$fakeRole]),
+            'users' => collect([$user]),
+        ])->render();
+
+        $this->assertStringContainsString('تنظیمات یادآوری و تعویق', $rendered);
+        $this->assertStringContainsString('قوانین و رفتارهای تعویق', $rendered);
+        $this->assertStringContainsString('امکان تغییر وضعیت به «درحال انجام»', $rendered);
+        $this->assertStringContainsString('فعال بودن قابلیت تعویق (Snooze)', $rendered);
+        $this->assertStringContainsString('حداکثر تعداد مجاز تعویق', $rendered);
+        $this->assertStringContainsString('وضعیت ثبت دلیل تعویق', $rendered);
+        $this->assertStringContainsString('تنظیمات ارجاع خودکار (Escalation)', $rendered);
+        $this->assertStringContainsString('ذخیره تنظیمات یادآوری', $rendered);
+    }
+
+    public function test_reminders_snooze_history_override_renders_with_ui_components(): void
+    {
+        $user = new User([
+            'id' => 1,
+            'name' => 'مدیر سیستم',
+            'email' => 'admin@admin.com',
+        ]);
+        $this->actingAs($user);
+
+        $fakeReminder = new \Modules\Reminders\Entities\Reminder([
+            'message' => 'پیگیری فاکتور خرید هاست',
+            'remind_at' => now()->addDay(),
+            'status' => \Modules\Reminders\Entities\Reminder::STATUS_OPEN,
+            'reminder_scope' => 'tasks',
+            'related_type' => 'TASK',
+            'related_id' => 10,
+        ]);
+        $fakeReminder->id = 14;
+
+        $fakeLog = new \Modules\Reminders\Entities\ReminderSnoozeLog([
+            'reminder_id' => 14,
+            'user_id' => 1,
+            'original_remind_at' => now(),
+            'snoozed_to' => now()->addHours(2),
+            'duration_minutes' => 120,
+            'duration_key' => '2h',
+            'reason' => 'مشتری در جلسه کاری بود',
+            'snooze_sequence' => 1,
+        ]);
+        $fakeLog->id = 101;
+        $fakeLog->created_at = now();
+        $fakeLog->setRelation('user', $user);
+
+        $rendered = View::make('reminders::user.reminders.snooze-history', [
+            'reminder' => $fakeReminder,
+            'logs' => collect([$fakeLog]),
+        ])->render();
+
+        $this->assertStringContainsString('تاریخچه تعویق یادآوری', $rendered);
+        $this->assertStringContainsString('پیگیری فاکتور خرید هاست', $rendered);
+        $this->assertStringContainsString('مشتری در جلسه کاری بود', $rendered);
+        $this->assertStringContainsString('مدیر سیستم', $rendered);
+        $this->assertStringContainsString('۲ ساعت', $rendered);
     }
 }

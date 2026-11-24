@@ -30,7 +30,8 @@
 @section('title', 'مدیریت پیگیری‌ها')
 
 @section('content')
-    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 pb-32 md:pb-8">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 pb-32 md:pb-8"
+         x-data="{ selectedIds: [], allChecked: false, bulkStatus: '', bulkAction: 'status', toFa(n) { return String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); } }">
         <header
             class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 p-4 sm:p-6 shadow-xs transition-all space-y-3 sm:space-y-4">
             <nav class="flex items-center gap-2 text-xs font-bold text-gray-400 dark:text-gray-500"
@@ -266,6 +267,12 @@
                         <thead
                             class="bg-gray-50/80 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700/40 text-xs font-black text-gray-500 dark:text-gray-400">
                         <tr>
+                            <th class="px-4 py-3.5 w-12 text-center">
+                                <input type="checkbox"
+                                       @change="selectedIds = $el.checked ? {{ json_encode($followups->pluck('id')->values()->all()) }} : []"
+                                       :checked="selectedIds.length > 0 && selectedIds.length === {{ $followups->count() }}"
+                                       class="rounded-md border-gray-300 dark:border-gray-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            </th>
                             <th class="px-5 py-3.5 w-14 text-center">#</th>
                             <th class="px-5 py-3.5">عنوان پیگیری</th>
                             <th class="px-5 py-3.5">مشتری مرتبط</th>
@@ -295,6 +302,12 @@
                                 };
                             @endphp
                             <tr class="group hover:bg-indigo-50/30 dark:hover:bg-gray-700/20 transition-colors">
+                                <td class="px-4 py-4 text-center">
+                                    <input type="checkbox"
+                                           :value="{{ $fu->id }}"
+                                           x-model="selectedIds"
+                                           class="rounded-md border-gray-300 dark:border-gray-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                </td>
                                 <td class="px-5 py-4 text-center text-gray-400 dark:text-gray-500 text-xs font-bold">
                                     #{{ $faNum($fu->id) }}
                                 </td>
@@ -403,6 +416,25 @@
                                             </a>
                                         @endcanany
 
+                                        {{-- علامت‌گذاری به عنوان انجام شده --}}
+                                        @canany(['followups.edit', 'followups.manage'])
+                                            @if($fu->status !== \Modules\Tasks\Entities\Task::STATUS_DONE)
+                                                <form method="POST" action="{{ route('user.tasks.bulk-update') }}" class="inline-block">
+                                                    @csrf
+                                                    <input type="hidden" name="action" value="status">
+                                                    <input type="hidden" name="status" value="{{ \Modules\Tasks\Entities\Task::STATUS_DONE }}">
+                                                    <input type="hidden" name="ids[]" value="{{ $fu->id }}">
+                                                    <x-ui.complete-button
+                                                        type="submit"
+                                                        label=""
+                                                        confirm-label="انجام شد؟"
+                                                        size="sm"
+                                                        title="علامت‌گذاری پیگیری به عنوان انجام شده"
+                                                    />
+                                                </form>
+                                            @endif
+                                        @endcanany
+
                                         @can('followups.delete')
                                             <form method="POST" action="{{ route('user.followups.destroy', $fu) }}"
                                                   class="inline-block">
@@ -444,13 +476,19 @@
                             };
                         @endphp
                         <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/60 shadow-xs space-y-3.5 transition-all hover:border-indigo-100 dark:hover:border-indigo-900/40">
-                            {{-- ردیف عنوان پیگیری و شناسه --}}
+                            {{-- ردیف چک‌باکس، عنوان پیگیری و شناسه --}}
                             <div class="flex items-start justify-between gap-3">
-                                <div class="min-w-0">
-                                    <a href="{{ route('user.followups.show', $fu) }}"
-                                       class="font-black text-sm text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 line-clamp-2 transition-colors">
-                                        {{ $fu->title }}
-                                    </a>
+                                <div class="flex items-start gap-2.5 min-w-0">
+                                    <input type="checkbox"
+                                           :value="{{ $fu->id }}"
+                                           x-model="selectedIds"
+                                           class="mt-1 rounded-md border-gray-300 dark:border-gray-700 text-indigo-600 focus:ring-indigo-500 shrink-0 cursor-pointer">
+                                    <div class="min-w-0">
+                                        <a href="{{ route('user.followups.show', $fu) }}"
+                                           class="font-black text-sm text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 line-clamp-2 transition-colors">
+                                            {{ $fu->title }}
+                                        </a>
+                                    </div>
                                 </div>
                                 <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/40 shrink-0">
                                     #{{ $faNum($fu->id) }}
@@ -540,7 +578,7 @@
                             </div>
 
                             {{-- دکمه‌های عملیاتی --}}
-                            <div class="flex items-center justify-end gap-2 pt-2.5 border-t border-gray-100 dark:border-gray-700/40">
+                            <div class="flex flex-wrap items-center justify-end gap-2 pt-2.5 border-t border-gray-100 dark:border-gray-700/40">
                                 <a href="{{ route('user.followups.show', $fu) }}"
                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700/60 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                                     <svg class="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -557,6 +595,23 @@
                                         </svg>
                                         <span>ویرایش</span>
                                     </a>
+                                @endcanany
+                                @canany(['followups.edit', 'followups.manage'])
+                                    @if($fu->status !== \Modules\Tasks\Entities\Task::STATUS_DONE)
+                                        <form method="POST" action="{{ route('user.tasks.bulk-update') }}" class="inline-block">
+                                            @csrf
+                                            <input type="hidden" name="action" value="status">
+                                            <input type="hidden" name="status" value="{{ \Modules\Tasks\Entities\Task::STATUS_DONE }}">
+                                            <input type="hidden" name="ids[]" value="{{ $fu->id }}">
+                                            <x-ui.complete-button
+                                                type="submit"
+                                                label=""
+                                                confirm-label="انجام شد؟"
+                                                size="sm"
+                                                title="علامت‌گذاری پیگیری به عنوان انجام شده"
+                                            />
+                                        </form>
+                                    @endif
                                 @endcanany
                                 @can('followups.delete')
                                     <form method="POST" action="{{ route('user.followups.destroy', $fu) }}" class="inline-block">
@@ -636,6 +691,105 @@
                 @endif
             @endif
         </div>
+
+        {{-- نوار شناور و مدرن عملیات گروهی در فوتر (Floating Action Island) --}}
+        <div x-show="selectedIds.length > 0"
+             x-cloak
+             x-transition:enter="transition cubic-bezier(0.16, 1, 0.3, 1) duration-300 transform"
+             x-transition:enter-start="opacity-0 translate-y-10 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition cubic-bezier(0.16, 1, 0.3, 1) duration-200 transform"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-10 scale-95"
+             class="fixed bottom-24 md:bottom-6 z-40 inset-x-0 px-8 sm:px-12 md:px-0 pointer-events-none flex justify-center transition-all duration-300"
+             :class="typeof sidebarCollapsed !== 'undefined' && sidebarCollapsed ? 'lg:pr-20' : 'lg:pr-72'">
+            <div
+                class="pointer-events-auto w-full sm:w-auto bg-white/95 dark:bg-gray-800/95 backdrop-blur-2xl border border-gray-200/90 dark:border-gray-700/80 rounded-full px-2 py-1.5 sm:px-4 sm:py-2 shadow-2xl shadow-indigo-950/20 dark:shadow-black/70 ring-1 ring-black/5 dark:ring-white/10">
+                <form method="POST" action="{{ route('user.tasks.bulk-update') }}"
+                      class="flex items-center gap-1.5 sm:gap-3 w-full sm:w-auto">
+                    @csrf
+                    <input type="hidden" name="action" x-model="bulkAction">
+                    <template x-for="id in selectedIds" :key="id">
+                        <input type="hidden" name="ids[]" :value="id">
+                    </template>
+
+                    {{-- چیپ یکپارچه شمارنده با دکمه لغو سریع --}}
+                    <div
+                        class="inline-flex items-center gap-1.5 sm:gap-2 h-9 px-2 sm:px-3 rounded-full bg-indigo-50/90 dark:bg-indigo-950/50 border border-indigo-100/90 dark:border-indigo-800/60 text-indigo-950 dark:text-indigo-100 shadow-2xs shrink-0 select-none">
+                        <span
+                            class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-indigo-600 text-white text-[11px] font-black leading-none shadow-xs"
+                            x-text="toFa(selectedIds.length)"></span>
+                        <span class="text-xs font-black whitespace-nowrap">
+                            <span class="hidden sm:inline">پیگیری </span>انتخاب
+                        </span>
+                        <button type="button"
+                                @click="selectedIds = []; allChecked = false"
+                                class="inline-flex items-center justify-center w-5 h-5 -me-1 rounded-full text-indigo-400 hover:text-indigo-700 dark:hover:text-white hover:bg-indigo-200/50 dark:hover:bg-indigo-800/60 transition-colors cursor-pointer"
+                                title="لغو انتخاب همه">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                 stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    {{-- خط جداکننده عمودی در دسکتاپ --}}
+                    <div class="hidden sm:block h-6 w-px bg-gray-200/80 dark:bg-gray-700/80 shrink-0"></div>
+
+                    {{-- بخش تغییر وضعیت: دراپ‌داون وضعیت و دکمه ثبت --}}
+                    @canany(['followups.edit', 'followups.manage'])
+                        <div class="flex items-center gap-1.5 flex-1 sm:flex-initial min-w-0"
+                             @status-changed.window="bulkStatus = $event.detail">
+                            <div class="flex-1 sm:flex-initial sm:w-44 min-w-0">
+                                <x-ui.select
+                                    name="status"
+                                    :options="$statuses"
+                                    placeholder="وضعیت..."
+                                    placement="top"
+                                    size="sm"
+                                    rounded="full"
+                                    :searchable="false"
+                                    :clearable="false"
+                                />
+                            </div>
+
+                            <button type="submit"
+                                    @click="bulkAction = 'status'"
+                                    name="action"
+                                    value="status"
+                                    :disabled="!bulkStatus"
+                                    class="h-9 px-2.5 sm:px-4 rounded-full text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-indigo-600 transition-all cursor-pointer shadow-xs shadow-indigo-600/20 active:scale-95 inline-flex items-center justify-center gap-1 shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                     stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span class="whitespace-nowrap">ثبت</span>
+                            </button>
+                        </div>
+                    @endcanany
+
+                    {{-- خط جداکننده عمودی --}}
+                    <div class="h-5 sm:h-6 w-px bg-gray-200/80 dark:bg-gray-700/80 shrink-0"></div>
+
+                    {{-- دکمه حذف گروهی --}}
+                    @can('followups.delete')
+                        <div @click="bulkAction = 'delete'" class="shrink-0 flex items-center">
+                            <x-ui.delete-button
+                                type="submit"
+                                label=""
+                                confirm-label="حذف؟"
+                                cancel-label="انصراف"
+                                size="sm"
+                                title="حذف گروهی پیگیری‌های انتخاب شده"
+                            />
+                        </div>
+                    @endcan
+                </form>
+            </div>
+        </div>
+
+        {{-- فاصله تضمین‌شده انتهای صفحه در موبایل برای جلوگیری از هرگونه تداخل با داک ناوبری --}}
+        <div class="h-28 md:hidden" style="height: 7rem;" aria-hidden="true"></div>
 
         <x-ui.toast position="bottom-left"/>
     </div>

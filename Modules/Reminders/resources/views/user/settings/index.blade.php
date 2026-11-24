@@ -160,9 +160,9 @@
                             {{-- لیست آبشاری نقش‌ها --}}
                             <div x-show="openRoles" style="display: none;" class="absolute z-10 w-full mt-1.5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg max-h-48 overflow-y-auto py-1">
                                 @foreach($roles as $r)
-                                    <div @click="toggleRole({{ $r->id }}, '{{ $r->name }}')" 
+                                    <div @click="toggleRole({{ $r->id }}, '{{ $r->display_name ?: $r->name }}')" 
                                          class="px-4 py-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer flex items-center justify-between">
-                                        <span>{{ $r->name }}</span>
+                                        <span>{{ $r->display_name ?: $r->name }}</span>
                                         <span x-show="hasRole({{ $r->id }})" class="text-indigo-600 dark:text-indigo-400">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
                                         </span>

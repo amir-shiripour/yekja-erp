@@ -43,6 +43,17 @@ class ReminderSettingsController extends Controller
      */
     public function update(Request $request)
     {
+        if ($request->has('reminders_escalation_roles') && is_array($request->input('reminders_escalation_roles'))) {
+            $request->merge([
+                'reminders_escalation_roles' => json_encode(array_values($request->input('reminders_escalation_roles')))
+            ]);
+        }
+        if ($request->has('reminders_escalation_users') && is_array($request->input('reminders_escalation_users'))) {
+            $request->merge([
+                'reminders_escalation_users' => json_encode(array_values(array_map('intval', $request->input('reminders_escalation_users'))))
+            ]);
+        }
+
         $data = $request->validate([
             'reminders_in_progress_enabled'    => 'nullable|string',
             'reminders_snooze_enabled'         => 'nullable|string', // input checkbox sends value or null
