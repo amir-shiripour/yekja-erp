@@ -417,8 +417,40 @@ class ReminderController extends Controller
     {
         $user = Auth::user();
 
-        if (! $user->can('reminders.edit') && ! $user->can('reminders.manage')) {
+        if (! $user->can('reminders.edit') && ! $user->can('reminders.manage') && ! $user->can('reminders.delete')) {
             abort(403);
+        }
+
+        $action = $request->input('action', 'status');
+        $status = $request->input('status');
+
+        if ($action === 'delete' || $status === 'delete') {
+            if (! $user->can('reminders.delete') && ! $user->can('reminders.manage')) {
+                abort(403);
+            }
+
+            $data = $request->validate([
+                'ids'   => ['required', 'array'],
+                'ids.*' => ['integer'],
+            ]);
+
+            $reminders = Reminder::visibleForUser($user)->whereIn('id', $data['ids'])->get();
+            $deleted = 0;
+            foreach ($reminders as $reminder) {
+                if ($reminder->canBeDeletedBy($user)) {
+                    $reminder->delete();
+                    $deleted++;
+                }
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'deleted' => $deleted,
+                ]);
+            }
+
+            return back()->with('status', "{$deleted} یادآوری با موفقیت حذف شد.");
         }
 
         $data = $request->validate([

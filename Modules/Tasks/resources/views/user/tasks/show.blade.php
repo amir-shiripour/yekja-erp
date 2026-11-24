@@ -134,14 +134,14 @@
                                     <a href="{{ route('user.clients.show', $relatedClient) }}" class="text-sm font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                         {{ $relatedClient->full_name }}
                                     </a>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 dir-ltr text-right font-mono">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 dir-ltr text-right font-bold">
                                         {{ $relatedClient->phone ?? '' }}
                                     </div>
                                 @elseif($task->client)
                                     <a href="{{ route('user.clients.show', $task->client) }}" class="text-sm font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                         {{ $task->client->full_name }}
                                     </a>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 dir-ltr text-right font-mono">
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 dir-ltr text-right font-bold">
                                         {{ $task->client->phone ?? '' }}
                                     </div>
                                 @else
@@ -211,7 +211,7 @@
                                         @endif
                                     </div>
                                     <div class="flex items-center gap-3 text-[10px] text-gray-500 dark:text-gray-400">
-                                        <span class="flex items-center gap-1 dir-ltr font-mono">
+                                        <span class="flex items-center gap-1 dir-ltr font-bold">
                                             <svg class="w-3 h-3 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                             {{ $dateJal }}
                                         </span>
@@ -361,7 +361,7 @@
                                 {{-- شماره طرح درمان --}}
                                 <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-gray-700/50">
                                     <span class="text-gray-500 dark:text-gray-400">شناسه طرح درمان</span>
-                                    <span class="font-mono text-gray-700 dark:text-gray-300">#{{ $treatmentPlan->id }}</span>
+                                    <span class="font-bold text-gray-700 dark:text-gray-300">#{{ $treatmentPlan->id }}</span>
                                 </div>
 
                                 {{-- وضعیت طرح درمان --}}
@@ -532,7 +532,7 @@
                                                         <span class="text-[11px] font-bold text-gray-950 dark:text-white">
                                                             تعویق #{{ $log->snooze_sequence }}
                                                         </span>
-                                                        <span class="text-[10px] text-gray-400 dark:text-gray-500 font-mono" dir="ltr">
+                                                        <span class="text-[10px] text-gray-400 dark:text-gray-500 font-bold" dir="ltr">
                                                             {{ Jalalian::fromCarbon($log->created_at)->format('Y/m/d - H:i') }}
                                                         </span>
                                                     </div>
@@ -612,7 +612,7 @@
                     <div class="space-y-3 text-xs">
                         <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-gray-700/50">
                             <span class="text-gray-500 dark:text-gray-400">شناسه (ID)</span>
-                            <span class="font-mono text-gray-700 dark:text-gray-300">#{{ $task->id }}</span>
+                            <span class="font-bold text-gray-700 dark:text-gray-300">#{{ $task->id }}</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-gray-700/50">
                             <span class="text-gray-500 dark:text-gray-400">ایجاد کننده</span>

@@ -334,6 +334,7 @@
         placement: @js($placement),
     })"
     class="relative w-full {{ $label ? 'space-y-1.5' : '' }}"
+    :class="open ? 'z-50' : ''"
     {{ $attributes->whereDoesntStartWith('wire:model')->except(['name', 'options', 'value', 'placeholder', 'multiple', 'variant', 'color']) }}
 >
     {{-- فیلدهای ارسالی مخفی فرم (Hidden inputs) --}}

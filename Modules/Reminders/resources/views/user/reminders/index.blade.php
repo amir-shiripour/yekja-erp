@@ -175,7 +175,7 @@
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50 dark:bg-gray-900/30">
                     <div class="flex items-center gap-3">
                         <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 shadow-sm">
-                            <span class="text-sm font-bold font-mono">{{ $taskReminders->count() }}</span>
+                            <span class="text-sm font-black">{{ $taskReminders->count() }}</span>
                         </div>
                         <div>
                             <h2 class="text-sm font-bold text-gray-900 dark:text-white">وظایف (Tasks)</h2>
@@ -232,7 +232,7 @@
                                     <div class="text-sm font-medium text-gray-800 dark:text-gray-100 line-clamp-1" title="{{ $reminder->message }}">
                                         {{ $reminder->message ?? ('یادآوری انجام وظیفه: ' . ($task->title ?? 'Task #'.$task->id)) }}
                                     </div>
-                                    <div class="text-[10px] text-gray-400 font-mono mt-0.5">ID: {{ $reminder->id }}</div>
+                                    <div class="text-[10px] text-gray-400 font-bold mt-0.5">ID: {{ $reminder->id }}</div>
                                 </td>
                                 <td class="px-4 py-3 align-middle">
                                     @if($task)
@@ -280,7 +280,7 @@
                                             @endif
                                             
                                             @if($isClient && $relatedModel->username)
-                                                <span class="text-[10px] text-gray-500 dark:text-gray-400 font-mono mt-0.5">@ {{ $relatedModel->username }}</span>
+                                                <span class="text-[10px] text-gray-500 dark:text-gray-400 font-bold mt-0.5">@ {{ $relatedModel->username }}</span>
                                             @endif
                                         </div>
                                     @else
@@ -295,7 +295,7 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 align-middle text-center">
-                                    <span class="text-xs font-mono font-medium text-gray-600 dark:text-gray-300 dir-ltr">{{ $remindJalali }}</span>
+                                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300 dir-ltr">{{ $remindJalali }}</span>
                                 </td>
                                 <td class="px-4 py-3 align-middle text-center">
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium border {{ $statusInfo['class'] }}">
@@ -344,7 +344,7 @@
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50 dark:bg-gray-900/30">
                     <div class="flex items-center gap-3">
                         <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300 shadow-sm">
-                            <span class="text-sm font-bold font-mono">{{ $followUpReminders->count() }}</span>
+                            <span class="text-sm font-black">{{ $followUpReminders->count() }}</span>
                         </div>
                         <div>
                             <h2 class="text-sm font-bold text-gray-900 dark:text-white">پیگیری‌ها (FollowUps)</h2>
@@ -396,7 +396,7 @@
                                     <div class="text-sm font-medium text-gray-800 dark:text-gray-100 line-clamp-1" title="{{ $reminder->message }}">
                                         {{ $reminder->message ?? ('یادآوری پیگیری: ' . ($followUp->title ?? 'FollowUp #'.$followUp->id)) }}
                                     </div>
-                                    <div class="text-[10px] text-gray-400 font-mono mt-0.5">ID: {{ $reminder->id }}</div>
+                                    <div class="text-[10px] text-gray-400 font-bold mt-0.5">ID: {{ $reminder->id }}</div>
                                 </td>
                                 <td class="px-4 py-3 align-middle">
                                     @if($followUp)
@@ -439,7 +439,7 @@
                                             @endif
                                             
                                             @if($isClient && $relatedModel->username)
-                                                <span class="text-[10px] text-gray-500 dark:text-gray-400 font-mono mt-0.5">@ {{ $relatedModel->username }}</span>
+                                                <span class="text-[10px] text-gray-500 dark:text-gray-400 font-bold mt-0.5">@ {{ $relatedModel->username }}</span>
                                             @endif
                                         </div>
                                     @else
@@ -454,7 +454,7 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 align-middle text-center">
-                                    <span class="text-xs font-mono font-medium text-gray-600 dark:text-gray-300 dir-ltr">{{ $remindJalali }}</span>
+                                    <span class="text-xs font-bold text-gray-600 dark:text-gray-300 dir-ltr">{{ $remindJalali }}</span>
                                 </td>
                                 <td class="px-4 py-3 align-middle text-center">
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium border {{ $statusInfo['class'] }}">
