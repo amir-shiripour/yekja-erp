@@ -50,7 +50,7 @@ class AdminProThemeTest extends TestCase
         $this->assertEquals('مدیریت پیشرفته (Admin Pro)', $theme['name']);
         $this->assertTrue($theme['has_overrides']);
         $this->assertFalse($theme['has_web_index']);
-        $this->assertEquals(27, $theme['crm_overrides_count']);
+        $this->assertEquals(30, $theme['crm_overrides_count']);
 
         $expectedFiles = [
             'layouts/user.blade.php',
@@ -80,6 +80,9 @@ class AdminProThemeTest extends TestCase
             'notifications/user/settings.blade.php',
             'notifications/admin/broadcast/index.blade.php',
             'notifications/admin/broadcast/create.blade.php',
+            'sms/user/logs/index.blade.php',
+            'sms/user/logs/send.blade.php',
+            'sms/user/settings/index.blade.php',
         ];
 
         foreach ($expectedFiles as $file) {
@@ -887,8 +890,68 @@ class AdminProThemeTest extends TestCase
         ])->render();
 
         $this->assertStringContainsString('تنظیمات و ترجیحات اعلان‌ها', $rendered);
-        $this->assertStringContainsString('تنظیمات عمومی و ساعات سکوت (Do Not Disturb)', $rendered);
+        $this->assertStringContainsString('تنظیمات عمومی و ساعات سکوت', $rendered);
         $this->assertStringContainsString('کانال‌های دریافت به تفکیک موضوع', $rendered);
         $this->assertStringContainsString('ذخیره تنظیمات اعلان‌ها', $rendered);
+    }
+
+    public function test_sms_overrides_render_with_ui_components(): void
+    {
+        $user = new User([
+            'id' => 1,
+            'name' => 'مدیر سیستم',
+            'email' => 'admin@admin.com',
+        ]);
+        $this->actingAs($user);
+
+        $fakeSms = new \Modules\Sms\Entities\SmsMessage([
+            'to' => '09123456789',
+            'type' => 'manual',
+            'status' => 'sent',
+            'driver' => 'limosms',
+            'message' => 'پیامک آزمایشی تستی',
+        ]);
+        $fakeSms->id = 1;
+        $fakeSms->created_at = now();
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            collect([$fakeSms]),
+            1,
+            15,
+            1
+        );
+
+        $renderedLogs = View::make('sms::user.logs.index', [
+            'messages' => $paginator,
+            'totalCount' => 1,
+            'sentCount' => 1,
+            'failedCount' => 0,
+            'pendingCount' => 0,
+        ])->render();
+
+        $this->assertStringContainsString('گزارش و مدیریت پیامک‌ها', $renderedLogs);
+        $this->assertStringContainsString('پیامک آزمایشی تستی', $renderedLogs);
+
+        $renderedSend = View::make('sms::user.logs.send', [
+            'users' => collect([$user]),
+            'roles' => collect(),
+            'clients' => collect(),
+            'clientStatuses' => collect(),
+            'canTargetUsers' => true,
+            'canTargetClients' => false,
+        ])->render();
+
+        $this->assertStringContainsString('ارسال پیامک جدید', $renderedSend);
+        $this->assertStringContainsString('گیرندگان پیام', $renderedSend);
+
+        $renderedSettings = View::make('sms::user.settings.index', [
+            'setting' => null,
+            'balance' => null,
+            'clientsModuleInstalled' => true,
+            'clientOtpPattern' => '12345',
+        ])->render();
+
+        $this->assertStringContainsString('تنظیمات درگاه پیامک', $renderedSettings);
+        $this->assertStringContainsString('ذخیره تنظیمات پیامک', $renderedSettings);
     }
 }

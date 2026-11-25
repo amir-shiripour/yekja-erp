@@ -59,10 +59,12 @@ class SmsSendController extends Controller
     public function store(Request $request, SmsManager $sms)
     {
         $data = $request->validate([
-            'target_type'      => ['required', 'in:users,clients'],
-            'recipient_scope'  => ['required', 'in:filters,selected'],
-            'type'             => ['required', 'in:manual,scheduled'],
-            'scheduled_at'     => ['nullable', 'date'],
+            'target_type'           => ['required', 'in:users,clients'],
+            'recipient_scope'       => ['required', 'in:filters,selected'],
+            'type'                  => ['required', 'in:manual,scheduled'],
+            'scheduled_at'          => ['nullable', 'date'],
+            'scheduled_date_jalali' => ['nullable', 'string', 'max:20'],
+            'scheduled_time'        => ['nullable', 'string', 'max:10'],
 
             // گیرندگان کاربران
             'user_role_ids'    => ['array'],
@@ -88,8 +90,26 @@ class SmsSendController extends Controller
             'created_by' => optional($user)->id,
         ];
 
-        if ($data['type'] === SmsMessage::TYPE_SCHEDULED && $request->filled('scheduled_at')) {
-            $baseOptions['scheduled_at'] = $request->date('scheduled_at');
+        if ($data['type'] === SmsMessage::TYPE_SCHEDULED) {
+            if ($request->filled('scheduled_date_jalali')) {
+                $jalaliDate = str_replace(
+                    ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'],
+                    ['0','1','2','3','4','5','6','7','8','9'],
+                    trim((string) $request->input('scheduled_date_jalali'))
+                );
+                $timeStr = str_replace(
+                    ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'],
+                    ['0','1','2','3','4','5','6','7','8','9'],
+                    trim((string) ($request->input('scheduled_time') ?: '09:00'))
+                );
+                try {
+                    $baseOptions['scheduled_at'] = \Morilog\Jalali\Jalalian::fromFormat('Y/m/d H:i', "{$jalaliDate} {$timeStr}")->toCarbon();
+                } catch (\Throwable) {
+                    return back()->withErrors(['scheduled_date_jalali' => 'فرمت تاریخ یا ساعت زمان‌بندی معتبر نیست.'])->withInput();
+                }
+            } elseif ($request->filled('scheduled_at')) {
+                $baseOptions['scheduled_at'] = $request->date('scheduled_at');
+            }
         }
 
         $patternKey = $data['pattern'] ?? null;

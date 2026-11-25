@@ -172,8 +172,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-sm font-black text-gray-900 dark:text-white">کانال‌های دریافت به تفکیک
-                            موضوع</h2>
+                        <h2 class="text-sm font-black text-gray-900 dark:text-white">کانال‌های دریافت به تفکیک موضوع</h2>
                     </div>
                 </div>
 
