@@ -10,10 +10,17 @@ class SmsLogController extends Controller
 {
     public function index(Request $request)
     {
+        $baseQuery = SmsMessage::query();
+
+        $totalCount   = (clone $baseQuery)->count();
+        $sentCount    = (clone $baseQuery)->where('status', SmsMessage::STATUS_SENT)->count();
+        $failedCount  = (clone $baseQuery)->where('status', SmsMessage::STATUS_FAILED)->count();
+        $pendingCount = (clone $baseQuery)->where('status', SmsMessage::STATUS_PENDING)->count();
+
         $query = SmsMessage::query()->latest();
 
         if ($request->filled('q')) {
-            $q = $request->input('q');
+            $q = trim((string) $request->input('q'));
             $query->where(function ($qbuilder) use ($q) {
                 $qbuilder->where('to', 'like', "%{$q}%")
                     ->orWhere('message', 'like', "%{$q}%")
@@ -29,10 +36,24 @@ class SmsLogController extends Controller
             $query->where('status', $request->input('status'));
         }
 
-        $messages = $query->paginate()->withQueryString();
+        $period = $request->input('period', 'all');
+        match ($period) {
+            'today' => $query->whereDate('created_at', today()),
+            'week'  => $query->where('created_at', '>=', now()->startOfWeek()),
+            'month' => $query->where('created_at', '>=', now()->startOfMonth()),
+            'year'  => $query->where('created_at', '>=', now()->startOfYear()),
+            default => null,
+        };
+
+        $perPage = min(max((int) $request->input('per_page', 15), 5), 100);
+        $messages = $query->paginate($perPage)->withQueryString();
 
         return view('sms::user.logs.index', [
-            'messages' => $messages,
+            'messages'     => $messages,
+            'totalCount'   => $totalCount,
+            'sentCount'    => $sentCount,
+            'failedCount'  => $failedCount,
+            'pendingCount' => $pendingCount,
         ]);
     }
 

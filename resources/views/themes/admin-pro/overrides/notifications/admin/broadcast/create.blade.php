@@ -106,8 +106,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="text-sm font-black text-gray-900 dark:text-white">محتوا و مخاطبان
-                                    اطلاعیه</h2>
+                                <h2 class="text-sm font-black text-gray-900 dark:text-white">محتوا و مخاطبان اطلاعیه</h2>
                             </div>
                         </div>
 
