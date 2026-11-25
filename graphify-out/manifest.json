@@ -6186,22 +6186,22 @@
     "semantic_hash": "9d5be79449f293005587ace205392cf7"
   },
   "Modules/Notifications/Http/Controllers/Admin/BroadcastNotificationController.php": {
-    "mtime": 1789629336.683592,
-    "seen": 1794898849.8311872,
-    "ast_hash": "381d8365a0ffaf957e21c27f0283d86d",
-    "semantic_hash": "381d8365a0ffaf957e21c27f0283d86d"
+    "mtime": 1795589871.3774638,
+    "seen": 1795589953.8314538,
+    "ast_hash": "57d6c7279cdce7f13c26b9a11c9ed268",
+    "semantic_hash": ""
   },
   "Modules/Notifications/Http/Controllers/User/NotificationController.php": {
-    "mtime": 1789629336.684595,
-    "seen": 1794898849.8311882,
-    "ast_hash": "2f011f88d4827f70ae0660254e3b7fe1",
-    "semantic_hash": "2f011f88d4827f70ae0660254e3b7fe1"
+    "mtime": 1795587160.9051793,
+    "seen": 1795587908.3086674,
+    "ast_hash": "4a5baa2e2f5a1361bb0e67bbde390883",
+    "semantic_hash": ""
   },
   "Modules/Notifications/Http/Controllers/User/NotificationPreferenceController.php": {
-    "mtime": 1789629336.6856008,
-    "seen": 1794898849.8311892,
-    "ast_hash": "b618d2c826bca1d8f96288b04598694b",
-    "semantic_hash": "b618d2c826bca1d8f96288b04598694b"
+    "mtime": 1795589891.3879538,
+    "seen": 1795589953.83146,
+    "ast_hash": "68b96661e441786de463fb67e2813c52",
+    "semantic_hash": ""
   },
   "Modules/Notifications/Installer.php": {
     "mtime": 1789629336.693619,
@@ -15990,9 +15990,9 @@
     "semantic_hash": ""
   },
   "resources/views/components/ui/dock.blade.php": {
-    "mtime": 1795261378.961836,
-    "seen": 1795262151.97959,
-    "ast_hash": "4e2b7e57727aaee64df252174ef5fa74",
+    "mtime": 1795597763.339619,
+    "seen": 1795598000.4523463,
+    "ast_hash": "862f6e37d6b392ffa5a8defaa25d0018",
     "semantic_hash": ""
   },
   "resources/views/components/ui/empty-state.blade.php": {
@@ -16134,9 +16134,9 @@
     "semantic_hash": ""
   },
   "tests/Feature/AdminProThemeTest.php": {
-    "mtime": 1795437133.3143513,
-    "seen": 1795437279.362141,
-    "ast_hash": "37ba588b6aa162b0411e422711a7ca7a",
+    "mtime": 1795584421.1051512,
+    "seen": 1795584468.438653,
+    "ast_hash": "bed864fafdc6d30b04f0e1fd32fd9721",
     "semantic_hash": ""
   },
   "resources/views/components/ui/phone-input.blade.php": {
@@ -16293,6 +16293,54 @@
     "mtime": 1795515194.6971278,
     "seen": 1795519585.2158518,
     "ast_hash": "811e5288473a30cd9cc24799bd12cd94",
+    "semantic_hash": ""
+  },
+  "Modules/Notifications/Database/Seeders/NotificationMockSeeder.php": {
+    "mtime": 1795584413.089275,
+    "seen": 1795584468.4340262,
+    "ast_hash": "b579bd77c823b2511b5e1e4746d923ba",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/notifications/user/index.blade.php": {
+    "mtime": 1795596356.262546,
+    "seen": 1795596463.7528827,
+    "ast_hash": "4b9bf8cae63878f515a7d0419f9236b5",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/notifications/user/settings.blade.php": {
+    "mtime": 1795595552.521504,
+    "seen": 1795595610.3686907,
+    "ast_hash": "91dad0b77fee5fef91dec4d281378f04",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/notifications/admin/broadcast/create.blade.php": {
+    "mtime": 1795597470.2618186,
+    "seen": 1795598000.4524555,
+    "ast_hash": "ce4d9bd5760c6ac23aaaf925f588cc00",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/overrides/notifications/admin/broadcast/index.blade.php": {
+    "mtime": 1795596400.8803954,
+    "seen": 1795596463.7528796,
+    "ast_hash": "e981ea22c46bb2eb3eb885a155b34d06",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/toggle.blade.php": {
+    "mtime": 1795587151.3761222,
+    "seen": 1795587908.3116488,
+    "ast_hash": "f77c6ff4aaaf9b1451399fe3dae119a0",
+    "semantic_hash": ""
+  },
+  "resources/views/themes/admin-pro/partials/pagination-bar.blade.php": {
+    "mtime": 1795587155.7289913,
+    "seen": 1795587908.311747,
+    "ast_hash": "5de6e35bdb1a205c8ed4b8381366878a",
+    "semantic_hash": ""
+  },
+  "resources/views/components/ui/time-picker.blade.php": {
+    "mtime": 1795595710.9626124,
+    "seen": 1795595757.6892776,
+    "ast_hash": "d42b058f790810115555ecdf32650d6e",
     "semantic_hash": ""
   },
   "package-lock.json": {

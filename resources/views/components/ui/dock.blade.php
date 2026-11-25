@@ -223,3 +223,14 @@
         </button>
     </nav>
 </div>
+
+{{-- Mobile Dock Clearance: prevents sticky submit bars & page footers from sliding under the fixed mobile dock --}}
+<div class="md:hidden h-24 w-full shrink-0 pointer-events-none" aria-hidden="true"></div>
+<style>
+    @media (max-width: 767px) {
+        .sticky.bottom-4 {
+            bottom: 5.75rem !important;
+            z-index: 35 !important;
+        }
+    }
+</style>
