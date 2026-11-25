@@ -50,7 +50,7 @@ class AdminProThemeTest extends TestCase
         $this->assertEquals('مدیریت پیشرفته (Admin Pro)', $theme['name']);
         $this->assertTrue($theme['has_overrides']);
         $this->assertFalse($theme['has_web_index']);
-        $this->assertEquals(23, $theme['crm_overrides_count']);
+        $this->assertEquals(27, $theme['crm_overrides_count']);
 
         $expectedFiles = [
             'layouts/user.blade.php',
@@ -76,6 +76,10 @@ class AdminProThemeTest extends TestCase
             'reminders/user/reminders/index.blade.php',
             'reminders/user/reminders/snooze-history.blade.php',
             'reminders/user/settings/index.blade.php',
+            'notifications/user/index.blade.php',
+            'notifications/user/settings.blade.php',
+            'notifications/admin/broadcast/index.blade.php',
+            'notifications/admin/broadcast/create.blade.php',
         ];
 
         foreach ($expectedFiles as $file) {
@@ -751,5 +755,140 @@ class AdminProThemeTest extends TestCase
         $this->assertStringContainsString('مشتری در جلسه کاری بود', $rendered);
         $this->assertStringContainsString('مدیر سیستم', $rendered);
         $this->assertStringContainsString('۲ ساعت', $rendered);
+    }
+
+    public function test_notifications_index_override_renders_with_ui_components(): void
+    {
+        $user = new User([
+            'id' => 1,
+            'name' => 'مدیر سیستم',
+            'email' => 'admin@admin.com',
+        ]);
+        $this->actingAs($user);
+
+        $fakeNotif = new \Modules\Notifications\Entities\Notification([
+            'id' => '00000000-0000-0000-0000-000000000001',
+            'type' => 'Modules\\Notifications\\Notifications\\GeneralNotification',
+            'notifiable_type' => User::class,
+            'notifiable_id' => 1,
+            'data' => [
+                'title' => 'هشدار امنیتی تست',
+                'message' => 'تلاش ناموفق برای ورود شناسایی شد.',
+                'category' => 'system',
+                'priority' => 'urgent',
+                'severity' => 'danger',
+            ],
+            'read_at' => null,
+        ]);
+        $fakeNotif->created_at = now();
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            collect([$fakeNotif]),
+            1,
+            15,
+            1
+        );
+
+        $rendered = View::make('notifications::user.index', [
+            'notifications' => $paginator,
+            'statusFilter' => 'all',
+            'categoryFilter' => 'all',
+            'priorityFilter' => 'all',
+            'search' => null,
+            'unreadCount' => 1,
+            'readCount' => 0,
+            'totalCount' => 1,
+            'categories' => config('notifications.categories', []),
+            'priorities' => config('notifications.priorities', []),
+        ])->render();
+
+        $this->assertStringContainsString('مرکز اعلان‌ها', $rendered);
+        $this->assertStringContainsString('مدیریت و پیگیری اعلان‌ها', $rendered);
+        $this->assertStringContainsString('هشدار امنیتی تست', $rendered);
+        $this->assertStringContainsString('فوری', $rendered);
+    }
+
+    public function test_notifications_broadcast_overrides_render_with_ui_components(): void
+    {
+        $user = new User([
+            'id' => 1,
+            'name' => 'مدیر سیستم',
+            'email' => 'admin@admin.com',
+        ]);
+        $this->actingAs($user);
+
+        $fakeBroadcast = new \Modules\Notifications\Entities\NotificationBroadcast([
+            'id' => 1,
+            'created_by' => 1,
+            'title' => 'اطلاعیه تستی همگانی',
+            'message' => 'متن پیام آزمایشی برای کل کاربران',
+            'category' => 'broadcast',
+            'priority' => 'high',
+            'severity' => 'warning',
+            'target_type' => 'all',
+            'channels' => ['database', 'sms'],
+            'recipients_count' => 15,
+            'sent_at' => now(),
+        ]);
+        $fakeBroadcast->id = 1;
+        $fakeBroadcast->setRelation('creator', $user);
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            collect([$fakeBroadcast]),
+            1,
+            15,
+            1
+        );
+
+        $renderedIndex = View::make('notifications::admin.broadcast.index', [
+            'broadcasts' => $paginator,
+        ])->render();
+
+        $this->assertStringContainsString('اطلاعیه‌ها و پیام‌های همگانی', $renderedIndex);
+        $this->assertStringContainsString('اطلاعیه تستی همگانی', $renderedIndex);
+        $this->assertStringContainsString('ارسال اطلاعیه جدید', $renderedIndex);
+
+        $fakeRole = new Role(['name' => 'super-admin', 'display_name' => 'مدیر ارشد']);
+        $renderedCreate = View::make('notifications::admin.broadcast.create', [
+            'roles' => collect([$fakeRole]),
+            'categories' => config('notifications.categories', []),
+            'priorities' => config('notifications.priorities', []),
+            'severities' => config('notifications.severities', []),
+        ])->render();
+
+        $this->assertStringContainsString('ارسال اطلاعیه همگانی جدید', $renderedCreate);
+        $this->assertStringContainsString('محتوا و مخاطبان اطلاعیه', $renderedCreate);
+        $this->assertStringContainsString('مدیر ارشد', $renderedCreate);
+    }
+
+    public function test_notifications_settings_override_renders_with_ui_components(): void
+    {
+        $user = new User([
+            'id' => 1,
+            'name' => 'مدیر سیستم',
+            'email' => 'admin@admin.com',
+        ]);
+        $this->actingAs($user);
+
+        $userSetting = new \Modules\Notifications\Entities\NotificationUserSetting([
+            'user_id' => 1,
+            'sound_enabled' => true,
+            'quiet_hours_enabled' => false,
+            'quiet_hours_start' => '22:00:00',
+            'quiet_hours_end' => '08:00:00',
+        ]);
+
+        $rendered = View::make('notifications::user.settings', [
+            'user' => $user,
+            'categories' => config('notifications.categories', []),
+            'userPreferences' => collect(),
+            'userSetting' => $userSetting,
+            'defaultChannels' => config('notifications.default_channels', []),
+        ])->render();
+
+        $this->assertStringContainsString('تنظیمات و ترجیحات اعلان‌ها', $rendered);
+        $this->assertStringContainsString('تنظیمات عمومی و ساعات سکوت (Do Not Disturb)', $rendered);
+        $this->assertStringContainsString('کانال‌های دریافت به تفکیک موضوع', $rendered);
+        $this->assertStringContainsString('ذخیره تنظیمات اعلان‌ها', $rendered);
     }
 }

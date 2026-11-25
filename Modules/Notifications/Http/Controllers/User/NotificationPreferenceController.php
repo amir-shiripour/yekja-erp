@@ -27,10 +27,10 @@ class NotificationPreferenceController extends Controller
         $userSetting = NotificationUserSetting::firstOrCreate(
             ['user_id' => $user->id],
             [
-                'sound_enabled'       => true,
+                'sound_enabled' => true,
                 'quiet_hours_enabled' => false,
-                'quiet_hours_start'   => '22:00:00',
-                'quiet_hours_end'     => '08:00:00',
+                'quiet_hours_start' => '22:00:00',
+                'quiet_hours_end' => '08:00:00',
             ]
         );
 
@@ -53,11 +53,11 @@ class NotificationPreferenceController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'preferences'          => 'nullable|array',
-            'sound_enabled'        => 'nullable|boolean',
-            'quiet_hours_enabled'  => 'nullable|boolean',
-            'quiet_hours_start'    => 'nullable|string',
-            'quiet_hours_end'      => 'nullable|string',
+            'preferences' => 'nullable|array',
+            'sound_enabled' => 'nullable|boolean',
+            'quiet_hours_enabled' => 'nullable|boolean',
+            'quiet_hours_start' => 'nullable|string',
+            'quiet_hours_end' => 'nullable|string',
         ]);
 
         $categories = config('notifications.categories', []);
@@ -69,25 +69,31 @@ class NotificationPreferenceController extends Controller
 
             NotificationPreference::updateOrCreate(
                 [
-                    'user_id'  => $user->id,
+                    'user_id' => $user->id,
                     'category' => $catKey,
                 ],
                 [
                     'channel_database' => isset($prefData['database']),
-                    'channel_sms'      => isset($prefData['sms']),
-                    'channel_mail'     => isset($prefData['mail']),
+                    'channel_sms' => isset($prefData['sms']),
+                    'channel_mail' => isset($prefData['mail']),
                 ]
             );
         }
+
+        $normalizeTime = fn(?string $val, string $fallback) => str_replace(
+            ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'],
+            ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+            trim((string)($val ?: $fallback))
+        );
 
         // به‌روزرسانی تنظیمات عمومی
         NotificationUserSetting::updateOrCreate(
             ['user_id' => $user->id],
             [
-                'sound_enabled'       => $request->boolean('sound_enabled', false),
+                'sound_enabled' => $request->boolean('sound_enabled', false),
                 'quiet_hours_enabled' => $request->boolean('quiet_hours_enabled', false),
-                'quiet_hours_start'   => $request->input('quiet_hours_start', '22:00:00'),
-                'quiet_hours_end'     => $request->input('quiet_hours_end', '08:00:00'),
+                'quiet_hours_start' => $normalizeTime($request->input('quiet_hours_start'), '22:00:00'),
+                'quiet_hours_end' => $normalizeTime($request->input('quiet_hours_end'), '08:00:00'),
             ]
         );
 

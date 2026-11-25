@@ -15,19 +15,21 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
-        $statusFilter   = $request->get('filter', 'all'); // all, unread, read
+
+        $statusFilter = $request->get('filter', 'all'); // all, unread, read
         $categoryFilter = $request->get('category', 'all');
         $priorityFilter = $request->get('priority', 'all');
-        $search         = $request->get('search');
-        
+        $periodFilter = $request->get('period', 'all'); // all, today, week, month, year
+        $search = $request->get('search');
+        $perPage = min(max((int)$request->get('per_page', 15), 5), 100);
+
         $baseQuery = Notification::where('notifiable_type', get_class($user))
             ->where('notifiable_id', $user->id);
 
         // آمار سریع
         $unreadCount = (clone $baseQuery)->unread()->count();
-        $readCount   = (clone $baseQuery)->read()->count();
-        $totalCount  = (clone $baseQuery)->count();
+        $readCount = (clone $baseQuery)->read()->count();
+        $totalCount = (clone $baseQuery)->count();
 
         $query = clone $baseQuery;
 
@@ -45,11 +47,19 @@ class NotificationController extends Controller
             $query->priority($priorityFilter);
         }
 
+        match ($periodFilter) {
+            'today' => $query->whereDate('created_at', today()),
+            'week' => $query->where('created_at', '>=', now()->startOfWeek()),
+            'month' => $query->where('created_at', '>=', now()->startOfMonth()),
+            'year' => $query->where('created_at', '>=', now()->startOfYear()),
+            default => null,
+        };
+
         if (!empty($search)) {
             $query->search($search);
         }
 
-        $notifications = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
+        $notifications = $query->orderByDesc('created_at')->paginate($perPage)->withQueryString();
 
         $categories = config('notifications.categories', []);
         $priorities = config('notifications.priorities', []);
@@ -59,6 +69,7 @@ class NotificationController extends Controller
             'statusFilter',
             'categoryFilter',
             'priorityFilter',
+            'periodFilter',
             'search',
             'unreadCount',
             'readCount',
@@ -74,7 +85,7 @@ class NotificationController extends Controller
     public function markAsRead(Request $request, $id)
     {
         $user = Auth::user();
-        
+
         $notification = Notification::where('notifiable_type', get_class($user))
             ->where('notifiable_id', $user->id)
             ->where('id', $id)
@@ -98,7 +109,7 @@ class NotificationController extends Controller
     public function markAllAsRead(Request $request)
     {
         $user = Auth::user();
-        
+
         Notification::where('notifiable_type', get_class($user))
             ->where('notifiable_id', $user->id)
             ->unread()
@@ -120,7 +131,7 @@ class NotificationController extends Controller
     public function bulkMarkAsRead(Request $request)
     {
         $request->validate([
-            'ids'   => 'required|array',
+            'ids' => 'required|array',
             'ids.*' => 'string',
         ]);
 
@@ -135,7 +146,7 @@ class NotificationController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'count'   => $count,
+                'count' => $count,
                 'message' => "تعداد {$count} اعلان به عنوان خوانده شده ثبت شدند."
             ]);
         }
@@ -149,7 +160,7 @@ class NotificationController extends Controller
     public function destroy(Request $request, $id)
     {
         $user = Auth::user();
-        
+
         $notification = Notification::where('notifiable_type', get_class($user))
             ->where('notifiable_id', $user->id)
             ->where('id', $id)
@@ -173,7 +184,7 @@ class NotificationController extends Controller
     public function bulkDestroy(Request $request)
     {
         $request->validate([
-            'ids'   => 'required|array',
+            'ids' => 'required|array',
             'ids.*' => 'string',
         ]);
 
@@ -187,7 +198,7 @@ class NotificationController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'count'   => $count,
+                'count' => $count,
                 'message' => "تعداد {$count} اعلان با موفقیت حذف شدند."
             ]);
         }
@@ -235,21 +246,21 @@ class NotificationController extends Controller
             ->get()
             ->map(function ($n) {
                 return [
-                    'id'          => $n->id,
-                    'title'       => $n->title,
-                    'message'     => $n->message,
-                    'action_url'  => $n->action_url,
-                    'category'    => $n->category,
-                    'priority'    => $n->priority,
-                    'severity'    => $n->severity,
-                    'is_unread'   => is_null($n->read_at),
-                    'created_at'  => $n->created_at->diffForHumans(),
+                    'id' => $n->id,
+                    'title' => $n->title,
+                    'message' => $n->message,
+                    'action_url' => $n->action_url,
+                    'category' => $n->category,
+                    'priority' => $n->priority,
+                    'severity' => $n->severity,
+                    'is_unread' => is_null($n->read_at),
+                    'created_at' => $n->created_at->diffForHumans(),
                 ];
             });
 
         return response()->json([
             'unreadCount' => $unreadCount,
-            'items'       => $items,
+            'items' => $items,
         ]);
     }
 }
